@@ -1,4 +1,8 @@
+use std::io::{Read, Seek, SeekFrom};
 use serde::{Deserialize, Serialize};
+use bi_fs_rs::pbo::handle::PBOHandle;
+use anyhow::{Result};
+use sha1::Digest;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PBOFile {
@@ -11,7 +15,52 @@ pub struct PBOFile {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PBOPart {
     pub rel_path: String,
-    pub length: u64,
+    pub length: u32,
     pub checksum: Vec<u8>,
     pub start_offset: u64,
 }
+
+impl PBOFile {
+    fn from_handle(handle: &mut PBOHandle, rel_path: String) -> Result<Self> {
+        let mut offset = 0;
+        let mut parts = Vec::with_capacity(handle.files.len());
+
+        // Seek to the start of the blob
+        handle.handle.seek(SeekFrom::Start(handle.blob_start))?;
+
+        for file in &handle.files {
+            // Read Data
+            let mut data = vec![0; file.size as usize];
+            handle.handle.read_exact(&mut data)?;
+
+            // Hash Data
+            let mut file_hasher = sha1::Sha1::new();
+            file_hasher.update(&data);
+            let file_checksum = file_hasher.finalize().to_vec();
+
+            parts.push(PBOPart {
+                rel_path: file.filename.to_string(),
+                length: file.size,
+                checksum: file_checksum,
+                start_offset: offset,
+            });
+            offset += file.size as u64;
+        }
+
+        // Compute PBO checksum
+        let mut pbo_hasher = sha1::Sha1::new();
+        pbo_hasher.update(handle.checksum.data);
+        for part in &parts {
+            pbo_hasher.update(&part.checksum);
+        }
+        let pbo_checksum = pbo_hasher.finalize().to_vec();
+
+        Ok(Self {
+            rel_path,
+            length: handle.length,
+            checksum:pbo_checksum,
+            parts,
+        })
+    }
+}
+

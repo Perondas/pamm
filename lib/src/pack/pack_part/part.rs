@@ -14,5 +14,6 @@ pub enum PackPart {
 #[derive(Debug, Serialize, Deserialize)]
 pub enum File {
     PBO(PBOFile),
+    // TODO: maybe split large files into chunks?a
     Generic(GenericFile),
 }
