@@ -7,6 +7,7 @@ use sha1::Digest;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PBOFile {
     pub rel_path: String,
+    pub last_modified: u64,
     pub length: u64,
     pub checksum: Vec<u8>,
     pub blob_offset: u64,
@@ -57,10 +58,16 @@ impl PBOFile {
         sha1::Digest::update(&mut pbo_hasher, rel_path.as_bytes());
         let pbo_checksum = pbo_hasher.finalize().to_vec();
 
+        let last_modified = std::fs::metadata(rel_path)
+            .and_then(|meta| meta.modified())
+            .map(|time| time.duration_since(std::time::UNIX_EPOCH).unwrap().as_secs())
+            .unwrap_or(0);
+
         Ok(Self {
             rel_path: rel_path.to_string(),
             length: handle.length,
             checksum:pbo_checksum,
+            last_modified,
             parts,
             blob_offset: handle.blob_start
         })
