@@ -30,8 +30,8 @@ impl FromCliInput for PackConfig {
             .allow_empty(true)
             .interact_text()?;
 
-        let required_mods_path = dialoguer::Input::<String>::new()
-            .with_prompt("Path to the required mods folder")
+        let required_addons_path = dialoguer::Input::<String>::new()
+            .with_prompt("Path to the required addons folder")
             .allow_empty(false)
             .validate_with(|input: &String| -> Result<(), &str> {
                 if PathBuf::from(input).is_dir() {
@@ -42,8 +42,8 @@ impl FromCliInput for PackConfig {
             })
             .interact_text()?;
 
-        let optional_mods_path = dialoguer::Input::<String>::new()
-            .with_prompt("Path to the optional mods folder")
+        let optional_addons_path = dialoguer::Input::<String>::new()
+            .with_prompt("Path to the optional addons folder")
             .allow_empty(true)
             .validate_with(|input: &String| -> Result<(), &str> {
                 if input.is_empty() || PathBuf::from(input).is_dir() {
@@ -82,11 +82,11 @@ impl FromCliInput for PackConfig {
             } else {
                 Some(PathBuf::from(banner_image_path))
             },
-            required_parts_path: PathBuf::from(required_mods_path),
-            optional_parts_path: if optional_mods_path.is_empty() {
+            required_addons_path: PathBuf::from(required_addons_path),
+            optional_addons_path: if optional_addons_path.is_empty() {
                 None
             } else {
-                Some(PathBuf::from(optional_mods_path))
+                Some(PathBuf::from(optional_addons_path))
             },
             description,
             client_params,

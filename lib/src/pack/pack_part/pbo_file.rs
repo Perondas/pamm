@@ -9,6 +9,7 @@ pub struct PBOFile {
     pub rel_path: String,
     pub length: u64,
     pub checksum: Vec<u8>,
+    pub blob_offset: u64,
     pub parts: Vec<PBOPart>,
 }
 
@@ -21,7 +22,7 @@ pub struct PBOPart {
 }
 
 impl PBOFile {
-    fn from_handle(handle: &mut PBOHandle, rel_path: String) -> Result<Self> {
+    pub fn from_handle(handle: &mut PBOHandle, rel_path: &str) -> Result<Self> {
         let mut offset = 0;
         let mut parts = Vec::with_capacity(handle.files.len());
 
@@ -35,7 +36,7 @@ impl PBOFile {
 
             // Hash Data
             let mut file_hasher = sha1::Sha1::new();
-            file_hasher.update(&data);
+            sha1::Digest::update(&mut file_hasher, &data);
             let file_checksum = file_hasher.finalize().to_vec();
 
             parts.push(PBOPart {
@@ -49,17 +50,19 @@ impl PBOFile {
 
         // Compute PBO checksum
         let mut pbo_hasher = sha1::Sha1::new();
-        pbo_hasher.update(handle.checksum.data);
+        sha1::Digest::update(&mut pbo_hasher, handle.checksum.data);
         for part in &parts {
-            pbo_hasher.update(&part.checksum);
+            sha1::Digest::update(&mut pbo_hasher, &part.checksum);
         }
+        sha1::Digest::update(&mut pbo_hasher, rel_path.as_bytes());
         let pbo_checksum = pbo_hasher.finalize().to_vec();
 
         Ok(Self {
-            rel_path,
+            rel_path: rel_path.to_string(),
             length: handle.length,
             checksum:pbo_checksum,
             parts,
+            blob_offset: handle.blob_start
         })
     }
 }
