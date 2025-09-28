@@ -9,6 +9,6 @@ fn main() -> Result<()> {
     let args = Args::parse();
 
     match args.command {
-        AppSubcommand::InitPack(args) => init_pack_command(args)
+        AppSubcommand::Init(args) => init_pack_command(args)
     }
 }

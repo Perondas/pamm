@@ -11,5 +11,5 @@ pub struct Args {
 
 #[derive(Debug, Subcommand)]
 pub enum AppSubcommand {
-    InitPack(InitPackArgs)
+    Init(InitPackArgs)
 }
