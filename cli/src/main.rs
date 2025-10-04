@@ -1,14 +1,16 @@
-pub mod commands;
 pub mod args;
-use anyhow::Result;
-use clap::Parser;
+pub mod commands;
 use crate::args::{AppSubcommand, Args};
 use crate::commands::init_pack::init_pack_command;
+use crate::commands::update_pack::update_pack_command;
+use anyhow::Result;
+use clap::Parser;
 
 fn main() -> Result<()> {
     let args = Args::parse();
 
     match args.command {
-        AppSubcommand::Init(args) => init_pack_command(args)
+        AppSubcommand::Init => init_pack_command(),
+        AppSubcommand::Update(args) => update_pack_command(args),
     }
 }

@@ -5,13 +5,13 @@ use crate::pack::pack_part::{
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum PackPart {
     Folder(Folder),
     File(File),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum File {
     PBO(PBOFile),
     // TODO: maybe split large files into chunks?a
@@ -19,23 +19,33 @@ pub enum File {
 }
 
 impl PackPart {
-    pub fn get_checksum(&self) -> &[u8] {
+    pub fn get_checksum(&self) -> Vec<u8> {
         match self {
-            PackPart::Folder(folder) => &folder.checksum,
-            PackPart::File(file) => match file {
-                File::PBO(pbo) => &pbo.checksum,
-                File::Generic(generic) => &generic.checksum,
-            },
+            PackPart::Folder(folder) => folder.checksum.clone(),
+            PackPart::File(file) => file.get_checksum().clone(),
         }
     }
     
     pub fn get_rel_path(&self) -> &str {
         match self {
             PackPart::Folder(folder) => &folder.rel_path,
-            PackPart::File(file) => match file {
-                File::PBO(pbo) => &pbo.rel_path,
-                File::Generic(generic) => &generic.rel_path,
-            },
+            PackPart::File(file) =>file.get_rel_path(),
+        }
+    }
+}
+
+impl File {
+    pub fn get_rel_path(&self) -> &str {
+        match self {
+            File::PBO(pbo) => &pbo.rel_path,
+            File::Generic(generic) => &generic.rel_path,
+        }
+    }
+
+    pub fn get_checksum(&self) -> Vec<u8> {
+        match self {
+            File::PBO(pbo) => pbo.checksum.clone(),
+            File::Generic(generic) => generic.checksum.clone(),
         }
     }
 }

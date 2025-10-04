@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use crate::commands::init_pack::InitPackArgs;
+use crate::commands::update_pack::UpdatePackArgs;
 
 /// Pbo signing utility
 #[derive(Parser, Debug)]
@@ -11,5 +11,6 @@ pub struct Args {
 
 #[derive(Debug, Subcommand)]
 pub enum AppSubcommand {
-    Init(InitPackArgs)
+    Init,
+    Update(UpdatePackArgs),
 }

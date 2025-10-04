@@ -530,6 +530,7 @@ dependencies = [
  "bi_fs_rs",
  "regex",
  "serde",
+ "serde_cbor",
  "serde_json",
  "sha1",
 ]
