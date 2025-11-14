@@ -1,8 +1,8 @@
+use crate::commands::init_remote::InitRemoteArgs;
 use crate::commands::update_pack::UpdatePackArgs;
 use clap::{Parser, Subcommand};
-use crate::commands::init_remote::InitRemoteArgs;
 
-/// Pbo signing utility
+/// Personal ARMA mod manager CLI
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 pub struct Args {

@@ -1,7 +1,7 @@
 use crate::commands::input::from_cli_input::FromCliInput;
 use anyhow::Result;
 use dialoguer::theme::ColorfulTheme;
-use pamm_lib::pack::pack_manifest::PackConfig;
+use pamm_lib::pack::pack_config::PackConfig;
 use pamm_lib::pack::server_info::ServerInfo;
 use std::path::PathBuf;
 
