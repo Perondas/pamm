@@ -1,5 +1,6 @@
-use clap::{Parser, Subcommand};
 use crate::commands::update_pack::UpdatePackArgs;
+use clap::{Parser, Subcommand};
+use crate::commands::init_remote::InitRemoteArgs;
 
 /// Pbo signing utility
 #[derive(Parser, Debug)]
@@ -13,4 +14,5 @@ pub struct Args {
 pub enum AppSubcommand {
     Init,
     Update(UpdatePackArgs),
+    InitRemote(InitRemoteArgs),
 }

@@ -4,7 +4,7 @@ use pamm_lib::pack::pack_manifest::PackConfig;
 pub fn init_pack_command() -> anyhow::Result<()> {
     let pack_config = PackConfig::from_cli_input()?;
 
-    pack_config.init_on_disk()?;
+    pack_config.init_on_disk(&std::env::current_dir()?)?;
 
     Ok(())
 }

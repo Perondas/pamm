@@ -1,11 +1,12 @@
 use std::fs;
+use std::path::PathBuf;
 use crate::pack::pack_manifest::{PackConfig, PackManifest};
 use anyhow::Result;
 use crate::consts::*;
 
 impl PackConfig {
-    pub fn init_on_disk(&self) -> Result<()> {
-        let base_path = std::env::current_dir()?.join(&self.name);
+    pub fn init_on_disk(&self, base: &PathBuf) -> Result<()> {
+        let base_path = base.join(&self.name);
         
         fs::create_dir(&base_path)?;
         

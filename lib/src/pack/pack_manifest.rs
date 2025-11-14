@@ -13,4 +13,5 @@ pub struct PackConfig {
     pub description: String,
     pub client_params: String,
     pub servers: Vec<ServerInfo>,
+    pub remote: Option<String>,
 }

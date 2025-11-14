@@ -1,9 +1,9 @@
-use std::path::PathBuf;
 use crate::commands::input::from_cli_input::FromCliInput;
 use anyhow::Result;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::pack::pack_manifest::PackConfig;
 use pamm_lib::pack::server_info::ServerInfo;
+use std::path::PathBuf;
 
 impl FromCliInput for PackConfig {
     fn from_cli_input() -> Result<Self> {
@@ -32,6 +32,7 @@ impl FromCliInput for PackConfig {
             description,
             client_params,
             servers,
+            remote: None,
         })
     }
 }
