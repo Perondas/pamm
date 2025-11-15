@@ -9,15 +9,19 @@ use std::fs;
 impl PackManifest {
     pub fn apply_pack_diff(self, pack_diff: PackDiff) -> Result<Self> {
         let PackManifest { addons, .. } = self;
-        let PackDiff { added, removed, changed } = pack_diff;
+        let PackDiff {
+            added,
+            removed,
+            modified: changed,
+        } = pack_diff;
 
         let without_removed = addons
             .into_iter()
-            .filter(|addon| !removed.contains(addon));
+            .filter(|(path, _)| !removed.contains(path));
 
         let with_added: Vec<_> = added
             .iter()
-            .map(|(path, _part)| path.to_owned())
+            .map(|(path, part)| (path.to_owned(), part.get_checksum()))
             .collect();
 
         let base_path = std::env::current_dir()?.join(STATE_DIR_NAME);

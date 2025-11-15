@@ -29,9 +29,9 @@ pub fn update_pack_command(args: UpdatePackArgs) -> anyhow::Result<()> {
     println!("Pack Update Summary:");
     println!("Added: {}", diff.added.len());
     println!("Removed: {}", diff.removed.len());
-    println!("Changed: {}", diff.changed.len());
+    println!("Changed: {}", diff.modified.len());
 
-    if diff.added.is_empty() && diff.removed.is_empty() && diff.changed.is_empty() {
+    if diff.added.is_empty() && diff.removed.is_empty() && diff.modified.is_empty() {
         println!("No changes detected. Your pack is up to date.");
         return Ok(());
     }

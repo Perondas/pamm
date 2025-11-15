@@ -6,7 +6,7 @@ use std::io::{Read, Seek, SeekFrom};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PBOFile {
-    pub rel_path: String,
+    pub name: String,
     pub last_modified: u64,
     pub length: u64,
     pub checksum: Vec<u8>,
@@ -16,7 +16,7 @@ pub struct PBOFile {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PBOPart {
-    pub rel_path: String,
+    pub name: String,
     pub length: u32,
     pub checksum: Vec<u8>,
     pub start_offset: u64,
@@ -41,7 +41,7 @@ impl PBOFile {
             let file_checksum = file_hasher.finalize().to_vec();
 
             parts.push(PBOPart {
-                rel_path: file.filename.to_string(),
+                name: file.filename.to_string(),
                 length: file.size,
                 checksum: file_checksum,
                 start_offset: offset,
@@ -70,7 +70,7 @@ impl PBOFile {
             .unwrap_or(0);
 
         Ok(Self {
-            rel_path: rel_path.to_string(),
+            name: rel_path.to_string(),
             length: handle.length,
             checksum: pbo_checksum,
             last_modified,

@@ -26,5 +26,21 @@ pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
         return Err(anyhow::anyhow!("pack file does not exist"));
     };
 
-    todo!()
+    // TODO: add remote config sync
+
+    let remote_manifest_url = local_config
+        .remote
+        .expect("Remote not set in config")
+        .join(MANIFEST_FILE_NAME)?;
+
+    let remote_manifest = serde_cbor::from_reader::<PackManifest, _>(
+        ureq::get(remote_manifest_url.to_string())
+            .call()?
+            .body_mut()
+            .as_reader(),
+    )?;
+    
+    println!("Got remote manifest: {:?}", remote_manifest);
+
+    Ok(())
 }

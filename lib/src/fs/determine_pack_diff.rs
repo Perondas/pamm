@@ -4,7 +4,7 @@ use crate::pack::pack_diff::PackDiff;
 use crate::pack::pack_manifest::PackManifest;
 use crate::pack::pack_part::part::PackPart;
 use anyhow::Result;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 impl PackManifest {
     pub fn determine_pack_diff(&self, force_refresh: bool) -> Result<PackDiff> {
@@ -19,40 +19,43 @@ impl PackManifest {
 
         let removed = all_known_addons
             .iter()
-            .filter(|addon| !all_fs_addons.contains(addon))
+            .filter(|(path, _)| !all_fs_addons.contains(path))
+            .map(|(path, _)| path)
             .cloned()
             .collect::<Vec<_>>();
 
         let created = all_fs_addons
             .iter()
-            .filter(|addon| !all_known_addons.contains(addon))
+            .filter(|addon| !all_known_addons.iter().any(|(path, _)| *addon == path))
             .cloned()
             .collect::<Vec<_>>();
 
         let potentially_modified = all_known_addons
             .iter()
-            .filter(|addon| all_fs_addons.contains(addon))
+            .filter(|(path, _)| all_fs_addons.contains(path))
             .cloned()
             .collect::<Vec<_>>();
 
-        let created_parts = created
-            .iter()
-            .map(|path| index_creation(path))
-            .collect::<Result<Vec<_>>>()?;
+        let mut added = Vec::with_capacity(created.len());
 
-        let modified_parts = potentially_modified
-            .iter()
-            .map(|path| index_update(path, force_refresh))
-            .collect::<Result<Vec<_>>>()?;
+        for path in created {
+            let created = read_to_part(PathBuf::from(&path), None)?;
+            added.push((path, created));
+        }
+
+        let mut modified = Vec::new();
+
+        for (path, _) in potentially_modified {
+            let updated = update_part(&path, force_refresh)?;
+            if let Some(updated) = updated {
+                modified.push((path, updated));
+            }
+        }
 
         Ok(PackDiff {
-            added: created.into_iter().zip(created_parts).collect(),
+            added,
             removed,
-            changed: potentially_modified
-                .into_iter()
-                .zip(modified_parts)
-                .filter_map(|(path, part_opt)| part_opt.map(|part| (path, part)))
-                .collect(),
+            modified,
         })
     }
 }
@@ -72,27 +75,39 @@ fn get_addons_in_folder(dir_path: &str) -> Result<Vec<String>> {
     Ok(addons)
 }
 
-fn index_creation(path: &str) -> Result<PackPart> {
-    read_to_part(PathBuf::from(path), None)
+fn update_part(path: &str, force_refresh: bool) -> Result<Option<PackPart>> {
+    let path = PathBuf::from(path);
+
+    let part_file = if force_refresh {
+        None
+    } else {
+        try_load_part_file(&path)?
+    };
+
+    let new_part = read_to_part(path, part_file.as_ref())?;
+
+    if let Some(part_file) = part_file {
+        if part_file.get_checksum() == new_part.get_checksum() {
+            Ok(None)
+        } else {
+            Ok(Some(new_part))
+        }
+    } else {
+        Ok(Some(new_part))
+    }
 }
 
-fn index_update(path: &str, force_refresh: bool) -> Result<Option<PackPart>> {
-    let path = PathBuf::from(path);
+fn try_load_part_file(path: &Path) -> Result<Option<PackPart>> {
     let folder_name = path.file_name().unwrap().to_str().unwrap();
 
     let state_path = std::env::current_dir()?.join(STATE_DIR_NAME);
     let state_file_name = format!("{}.part", folder_name);
     let state_file_path = state_path.join(state_file_name);
-    if !state_file_path.exists() || force_refresh {
-        Ok(Some(read_to_part(path, None)?))
+
+    if !state_file_path.exists() {
+        Ok(None)
     } else {
         let state_part: PackPart = serde_cbor::from_reader(std::fs::File::open(state_file_path)?)?;
-        let stored_checksum = state_part.get_checksum();
-        let new_part = read_to_part(path, Some(state_part))?;
-        if stored_checksum == new_part.get_checksum() {
-            Ok(None)
-        } else {
-            Ok(Some(new_part))
-        }
+        Ok(Some(state_part))
     }
 }

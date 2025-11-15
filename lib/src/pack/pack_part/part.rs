@@ -28,7 +28,7 @@ impl PackPart {
     
     pub fn get_rel_path(&self) -> &str {
         match self {
-            PackPart::Folder(folder) => &folder.rel_path,
+            PackPart::Folder(folder) => &folder.name,
             PackPart::File(file) =>file.get_rel_path(),
         }
     }
@@ -37,8 +37,8 @@ impl PackPart {
 impl File {
     pub fn get_rel_path(&self) -> &str {
         match self {
-            File::PBO(pbo) => &pbo.rel_path,
-            File::Generic(generic) => &generic.rel_path,
+            File::PBO(pbo) => &pbo.name,
+            File::Generic(generic) => &generic.name,
         }
     }
 

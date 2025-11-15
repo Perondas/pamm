@@ -4,5 +4,5 @@ use crate::pack::pack_part::part::PackPart;
 pub struct PackDiff {
     pub added: Vec<(String,PackPart)>,
     pub removed: Vec<String>,
-    pub changed: Vec<(String,PackPart)>,
+    pub modified: Vec<(String, PackPart)>,
 }

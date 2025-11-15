@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use crate::pack::pack_part::folder::Folder;
 use crate::pack::pack_part::generic_file::GenericFile;
 use crate::pack::pack_part::part::File::{Generic, PBO};
@@ -8,12 +7,13 @@ use anyhow::Result;
 use bi_fs_rs::pbo::handle::PBOHandle;
 use regex::Regex;
 use sha1::{Digest, Sha1};
+use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::LazyLock;
 
 static PBO_NAME_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^(.+)\.pbo$").unwrap());
 
-pub fn read_to_part(path_buf: PathBuf, old_index: Option<PackPart>) -> Result<PackPart> {
+pub fn read_to_part(path_buf: PathBuf, old_index: Option<&PackPart>) -> Result<PackPart> {
     if path_buf.is_file() {
         let old_index = old_index.and_then(|part| match part {
             PackPart::File(file) => Some(file),
@@ -31,7 +31,7 @@ pub fn read_to_part(path_buf: PathBuf, old_index: Option<PackPart>) -> Result<Pa
     }
 }
 
-fn read_dir_to_parts(fs_path: PathBuf, old_index: Option<Folder>) -> Result<PackPart> {
+fn read_dir_to_parts(fs_path: PathBuf, old_index: Option<&Folder>) -> Result<PackPart> {
     if !fs_path.is_dir() {
         anyhow::bail!("Path is not a directory: {:?}", fs_path);
     }
@@ -40,13 +40,12 @@ fn read_dir_to_parts(fs_path: PathBuf, old_index: Option<Folder>) -> Result<Pack
 
     let mut folder_parts = Vec::new();
 
-
     let mut old_child_folders = if let Some(old_folder) = &old_index {
         old_folder
             .children
             .iter()
             .filter_map(|part| match part {
-                PackPart::Folder(folder) => Some((folder.rel_path.clone(), folder.to_owned())),
+                PackPart::Folder(folder) => Some((folder.name.clone(), folder.to_owned())),
                 _ => None,
             })
             .collect::<HashMap<_, _>>()
@@ -67,15 +66,20 @@ fn read_dir_to_parts(fs_path: PathBuf, old_index: Option<Folder>) -> Result<Pack
         HashMap::new()
     };
 
-
     for entry in std::fs::read_dir(&fs_path)? {
         let entry = entry?;
         let entry_path = entry.path();
         let child_name = entry.file_name().to_str().unwrap().to_owned();
         if entry_path.is_file() {
-            folder_parts.push(read_file_to_part(entry_path, old_child_files.remove(&child_name))?);
+            folder_parts.push(read_file_to_part(
+                entry_path,
+                old_child_files.remove(&child_name).as_ref(),
+            )?);
         } else if entry_path.is_dir() {
-            folder_parts.push(read_dir_to_parts(entry_path, old_child_folders.remove(&child_name))?);
+            folder_parts.push(read_dir_to_parts(
+                entry_path,
+                old_child_folders.remove(&child_name).as_ref(),
+            )?);
         }
     }
 
@@ -87,13 +91,13 @@ fn read_dir_to_parts(fs_path: PathBuf, old_index: Option<Folder>) -> Result<Pack
     let checksum = hasher.finalize().to_vec();
 
     Ok(PackPart::Folder(Folder {
-        rel_path: name,
+        name: name,
         checksum,
         children: folder_parts,
     }))
 }
 
-fn read_file_to_part(path_buf: PathBuf, old_index: Option<File>) -> Result<PackPart> {
+fn read_file_to_part(path_buf: PathBuf, old_index: Option<&File>) -> Result<PackPart> {
     if PBO_NAME_REGEX.is_match(path_buf.file_name().unwrap().to_str().unwrap()) {
         let old_index = old_index.and_then(|file| match file {
             PBO(pbo) => Some(pbo),
@@ -109,7 +113,7 @@ fn read_file_to_part(path_buf: PathBuf, old_index: Option<File>) -> Result<PackP
     }
 }
 
-fn read_pbo_to_part(fs_path: PathBuf, old_part: Option<PBOFile>) -> Result<PackPart> {
+fn read_pbo_to_part(fs_path: PathBuf, old_part: Option<&PBOFile>) -> Result<PackPart> {
     if !fs_path.is_file() {
         anyhow::bail!("Path is not a file: {:?}", fs_path);
     }
@@ -118,10 +122,13 @@ fn read_pbo_to_part(fs_path: PathBuf, old_part: Option<PBOFile>) -> Result<PackP
 
     if let Some(old_part) = old_part {
         let metadata = std::fs::metadata(&fs_path)?;
-        let last_modified = metadata.modified()?.duration_since(std::time::UNIX_EPOCH)?.as_secs();
+        let last_modified = metadata
+            .modified()?
+            .duration_since(std::time::UNIX_EPOCH)?
+            .as_secs();
         let length = metadata.len();
         if old_part.last_modified == last_modified && old_part.length == length {
-            return Ok(PackPart::File(PBO(old_part)));
+            return Ok(PackPart::File(PBO(old_part.clone())));
         }
     }
 
@@ -130,7 +137,7 @@ fn read_pbo_to_part(fs_path: PathBuf, old_part: Option<PBOFile>) -> Result<PackP
     Ok(PackPart::File(PBO(file)))
 }
 
-fn read_generic_file_to_part(fs_path: PathBuf, old_part: Option<GenericFile>) -> Result<PackPart> {
+fn read_generic_file_to_part(fs_path: PathBuf, old_part: Option<&GenericFile>) -> Result<PackPart> {
     if !fs_path.is_file() {
         anyhow::bail!("Path is not a file: {:?}", fs_path);
     }
@@ -139,10 +146,13 @@ fn read_generic_file_to_part(fs_path: PathBuf, old_part: Option<GenericFile>) ->
 
     if let Some(old_part) = old_part {
         let metadata = std::fs::metadata(&fs_path)?;
-        let last_modified = metadata.modified()?.duration_since(std::time::UNIX_EPOCH)?.as_secs();
+        let last_modified = metadata
+            .modified()?
+            .duration_since(std::time::UNIX_EPOCH)?
+            .as_secs();
         let length = metadata.len();
         if old_part.last_modified == last_modified && old_part.length == length {
-            return Ok(PackPart::File(Generic(old_part)));
+            return Ok(PackPart::File(Generic(old_part.clone())));
         }
     }
 
@@ -163,7 +173,7 @@ fn read_generic_file_to_part(fs_path: PathBuf, old_part: Option<GenericFile>) ->
         .unwrap_or(0);
 
     Ok(PackPart::File(Generic(GenericFile {
-        rel_path: file_name,
+        name: file_name,
         last_modified,
         length,
         checksum,
