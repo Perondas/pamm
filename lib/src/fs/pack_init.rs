@@ -3,10 +3,10 @@ use crate::pack::pack_config::PackConfig;
 use crate::pack::pack_manifest::PackManifest;
 use anyhow::Result;
 use std::fs;
-use std::path::PathBuf;
+use std::path::Path;
 
 impl PackConfig {
-    pub fn init_on_disk(&self, base: &PathBuf) -> Result<()> {
+    pub fn init_on_disk(&self, base: &Path) -> Result<()> {
         let base_path = base.join(&self.name);
 
         fs::create_dir(&base_path)?;

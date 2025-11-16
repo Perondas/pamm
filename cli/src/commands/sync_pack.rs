@@ -8,7 +8,7 @@ use std::fs;
 #[derive(Debug, Args)]
 pub struct SyncPackArgs {}
 
-pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
+pub fn sync_pack_command(_: SyncPackArgs) -> anyhow::Result<()> {
     let config_file = current_dir()?.join(CONFIG_FILE_NAME);
     let pack_file = current_dir()?.join(MANIFEST_FILE_NAME);
 
@@ -19,7 +19,7 @@ pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
         return Err(anyhow::anyhow!("config file does not exist"));
     };
 
-    let local_manifest = if pack_file.exists() {
+    let _ = if pack_file.exists() {
         let file = fs::File::open(&pack_file)?;
         serde_cbor::from_reader::<PackManifest, _>(file)?
     } else {

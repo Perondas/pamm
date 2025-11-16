@@ -1,4 +1,5 @@
 pub mod part_reader;
 pub mod pack_init;
-pub mod determine_pack_diff;
-pub mod apply_pack_diff;
+pub mod gen_pack_from_fs;
+pub mod file_cache;
+pub mod pack_diff;

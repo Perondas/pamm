@@ -2,6 +2,7 @@ use clap::Args;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::consts::MANIFEST_FILE_NAME;
 use pamm_lib::pack::pack_manifest::PackManifest;
+use pamm_lib::pack::part_diff::PartDiff::{Created, Deleted, Modified};
 use std::env::current_dir;
 use std::fs;
 
@@ -15,7 +16,7 @@ pub struct UpdatePackArgs {
 pub fn update_pack_command(args: UpdatePackArgs) -> anyhow::Result<()> {
     let pack_file = current_dir()?.join(MANIFEST_FILE_NAME);
 
-    let manifest = if pack_file.exists() {
+    let stored_manifest = if pack_file.exists() {
         let file = fs::File::open(&pack_file)?;
         serde_cbor::from_reader(file)?
     } else {
@@ -24,17 +25,64 @@ pub fn update_pack_command(args: UpdatePackArgs) -> anyhow::Result<()> {
         PackManifest::default()
     };
 
-    let diff = manifest.determine_pack_diff(args.force_refresh)?;
+    let fs_manifest = PackManifest::load_from_fs(&current_dir()?, args.force_refresh)?;
 
-    println!("Pack Update Summary:");
-    println!("Added: {}", diff.added.len());
-    println!("Removed: {}", diff.removed.len());
-    println!("Changed: {}", diff.modified.len());
+    let diff = stored_manifest.determine_pack_diff(&fs_manifest)?;
 
-    if diff.added.is_empty() && diff.removed.is_empty() && diff.modified.is_empty() {
-        println!("No changes detected. Your pack is up to date.");
+    if !diff.has_changes() {
+        println!("No changes found");
         return Ok(());
     }
+
+    println!("Pack Update Summary:");
+    println!();
+    println!("Required addon changes:");
+    println!(
+        "Added: {}",
+        diff.required_changes
+            .iter()
+            .filter(|d| matches!(d, Created(_)))
+            .count()
+    );
+    println!(
+        "Removed: {}",
+        diff.required_changes
+            .iter()
+            .filter(|d| matches!(d, Deleted(_)))
+            .count()
+    );
+    println!(
+        "Changed: {}",
+        diff.required_changes
+            .iter()
+            .filter(|d| matches!(d, Modified(_)))
+            .count()
+    );
+    println!();
+    println!("Optional addon changes:");
+    println!(
+        "Added: {}",
+        diff.required_changes
+            .iter()
+            .filter(|d| matches!(d, Created(_)))
+            .count()
+    );
+    println!(
+        "Removed: {}",
+        diff.required_changes
+            .iter()
+            .filter(|d| matches!(d, Deleted(_)))
+            .count()
+    );
+    println!(
+        "Changed: {}",
+        diff.required_changes
+            .iter()
+            .filter(|d| matches!(d, Modified(_)))
+            .count()
+    );
+
+    println!("{:#?}", diff);
 
     // TODO: Show more detailed summary of changes
 
@@ -48,7 +96,8 @@ pub fn update_pack_command(args: UpdatePackArgs) -> anyhow::Result<()> {
         return Ok(());
     }
 
-    manifest.apply_pack_diff(diff)?;
+    let file = fs::File::create(&pack_file)?;
+    serde_cbor::to_writer(file, &fs_manifest)?;
 
     Ok(())
 }

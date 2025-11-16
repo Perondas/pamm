@@ -1,8 +1,13 @@
-use crate::pack::pack_part::part::PackPart;
+use crate::pack::part_diff::PartDiff;
 
 #[derive(Debug)]
 pub struct PackDiff {
-    pub added: Vec<(String,PackPart)>,
-    pub removed: Vec<String>,
-    pub modified: Vec<(String, PackPart)>,
+    pub required_changes: Vec<PartDiff>,
+    pub optional_changes: Vec<PartDiff>,
+}
+
+impl PackDiff {
+    pub fn has_changes(&self) -> bool {
+        !self.required_changes.is_empty() && !self.optional_changes.is_empty()
+    }
 }
