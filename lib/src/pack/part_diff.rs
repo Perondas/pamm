@@ -28,13 +28,14 @@ pub enum FileModification {
 #[derive(Debug)]
 pub struct PBOModification {
     pub name: String,
-    pub old_order: Vec<PBOPart>,
+    // Order of the parts by checksum
     pub new_order: Vec<PBOPart>,
+    pub required_parts: Vec<Vec<u8>>,
     pub target_checksum: Vec<u8>,
+    pub blob_offset: u64,
 }
 
 #[derive(Debug)]
-
 pub struct GenericFileModification {
     pub name: String,
     pub new_length: u64,

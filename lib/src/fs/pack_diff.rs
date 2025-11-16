@@ -69,7 +69,9 @@ fn diff_part(pair: (PackPart, PackPart)) -> anyhow::Result<Option<PartDiff>> {
     }
 
     Ok(Some(match pair {
-        (PackPart::File(left_file), PackPart::File(right_file)) => diff_file(left_file, right_file)?,
+        (PackPart::File(left_file), PackPart::File(right_file)) => {
+            diff_file(left_file, right_file)?
+        }
         (PackPart::Folder(left_folder), PackPart::Folder(right_folder)) => {
             diff_folder(left_folder, right_folder)?
         }
@@ -87,14 +89,24 @@ fn diff_file(left: File, right: File) -> anyhow::Result<PartDiff> {
                 new_length: right_file.length,
             })),
         )),
-        (File::PBO(left_file), File::PBO(right_file)) => Ok(PartDiff::Modified(
-            PartModification::File(PBO(PBOModification {
-                name: right_file.name,
-                target_checksum: right_file.checksum,
-                new_order: right_file.parts,
-                old_order: left_file.parts,
-            })),
-        )),
+        (File::PBO(left_file), File::PBO(right_file)) => {
+            let required_parts = right_file
+                .parts
+                .iter()
+                .filter(|p| !left_file.parts.iter().any(|l| l.checksum == p.checksum))
+                .map(|p| p.checksum.clone())
+                .collect();
+
+            Ok(PartDiff::Modified(PartModification::File(PBO(
+                PBOModification {
+                    name: right_file.name,
+                    target_checksum: right_file.checksum,
+                    new_order: right_file.parts,
+                    required_parts,
+                    blob_offset: right_file.blob_offset,
+                },
+            ))))
+        }
         // On type mismatch we re-create everything as new
         (_, right) => Ok(PartDiff::Created(PackPart::File(right))),
     }

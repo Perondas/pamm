@@ -908,6 +908,7 @@ dependencies = [
  "serde_json",
  "sha1",
  "sled",
+ "ureq",
  "url",
 ]
 
