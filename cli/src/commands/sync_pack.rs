@@ -20,8 +20,11 @@ pub fn sync_pack_command(_: SyncPackArgs) -> anyhow::Result<()> {
     };
 
     let _ = if pack_file.exists() {
-        let file = fs::File::open(&pack_file)?;
-        serde_cbor::from_reader::<PackManifest, _>(file)?
+        let mut file = fs::File::open(&pack_file)?;
+        bincode::serde::decode_from_std_read::<PackManifest, _, _>(
+            &mut file,
+            bincode::config::standard(),
+        )?
     } else {
         return Err(anyhow::anyhow!("pack file does not exist"));
     };
@@ -33,13 +36,14 @@ pub fn sync_pack_command(_: SyncPackArgs) -> anyhow::Result<()> {
         .expect("Remote not set in config")
         .join(MANIFEST_FILE_NAME)?;
 
-    let remote_manifest = serde_cbor::from_reader::<PackManifest, _>(
-        ureq::get(remote_manifest_url.to_string())
+    let remote_manifest = bincode::serde::decode_from_std_read::<PackManifest, _, _>(
+        &mut ureq::get(remote_manifest_url.to_string())
             .call()?
             .body_mut()
             .as_reader(),
+        bincode::config::standard(),
     )?;
-    
+
     println!("Got remote manifest: {:?}", remote_manifest);
 
     Ok(())

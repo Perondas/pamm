@@ -3,6 +3,7 @@ use dialoguer::theme::ColorfulTheme;
 use pamm_lib::consts::MANIFEST_FILE_NAME;
 use pamm_lib::pack::pack_manifest::PackManifest;
 use pamm_lib::pack::part_diff::PartDiff::{Created, Deleted, Modified};
+use pamm_lib::serialization::{from_reader, to_writer};
 use std::env::current_dir;
 use std::fs;
 
@@ -17,8 +18,8 @@ pub fn update_pack_command(args: UpdatePackArgs) -> anyhow::Result<()> {
     let pack_file = current_dir()?.join(MANIFEST_FILE_NAME);
 
     let stored_manifest = if pack_file.exists() {
-        let file = fs::File::open(&pack_file)?;
-        serde_cbor::from_reader(file)?
+        let mut file = fs::File::open(&pack_file)?;
+        from_reader(&mut file)?
     } else {
         println!("No pack found in the current directory.");
         println!("Reinitializing a new pack manifest.");
@@ -96,8 +97,8 @@ pub fn update_pack_command(args: UpdatePackArgs) -> anyhow::Result<()> {
         return Ok(());
     }
 
-    let file = fs::File::create(&pack_file)?;
-    serde_cbor::to_writer(file, &fs_manifest)?;
+    let mut file = fs::File::create(&pack_file)?;
+    to_writer(&mut file, &fs_manifest)?;
 
     Ok(())
 }

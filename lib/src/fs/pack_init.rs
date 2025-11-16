@@ -1,6 +1,7 @@
 use crate::consts::*;
 use crate::pack::pack_config::PackConfig;
 use crate::pack::pack_manifest::PackManifest;
+use crate::serialization::to_writer;
 use anyhow::Result;
 use std::fs;
 use std::path::Path;
@@ -21,8 +22,8 @@ impl PackConfig {
 
         let manifest = PackManifest::default();
         let manifest_path = base_path.join(MANIFEST_FILE_NAME);
-        let manifest_file = fs::File::create(manifest_path)?;
-        serde_cbor::to_writer(manifest_file, &manifest)?;
+        let mut manifest_file = fs::File::create(manifest_path)?;
+        to_writer(&mut manifest_file, &manifest)?;
 
         Ok(())
     }
