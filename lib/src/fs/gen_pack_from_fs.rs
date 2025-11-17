@@ -52,7 +52,7 @@ fn read_addons_to_part(folder: PathBuf, cache: &KVCache) -> anyhow::Result<Vec<P
         }
     }
 
-    parts.sort_by(|a, b| a.get_rel_path().cmp(b.get_rel_path()));
+    parts.sort_by(|a, b| a.get_name().cmp(b.get_name()));
 
     Ok(parts)
 }

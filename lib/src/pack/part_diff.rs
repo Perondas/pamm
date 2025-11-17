@@ -16,6 +16,7 @@ pub enum PartModification {
 
 #[derive(Debug)]
 pub struct FolderModification {
+    pub name: String,
     pub changes: Vec<PartDiff>,
 }
 

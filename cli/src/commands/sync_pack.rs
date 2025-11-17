@@ -1,5 +1,6 @@
 use clap::Args;
 use pamm_lib::consts::{CONFIG_FILE_NAME, MANIFEST_FILE_NAME};
+use pamm_lib::dl::downloader::apply_diff;
 use pamm_lib::pack::pack_config::PackConfig;
 use pamm_lib::pack::pack_manifest::PackManifest;
 use std::env::current_dir;
@@ -19,7 +20,7 @@ pub fn sync_pack_command(_: SyncPackArgs) -> anyhow::Result<()> {
         return Err(anyhow::anyhow!("config file does not exist"));
     };
 
-    let _ = if pack_file.exists() {
+    let local_manifest = if pack_file.exists() {
         let mut file = fs::File::open(&pack_file)?;
         bincode::serde::decode_from_std_read::<PackManifest, _, _>(
             &mut file,
@@ -44,7 +45,26 @@ pub fn sync_pack_command(_: SyncPackArgs) -> anyhow::Result<()> {
         bincode::config::standard(),
     )?;
 
-    println!("Got remote manifest: {:?}", remote_manifest);
+    let diff = local_manifest.determine_pack_diff(&remote_manifest)?;
+
+    if !diff.has_changes() {
+        println!("Pack is already up to date.");
+        return Ok(());
+    }
+
+    apply_diff(&current_dir()?, diff, &remote_manifest_url)?;
+
+    let fs_manifest = PackManifest::load_from_fs(&current_dir()?, false)?;
+
+    let diff_after_patch = fs_manifest.determine_pack_diff(&remote_manifest)?;
+
+    if diff_after_patch.has_changes() {
+        return Err(anyhow::anyhow!(
+            "Pack is still out of date after applying diff"
+        ));
+    }
+
+    println!("Pack synchronized successfully.");
 
     Ok(())
 }

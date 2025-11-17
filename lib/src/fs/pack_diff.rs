@@ -25,13 +25,13 @@ fn diff_parts(left: &[PackPart], right: &[PackPart]) -> anyhow::Result<Vec<PartD
     let mut left_map: HashMap<String, PackPart> = left
         .iter()
         .cloned()
-        .map(|p| (p.get_rel_path().to_owned(), p))
+        .map(|p| (p.get_name().to_owned(), p))
         .collect();
 
     let mut right_map: HashMap<String, PackPart> = right
         .iter()
         .cloned()
-        .map(|p| (p.get_rel_path().to_owned(), p))
+        .map(|p| (p.get_name().to_owned(), p))
         .collect();
 
     // Ones that are in right but not left are added
@@ -115,6 +115,9 @@ fn diff_file(left: File, right: File) -> anyhow::Result<PartDiff> {
 fn diff_folder(left: Folder, right: Folder) -> anyhow::Result<PartDiff> {
     let changes = diff_parts(&left.children, &right.children)?;
     Ok(PartDiff::Modified(PartModification::Folder(
-        FolderModification { changes },
+        FolderModification {
+            name: right.name,
+            changes,
+        },
     )))
 }

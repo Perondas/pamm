@@ -8,6 +8,6 @@ pub struct PackDiff {
 
 impl PackDiff {
     pub fn has_changes(&self) -> bool {
-        !self.required_changes.is_empty() && !self.optional_changes.is_empty()
+        !self.required_changes.is_empty() || !self.optional_changes.is_empty()
     }
 }

@@ -903,6 +903,7 @@ dependencies = [
  "anyhow",
  "bi_fs_rs",
  "bincode",
+ "log",
  "regex",
  "serde",
  "serde_json",

@@ -26,16 +26,16 @@ impl PackPart {
         }
     }
     
-    pub fn get_rel_path(&self) -> &str {
+    pub fn get_name(&self) -> &str {
         match self {
             PackPart::Folder(folder) => &folder.name,
-            PackPart::File(file) =>file.get_rel_path(),
+            PackPart::File(file) =>file.get_name(),
         }
     }
 }
 
 impl File {
-    pub fn get_rel_path(&self) -> &str {
+    pub fn get_name(&self) -> &str {
         match self {
             File::PBO(pbo) => &pbo.name,
             File::Generic(generic) => &generic.name,
