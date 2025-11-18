@@ -33,8 +33,14 @@ fn read_dir_to_parts(fs_path: PathBuf, cache: &KVCache) -> Result<PackPart> {
 
     let mut folder_parts = Vec::new();
 
-    for entry in std::fs::read_dir(&fs_path)? {
-        let entry = entry?;
+    let entries = std::fs::read_dir(&fs_path)?;
+    let sorted_entries = {
+        let mut entries: Vec<_> = entries.collect::<Result<_, _>>()?;
+        entries.sort_by_key(|e| e.path());
+        entries
+    };
+
+    for entry in sorted_entries {
         let entry_path = entry.path();
         if entry_path.is_file() {
             folder_parts.push(read_file_to_part(entry_path, cache)?);

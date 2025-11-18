@@ -83,7 +83,7 @@ pub fn update_pack_command(args: UpdatePackArgs) -> anyhow::Result<()> {
             .count()
     );
 
-    println!("{:#?}", diff);
+   // println!("{:#?}", diff);
 
     // TODO: Show more detailed summary of changes
 
