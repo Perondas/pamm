@@ -48,4 +48,11 @@ impl File {
             File::Generic(generic) => generic.checksum.clone(),
         }
     }
+
+    pub fn get_length(&self) -> u64 {
+        match self {
+            File::PBO(pbo) => pbo.length,
+            File::Generic(generic) => generic.length,
+        }
+    }
 }

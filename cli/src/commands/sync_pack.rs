@@ -1,4 +1,5 @@
 use clap::Args;
+use dialoguer::theme::ColorfulTheme;
 use pamm_lib::consts::{CONFIG_FILE_NAME, MANIFEST_FILE_NAME};
 use pamm_lib::dl::downloader::apply_diff;
 use pamm_lib::pack::pack_config::PackConfig;
@@ -11,7 +12,6 @@ pub struct SyncPackArgs {}
 
 pub fn sync_pack_command(_: SyncPackArgs) -> anyhow::Result<()> {
     let config_file = current_dir()?.join(CONFIG_FILE_NAME);
-    let pack_file = current_dir()?.join(MANIFEST_FILE_NAME);
 
     let local_config: PackConfig = if config_file.exists() {
         let file = fs::File::open(&config_file)?;
@@ -20,15 +20,7 @@ pub fn sync_pack_command(_: SyncPackArgs) -> anyhow::Result<()> {
         return Err(anyhow::anyhow!("config file does not exist"));
     };
 
-    let local_manifest = if pack_file.exists() {
-        let mut file = fs::File::open(&pack_file)?;
-        bincode::serde::decode_from_std_read::<PackManifest, _, _>(
-            &mut file,
-            bincode::config::standard(),
-        )?
-    } else {
-        return Err(anyhow::anyhow!("pack file does not exist"));
-    };
+    let local_manifest = PackManifest::load_from_fs(&current_dir()?, false)?;
 
     // TODO: add remote config sync
 
@@ -49,6 +41,19 @@ pub fn sync_pack_command(_: SyncPackArgs) -> anyhow::Result<()> {
 
     if !diff.has_changes() {
         println!("Pack is already up to date.");
+        return Ok(());
+    }
+
+    println!("The following changes were detected:");
+    println!("{}", diff.to_pretty_string());
+
+    let outcome = dialoguer::Confirm::with_theme(&ColorfulTheme::default())
+        .with_prompt("Do you want to apply these changes?")
+        .default(false)
+        .interact()?;
+
+    if !outcome {
+        println!("Aborting sync.");
         return Ok(());
     }
 

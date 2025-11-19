@@ -1,10 +1,10 @@
-use anyhow::Context;
 use anyhow::anyhow;
+use anyhow::Context;
 use regex::Regex;
 use std::io::{BufRead, BufReader, Read};
 use std::sync::LazyLock;
 use ureq::http::header::CONTENT_TYPE;
-use ureq::http::{HeaderMap, Response};
+use ureq::http::Response;
 use ureq::{Body, BodyReader};
 
 static CONTENT_RANGE_HEADER: LazyLock<Regex> =
@@ -72,14 +72,14 @@ fn get_next_part<R: Read>(
 ) -> anyhow::Result<Option<Vec<u8>>> {
     let boundary_len = boundary.len() + 4; // "--" + boundary + "\r\n"
     let mut boundary_bytes = vec![0u8; boundary_len];
-    let read = reader.read(&mut boundary_bytes)?;
+    let read = reader.read_exact(&mut boundary_bytes);
 
-    if read == 0 {
-        return Ok(None); // EOF
-    }
-
-    if read < boundary_len {
-        return Err(anyhow!("Unexpected EOF while reading boundary"));
+    if let Err(e) = read {
+        return if e.kind() == std::io::ErrorKind::UnexpectedEof {
+            Ok(None) // Expected EOF
+        } else {
+            Err(anyhow!("Failed to read boundary: {}", e))
+        };
     }
 
     if &boundary_bytes[..2] != b"--" || &boundary_bytes[2..boundary_len - 2] != boundary {
@@ -87,13 +87,17 @@ fn get_next_part<R: Read>(
     }
 
     if &boundary_bytes[boundary_len - 2..] == b"--" {
-        let mut check_eof = [0u8; 3];
-        let read = reader.read(&mut check_eof)?;
-        if read != 2 {
-            return Err(anyhow!("Unexpected data after final boundary"));
-        }
+        let mut check_eof = [0u8; 2];
+        reader.read_exact(&mut check_eof)?;
+
         if &check_eof[..2] != b"\r\n" {
             return Err(anyhow!("Invalid data after final boundary"));
+        }
+
+        let mut peek_buf = [0u8; 1];
+        let bytes_peeked = reader.read(&mut peek_buf)?;
+        if bytes_peeked != 0 {
+            return Err(anyhow!("Data found after final boundary"));
         }
 
         return Ok(None); // End of multipart
@@ -115,7 +119,7 @@ fn get_next_part<R: Read>(
         let bytes_read = reader.read_until(b'\n', &mut header)?;
 
         if bytes_read == 0 {
-            return (Err(anyhow!("Unexpected EOF while reading headers")));
+            return Err(anyhow!("Unexpected EOF while reading headers"));
         }
 
         if header == b"\r\n" {
@@ -150,19 +154,13 @@ fn get_next_part<R: Read>(
     };
 
     let mut part_data = vec![0u8; part_size];
-    reader.read_exact(&mut part_data).context(anyhow!(
-        "Failed to read content of length: {}",
-        part_size
-    ))?;
+    reader
+        .read_exact(&mut part_data)
+        .context(anyhow!("Failed to read content of length: {}", part_size))?;
 
     // Read the trailing \r\n after the part
     let mut trailing = [0u8; 2];
-    let read = reader.read(&mut trailing)?;
-    if read < 2 {
-        return Err(anyhow!(
-            "Unexpected EOF while reading part trailing"
-        ));
-    }
+    reader.read_exact(&mut trailing)?;
 
     if &trailing != b"\r\n" {
         return Err(anyhow!("Invalid trailing after part"));

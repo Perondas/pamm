@@ -2,7 +2,6 @@ use clap::Args;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::consts::MANIFEST_FILE_NAME;
 use pamm_lib::pack::pack_manifest::PackManifest;
-use pamm_lib::pack::part_diff::PartDiff::{Created, Deleted, Modified};
 use pamm_lib::serialization::{from_reader, to_writer};
 use std::env::current_dir;
 use std::fs;
@@ -35,57 +34,8 @@ pub fn update_pack_command(args: UpdatePackArgs) -> anyhow::Result<()> {
         return Ok(());
     }
 
-    println!("Pack Update Summary:");
-    println!();
-    println!("Required addon changes:");
-    println!(
-        "Added: {}",
-        diff.required_changes
-            .iter()
-            .filter(|d| matches!(d, Created(_)))
-            .count()
-    );
-    println!(
-        "Removed: {}",
-        diff.required_changes
-            .iter()
-            .filter(|d| matches!(d, Deleted(_)))
-            .count()
-    );
-    println!(
-        "Changed: {}",
-        diff.required_changes
-            .iter()
-            .filter(|d| matches!(d, Modified(_)))
-            .count()
-    );
-    println!();
-    println!("Optional addon changes:");
-    println!(
-        "Added: {}",
-        diff.required_changes
-            .iter()
-            .filter(|d| matches!(d, Created(_)))
-            .count()
-    );
-    println!(
-        "Removed: {}",
-        diff.required_changes
-            .iter()
-            .filter(|d| matches!(d, Deleted(_)))
-            .count()
-    );
-    println!(
-        "Changed: {}",
-        diff.required_changes
-            .iter()
-            .filter(|d| matches!(d, Modified(_)))
-            .count()
-    );
-
-   // println!("{:#?}", diff);
-
-    // TODO: Show more detailed summary of changes
+    println!("The following changes were detected:");
+    println!("{}", diff.to_pretty_string());
 
     let outcome = dialoguer::Confirm::with_theme(&ColorfulTheme::default())
         .with_prompt("Do you want to apply these changes?")

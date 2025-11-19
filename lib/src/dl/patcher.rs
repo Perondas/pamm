@@ -36,7 +36,7 @@ pub fn patch_pbo_file(
 
     let mut temp_file = File::create(&temp_file_path)?;
 
-    let mut parts = get_required_pbo_parts(&url, &pbo_modification)?;
+    let mut parts = get_required_pbo_parts(&url, pbo_modification)?;
 
     let PBOModification {
         new_order,
@@ -62,8 +62,21 @@ pub fn patch_pbo_file(
         }
     }
 
+    let checksum_data = parts
+        .next()
+        .ok_or_else(|| anyhow::anyhow!("No response for PBO checksum"))??;
+    temp_file.write_all(&checksum_data)?;
+
     if parts.next().is_some() {
         return Err(anyhow::anyhow!("Received more parts than expected"));
+    }
+
+    if temp_file.metadata()?.len() != pbo_modification.new_length {
+        println!("Expected length: {}", pbo_modification.new_length);
+        println!("Actual length: {}", temp_file.metadata()?.len());
+        return Err(anyhow::anyhow!(
+            "Patched PBO length does not match expected length"
+        ));
     }
 
     mem::drop(pbo_handle);
@@ -88,7 +101,11 @@ fn get_required_pbo_parts(
 
     // We always get the entire header
     // TODO: can we only get part of it? Is that worth it?
-    let pbo_header_range = (0_u64, pbo_modification.blob_offset - 1);
+    let pbo_header_range = (0_u64, pbo_modification.blob_offset);
+    let pbo_checksum_rage = (
+        pbo_modification.new_length - 21,
+        pbo_modification.new_length,
+    );
     let modified_ranges = new_order
         .iter()
         .filter(|p| required_parts.contains(&p.checksum))
@@ -99,11 +116,12 @@ fn get_required_pbo_parts(
 
     let ranges = iter::once(pbo_header_range)
         .chain(modified_ranges)
+        .chain(iter::once(pbo_checksum_rage))
         .collect::<Vec<_>>();
 
     let ranges_str = ranges
         .iter()
-        .map(|(from, to)| format!("{}-{}", from, to))
+        .map(|(from, to)| format!("{}-{}", from, to - 1))
         .collect::<Vec<_>>()
         .join(", ");
     let resp = request_builder

@@ -77,7 +77,6 @@ fn read_file_to_part(fs_path: PathBuf, cache: &KVCache) -> Result<PackPart> {
         && old_part.last_modified == last_modified
         && old_part.length == length
     {
-        println!("Found cached part for: {:?}", fs_path);
         return Ok(old_part.part);
     }
 
@@ -87,7 +86,16 @@ fn read_file_to_part(fs_path: PathBuf, cache: &KVCache) -> Result<PackPart> {
             .and_then(|s| s.to_str())
             .ok_or(anyhow!("Bad path: {:?}", fs_path))?,
     ) {
-        read_pbo_to_part(&fs_path)
+        match read_pbo_to_part(&fs_path) {
+            Ok(part) => Ok(part),
+            Err(e) => {
+                println!(
+                    "Warning: Failed to read PBO file {:?}, falling back to generic file. Error: {}",
+                    fs_path, e
+                );
+                read_generic_file_to_part(&fs_path)
+            }
+        }
     } else {
         read_generic_file_to_part(&fs_path)
     }?;

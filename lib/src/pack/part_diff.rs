@@ -32,6 +32,8 @@ pub struct PBOModification {
     // Order of the parts by checksum
     pub new_order: Vec<PBOPart>,
     pub required_parts: Vec<Vec<u8>>,
+    pub required_parts_size: u64,
+    pub new_length: u64,
     pub target_checksum: Vec<u8>,
     pub blob_offset: u64,
 }

@@ -90,12 +90,14 @@ fn diff_file(left: File, right: File) -> anyhow::Result<PartDiff> {
             })),
         )),
         (File::PBO(left_file), File::PBO(right_file)) => {
-            let required_parts = right_file
+            let (required_parts, lengths): (Vec<_>, Vec<_>) = right_file
                 .parts
                 .iter()
                 .filter(|p| !left_file.parts.iter().any(|l| l.checksum == p.checksum))
-                .map(|p| p.checksum.clone())
-                .collect();
+                .map(|p| (p.checksum.clone(), p.length))
+                .unzip();
+
+            let required_parts_size = lengths.iter().map(|&l| l as u64).sum();
 
             Ok(PartDiff::Modified(PartModification::File(PBO(
                 PBOModification {
@@ -104,6 +106,8 @@ fn diff_file(left: File, right: File) -> anyhow::Result<PartDiff> {
                     new_order: right_file.parts,
                     required_parts,
                     blob_offset: right_file.blob_offset,
+                    required_parts_size,
+                    new_length: right_file.length,
                 },
             ))))
         }

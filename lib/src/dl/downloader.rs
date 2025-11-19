@@ -1,3 +1,4 @@
+use crate::consts::{OPTIONAL_DIR_NAME, REQUIRED_DIR_NAME};
 use crate::dl::patcher::{download_file, patch_generic_file, patch_pbo_file};
 use crate::pack::pack_diff::PackDiff;
 use crate::pack::pack_part::folder::Folder;
@@ -6,7 +7,6 @@ use crate::pack::part_diff::{FileModification, PartDiff, PartModification};
 use std::fs;
 use std::path::Path;
 use url::Url;
-use crate::consts::{OPTIONAL_DIR_NAME, REQUIRED_DIR_NAME};
 
 pub fn apply_diff(pack_path: &Path, pack_diff: PackDiff, base_url: &Url) -> anyhow::Result<()> {
     let PackDiff {
@@ -15,18 +15,18 @@ pub fn apply_diff(pack_path: &Path, pack_diff: PackDiff, base_url: &Url) -> anyh
     } = pack_diff;
 
     let required_path = pack_path.join(REQUIRED_DIR_NAME);
-    let required_url = base_url.join(&format!("{}/",REQUIRED_DIR_NAME))?;
+    let required_url = base_url.join(&format!("{REQUIRED_DIR_NAME}/"))?;
     patch_dir(&required_changes, &required_path, &required_url)?;
 
     let optional_path = pack_path.join(OPTIONAL_DIR_NAME);
-    let optional_url = base_url.join(&format!("{}/",OPTIONAL_DIR_NAME))?;
+    let optional_url = base_url.join(&format!("{OPTIONAL_DIR_NAME}/"))?;
     patch_dir(&optional_changes, &optional_path, &optional_url)?;
 
     Ok(())
 }
 
-fn patch_dir(diff: &[PartDiff], destination_path: &Path, url: &Url) -> anyhow::Result<()> {
-    for modification in diff {
+fn patch_dir(diffs: &[PartDiff], destination_path: &Path, url: &Url) -> anyhow::Result<()> {
+    for modification in diffs {
         match modification {
             PartDiff::Created(part) => match part {
                 PackPart::Folder(f) => {
@@ -91,8 +91,6 @@ fn create_folder(path: &Path, folder: &Folder, url: &Url) -> anyhow::Result<()> 
 fn create_file(path: &Path, file: &File, url: &Url) -> anyhow::Result<()> {
     let file_path = path.join(file.get_name());
     let file_url = url.join(file.get_name())?;
-    println!("Old url is {:?}", url);
-    println!("Creating file at {:?} from {:?}", file_path, file_url);
     download_file(&file_path, file_url)?;
     Ok(())
 }
