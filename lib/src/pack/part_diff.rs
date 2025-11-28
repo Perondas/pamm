@@ -8,6 +8,12 @@ pub enum PartDiff {
     Modified(PartModification),
 }
 
+pub enum PartChange {
+    Created(PackPart),
+    Deleted,
+    Modified(FileModification),
+}
+
 #[derive(Debug)]
 pub enum PartModification {
     Folder(FolderModification),

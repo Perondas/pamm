@@ -20,7 +20,7 @@ pub fn sync_pack_command(_: SyncPackArgs) -> anyhow::Result<()> {
         return Err(anyhow::anyhow!("config file does not exist"));
     };
 
-    let local_manifest = PackManifest::load_from_fs(&current_dir()?, false)?;
+    let local_manifest = PackManifest::gen_from_fs(&current_dir()?, false)?;
 
     // TODO: add remote config sync
 
@@ -59,7 +59,7 @@ pub fn sync_pack_command(_: SyncPackArgs) -> anyhow::Result<()> {
 
     apply_diff(&current_dir()?, diff, &remote_manifest_url)?;
 
-    let fs_manifest = PackManifest::load_from_fs(&current_dir()?, false)?;
+    let fs_manifest = PackManifest::gen_from_fs(&current_dir()?, false)?;
 
     let diff_after_patch = fs_manifest.determine_pack_diff(&remote_manifest)?;
 
