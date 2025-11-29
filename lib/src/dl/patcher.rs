@@ -5,9 +5,7 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use std::{fs, iter, mem};
-use ureq::{Body, BodyReader};
-use ureq::http::header::CONTENT_TYPE;
-use ureq::http::Response;
+use ureq::BodyReader;
 use url::Url;
 
 pub fn download_file(destination_path: &Path, url: Url) -> anyhow::Result<()> {
@@ -134,5 +132,3 @@ fn get_required_pbo_parts(
 
     Ok(responses)
 }
-
-

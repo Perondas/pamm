@@ -11,7 +11,7 @@ pub struct LaunchArgs {
     pub remote: Url,*/
 }
 
-pub fn launch_command(args: LaunchArgs) -> anyhow::Result<()> {
+pub fn launch_command(_args: LaunchArgs) -> anyhow::Result<()> {
     let local_config = PackConfig::read(&current_dir()?)?;
     let manifest = PackManifest::read(&current_dir()?)?;
 
