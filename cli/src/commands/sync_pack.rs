@@ -61,6 +61,8 @@ pub fn sync_pack_command(_: SyncPackArgs) -> anyhow::Result<()> {
 
     let fs_manifest = PackManifest::gen_from_fs(&current_dir()?, false)?;
 
+    fs_manifest.write_to_fs(&current_dir()?)?;
+
     let diff_after_patch = fs_manifest.determine_pack_diff(&remote_manifest)?;
 
     if diff_after_patch.has_changes() {
