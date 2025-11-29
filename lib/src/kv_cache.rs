@@ -41,10 +41,11 @@ impl KVCache {
         self.db.clear()?;
         Ok(())
     }
+}
 
-    pub fn flush(&self) -> Result<(), anyhow::Error> {
-        self.db.flush()?;
-        Ok(())
+impl Drop for KVCache {
+    fn drop(&mut self) {
+        let _ = self.db.flush();
     }
 }
 

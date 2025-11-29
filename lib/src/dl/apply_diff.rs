@@ -30,10 +30,10 @@ fn patch_dir(diffs: &[PartDiff], destination_path: &Path, url: &Url) -> anyhow::
         match modification {
             PartDiff::Created(part) => match part {
                 PackPart::Folder(f) => {
-                    create_folder(destination_path, f, url)?;
+                    dl_folder_recursively(destination_path, f, url)?;
                 }
                 PackPart::File(f) => {
-                    create_file(destination_path, f, url)?;
+                    dl_file(destination_path, f, url)?;
                 }
             },
             PartDiff::Deleted(path) => {
@@ -69,7 +69,7 @@ fn patch_dir(diffs: &[PartDiff], destination_path: &Path, url: &Url) -> anyhow::
     Ok(())
 }
 
-fn create_folder(path: &Path, folder: &Folder, url: &Url) -> anyhow::Result<()> {
+fn dl_folder_recursively(path: &Path, folder: &Folder, url: &Url) -> anyhow::Result<()> {
     let folder_path = path.join(&folder.name);
     let folder_url = url.join(&format!("{}/", &folder.name))?;
 
@@ -78,17 +78,17 @@ fn create_folder(path: &Path, folder: &Folder, url: &Url) -> anyhow::Result<()> 
     for child in folder.children.iter() {
         match child {
             PackPart::Folder(f) => {
-                create_folder(&folder_path, f, &folder_url)?;
+                dl_folder_recursively(&folder_path, f, &folder_url)?;
             }
             PackPart::File(f) => {
-                create_file(&folder_path, f, &folder_url)?;
+                dl_file(&folder_path, f, &folder_url)?;
             }
         }
     }
     Ok(())
 }
 
-fn create_file(path: &Path, file: &File, url: &Url) -> anyhow::Result<()> {
+fn dl_file(path: &Path, file: &File, url: &Url) -> anyhow::Result<()> {
     let file_path = path.join(file.get_name());
     let file_url = url.join(file.get_name())?;
     download_file(&file_path, file_url)?;

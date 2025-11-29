@@ -3,3 +3,4 @@ pub mod input;
 pub mod update_pack;
 pub mod init_remote;
 pub mod sync_pack;
+pub mod launch;

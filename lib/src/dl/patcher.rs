@@ -1,11 +1,13 @@
-use crate::dl::multipart::{ByteRangeResponse, IntoByteRangeResponse};
+use crate::dl::byte_range_response::{ByteRangeResponse, IntoByteRangeResponse};
 use crate::pack::part_diff::{GenericFileModification, PBOModification};
 use bi_fs_rs::pbo::handle::PBOHandle;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use std::{fs, iter, mem};
-use ureq::BodyReader;
+use ureq::{Body, BodyReader};
+use ureq::http::header::CONTENT_TYPE;
+use ureq::http::Response;
 use url::Url;
 
 pub fn download_file(destination_path: &Path, url: Url) -> anyhow::Result<()> {
@@ -132,3 +134,5 @@ fn get_required_pbo_parts(
 
     Ok(responses)
 }
+
+

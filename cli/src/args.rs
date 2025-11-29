@@ -1,6 +1,7 @@
 use crate::commands::init_remote::InitRemoteArgs;
 use crate::commands::update_pack::UpdatePackArgs;
 use clap::{Parser, Subcommand};
+use crate::commands::launch::LaunchArgs;
 use crate::commands::sync_pack::SyncPackArgs;
 
 /// Personal ARMA mod manager CLI
@@ -17,4 +18,5 @@ pub enum AppSubcommand {
     Update(UpdatePackArgs),
     InitRemote(InitRemoteArgs),
     Sync(SyncPackArgs),
+    Launch(LaunchArgs),
 }

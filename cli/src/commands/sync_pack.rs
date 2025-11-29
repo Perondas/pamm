@@ -1,7 +1,7 @@
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::consts::{CONFIG_FILE_NAME, MANIFEST_FILE_NAME};
-use pamm_lib::dl::downloader::apply_diff;
+use pamm_lib::dl::apply_diff::apply_diff;
 use pamm_lib::pack::pack_config::PackConfig;
 use pamm_lib::pack::pack_manifest::PackManifest;
 use std::env::current_dir;
@@ -20,7 +20,7 @@ pub fn sync_pack_command(_: SyncPackArgs) -> anyhow::Result<()> {
         return Err(anyhow::anyhow!("config file does not exist"));
     };
 
-    let local_manifest = PackManifest::load_from_fs(&current_dir()?, false)?;
+    let local_manifest = PackManifest::gen_from_fs(&current_dir()?, false)?;
 
     // TODO: add remote config sync
 
@@ -59,7 +59,7 @@ pub fn sync_pack_command(_: SyncPackArgs) -> anyhow::Result<()> {
 
     apply_diff(&current_dir()?, diff, &remote_manifest_url)?;
 
-    let fs_manifest = PackManifest::load_from_fs(&current_dir()?, false)?;
+    let fs_manifest = PackManifest::gen_from_fs(&current_dir()?, false)?;
 
     let diff_after_patch = fs_manifest.determine_pack_diff(&remote_manifest)?;
 

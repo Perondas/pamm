@@ -6,7 +6,7 @@ use url::Url;
 pub struct PackConfig {
     pub name: String,
     pub description: String,
-    pub client_params: String,
+    pub client_params: Vec<String>,
     pub servers: Vec<ServerInfo>,
     pub remote: Option<Url>,
 }

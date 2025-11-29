@@ -24,7 +24,7 @@ impl FromCliInput for PackConfig {
             .allow_empty(true)
             .interact_text()?;
 
-        let client_params = "-noSplash -skipIntro".to_owned();
+        let client_params = vec!["-noSplash".to_string(), "-skipIntro".to_string()];
         let servers = vec![ServerInfo::default()];
 
         Ok(PackConfig {

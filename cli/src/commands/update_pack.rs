@@ -1,10 +1,7 @@
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
-use pamm_lib::consts::MANIFEST_FILE_NAME;
 use pamm_lib::pack::pack_manifest::PackManifest;
-use pamm_lib::serialization::{from_reader, to_writer};
 use std::env::current_dir;
-use std::fs;
 
 #[derive(Debug, Args)]
 pub struct UpdatePackArgs {
@@ -14,18 +11,9 @@ pub struct UpdatePackArgs {
 }
 
 pub fn update_pack_command(args: UpdatePackArgs) -> anyhow::Result<()> {
-    let pack_file = current_dir()?.join(MANIFEST_FILE_NAME);
+    let stored_manifest = PackManifest::read_or_default(&current_dir()?)?;
 
-    let stored_manifest = if pack_file.exists() {
-        let mut file = fs::File::open(&pack_file)?;
-        from_reader(&mut file)?
-    } else {
-        println!("No pack found in the current directory.");
-        println!("Reinitializing a new pack manifest.");
-        PackManifest::default()
-    };
-
-    let fs_manifest = PackManifest::load_from_fs(&current_dir()?, args.force_refresh)?;
+    let fs_manifest = PackManifest::gen_from_fs(&current_dir()?, args.force_refresh)?;
 
     let diff = stored_manifest.determine_pack_diff(&fs_manifest)?;
 
@@ -47,8 +35,7 @@ pub fn update_pack_command(args: UpdatePackArgs) -> anyhow::Result<()> {
         return Ok(());
     }
 
-    let mut file = fs::File::create(&pack_file)?;
-    to_writer(&mut file, &fs_manifest)?;
+    fs_manifest.write_to_fs(&current_dir()?)?;
 
     Ok(())
 }
