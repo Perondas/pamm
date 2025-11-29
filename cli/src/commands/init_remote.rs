@@ -6,7 +6,7 @@ use url::Url;
 #[derive(Debug, Args)]
 pub struct InitRemoteArgs {
     /// Force refresh all addons, ignoring cached state
-    #[arg(short, long)]
+    #[arg()]
     pub remote: Url,
 }
 
