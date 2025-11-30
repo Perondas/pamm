@@ -1,9 +1,12 @@
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
-use pamm_lib::consts::{CONFIG_FILE_NAME, MANIFEST_FILE_NAME};
-use pamm_lib::dl::apply_diff::apply_diff;
-use pamm_lib::pack::pack_config::PackConfig;
-use pamm_lib::pack::pack_manifest::PackManifest;
+use pamm_lib::{
+    consts::{CONFIG_FILE_NAME, MANIFEST_FILE_NAME},
+    net::apply_diff::apply_diff,
+    net::downloadable::Downloadable,
+    pack::pack_config::PackConfig,
+    pack::pack_manifest::PackManifest,
+};
 use std::env::current_dir;
 use std::fs;
 
@@ -29,13 +32,7 @@ pub fn sync_pack_command(_: SyncPackArgs) -> anyhow::Result<()> {
         .expect("Remote not set in config")
         .join(MANIFEST_FILE_NAME)?;
 
-    let remote_manifest = bincode::serde::decode_from_std_read::<PackManifest, _, _>(
-        &mut ureq::get(remote_manifest_url.to_string())
-            .call()?
-            .body_mut()
-            .as_reader(),
-        bincode::config::standard(),
-    )?;
+    let remote_manifest = PackManifest::download(&remote_manifest_url)?;
 
     let diff = local_manifest.determine_pack_diff(&remote_manifest)?;
 

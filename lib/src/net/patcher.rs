@@ -1,4 +1,4 @@
-use crate::dl::byte_range_response::{ByteRangeResponse, IntoByteRangeResponse};
+use crate::net::byte_range_response::{ByteRangeResponse, IntoByteRangeResponse};
 use crate::pack::part_diff::{GenericFileModification, PBOModification};
 use bi_fs_rs::pbo::handle::PBOHandle;
 use std::fs::File;

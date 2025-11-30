@@ -1,5 +1,5 @@
 use crate::consts::{OPTIONAL_DIR_NAME, REQUIRED_DIR_NAME};
-use crate::dl::patcher::{download_file, patch_generic_file, patch_pbo_file};
+use crate::net::patcher::{download_file, patch_generic_file, patch_pbo_file};
 use crate::pack::pack_diff::PackDiff;
 use crate::pack::pack_part::folder::Folder;
 use crate::pack::pack_part::part::{File, PackPart};

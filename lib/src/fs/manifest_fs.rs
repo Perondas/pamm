@@ -1,12 +1,12 @@
-use crate::bin_serialization::{from_reader, to_writer};
 use crate::consts::{CACHE_DB_DIR_NAME, MANIFEST_FILE_NAME, OPTIONAL_DIR_NAME, REQUIRED_DIR_NAME};
 use crate::fs::part_reader::read_to_part;
 use crate::kv_cache::KVCache;
 use crate::pack::pack_manifest::PackManifest;
 use crate::pack::pack_part::part::PackPart;
 use sha1::{Digest, Sha1};
-use std::fs;
 use std::path::{Path, PathBuf};
+use crate::fs::fs_readable::FsReadable;
+use crate::fs::fs_writable::FsWritable;
 
 impl PackManifest {
     pub fn gen_from_fs(base_path: &Path, force_refresh: bool) -> anyhow::Result<Self> {
@@ -36,8 +36,7 @@ impl PackManifest {
     pub fn read(base_path: &Path) -> anyhow::Result<Self> {
         let path = base_path.join(MANIFEST_FILE_NAME);
         if path.exists() {
-            let mut file = fs::File::open(&path)?;
-            from_reader(&mut file)
+            PackManifest::read_from_path(&path)
         } else {
             anyhow::bail!("no manifest file found")
         }
@@ -46,8 +45,7 @@ impl PackManifest {
     pub fn read_or_default(base_path: &Path) -> anyhow::Result<Self> {
         let path = base_path.join(MANIFEST_FILE_NAME);
         let stored_manifest = if path.exists() {
-            let mut file = fs::File::open(&path)?;
-            from_reader(&mut file)?
+            PackManifest::read_from_path(&path)?
         } else {
             println!("No pack found in the current directory.");
             println!("Reinitializing a new pack manifest.");
@@ -59,8 +57,7 @@ impl PackManifest {
 
     pub fn write_to_fs(&self, base_path: &Path) -> anyhow::Result<()> {
         let path = base_path.join(MANIFEST_FILE_NAME);
-        let mut file = fs::File::create(&path)?;
-        to_writer(&mut file, self)?;
+        self.write_to_path(&path)?;
         Ok(())
     }
 

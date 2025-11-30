@@ -1,17 +1,14 @@
 use crate::consts::*;
 use crate::pack::pack_config::PackConfig;
 use crate::pack::pack_manifest::PackManifest;
-use crate::json_serialization::from_reader;
 use std::fs;
 use std::path::Path;
+use crate::fs::fs_readable::FsReadable;
 
 impl PackConfig {
     pub fn init_on_disk(&self, parent_dir: &Path) -> anyhow::Result<()> {
         if !parent_dir.is_dir() {
-            anyhow::bail!(
-                "{} is not a directory",
-                parent_dir.display()
-            );
+            anyhow::bail!("{} is not a directory", parent_dir.display());
         }
 
         let base_path = parent_dir.join(&self.name);
@@ -35,8 +32,7 @@ impl PackConfig {
     pub fn read(base_path: &Path) -> anyhow::Result<Self> {
         let path = base_path.join(CONFIG_FILE_NAME);
         if path.exists() {
-            let mut file = fs::File::open(&path)?;
-            from_reader(&mut file)
+            PackConfig::read_from_path(&path)
         } else {
             anyhow::bail!("no config file found")
         }
