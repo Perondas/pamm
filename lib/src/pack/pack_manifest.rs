@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::pack::pack_part::part::PackPart;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct PackManifest {

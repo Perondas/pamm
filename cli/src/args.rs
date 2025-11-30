@@ -1,8 +1,8 @@
 use crate::commands::init_remote::InitRemoteArgs;
-use crate::commands::update_pack::UpdatePackArgs;
-use clap::{Parser, Subcommand};
 use crate::commands::launch::LaunchArgs;
 use crate::commands::sync_pack::SyncPackArgs;
+use crate::commands::update_pack::UpdatePackArgs;
+use clap::{Parser, Subcommand};
 
 /// Personal ARMA mod manager CLI
 #[derive(Parser, Debug)]

@@ -1,9 +1,9 @@
 use crate::consts::*;
+use crate::fs::fs_readable::FsReadable;
 use crate::pack::pack_config::PackConfig;
 use crate::pack::pack_manifest::PackManifest;
 use std::fs;
 use std::path::Path;
-use crate::fs::fs_readable::FsReadable;
 
 impl PackConfig {
     pub fn init_on_disk(&self, parent_dir: &Path) -> anyhow::Result<()> {

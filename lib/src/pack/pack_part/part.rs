@@ -1,8 +1,4 @@
-use crate::pack::pack_part::{
-    folder::Folder,
-    generic_file::GenericFile,
-    pbo_file::PBOFile,
-};
+use crate::pack::pack_part::{folder::Folder, generic_file::GenericFile, pbo_file::PBOFile};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -25,11 +21,11 @@ impl PackPart {
             PackPart::File(file) => file.get_checksum().clone(),
         }
     }
-    
+
     pub fn get_name(&self) -> &str {
         match self {
             PackPart::Folder(folder) => &folder.name,
-            PackPart::File(file) =>file.get_name(),
+            PackPart::File(file) => file.get_name(),
         }
     }
 }

@@ -23,8 +23,7 @@ pub fn init_remote_command(args: InitRemoteArgs) -> anyhow::Result<()> {
         ..remote_config
     };
 
-
-    config.init_on_disk( &std::env::current_dir()?)?;
+    config.init_on_disk(&std::env::current_dir()?)?;
 
     println!("Successfully initialized remote pack: {:?}", config);
 
