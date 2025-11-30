@@ -1,5 +1,5 @@
-use serde::de::DeserializeOwned;
 use serde::Serialize;
+use serde::de::DeserializeOwned;
 
 pub(super) fn to_writer<E: Serialize, W: std::io::Write>(
     writer: &mut W,

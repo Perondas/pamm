@@ -1,11 +1,11 @@
 use crate::fs::file_cache::FileCache;
-use crate::kv_cache::{path_to_key, KVCache};
+use crate::kv_cache::{KVCache, path_to_key};
 use crate::pack::pack_part::folder::Folder;
 use crate::pack::pack_part::generic_file::GenericFile;
 use crate::pack::pack_part::part::File::{Generic, PBO};
 use crate::pack::pack_part::part::PackPart;
 use crate::pack::pack_part::pbo_file::PBOFile;
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use bi_fs_rs::pbo::handle::PBOHandle;
 use regex::Regex;
 use sha1::{Digest, Sha1};
