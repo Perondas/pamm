@@ -1,7 +1,9 @@
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 
-pub(super) fn to_writer<E: Serialize, W: std::io::Write>(
+// Binary serialization using bincode
+
+pub(in crate::serialization) fn to_writer<E: Serialize, W: std::io::Write>(
     writer: &mut W,
     content: &E,
 ) -> anyhow::Result<()> {
@@ -9,7 +11,7 @@ pub(super) fn to_writer<E: Serialize, W: std::io::Write>(
     Ok(())
 }
 
-pub(super) fn from_reader<D: DeserializeOwned, R: std::io::Read>(
+pub(in crate::serialization) fn from_reader<D: DeserializeOwned, R: std::io::Read>(
     reader: &mut R,
 ) -> anyhow::Result<D> {
     let res: Result<D, _> =

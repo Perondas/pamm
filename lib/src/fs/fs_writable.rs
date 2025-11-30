@@ -1,4 +1,4 @@
-use crate::serialization::serializable::Writable;
+use crate::serialization::writable::Writable;
 use std::path::Path;
 
 pub(crate) trait FsWritable: Sized {

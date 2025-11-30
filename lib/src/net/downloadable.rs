@@ -1,4 +1,4 @@
-use crate::serialization::serializable::Readable;
+use crate::serialization::readable::Readable;
 use url::Url;
 
 pub trait Downloadable: Sized {

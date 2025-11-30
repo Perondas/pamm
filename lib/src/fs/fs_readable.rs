@@ -1,4 +1,4 @@
-use crate::serialization::serializable::Readable;
+use crate::serialization::readable::Readable;
 use std::path::Path;
 
 pub(crate) trait FsReadable: Sized {
