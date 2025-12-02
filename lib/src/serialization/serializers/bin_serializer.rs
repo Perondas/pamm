@@ -1,3 +1,4 @@
+use anyhow::Context;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 
@@ -16,5 +17,5 @@ pub(in crate::serialization) fn from_reader<D: DeserializeOwned, R: std::io::Rea
 ) -> anyhow::Result<D> {
     let res: Result<D, _> =
         bincode::serde::decode_from_std_read(reader, bincode::config::standard());
-    Ok(res?)
+    res.context("Failed to deserialize binary data")
 }

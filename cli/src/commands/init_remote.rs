@@ -1,6 +1,7 @@
 use clap::Args;
-use pamm_lib::consts::CONFIG_FILE_NAME;
-use pamm_lib::pack::pack_config::PackConfig;
+use pamm_lib::fs::init_pack::init_pack_on_fs;
+use pamm_lib::net::downloadable::KnownDownloadable;
+use pamm_lib::pack::config::pack_config::PackConfig;
 use url::Url;
 
 #[derive(Debug, Args)]
@@ -11,19 +12,11 @@ pub struct InitRemoteArgs {
 }
 
 pub fn init_remote_command(args: InitRemoteArgs) -> anyhow::Result<()> {
-    let remote_config_url = args.remote.join(CONFIG_FILE_NAME)?;
+    let remote_config = PackConfig::download_known(&args.remote)?;
 
-    let remote_config = ureq::get(remote_config_url.to_string())
-        .call()?
-        .body_mut()
-        .read_json::<PackConfig>()?;
+    let config = remote_config.with_remote(args.remote);
 
-    let config = PackConfig {
-        remote: Some(args.remote),
-        ..remote_config
-    };
-
-    config.init_on_disk(&std::env::current_dir()?)?;
+    init_pack_on_fs(&config, &std::env::current_dir()?)?;
 
     println!("Successfully initialized remote pack: {:?}", config);
 

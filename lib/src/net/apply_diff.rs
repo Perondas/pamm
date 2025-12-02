@@ -1,9 +1,11 @@
-use crate::consts::{OPTIONAL_DIR_NAME, REQUIRED_DIR_NAME};
-use crate::net::patcher::{download_file, patch_generic_file, patch_pbo_file};
-use crate::pack::pack_diff::PackDiff;
-use crate::pack::pack_part::folder::Folder;
-use crate::pack::pack_part::part::{File, PackPart};
-use crate::pack::part_diff::{FileModification, PartDiff, PartModification};
+use crate::name_consts::{OPTIONAL_DIR_NAME, REQUIRED_DIR_NAME};
+use crate::net::patcher::{download_file, patch_pbo_file};
+use crate::pack::manifest::diff::entry_diff::{
+    EntryDiff, EntryModification, FileModification, ModifiedEntryKind,
+};
+use crate::pack::manifest::diff::pack_diff::PackDiff;
+use crate::pack::manifest::entries::manifest_entry::{EntryKind, ManifestEntry};
+use anyhow::Context;
 use std::fs;
 use std::path::Path;
 use url::Url;
@@ -25,19 +27,12 @@ pub fn apply_diff(pack_path: &Path, pack_diff: PackDiff, base_url: &Url) -> anyh
     Ok(())
 }
 
-fn patch_dir(diffs: &[PartDiff], destination_path: &Path, url: &Url) -> anyhow::Result<()> {
+fn patch_dir(diffs: &[EntryDiff], dir_path: &Path, url: &Url) -> anyhow::Result<()> {
     for modification in diffs {
         match modification {
-            PartDiff::Created(part) => match part {
-                PackPart::Folder(f) => {
-                    dl_folder_recursively(destination_path, f, url)?;
-                }
-                PackPart::File(f) => {
-                    dl_file(destination_path, f, url)?;
-                }
-            },
-            PartDiff::Deleted(path) => {
-                let full_path = destination_path.join(path);
+            EntryDiff::Created(entry) => create_entry(entry, dir_path, url)?,
+            EntryDiff::Deleted(path) => {
+                let full_path = dir_path.join(path);
                 if full_path.is_dir() {
                     // TODO: check that this is sensible
                     //fs::remove_dir_all(&full_path)?;
@@ -45,52 +40,70 @@ fn patch_dir(diffs: &[PartDiff], destination_path: &Path, url: &Url) -> anyhow::
                     fs::remove_file(&full_path)?;
                 }
             }
-            PartDiff::Modified(modification) => match modification {
-                PartModification::Folder(f) => {
-                    let new_path = destination_path.join(&f.name);
-                    let new_url = url.join(&format!("{}/", &f.name))?;
-                    patch_dir(&f.changes, &new_path, &new_url)?;
-                }
-                PartModification::File(f) => match f {
-                    FileModification::PBO(p) => {
-                        let file_path = destination_path.join(&p.name);
-                        let file_url = url.join(&p.name)?;
-                        patch_pbo_file(&file_path, file_url, p)?;
-                    }
-                    FileModification::GenericFile(g) => {
-                        let file_path = destination_path.join(&g.name);
-                        let file_url = url.join(&g.name)?;
-                        patch_generic_file(&file_path, file_url, g)?;
-                    }
-                },
-            },
+            EntryDiff::Modified(modification) => apply_modification(modification, dir_path, url)?,
         }
     }
+
     Ok(())
 }
 
-fn dl_folder_recursively(path: &Path, folder: &Folder, url: &Url) -> anyhow::Result<()> {
-    let folder_path = path.join(&folder.name);
-    let folder_url = url.join(&format!("{}/", &folder.name))?;
+fn create_entry(entry: &ManifestEntry, parent_path: &Path, parent_url: &Url) -> anyhow::Result<()> {
+    let url = join_url(parent_url, &entry.name)?;
+    let path = parent_path.join(&entry.name);
 
-    fs::create_dir_all(&folder_path)?;
-
-    for child in folder.children.iter() {
-        match child {
-            PackPart::Folder(f) => {
-                dl_folder_recursively(&folder_path, f, &folder_url)?;
-            }
-            PackPart::File(f) => {
-                dl_file(&folder_path, f, &folder_url)?;
+    match &entry.kind {
+        EntryKind::Folder(children) => {
+            fs::create_dir_all(&path).context("Failed to create folder")?;
+            for child in children {
+                create_entry(child, &path, &url)?;
             }
         }
+        EntryKind::File { .. } => {
+            download_file(&path, &url)?;
+        }
     }
+
     Ok(())
 }
 
-fn dl_file(path: &Path, file: &File, url: &Url) -> anyhow::Result<()> {
-    let file_path = path.join(file.get_name());
-    let file_url = url.join(file.get_name())?;
-    download_file(&file_path, file_url)?;
+fn apply_modification(
+    modification: &EntryModification,
+    parent_path: &Path,
+    parent_url: &Url,
+) -> anyhow::Result<()> {
+    let url = join_url(parent_url, &modification.name)?;
+    let path = parent_path.join(&modification.name);
+
+    match &modification.kind {
+        ModifiedEntryKind::Folder(children) => patch_dir(children, &path, &url)?,
+        ModifiedEntryKind::File { modification, .. } => {
+            match modification {
+                FileModification::PBO {
+                    new_order,
+                    required_checksums,
+                    new_length,
+                    blob_offset,
+                    ..
+                } => patch_pbo_file(
+                    &path,
+                    url,
+                    new_order,
+                    required_checksums,
+                    *new_length,
+                    *blob_offset,
+                )?,
+                // Just re-download the file for generic modifications
+                FileModification::Generic => download_file(&path, &url)?,
+            }
+        }
+    }
+
     Ok(())
+}
+
+fn join_url(base: &Url, segment: &str) -> anyhow::Result<Url> {
+    base.join(&format!("/{}", segment)).context(format!(
+        "Failed to create url by joining {} with {}",
+        base, segment
+    ))
 }

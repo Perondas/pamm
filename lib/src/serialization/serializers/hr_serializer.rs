@@ -1,3 +1,4 @@
+use anyhow::Context;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 
@@ -15,5 +16,5 @@ pub(in crate::serialization) fn from_reader<D: DeserializeOwned, R: std::io::Rea
     reader: &mut R,
 ) -> anyhow::Result<D> {
     let res: Result<D, _> = serde_json::from_reader(reader);
-    Ok(res?)
+    res.context("Failed to deserialize human-readable JSON data")
 }

@@ -1,6 +1,7 @@
 use clap::Args;
-use pamm_lib::pack::pack_config::PackConfig;
-use pamm_lib::pack::pack_manifest::PackManifest;
+use pamm_lib::fs::fs_readable::KnownFSReadable;
+use pamm_lib::pack::config::pack_config::PackConfig;
+use pamm_lib::pack::manifest::pack_manifest::PackManifest;
 use std::env::current_dir;
 use std::path::PathBuf;
 
@@ -12,8 +13,10 @@ pub struct LaunchArgs {
 }
 
 pub fn launch_command(_args: LaunchArgs) -> anyhow::Result<()> {
-    let local_config = PackConfig::read(&current_dir()?)?;
-    let manifest = PackManifest::read(&current_dir()?)?;
+    let local_config =
+        PackConfig::read_from_known(&current_dir()?)?.expect("Local pack config not found");
+    let manifest =
+        PackManifest::read_from_known(&current_dir()?)?.expect("Local pack manifest not found");
 
     let mut launch_url = String::from("steam://rungameid/107410// -nolauncher ");
 

@@ -1,10 +1,7 @@
-use crate::fs::file_cache::FileCache;
-use crate::kv_cache::{KVCache, path_to_key};
-use crate::pack::pack_part::folder::Folder;
-use crate::pack::pack_part::generic_file::GenericFile;
-use crate::pack::pack_part::part::File::{Generic, PBO};
-use crate::pack::pack_part::part::PackPart;
-use crate::pack::pack_part::pbo_file::PBOFile;
+use crate::fs::cache::file_cache_entry::FileCacheEntry;
+use crate::fs::cache::kv_cache::{KVCache, path_to_key};
+use crate::pack::manifest::entries::manifest_entry::FileKind::Generic;
+use crate::pack::manifest::entries::manifest_entry::{EntryKind, ManifestEntry};
 use anyhow::{Result, anyhow};
 use bi_fs_rs::pbo::handle::PBOHandle;
 use regex::Regex;
@@ -14,7 +11,7 @@ use std::sync::LazyLock;
 
 static PBO_NAME_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^(.+)\.pbo$").unwrap());
 
-pub fn read_to_part(path_buf: PathBuf, cache: &KVCache) -> Result<PackPart> {
+pub fn read_to_part(path_buf: PathBuf, cache: &KVCache) -> Result<ManifestEntry> {
     if path_buf.is_file() {
         read_file_to_part(path_buf, cache)
     } else if path_buf.is_dir() {
@@ -24,7 +21,7 @@ pub fn read_to_part(path_buf: PathBuf, cache: &KVCache) -> Result<PackPart> {
     }
 }
 
-fn read_dir_to_parts(fs_path: PathBuf, cache: &KVCache) -> Result<PackPart> {
+fn read_dir_to_parts(fs_path: PathBuf, cache: &KVCache) -> Result<ManifestEntry> {
     if !fs_path.is_dir() {
         anyhow::bail!("Path is not a directory: {:?}", fs_path);
     }
@@ -52,18 +49,18 @@ fn read_dir_to_parts(fs_path: PathBuf, cache: &KVCache) -> Result<PackPart> {
     let mut hasher = Sha1::new();
     sha1::Digest::update(&mut hasher, name.as_bytes());
     for part in &folder_parts {
-        sha1::Digest::update(&mut hasher, part.get_checksum());
+        sha1::Digest::update(&mut hasher, &part.checksum);
     }
     let checksum = hasher.finalize().to_vec();
 
-    Ok(PackPart::Folder(Folder {
+    Ok(ManifestEntry {
         name,
         checksum,
-        children: folder_parts,
-    }))
+        kind: EntryKind::Folder(folder_parts),
+    })
 }
 
-fn read_file_to_part(fs_path: PathBuf, cache: &KVCache) -> Result<PackPart> {
+fn read_file_to_part(fs_path: PathBuf, cache: &KVCache) -> Result<ManifestEntry> {
     let metadata = std::fs::metadata(&fs_path)?;
     let last_modified = metadata
         .modified()?
@@ -71,7 +68,7 @@ fn read_file_to_part(fs_path: PathBuf, cache: &KVCache) -> Result<PackPart> {
         .as_secs();
     let length = metadata.len();
 
-    let old_part: Option<FileCache> = cache.get(path_to_key(&fs_path)?)?;
+    let old_part: Option<FileCacheEntry> = cache.get(path_to_key(&fs_path)?)?;
 
     if let Some(old_part) = old_part
         && old_part.last_modified == last_modified
@@ -100,7 +97,7 @@ fn read_file_to_part(fs_path: PathBuf, cache: &KVCache) -> Result<PackPart> {
         read_generic_file_to_part(&fs_path)
     }?;
 
-    let file_cache = FileCache {
+    let file_cache = FileCacheEntry {
         last_modified,
         length,
         part: part.clone(),
@@ -111,7 +108,7 @@ fn read_file_to_part(fs_path: PathBuf, cache: &KVCache) -> Result<PackPart> {
     Ok(part)
 }
 
-fn read_pbo_to_part(fs_path: &PathBuf) -> Result<PackPart> {
+fn read_pbo_to_part(fs_path: &PathBuf) -> Result<ManifestEntry> {
     if !fs_path.is_file() {
         anyhow::bail!("Path is not a file: {:?}", fs_path);
     }
@@ -119,12 +116,11 @@ fn read_pbo_to_part(fs_path: &PathBuf) -> Result<PackPart> {
     let rel_path = fs_path.file_name().unwrap().to_str().unwrap().to_owned();
 
     let mut pbo_handle = PBOHandle::open_file(fs_path)?;
-    let file = PBOFile::from_handle(&mut pbo_handle, &rel_path)?;
 
-    Ok(PackPart::File(PBO(file)))
+    ManifestEntry::from_handle(&mut pbo_handle, &rel_path)
 }
 
-fn read_generic_file_to_part(fs_path: &PathBuf) -> Result<PackPart> {
+fn read_generic_file_to_part(fs_path: &PathBuf) -> Result<ManifestEntry> {
     if !fs_path.is_file() {
         anyhow::bail!("Path is not a file: {:?}", fs_path);
     }
@@ -147,10 +143,13 @@ fn read_generic_file_to_part(fs_path: &PathBuf) -> Result<PackPart> {
         })
         .unwrap_or(0);
 
-    Ok(PackPart::File(Generic(GenericFile {
+    Ok(ManifestEntry {
         name: file_name,
-        last_modified,
-        length,
         checksum,
-    })))
+        kind: EntryKind::File {
+            last_modified,
+            length,
+            kind: Generic,
+        },
+    })
 }

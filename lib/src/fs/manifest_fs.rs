@@ -1,10 +1,8 @@
-use crate::consts::{CACHE_DB_DIR_NAME, MANIFEST_FILE_NAME, OPTIONAL_DIR_NAME, REQUIRED_DIR_NAME};
-use crate::fs::fs_readable::FsReadable;
-use crate::fs::fs_writable::FsWritable;
+use crate::fs::cache::kv_cache::KVCache;
 use crate::fs::part_reader::read_to_part;
-use crate::kv_cache::KVCache;
-use crate::pack::pack_manifest::PackManifest;
-use crate::pack::pack_part::part::PackPart;
+use crate::name_consts::{CACHE_DB_DIR_NAME, OPTIONAL_DIR_NAME, REQUIRED_DIR_NAME};
+use crate::pack::manifest::entries::manifest_entry::ManifestEntry;
+use crate::pack::manifest::pack_manifest::PackManifest;
 use sha1::{Digest, Sha1};
 use std::path::{Path, PathBuf};
 
@@ -22,7 +20,7 @@ impl PackManifest {
 
         let mut hasher = Sha1::new();
         for addon in all_addons {
-            sha1::Digest::update(&mut hasher, addon.get_checksum());
+            sha1::Digest::update(&mut hasher, &addon.checksum);
         }
         let pack_checksum = hasher.finalize().to_vec();
 
@@ -33,40 +31,12 @@ impl PackManifest {
         })
     }
 
-    pub fn read(base_path: &Path) -> anyhow::Result<Self> {
-        let path = base_path.join(MANIFEST_FILE_NAME);
-        if path.exists() {
-            PackManifest::read_from_path(&path)
-        } else {
-            anyhow::bail!("no manifest file found")
-        }
-    }
-
-    pub fn read_or_default(base_path: &Path) -> anyhow::Result<Self> {
-        let path = base_path.join(MANIFEST_FILE_NAME);
-        let stored_manifest = if path.exists() {
-            PackManifest::read_from_path(&path)?
-        } else {
-            println!("No pack found in the current directory.");
-            println!("Reinitializing a new pack manifest.");
-            PackManifest::default()
-        };
-
-        Ok(stored_manifest)
-    }
-
-    pub fn write_to_fs(&self, base_path: &Path) -> anyhow::Result<()> {
-        let path = base_path.join(MANIFEST_FILE_NAME);
-        self.write_to_path(&path)?;
-        Ok(())
-    }
-
     pub fn get_required_addon_paths(&self, base_path: &Path) -> anyhow::Result<Vec<PathBuf>> {
         let required_dir = base_path.join(REQUIRED_DIR_NAME);
         let res = self
             .required_addons
             .iter()
-            .map(|part| required_dir.join(part.get_name()).canonicalize())
+            .map(|part| required_dir.join(&part.name).canonicalize())
             .collect::<Result<Vec<_>, _>>()?;
 
         Ok(res)
@@ -77,14 +47,14 @@ impl PackManifest {
         let res = self
             .optional_addons
             .iter()
-            .map(|part| optional_dir.join(part.get_name()).canonicalize())
+            .map(|part| optional_dir.join(&part.name).canonicalize())
             .collect::<Result<Vec<_>, _>>()?;
 
         Ok(res)
     }
 }
 
-fn read_addons_to_part(folder: PathBuf, cache: &KVCache) -> anyhow::Result<Vec<PackPart>> {
+fn read_addons_to_part(folder: PathBuf, cache: &KVCache) -> anyhow::Result<Vec<ManifestEntry>> {
     if !folder.is_dir() {
         anyhow::bail!("{} is not a directory", folder.display());
     }
@@ -103,7 +73,7 @@ fn read_addons_to_part(folder: PathBuf, cache: &KVCache) -> anyhow::Result<Vec<P
         }
     }
 
-    parts.sort_by(|a, b| a.get_name().cmp(b.get_name()));
+    parts.sort_by(|a, b| a.name.cmp(&b.name));
 
     Ok(parts)
 }

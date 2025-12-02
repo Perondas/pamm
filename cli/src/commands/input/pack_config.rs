@@ -1,8 +1,8 @@
 use crate::commands::input::from_cli_input::FromCliInput;
 use anyhow::Result;
 use dialoguer::theme::ColorfulTheme;
-use pamm_lib::pack::pack_config::PackConfig;
-use pamm_lib::pack::server_info::ServerInfo;
+use pamm_lib::pack::config::pack_config::PackConfig;
+use pamm_lib::pack::config::server_info::ServerInfo;
 use std::path::PathBuf;
 
 impl FromCliInput for PackConfig {
@@ -27,12 +27,6 @@ impl FromCliInput for PackConfig {
         let client_params = vec!["-noSplash".to_string(), "-skipIntro".to_string()];
         let servers = vec![ServerInfo::default()];
 
-        Ok(PackConfig {
-            name,
-            description,
-            client_params,
-            servers,
-            remote: None,
-        })
+        Ok(PackConfig::new(name, description, client_params, servers))
     }
 }

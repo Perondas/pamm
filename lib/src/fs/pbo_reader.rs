@@ -1,28 +1,10 @@
+use crate::pack::manifest::entries::manifest_entry::{EntryKind, FileKind, ManifestEntry, PBOPart};
 use anyhow::Result;
 use bi_fs_rs::pbo::handle::PBOHandle;
-use serde::{Deserialize, Serialize};
 use sha1::Digest;
 use std::io::{Read, Seek, SeekFrom};
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct PBOFile {
-    pub name: String,
-    pub last_modified: u64,
-    pub length: u64,
-    pub checksum: Vec<u8>,
-    pub blob_offset: u64,
-    pub parts: Vec<PBOPart>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct PBOPart {
-    pub name: String,
-    pub length: u32,
-    pub checksum: Vec<u8>,
-    pub start_offset: u64,
-}
-
-impl PBOFile {
+impl ManifestEntry {
     pub fn from_handle(handle: &mut PBOHandle, rel_path: &str) -> Result<Self> {
         let mut offset = 0;
         let mut parts = Vec::with_capacity(handle.files.len());
@@ -71,11 +53,15 @@ impl PBOFile {
 
         Ok(Self {
             name: rel_path.to_string(),
-            length: handle.length,
             checksum: pbo_checksum,
-            last_modified,
-            parts,
-            blob_offset: handle.blob_start,
+            kind: EntryKind::File {
+                last_modified,
+                length: handle.length,
+                kind: FileKind::Pbo {
+                    parts,
+                    blob_offset: handle.blob_start,
+                },
+            },
         })
     }
 }

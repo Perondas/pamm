@@ -1,6 +1,8 @@
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
-use pamm_lib::pack::pack_manifest::PackManifest;
+use pamm_lib::fs::fs_readable::KnownFSReadable;
+use pamm_lib::fs::fs_writable::KnownFSWritable;
+use pamm_lib::pack::manifest::pack_manifest::PackManifest;
 use std::env::current_dir;
 
 #[derive(Debug, Args)]
@@ -11,7 +13,7 @@ pub struct UpdatePackArgs {
 }
 
 pub fn update_pack_command(args: UpdatePackArgs) -> anyhow::Result<()> {
-    let stored_manifest = PackManifest::read_or_default(&current_dir()?)?;
+    let stored_manifest = PackManifest::read_from_known(current_dir()?)?.unwrap_or_default();
 
     let fs_manifest = PackManifest::gen_from_fs(&current_dir()?, args.force_refresh)?;
 
@@ -35,7 +37,7 @@ pub fn update_pack_command(args: UpdatePackArgs) -> anyhow::Result<()> {
         return Ok(());
     }
 
-    fs_manifest.write_to_fs(&current_dir()?)?;
+    fs_manifest.write_to_known(&current_dir()?)?;
 
     Ok(())
 }
