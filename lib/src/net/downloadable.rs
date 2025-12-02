@@ -9,8 +9,14 @@ pub trait Downloadable: Sized {
 
 impl<T: Readable> Downloadable for T {
     fn download(url: &Url) -> anyhow::Result<Self> {
-        Self::from_reader(&mut ureq::get(url.to_string()).call()?.body_mut().as_reader())
-            .context(format!("Failed to deserialize {}", url))
+        Self::from_reader(
+            &mut ureq::get(url.to_string())
+                .call()
+                .context(format!("Failed to download: {}", url))?
+                .body_mut()
+                .as_reader(),
+        )
+        .context(format!("Failed to deserialize {}", url))
     }
 }
 

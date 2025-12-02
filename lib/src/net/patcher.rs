@@ -1,5 +1,6 @@
 use crate::net::byte_range_response::{ByteRangeResponse, IntoByteRangeResponse};
 use crate::pack::manifest::entries::manifest_entry::PBOPart;
+use anyhow::Context;
 use bi_fs_rs::pbo::handle::PBOHandle;
 use std::fs::File;
 use std::io::Write;
@@ -9,7 +10,9 @@ use ureq::BodyReader;
 use url::Url;
 
 pub fn download_file(destination_path: &Path, url: &Url) -> anyhow::Result<()> {
-    let resp = ureq::get(&url.to_string()).call()?;
+    let resp = ureq::get(&url.to_string())
+        .call()
+        .context(format!("Failed to download: {}", url))?;
     let body = resp.into_body();
 
     let mut file = File::create(destination_path)?;
@@ -109,7 +112,8 @@ fn get_required_pbo_parts(
         .join(", ");
     let resp = request_builder
         .header("Range", format!("bytes={}", ranges_str))
-        .call()?;
+        .call()
+        .context(format!("Failed to fetch range for {}", url))?;
 
     let responses = resp.into_byte_range_response()?;
 

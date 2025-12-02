@@ -1,4 +1,4 @@
-use anyhow::anyhow;
+use anyhow::{Context, anyhow};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use std::path::Path;
@@ -21,7 +21,8 @@ impl KVCache {
         match self.db.get(key)? {
             Some(value) => bincode::serde::decode_from_slice(&value, bincode::config::standard())
                 .map(|(s, _)| Some(s))
-                .map_err(Into::into),
+                .map_err(Into::into)
+                .map_err(|e: anyhow::Error| e.context("Failed to decode cached value")),
             None => Ok(None),
         }
     }
