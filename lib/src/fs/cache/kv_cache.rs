@@ -1,4 +1,4 @@
-use anyhow::{Context, anyhow};
+use anyhow::anyhow;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use std::path::Path;
