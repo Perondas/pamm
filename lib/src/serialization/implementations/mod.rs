@@ -1,2 +1,3 @@
-pub mod config_serialization;
-pub mod manifest_serialization;
+pub mod hr_serialization;
+pub mod bin_serialization;
+pub mod macros;
