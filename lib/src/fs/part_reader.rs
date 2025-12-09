@@ -58,6 +58,12 @@ fn read_dir_to_parts(fs_path: PathBuf, cache: &KVCache) -> Result<ManifestEntry>
     }
     let checksum = hasher.finalize().to_vec();
 
+    println!(
+        "Read folder: {:?} with {} entries",
+        fs_path,
+        folder_parts.len()
+    );
+
     Ok(ManifestEntry {
         name,
         checksum,
