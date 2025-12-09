@@ -1,30 +1,32 @@
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::fs::fs_readable::KnownFSReadable;
-use pamm_lib::fs::fs_writable::KnownFSWritable;
+use pamm_lib::fs::fs_writable::NamedFSWritable;
+use pamm_lib::manifest::pack_manifest::PackManifest;
 use pamm_lib::net::apply_diff::apply_diff;
-use pamm_lib::net::downloadable::KnownDownloadable;
-use pamm_lib::pack::manifest::pack_manifest::PackManifest;
-use pamm_lib::repo::remote_config::RemoteConfig;
+use pamm_lib::net::downloadable::NamedDownloadable;
+use pamm_lib::repo::local_repo_config::LocalRepoConfig;
 use std::env::current_dir;
 
 #[derive(Debug, Args)]
-pub struct SyncPackArgs {}
+pub struct SyncPackArgs {
+    #[arg()]
+    pub name: String,
+    #[arg(short, long, default_value_t = false)]
+    pub force: bool,
+}
 
-pub fn sync_pack_command(_: SyncPackArgs) -> anyhow::Result<()> {
+pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
     let current_dir = current_dir()?;
 
-    // TODO: make refresh optional
-    let local_manifest = PackManifest::gen_from_fs(&current_dir, false)?;
-
-    // TODO: add remote config sync
-
-    let remote_config = RemoteConfig::read_from_known(&current_dir)?
+    let local_repo_config = LocalRepoConfig::read_from_known(&current_dir)?
         .expect("No remote config found in current directory");
 
-    let remote_url = remote_config.get_remote();
+    let local_manifest = PackManifest::gen_from_fs(&current_dir, &args.name, args.force)?;
 
-    let remote_manifest = PackManifest::download_known(remote_url)?;
+    let remote_url = local_repo_config.get_remote();
+
+    let remote_manifest = PackManifest::download_named(remote_url, &args.name)?;
 
     let diff = local_manifest.determine_pack_diff(&remote_manifest)?;
 
@@ -46,11 +48,11 @@ pub fn sync_pack_command(_: SyncPackArgs) -> anyhow::Result<()> {
         return Ok(());
     }
 
-    apply_diff(&current_dir, diff, remote_url)?;
+    apply_diff(&current_dir, &args.name, diff, remote_url)?;
 
-    let fs_manifest = PackManifest::gen_from_fs(&current_dir, false)?;
+    let fs_manifest = PackManifest::gen_from_fs(&current_dir, &args.name, false)?;
 
-    fs_manifest.write_to_known(&current_dir)?;
+    fs_manifest.write_to_named(&current_dir, &args.name)?;
 
     let diff_after_patch = fs_manifest.determine_pack_diff(&remote_manifest)?;
 

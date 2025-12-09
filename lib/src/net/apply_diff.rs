@@ -1,28 +1,26 @@
-use crate::name_consts::{OPTIONAL_DIR_NAME, REQUIRED_DIR_NAME};
-use crate::net::patcher::{download_file, patch_pbo_file};
-use crate::pack::manifest::diff::entry_diff::{
+use crate::manifest::diff::entry_diff::{
     EntryDiff, EntryModification, FileModification, ModifiedEntryKind,
 };
-use crate::pack::manifest::diff::pack_diff::PackDiff;
-use crate::pack::manifest::entries::manifest_entry::{EntryKind, ManifestEntry};
+use crate::manifest::diff::pack_diff::PackDiff;
+use crate::manifest::entries::manifest_entry::{EntryKind, ManifestEntry};
+use crate::name_consts::get_pack_addon_directory_name;
+use crate::net::patcher::{download_file, patch_pbo_file};
 use anyhow::Context;
 use std::fs;
 use std::path::Path;
 use url::Url;
 
-pub fn apply_diff(pack_path: &Path, pack_diff: PackDiff, base_url: &Url) -> anyhow::Result<()> {
-    let PackDiff {
-        required_changes,
-        optional_changes,
-    } = pack_diff;
-
-    let required_path = pack_path.join(REQUIRED_DIR_NAME);
-    let required_url = base_url.join(&format!("{REQUIRED_DIR_NAME}/"))?;
-    patch_dir(&required_changes, &required_path, &required_url)?;
-
-    let optional_path = pack_path.join(OPTIONAL_DIR_NAME);
-    let optional_url = base_url.join(&format!("{OPTIONAL_DIR_NAME}/"))?;
-    patch_dir(&optional_changes, &optional_path, &optional_url)?;
+pub fn apply_diff(
+    pack_path: &Path,
+    name: &str,
+    pack_diff: PackDiff,
+    base_url: &Url,
+) -> anyhow::Result<()> {
+    let PackDiff { changes } = pack_diff;
+    let addon_dir_name = get_pack_addon_directory_name(name);
+    let addons_path = pack_path.join(&addon_dir_name);
+    let addons_url = base_url.join(&format!("{addon_dir_name}/"))?;
+    patch_dir(&changes, &addons_path, &addons_url)?;
 
     Ok(())
 }
@@ -34,8 +32,7 @@ fn patch_dir(diffs: &[EntryDiff], dir_path: &Path, url: &Url) -> anyhow::Result<
             EntryDiff::Deleted(path) => {
                 let full_path = dir_path.join(path);
                 if full_path.is_dir() {
-                    // TODO: check that this is sensible
-                    //fs::remove_dir_all(&full_path)?;
+                    fs::remove_dir_all(&full_path)?;
                 } else if full_path.is_file() {
                     fs::remove_file(&full_path)?;
                 }

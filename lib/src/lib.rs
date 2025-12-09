@@ -1,7 +1,9 @@
 pub mod fs;
 pub mod known_name;
+pub mod manifest;
 pub mod name_consts;
+pub mod named;
 pub mod net;
 pub mod pack;
-pub mod serialization;
 pub mod repo;
+pub mod serialization;

@@ -1,5 +1,5 @@
+use crate::manifest::entries::manifest_entry::PBOPart;
 use crate::net::byte_range_response::{ByteRangeResponse, IntoByteRangeResponse};
-use crate::pack::manifest::entries::manifest_entry::PBOPart;
 use anyhow::Context;
 use bi_fs_rs::pbo::handle::PBOHandle;
 use std::fs::File;

@@ -1,5 +1,5 @@
-use crate::pack::manifest::entries::manifest_entry::ManifestEntry;
-use crate::pack::manifest::entries::manifest_entry::PBOPart;
+use crate::manifest::entries::manifest_entry::ManifestEntry;
+use crate::manifest::entries::manifest_entry::PBOPart;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug)]

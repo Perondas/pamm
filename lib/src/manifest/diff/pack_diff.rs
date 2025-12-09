@@ -1,29 +1,24 @@
-use crate::pack::manifest::diff::entry_diff::{
+use crate::manifest::diff::entry_diff::{
     EntryDiff, EntryModification, FileModification, ModifiedEntryKind,
 };
-use crate::pack::manifest::entries::manifest_entry::{EntryKind, ManifestEntry};
+use crate::manifest::entries::manifest_entry::{EntryKind, ManifestEntry};
 
 #[derive(Debug)]
 pub struct PackDiff {
-    pub required_changes: Vec<EntryDiff>,
-    pub optional_changes: Vec<EntryDiff>,
+    pub changes: Vec<EntryDiff>,
 }
 
 impl PackDiff {
     pub fn has_changes(&self) -> bool {
-        !self.required_changes.is_empty() || !self.optional_changes.is_empty()
+        !self.changes.is_empty()
     }
 
     pub fn to_pretty_string(&self) -> String {
         let mut result = String::new();
 
-        if !self.required_changes.is_empty() {
-            result.push_str("Required Changes:\n");
-            result.push_str(&diffs_to_string(&self.required_changes, ""));
-        }
-        if !self.optional_changes.is_empty() {
-            result.push_str("Optional Changes:\n");
-            result.push_str(&diffs_to_string(&self.optional_changes, ""));
+        if !self.changes.is_empty() {
+            result.push_str(" Changes:\n");
+            result.push_str(&diffs_to_string(&self.changes, ""));
         }
 
         result

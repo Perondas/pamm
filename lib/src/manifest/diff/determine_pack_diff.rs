@@ -1,19 +1,15 @@
-use crate::pack::manifest::diff::entry_diff::{
+use crate::manifest::diff::entry_diff::{
     EntryDiff, EntryModification, FileModification, ModifiedEntryKind,
 };
-use crate::pack::manifest::diff::pack_diff::PackDiff;
-use crate::pack::manifest::entries::manifest_entry::{EntryKind, FileKind, ManifestEntry, PBOPart};
-use crate::pack::manifest::pack_manifest::PackManifest;
+use crate::manifest::diff::pack_diff::PackDiff;
+use crate::manifest::entries::manifest_entry::{EntryKind, FileKind, ManifestEntry, PBOPart};
+use crate::manifest::pack_manifest::PackManifest;
 use std::collections::HashMap;
 
 impl PackManifest {
     pub fn determine_pack_diff(&self, other: &Self) -> anyhow::Result<PackDiff> {
-        let required_diff = diff_folders(&self.required_addons, &other.required_addons);
-        let optional_diff = diff_folders(&self.optional_addons, &other.optional_addons);
-
         Ok(PackDiff {
-            required_changes: required_diff?,
-            optional_changes: optional_diff?,
+            changes: diff_folders(&self.addons, &other.addons)?,
         })
     }
 }

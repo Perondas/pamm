@@ -1,7 +1,7 @@
 use crate::fs::cache::file_cache_entry::FileCacheEntry;
 use crate::fs::cache::kv_cache::{KVCache, path_to_key};
-use crate::pack::manifest::entries::manifest_entry::FileKind::Generic;
-use crate::pack::manifest::entries::manifest_entry::{EntryKind, ManifestEntry};
+use crate::manifest::entries::manifest_entry::FileKind::Generic;
+use crate::manifest::entries::manifest_entry::{EntryKind, ManifestEntry};
 use anyhow::{Result, anyhow};
 use bi_fs_rs::pbo::handle::PBOHandle;
 use regex::Regex;

@@ -1,3 +1,4 @@
+pub mod add_pack;
 pub mod init_pack;
 pub mod init_remote;
 pub mod input;

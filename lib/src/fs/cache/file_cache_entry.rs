@@ -1,4 +1,4 @@
-use crate::pack::manifest::entries::manifest_entry::ManifestEntry;
+use crate::manifest::entries::manifest_entry::ManifestEntry;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]

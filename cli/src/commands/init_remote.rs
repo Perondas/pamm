@@ -1,9 +1,5 @@
 use clap::Args;
-use pamm_lib::fs::fs_writable::KnownFSWritable;
-use pamm_lib::fs::init_pack::init_pack_on_fs;
-use pamm_lib::net::downloadable::KnownDownloadable;
-use pamm_lib::pack::config::pack_config::PackConfig;
-use pamm_lib::repo::remote_config::RemoteConfig;
+use pamm_lib::repo::repo_config::RepoConfig;
 use url::Url;
 
 #[derive(Debug, Args)]
@@ -16,15 +12,9 @@ pub struct InitRemoteArgs {
 pub fn init_remote_command(args: InitRemoteArgs) -> anyhow::Result<()> {
     let current_dir = std::env::current_dir()?;
 
-    let config = PackConfig::download_known(&args.remote)?;
+    let config = RepoConfig::init_from_remote(&current_dir, &args.remote)?;
 
-    init_pack_on_fs(&config, &current_dir)?;
-
-    println!("Successfully initialized remote pack: {:?}", config);
-
-    let remote_config = RemoteConfig::new(args.remote);
-
-    remote_config.write_to_known(&current_dir)?;
+    println!("{}", config.to_pretty_string());
 
     Ok(())
 }

@@ -1,7 +1,15 @@
-pub(crate) const REQUIRED_DIR_NAME: &str = "required_addons";
-pub(crate) const OPTIONAL_DIR_NAME: &str = "optional_addons";
-pub(crate) const PACK_CONFIG_FILE_NAME: &str = "pack_config.json";
-pub(crate) const REPO_CONFIG_FILE_NAME: &str = "repo_config.json";
-pub(crate) const REMOTE_FILE_NAME: &str = "remote_config.json";
-pub(crate) const MANIFEST_FILE_NAME: &str = "pack_manifest.pamm";
+pub(crate) const REPO_CONFIG_FILE_NAME: &str = "repo.config.json";
+pub(crate) const LOCAL_CONFIG_FILE_NAME: &str = "local.config.json";
 pub(crate) const CACHE_DB_DIR_NAME: &str = ".cache";
+
+pub(crate) fn get_pack_config_file_name(pack_name: &str) -> String {
+    format!("{}.pack.config.json", pack_name)
+}
+
+pub(crate) fn get_pack_manifest_file_name(pack_name: &str) -> String {
+    format!("{}.pack.manifest.pamm", pack_name)
+}
+
+pub(crate) fn get_pack_addon_directory_name(pack_name: &str) -> String {
+    format!("{}_pack_addons", pack_name)
+}

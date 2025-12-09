@@ -1,3 +1,4 @@
+use crate::commands::add_pack::AddPackArgs;
 use crate::commands::init_remote::InitRemoteArgs;
 use crate::commands::launch::LaunchArgs;
 use crate::commands::sync_pack::SyncPackArgs;
@@ -15,8 +16,9 @@ pub struct Args {
 #[derive(Debug, Subcommand)]
 pub enum AppSubcommand {
     Init,
-    Update(UpdatePackArgs),
     InitRemote(InitRemoteArgs),
+    AddPack(AddPackArgs),
+    Update(UpdatePackArgs),
     Sync(SyncPackArgs),
     Launch(LaunchArgs),
 }

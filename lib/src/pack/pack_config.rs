@@ -1,4 +1,4 @@
-use crate::pack::config::server_info::ServerInfo;
+use crate::pack::server_info::ServerInfo;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -7,6 +7,7 @@ pub struct PackConfig {
     pub description: String,
     pub client_params: Vec<String>,
     pub servers: Vec<ServerInfo>,
+    pub parent: Option<String>,
 }
 
 impl PackConfig {
@@ -15,12 +16,14 @@ impl PackConfig {
         description: String,
         client_params: Vec<String>,
         servers: Vec<ServerInfo>,
+        parent: Option<String>,
     ) -> Self {
-        PackConfig {
+        Self {
             name,
             description,
             client_params,
             servers,
+            parent: None,
         }
     }
 }

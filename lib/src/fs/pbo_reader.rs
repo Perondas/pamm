@@ -1,4 +1,4 @@
-use crate::pack::manifest::entries::manifest_entry::{EntryKind, FileKind, ManifestEntry, PBOPart};
+use crate::manifest::entries::manifest_entry::{EntryKind, FileKind, ManifestEntry, PBOPart};
 use anyhow::Result;
 use bi_fs_rs::pbo::handle::PBOHandle;
 use sha1::Digest;

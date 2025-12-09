@@ -1,57 +1,44 @@
 use crate::fs::cache::kv_cache::KVCache;
 use crate::fs::part_reader::read_to_part;
-use crate::name_consts::{CACHE_DB_DIR_NAME, OPTIONAL_DIR_NAME, REQUIRED_DIR_NAME};
-use crate::pack::manifest::entries::manifest_entry::ManifestEntry;
-use crate::pack::manifest::pack_manifest::PackManifest;
+use crate::manifest::entries::manifest_entry::ManifestEntry;
+use crate::manifest::pack_manifest::PackManifest;
+use crate::name_consts::{CACHE_DB_DIR_NAME, get_pack_addon_directory_name};
 use sha1::{Digest, Sha1};
 use std::path::{Path, PathBuf};
 
 impl PackManifest {
-    pub fn gen_from_fs(base_path: &Path, force_refresh: bool) -> anyhow::Result<Self> {
+    pub fn gen_from_fs(base_path: &Path, name: &str, force_refresh: bool) -> anyhow::Result<Self> {
         let cache = KVCache::new(base_path.join(CACHE_DB_DIR_NAME))?;
         if force_refresh {
             cache.remove_all()?;
         }
 
-        let required_addons = read_addons_to_part(base_path.join(REQUIRED_DIR_NAME), &cache)?;
-        let optional_addons = read_addons_to_part(base_path.join(OPTIONAL_DIR_NAME), &cache)?;
-
-        let all_addons = required_addons.iter().chain(optional_addons.iter());
+        let addons =
+            read_addons_to_part(base_path.join(get_pack_addon_directory_name(name)), &cache)?;
 
         let mut hasher = Sha1::new();
-        for addon in all_addons {
+        for addon in addons.iter() {
             sha1::Digest::update(&mut hasher, &addon.checksum);
         }
         let pack_checksum = hasher.finalize().to_vec();
 
         Ok(Self {
-            pack_checksum,
-            required_addons,
-            optional_addons,
+            name: name.to_string(),
+            repo_checksum: pack_checksum,
+            addons,
         })
     }
 
-    pub fn get_required_addon_paths(&self, base_path: &Path) -> anyhow::Result<Vec<PathBuf>> {
-        let required_dir = base_path.join(REQUIRED_DIR_NAME);
+    /*    pub fn get_addon_paths(&self, base_path: &Path) -> anyhow::Result<Vec<PathBuf>> {
+        let required_dir = base_path.join(ADDON_DIR_NAME);
         let res = self
-            .required_addons
+            .addons
             .iter()
             .map(|part| required_dir.join(&part.name).canonicalize())
             .collect::<Result<Vec<_>, _>>()?;
 
         Ok(res)
-    }
-
-    pub fn get_optional_addon_paths(&self, base_path: &Path) -> anyhow::Result<Vec<PathBuf>> {
-        let optional_dir = base_path.join(OPTIONAL_DIR_NAME);
-        let res = self
-            .optional_addons
-            .iter()
-            .map(|part| optional_dir.join(&part.name).canonicalize())
-            .collect::<Result<Vec<_>, _>>()?;
-
-        Ok(res)
-    }
+    }*/
 }
 
 fn read_addons_to_part(folder: PathBuf, cache: &KVCache) -> anyhow::Result<Vec<ManifestEntry>> {

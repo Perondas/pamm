@@ -1,5 +1,5 @@
 use crate::commands::input::from_cli_input::FromCliInput;
-use pamm_lib::pack::config::server_info::ServerInfo;
+use pamm_lib::pack::server_info::ServerInfo;
 
 impl FromCliInput for ServerInfo {
     fn from_cli_input() -> anyhow::Result<Self> {

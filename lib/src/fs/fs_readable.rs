@@ -1,4 +1,5 @@
 use crate::known_name::KnownName;
+use crate::named::Named;
 use crate::serialization::readable::Readable;
 use std::path::Path;
 
@@ -24,6 +25,17 @@ pub trait KnownFSReadable: FsReadable + KnownName {
 impl<T: FsReadable + KnownName> KnownFSReadable for T {
     fn read_from_known<P: AsRef<Path>>(path: P) -> anyhow::Result<Option<Self>> {
         let full_path = path.as_ref().join(Self::known_name());
+        Self::read_from_path(full_path)
+    }
+}
+
+pub trait NamedFSReadable: FsReadable + Named {
+    fn read_from_named<P: AsRef<Path>>(path: P, identifier: &str) -> anyhow::Result<Option<Self>>;
+}
+
+impl<T: FsReadable + Named> NamedFSReadable for T {
+    fn read_from_named<P: AsRef<Path>>(path: P, identifier: &str) -> anyhow::Result<Option<Self>> {
+        let full_path = path.as_ref().join(Self::get_name(identifier));
         Self::read_from_path(full_path)
     }
 }

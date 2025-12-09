@@ -1,7 +1,7 @@
 use clap::Args;
 use pamm_lib::fs::fs_readable::KnownFSReadable;
-use pamm_lib::pack::config::pack_config::PackConfig;
-use pamm_lib::pack::manifest::pack_manifest::PackManifest;
+use pamm_lib::manifest::pack_manifest::PackManifest;
+use pamm_lib::pack::pack_config::PackConfig;
 use std::env::current_dir;
 use std::path::PathBuf;
 
@@ -13,7 +13,8 @@ pub struct LaunchArgs {
 }
 
 pub fn launch_command(_args: LaunchArgs) -> anyhow::Result<()> {
-    let local_config =
+    todo!()
+    /*    let local_config =
         PackConfig::read_from_known(&current_dir()?)?.expect("Local pack config not found");
     let manifest =
         PackManifest::read_from_known(&current_dir()?)?.expect("Local pack manifest not found");
@@ -25,10 +26,7 @@ pub fn launch_command(_args: LaunchArgs) -> anyhow::Result<()> {
         launch_url.push(' ');
     }
 
-    let mods = manifest
-        .get_required_addon_paths(&current_dir()?)?
-        .into_iter()
-        .chain(manifest.get_optional_addon_paths(&current_dir()?)?);
+    let mods = manifest.get_addon_paths(&current_dir()?)?.into_iter();
 
     let mods_combined = mods.map(clean_path).collect::<Vec<_>>().join(";");
 
@@ -41,7 +39,7 @@ pub fn launch_command(_args: LaunchArgs) -> anyhow::Result<()> {
 
     open::that(launch_url)?;
 
-    Ok(())
+    Ok(())*/
 }
 
 #[cfg(target_os = "windows")]
