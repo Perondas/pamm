@@ -51,12 +51,16 @@ impl FromCliInputWithContext for PackConfig {
             }
         }
 
-        // We don't check for loops because we assume that users will never edit the pack config manually
-        let parent = dialoguer::Select::new()
-            .with_prompt("Select Parent Pack (if any)")
-            .items(&repo_config.packs)
-            .interact_opt()?
-            .map(|i| repo_config.packs[i].clone());
+        let mut parent = None;
+
+        if !repo_config.packs.is_empty() {
+            // We don't check for loops because we assume that users will never edit the pack config manually
+            parent = dialoguer::Select::new()
+                .with_prompt("Select Parent Pack (if any)")
+                .items(&repo_config.packs)
+                .interact_opt()?
+                .map(|i| repo_config.packs[i].clone());
+        }
 
         Ok(PackConfig::new(
             name,

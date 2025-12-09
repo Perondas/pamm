@@ -8,7 +8,7 @@ impl FromCliInput for ServerInfo {
                 .with_prompt("Server Name")
                 .interact_text()?,
             address: dialoguer::Input::new()
-                .with_prompt("Server Address (e.g., example.com:443)")
+                .with_prompt("Server Address (e.g., example.com)")
                 .interact_text()?,
             port: dialoguer::Input::new()
                 .with_prompt("Server Port")

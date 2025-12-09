@@ -7,7 +7,7 @@ use std::path::PathBuf;
 impl FromCliInput for RepoConfig {
     fn from_cli_input() -> Result<Self> {
         let name = dialoguer::Input::<String>::with_theme(&ColorfulTheme::default())
-            .with_prompt("Repo Name")
+            .with_prompt("Pack Name")
             .allow_empty(true)
             .validate_with(|input: &String| -> Result<(), &str> {
                 if PathBuf::from(input).exists() {
