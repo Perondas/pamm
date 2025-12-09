@@ -4,6 +4,8 @@ use crate::manifest::entries::manifest_entry::FileKind::Generic;
 use crate::manifest::entries::manifest_entry::{EntryKind, ManifestEntry};
 use anyhow::{Result, anyhow};
 use bi_fs_rs::pbo::handle::PBOHandle;
+use rayon::iter::ParallelIterator;
+use rayon::prelude::IntoParallelIterator;
 use regex::Regex;
 use sha1::{Digest, Sha1};
 use std::path::PathBuf;
@@ -28,8 +30,6 @@ fn read_dir_to_parts(fs_path: PathBuf, cache: &KVCache) -> Result<ManifestEntry>
 
     let name = fs_path.file_name().unwrap().to_str().unwrap().to_owned();
 
-    let mut folder_parts = Vec::new();
-
     let entries = std::fs::read_dir(&fs_path)?;
     let sorted_entries = {
         let mut entries: Vec<_> = entries.collect::<Result<_, _>>()?;
@@ -37,14 +37,19 @@ fn read_dir_to_parts(fs_path: PathBuf, cache: &KVCache) -> Result<ManifestEntry>
         entries
     };
 
-    for entry in sorted_entries {
-        let entry_path = entry.path();
-        if entry_path.is_file() {
-            folder_parts.push(read_file_to_part(entry_path, cache)?);
-        } else if entry_path.is_dir() {
-            folder_parts.push(read_dir_to_parts(entry_path, cache)?);
-        }
-    }
+    let folder_parts = sorted_entries
+        .into_par_iter()
+        .map(|entry| {
+            let entry_path = entry.path();
+            if entry_path.is_file() {
+                read_file_to_part(entry_path, cache)
+            } else if entry_path.is_dir() {
+                read_dir_to_parts(entry_path, cache)
+            } else {
+                unreachable!("Path is neither file nor directory: {:?}", entry_path);
+            }
+        })
+        .collect::<Result<Vec<ManifestEntry>>>()?;
 
     let mut hasher = Sha1::new();
     sha1::Digest::update(&mut hasher, name.as_bytes());
