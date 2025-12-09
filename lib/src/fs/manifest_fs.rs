@@ -3,6 +3,7 @@ use crate::fs::part_reader::read_to_part;
 use crate::manifest::entries::manifest_entry::ManifestEntry;
 use crate::manifest::pack_manifest::PackManifest;
 use crate::name_consts::{CACHE_DB_DIR_NAME, get_pack_addon_directory_name};
+use rayon::prelude::*;
 use sha1::{Digest, Sha1};
 use std::path::{Path, PathBuf};
 
@@ -46,19 +47,22 @@ fn read_addons_to_part(folder: PathBuf, cache: &KVCache) -> anyhow::Result<Vec<M
         anyhow::bail!("{} is not a directory", folder.display());
     }
 
-    let entries = std::fs::read_dir(folder)?;
-    let mut parts = vec![];
+    let entries: Vec<_> = std::fs::read_dir(folder)?
+        .filter_map(|entry| entry.ok())
+        .map(|entry| entry.path())
+        .collect();
 
-    for entry in entries {
-        let entry = entry?;
-        let path = entry.path();
-        if path.is_dir() {
-            let part = read_to_part(path, cache)?;
-            parts.push(part);
-        } else {
-            eprintln!("{} is not a directory", path.display());
-        }
-    }
+    let mut parts: Vec<ManifestEntry> = entries
+        .par_iter()
+        .filter_map(|path| {
+            if path.is_dir() {
+                Some(read_to_part(path.clone(), cache))
+            } else {
+                eprintln!("{} is not a directory", path.display());
+                None
+            }
+        })
+        .collect::<anyhow::Result<Vec<_>>>()?;
 
     parts.sort_by(|a, b| a.name.cmp(&b.name));
 
