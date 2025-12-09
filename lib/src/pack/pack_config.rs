@@ -23,7 +23,7 @@ impl PackConfig {
             description,
             client_params,
             servers,
-            parent: None,
+            parent,
         }
     }
 }
