@@ -6,6 +6,8 @@ use crate::manifest::entries::manifest_entry::{EntryKind, ManifestEntry};
 use crate::name_consts::get_pack_addon_directory_name;
 use crate::net::patcher::{download_file, patch_pbo_file};
 use anyhow::Context;
+use rayon::iter::ParallelIterator;
+use rayon::prelude::IntoParallelIterator;
 use std::fs;
 use std::path::Path;
 use url::Url;
@@ -26,26 +28,41 @@ pub fn apply_diff(
 }
 
 fn patch_dir(diffs: &[EntryDiff], dir_path: &Path, url: &Url) -> anyhow::Result<()> {
-    for modification in diffs {
-        match modification {
-            EntryDiff::Created(entry) => create_entry(entry, dir_path, url)?,
+    let res = diffs
+        .into_par_iter()
+        .map(|modification| match modification {
+            EntryDiff::Created(entry) => create_entry(entry, dir_path, url),
             EntryDiff::Deleted(path) => {
                 let full_path = dir_path.join(path);
                 if full_path.is_dir() {
-                    fs::remove_dir_all(&full_path)?;
+                    fs::remove_dir_all(&full_path).context("Failed to delete directory")
                 } else if full_path.is_file() {
-                    fs::remove_file(&full_path)?;
+                    fs::remove_file(&full_path).context("Failed to delete file")
+                } else {
+                    unreachable!(
+                        "Path to delete is neither file nor directory: {:?}",
+                        full_path
+                    );
                 }
             }
-            EntryDiff::Modified(modification) => apply_modification(modification, dir_path, url)?,
-        }
+            EntryDiff::Modified(modification) => apply_modification(modification, dir_path, url),
+        })
+        .filter_map(|res| res.err())
+        .collect::<Vec<_>>();
+
+    if !res.is_empty() {
+        let combined_error = res.into_iter().fold(
+            anyhow::anyhow!("One or more errors occurred while applying diff"),
+            |acc, err| acc.context(err),
+        );
+        return Err(combined_error);
     }
 
     Ok(())
 }
 
 fn create_entry(entry: &ManifestEntry, parent_path: &Path, parent_url: &Url) -> anyhow::Result<()> {
-    let url = join_url(parent_url, &entry.name)?;
+    let url = join_to_url(parent_url, &entry.name)?;
     let path = parent_path.join(&entry.name);
 
     match &entry.kind {
@@ -68,7 +85,7 @@ fn apply_modification(
     parent_path: &Path,
     parent_url: &Url,
 ) -> anyhow::Result<()> {
-    let url = join_url(parent_url, &modification.name)?;
+    let url = join_to_url(parent_url, &modification.name)?;
     let path = parent_path.join(&modification.name);
 
     match &modification.kind {
@@ -83,7 +100,7 @@ fn apply_modification(
                     ..
                 } => patch_pbo_file(
                     &path,
-                    url,
+                    &url,
                     new_order,
                     required_checksums,
                     *new_length,
@@ -98,8 +115,12 @@ fn apply_modification(
     Ok(())
 }
 
-fn join_url(base: &Url, segment: &str) -> anyhow::Result<Url> {
-    base.join(&format!("/{}", segment)).context(format!(
+fn join_to_url(base: &Url, segment: &str) -> anyhow::Result<Url> {
+    // Annoyingly the url crate does not have a method to join a path segment without
+    // interpreting it as a file name, so we add a trailing slash to force it to be treated
+    // as a directory segment.
+
+    base.join(&format!("{}/", segment)).context(format!(
         "Failed to create url by joining {} with {}",
         base, segment
     ))

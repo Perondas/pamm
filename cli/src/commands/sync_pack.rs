@@ -1,3 +1,4 @@
+use crate::utils::diff_to_string::ToPrettyString;
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::fs::fs_readable::KnownFSReadable;
@@ -35,7 +36,6 @@ pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
         return Ok(());
     }
 
-    println!("The following changes were detected:");
     println!("{}", diff.to_pretty_string());
 
     let outcome = dialoguer::Confirm::with_theme(&ColorfulTheme::default())

@@ -2,13 +2,13 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ManifestEntry {
-    pub(crate) name: String,
-    pub(crate) checksum: Vec<u8>,
-    pub(crate) kind: EntryKind,
+    pub name: String,
+    pub checksum: Vec<u8>,
+    pub kind: EntryKind,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub(crate) enum EntryKind {
+pub enum EntryKind {
     Folder(Vec<ManifestEntry>),
     File {
         last_modified: u64,
@@ -18,7 +18,7 @@ pub(crate) enum EntryKind {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub(crate) enum FileKind {
+pub enum FileKind {
     Pbo {
         blob_offset: u64,
         parts: Vec<PBOPart>,
@@ -29,8 +29,8 @@ pub(crate) enum FileKind {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PBOPart {
-    pub(crate) name: String,
-    pub(crate) length: u32,
-    pub(crate) checksum: Vec<u8>,
-    pub(crate) start_offset: u64,
+    pub name: String,
+    pub length: u32,
+    pub checksum: Vec<u8>,
+    pub start_offset: u64,
 }

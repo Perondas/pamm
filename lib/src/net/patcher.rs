@@ -10,9 +10,11 @@ use ureq::BodyReader;
 use url::Url;
 
 pub fn download_file(destination_path: &Path, url: &Url) -> anyhow::Result<()> {
-    let resp = ureq::get(&url.to_string())
-        .call()
-        .context(format!("Failed to download: {}", url))?;
+    let url = clean_url(url);
+
+    println!("Downloading {}", url);
+
+    let resp = ureq::get(url).call()?;
     let body = resp.into_body();
 
     let mut file = File::create(destination_path)?;
@@ -22,12 +24,14 @@ pub fn download_file(destination_path: &Path, url: &Url) -> anyhow::Result<()> {
 
 pub(crate) fn patch_pbo_file(
     existing_file: &Path,
-    url: Url,
+    url: &Url,
     new_order: &[PBOPart],
     required_checksums: &[Vec<u8>],
     new_length: u64,
     blob_offset: u64,
 ) -> anyhow::Result<()> {
+    let url = clean_url(url);
+
     let mut pbo_handle = PBOHandle::open_file(existing_file)?;
 
     let temp_file_path = existing_file.with_added_extension("pamm.temp");
@@ -35,7 +39,7 @@ pub(crate) fn patch_pbo_file(
     let mut temp_file = File::create(&temp_file_path)?;
 
     let mut parts =
-        get_required_pbo_parts(&url, new_order, required_checksums, new_length, blob_offset)?;
+        get_required_pbo_parts(url, new_order, required_checksums, new_length, blob_offset)?;
 
     let new_headers = parts
         .next()
@@ -79,14 +83,19 @@ pub(crate) fn patch_pbo_file(
     Ok(())
 }
 
+fn clean_url(url: &Url) -> &str {
+    // ureq does not like trailing slashes for file downloads
+    url.as_str().trim_end_matches('/')
+}
+
 fn get_required_pbo_parts(
-    url: &Url,
+    url: &str,
     new_order: &[PBOPart],
     required_checksums: &[Vec<u8>],
     new_length: u64,
     blob_offset: u64,
 ) -> anyhow::Result<ByteRangeResponse<BodyReader<'static>>> {
-    let request_builder = ureq::get(&url.to_string());
+    let request_builder = ureq::get(url);
 
     // We always get the entire header
     // TODO: can we only get part of it? Is that worth it?
