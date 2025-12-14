@@ -30,16 +30,18 @@ impl PackManifest {
         })
     }
 
-    /*    pub fn get_addon_paths(&self, base_path: &Path) -> anyhow::Result<Vec<PathBuf>> {
-        let required_dir = base_path.join(ADDON_DIR_NAME);
+    pub fn get_addon_paths(&self, base_path: &Path) -> anyhow::Result<Vec<PathBuf>> {
+        let addon_dir = base_path.join(get_pack_addon_directory_name(&self.name));
         let res = self
             .addons
             .iter()
-            .map(|part| required_dir.join(&part.name).canonicalize())
+            .map(|part| addon_dir.join(&part.name).canonicalize())
             .collect::<Result<Vec<_>, _>>()?;
 
+        println!("Loaded {} addons for pack {}.", res.len(), self.name);
+
         Ok(res)
-    }*/
+    }
 }
 
 fn read_addons_to_part(folder: PathBuf, cache: &KVCache) -> anyhow::Result<Vec<ManifestEntry>> {

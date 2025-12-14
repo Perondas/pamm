@@ -1,5 +1,6 @@
-use clap::Args;
-use pamm_lib::fs::fs_readable::KnownFSReadable;
+use anyhow::anyhow;
+use clap::{Args, arg};
+use pamm_lib::fs::fs_readable::NamedFSReadable;
 use pamm_lib::manifest::pack_manifest::PackManifest;
 use pamm_lib::pack::pack_config::PackConfig;
 use std::env::current_dir;
@@ -7,39 +8,61 @@ use std::path::PathBuf;
 
 #[derive(Debug, Args)]
 pub struct LaunchArgs {
-    /*/// Force refresh all addons, ignoring cached state
-    #[arg(short, long)]
-    pub remote: Url,*/
+    #[arg()]
+    pub name: String,
 }
 
-pub fn launch_command(_args: LaunchArgs) -> anyhow::Result<()> {
-    todo!()
-    /*    let local_config =
-        PackConfig::read_from_known(&current_dir()?)?.expect("Local pack config not found");
-    let manifest =
-        PackManifest::read_from_known(&current_dir()?)?.expect("Local pack manifest not found");
+pub fn launch_command(args: LaunchArgs) -> anyhow::Result<()> {
+    let current_dir = current_dir()?;
+
+    let pack_config = PackConfig::read_from_named(&current_dir, &args.name)?
+        .ok_or(anyhow!("Config for pack {} not found", args.name))?;
+    let addons = get_addon_paths(&args.name, &current_dir)?;
 
     let mut launch_url = String::from("steam://rungameid/107410// -nolauncher ");
 
-    for param in local_config.client_params {
+    for param in pack_config.client_params {
         launch_url.push_str(&param);
         launch_url.push(' ');
     }
 
-    let mods = manifest.get_addon_paths(&current_dir()?)?.into_iter();
+    let addons_combined = addons.collect::<Vec<_>>().join(";");
 
-    let mods_combined = mods.map(clean_path).collect::<Vec<_>>().join(";");
+    println!("Mods to load: {}", addons_combined);
 
-    println!("Mods to load: {}", mods_combined);
-
-    launch_url.push_str(&format!("-mod={}", urlencoding::encode(&mods_combined)));
+    launch_url.push_str(&format!("-mod={}", urlencoding::encode(&addons_combined)));
 
     println!("Launching Arma 3 with URL:");
     println!("{}", launch_url);
 
     open::that(launch_url)?;
 
-    Ok(())*/
+    Ok(())
+}
+
+fn get_addon_paths(
+    name: &str,
+    base_path: &PathBuf,
+) -> anyhow::Result<Box<dyn Iterator<Item = String>>> {
+    let local_manifest = PackManifest::read_from_named(base_path, name)?
+        .ok_or(anyhow!("Manifest for pack {} not found", name))?;
+    let pack_config = PackConfig::read_from_named(base_path, name)?
+        .ok_or(anyhow!("Config for pack {} not found", name))?;
+
+    let res = local_manifest
+        .get_addon_paths(base_path)?
+        .into_iter()
+        .map(clean_path);
+
+    println!("Loaded addons for pack {}:", name);
+
+    if let Some(parent_name) = pack_config.parent {
+        Ok(Box::new(
+            res.chain(get_addon_paths(&parent_name, base_path)?),
+        ))
+    } else {
+        Ok(Box::new(res.into_iter()))
+    }
 }
 
 #[cfg(target_os = "windows")]
