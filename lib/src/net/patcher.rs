@@ -32,6 +32,8 @@ pub(crate) fn patch_pbo_file(
 ) -> anyhow::Result<()> {
     let url = clean_url(url);
 
+    println!("Patching {}", url);
+
     let mut pbo_handle = PBOHandle::open_file(existing_file)?;
 
     let temp_file_path = existing_file.with_added_extension("pamm.temp");
