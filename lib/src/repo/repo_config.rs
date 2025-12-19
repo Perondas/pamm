@@ -1,9 +1,6 @@
-use crate::{hr_serializable, known_name};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
-hr_serializable!(RepoConfig);
-known_name!(RepoConfig, "repo.config.json");
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RepoConfig {
     pub name: String,

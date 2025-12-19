@@ -1,8 +1,8 @@
-use crate::fs::cache::kv_cache::KVCache;
-use crate::fs::part_reader::read_to_part;
+use crate::io::fs::cache::kv_cache::KVCache;
+use crate::io::fs::part_reader::read_to_part;
+use crate::io::name_consts::{CACHE_DB_DIR_NAME, get_pack_addon_directory_name};
 use crate::manifest::entries::manifest_entry::ManifestEntry;
 use crate::manifest::pack_manifest::PackManifest;
-use crate::name_consts::{CACHE_DB_DIR_NAME, get_pack_addon_directory_name};
 use rayon::prelude::*;
 use sha1::{Digest, Sha1};
 use std::path::{Path, PathBuf};

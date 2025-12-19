@@ -1,10 +1,10 @@
+use crate::io::name_consts::get_pack_addon_directory_name;
+use crate::io::net::patcher::{download_file, patch_pbo_file};
 use crate::manifest::diff::entry_diff::{
     EntryDiff, EntryModification, FileModification, ModifiedEntryKind,
 };
 use crate::manifest::diff::pack_diff::PackDiff;
 use crate::manifest::entries::manifest_entry::{EntryKind, ManifestEntry};
-use crate::name_consts::get_pack_addon_directory_name;
-use crate::net::patcher::{download_file, patch_pbo_file};
 use anyhow::Context;
 use rayon::iter::ParallelIterator;
 use rayon::prelude::IntoParallelIterator;

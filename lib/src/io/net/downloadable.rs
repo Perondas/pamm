@@ -1,6 +1,6 @@
-use crate::known_name::KnownName;
-use crate::named::Named;
-use crate::serialization::readable::Readable;
+use crate::io::known_file::KnownFile;
+use crate::io::named::NamedFile;
+use crate::io::serialization::readable::Readable;
 use anyhow::Context;
 use url::Url;
 
@@ -21,22 +21,22 @@ impl<T: Readable> Downloadable for T {
     }
 }
 
-pub trait KnownDownloadable: Downloadable + KnownName {
+pub trait KnownDownloadable: Downloadable + KnownFile {
     fn download_known(url: &Url) -> anyhow::Result<Self>;
 }
 
-impl<T: Downloadable + KnownName> KnownDownloadable for T {
+impl<T: Downloadable + KnownFile> KnownDownloadable for T {
     fn download_known(url: &Url) -> anyhow::Result<Self> {
-        let full_url = url.join(Self::known_name())?;
+        let full_url = url.join(Self::file_name())?;
         Self::download(&full_url)
     }
 }
 
-pub trait NamedDownloadable: Downloadable + Named {
+pub trait NamedDownloadable: Downloadable + NamedFile {
     fn download_named(url: &Url, identifier: &str) -> anyhow::Result<Self>;
 }
 
-impl<T: Downloadable + Named> NamedDownloadable for T {
+impl<T: Downloadable + NamedFile> NamedDownloadable for T {
     fn download_named(url: &Url, identifier: &str) -> anyhow::Result<Self> {
         let full_url = url.join(&Self::get_name(identifier))?;
         Self::download(&full_url)

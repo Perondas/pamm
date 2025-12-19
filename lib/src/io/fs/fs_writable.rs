@@ -1,6 +1,6 @@
-use crate::known_name::KnownName;
-use crate::named::Named;
-use crate::serialization::writable::Writable;
+use crate::io::known_file::KnownFile;
+use crate::io::named::NamedFile;
+use crate::io::serialization::writable::Writable;
 use std::path::Path;
 
 pub trait FsWritable: Sized {
@@ -14,22 +14,22 @@ impl<T: Writable> FsWritable for T {
     }
 }
 
-pub trait KnownFSWritable: FsWritable + KnownName {
+pub trait KnownFSWritable: FsWritable + KnownFile {
     fn write_to_known<P: AsRef<Path>>(&self, path: P) -> anyhow::Result<()>;
 }
 
-impl<T: FsWritable + KnownName> KnownFSWritable for T {
+impl<T: FsWritable + KnownFile> KnownFSWritable for T {
     fn write_to_known<P: AsRef<Path>>(&self, path: P) -> anyhow::Result<()> {
-        let full_path = path.as_ref().join(Self::known_name());
+        let full_path = path.as_ref().join(Self::file_name());
         self.write_to_path(full_path)
     }
 }
 
-pub trait NamedFSWritable: FsWritable + Named {
+pub trait NamedFSWritable: FsWritable + NamedFile {
     fn write_to_named<P: AsRef<Path>>(&self, path: P, identifier: &str) -> anyhow::Result<()>;
 }
 
-impl<T: FsWritable + Named> NamedFSWritable for T {
+impl<T: FsWritable + NamedFile> NamedFSWritable for T {
     fn write_to_named<P: AsRef<Path>>(&self, path: P, identifier: &str) -> anyhow::Result<()> {
         let full_path = path.as_ref().join(Self::get_name(identifier));
         self.write_to_path(full_path)

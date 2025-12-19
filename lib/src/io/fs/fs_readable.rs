@@ -1,6 +1,6 @@
-use crate::known_name::KnownName;
-use crate::named::Named;
-use crate::serialization::readable::Readable;
+use crate::io::known_file::KnownFile;
+use crate::io::named::NamedFile;
+use crate::io::serialization::readable::Readable;
 use std::path::Path;
 
 pub trait FsReadable: Sized {
@@ -18,22 +18,22 @@ impl<T: Readable> FsReadable for T {
     }
 }
 
-pub trait KnownFSReadable: FsReadable + KnownName {
+pub trait KnownFSReadable: FsReadable + KnownFile {
     fn read_from_known<P: AsRef<Path>>(path: P) -> anyhow::Result<Option<Self>>;
 }
 
-impl<T: FsReadable + KnownName> KnownFSReadable for T {
+impl<T: FsReadable + KnownFile> KnownFSReadable for T {
     fn read_from_known<P: AsRef<Path>>(path: P) -> anyhow::Result<Option<Self>> {
-        let full_path = path.as_ref().join(Self::known_name());
+        let full_path = path.as_ref().join(Self::file_name());
         Self::read_from_path(full_path)
     }
 }
 
-pub trait NamedFSReadable: FsReadable + Named {
+pub trait NamedFSReadable: FsReadable + NamedFile {
     fn read_from_named<P: AsRef<Path>>(path: P, identifier: &str) -> anyhow::Result<Option<Self>>;
 }
 
-impl<T: FsReadable + Named> NamedFSReadable for T {
+impl<T: FsReadable + NamedFile> NamedFSReadable for T {
     fn read_from_named<P: AsRef<Path>>(path: P, identifier: &str) -> anyhow::Result<Option<Self>> {
         let full_path = path.as_ref().join(Self::get_name(identifier));
         Self::read_from_path(full_path)

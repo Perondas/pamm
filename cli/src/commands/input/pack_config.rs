@@ -1,7 +1,7 @@
 use crate::commands::input::from_cli_input::{FromCliInput, FromCliInputWithContext};
 use anyhow::Result;
 use dialoguer::theme::ColorfulTheme;
-use pamm_lib::named::Named;
+use pamm_lib::io::named::NamedFile;
 use pamm_lib::pack::pack_config::PackConfig;
 use pamm_lib::pack::server_info::ServerInfo;
 use pamm_lib::repo::repo_config::RepoConfig;

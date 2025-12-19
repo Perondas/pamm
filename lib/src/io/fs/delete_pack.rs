@@ -1,6 +1,6 @@
+use crate::io::name_consts::get_pack_addon_directory_name;
+use crate::io::named::NamedFile;
 use crate::manifest::pack_manifest::PackManifest;
-use crate::name_consts::get_pack_addon_directory_name;
-use crate::named::Named;
 use crate::pack::pack_config::PackConfig;
 use anyhow::{Context, Result, anyhow};
 use std::path::Path;
