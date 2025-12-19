@@ -8,7 +8,7 @@ use pamm_lib::repo::repo_config::RepoConfig;
 #[derive(Debug, Args)]
 pub struct AddPackArgs {}
 
-pub fn add_pack_command(args: AddPackArgs) -> anyhow::Result<()> {
+pub fn add_pack_command(_args: AddPackArgs) -> anyhow::Result<()> {
     let current_dir = std::env::current_dir()?;
 
     let mut repo_config = RepoConfig::read_from_known(&current_dir)?.expect("Missing repo config");
