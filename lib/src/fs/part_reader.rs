@@ -1,5 +1,5 @@
 use crate::fs::cache::file_cache_entry::FileCacheEntry;
-use crate::fs::cache::kv_cache::{KVCache, path_to_key};
+use crate::fs::cache::kv_cache::KVCache;
 use crate::manifest::entries::manifest_entry::FileKind::Generic;
 use crate::manifest::entries::manifest_entry::{EntryKind, ManifestEntry};
 use anyhow::{Result, anyhow};
@@ -8,7 +8,7 @@ use rayon::iter::ParallelIterator;
 use rayon::prelude::IntoParallelIterator;
 use regex::Regex;
 use sha1::{Digest, Sha1};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 
 static PBO_NAME_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^(.+)\.pbo$").unwrap());
@@ -163,4 +163,12 @@ fn read_generic_file_to_part(fs_path: &PathBuf) -> Result<ManifestEntry> {
             kind: Generic,
         },
     })
+}
+
+pub fn path_to_key(path: &Path) -> anyhow::Result<String> {
+    Ok(path
+        .canonicalize()?
+        .to_str()
+        .ok_or(anyhow!("invalid path: {:?}", path))?
+        .to_owned())
 }

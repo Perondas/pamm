@@ -49,11 +49,3 @@ impl Drop for KVCache {
         let _ = self.db.flush();
     }
 }
-
-pub fn path_to_key(path: &Path) -> anyhow::Result<String> {
-    Ok(path
-        .canonicalize()?
-        .to_str()
-        .ok_or(anyhow!("invalid path: {:?}", path))?
-        .to_owned())
-}
