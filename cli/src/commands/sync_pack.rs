@@ -1,13 +1,16 @@
 use crate::utils::diff_to_string::ToPrettyString;
+use anyhow::anyhow;
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::fs::fs_readable::KnownFSReadable;
 use pamm_lib::fs::fs_writable::NamedFSWritable;
 use pamm_lib::manifest::pack_manifest::PackManifest;
 use pamm_lib::net::apply_diff::apply_diff;
-use pamm_lib::net::downloadable::NamedDownloadable;
+use pamm_lib::net::downloadable::{KnownDownloadable, NamedDownloadable};
 use pamm_lib::repo::local_repo_config::LocalRepoConfig;
+use pamm_lib::repo::repo_config::RepoConfig;
 use std::env::current_dir;
+use std::path::Path;
 
 #[derive(Debug, Args)]
 pub struct SyncPackArgs {
@@ -24,6 +27,8 @@ pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
         .expect("No remote config found in current directory");
 
     let local_manifest = PackManifest::gen_from_fs(&current_dir, &args.name, args.force)?;
+
+    sync_config(&current_dir, &local_repo_config)?;
 
     let remote_url = local_repo_config.get_remote();
 
@@ -65,4 +70,15 @@ pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
     println!("Pack synchronized successfully.");
 
     Ok(())
+}
+
+fn sync_config(current_dir: &Path, local_repo_config: &LocalRepoConfig) -> anyhow::Result<()> {
+    let remote_url = local_repo_config.get_remote();
+
+    let remote_repo_config = RepoConfig::download_known(remote_url)?;
+
+    let local_repo_config =
+        RepoConfig::read_from_known(current_dir)?.ok_or(anyhow!("Local repo config not found"))?;
+
+    todo!()
 }
