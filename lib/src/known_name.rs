@@ -1,13 +1,13 @@
 use crate::known_name_macro;
-use crate::name_consts::{LOCAL_CONFIG_FILE_NAME, REPO_CONFIG_FILE_NAME};
-use crate::repo::local_repo_config::LocalRepoConfig;
+use crate::name_consts::{REPO_CONFIG_FILE_NAME, REPO_USER_SETTINGS_FILE_NAME};
 use crate::repo::repo_config::RepoConfig;
+use crate::repo::repo_user_settings::RepoUserSettings;
 
 pub trait KnownName {
     fn known_name() -> &'static str;
 }
 
-known_name_macro!(LocalRepoConfig, LOCAL_CONFIG_FILE_NAME);
+known_name_macro!(RepoUserSettings, REPO_USER_SETTINGS_FILE_NAME);
 known_name_macro!(RepoConfig, REPO_CONFIG_FILE_NAME);
 
 #[macro_export]

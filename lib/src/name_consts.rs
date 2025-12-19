@@ -1,5 +1,5 @@
 pub(crate) const REPO_CONFIG_FILE_NAME: &str = "repo.config.json";
-pub(crate) const LOCAL_CONFIG_FILE_NAME: &str = "local.config.json";
+pub(crate) const REPO_USER_SETTINGS_FILE_NAME: &str = "user.repo.settings.json";
 pub(crate) const CACHE_DB_DIR_NAME: &str = ".cache";
 
 pub(crate) fn get_pack_config_file_name(pack_name: &str) -> String {
