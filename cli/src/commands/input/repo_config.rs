@@ -2,6 +2,7 @@ use crate::commands::input::from_cli_input::FromCliInput;
 use anyhow::Result;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::repo::repo_config::RepoConfig;
+use std::collections::HashSet;
 use std::path::PathBuf;
 
 impl FromCliInput for RepoConfig {
@@ -23,6 +24,6 @@ impl FromCliInput for RepoConfig {
             .allow_empty(true)
             .interact_text()?;
 
-        Ok(RepoConfig::new(name, description, vec![]))
+        Ok(RepoConfig::new(name, description, HashSet::new()))
     }
 }

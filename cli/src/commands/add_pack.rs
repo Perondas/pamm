@@ -15,7 +15,7 @@ pub fn add_pack_command(args: AddPackArgs) -> anyhow::Result<()> {
 
     let pack_config = PackConfig::from_cli_input(&repo_config)?;
 
-    repo_config.packs.push(pack_config.name.clone());
+    repo_config.packs.insert(pack_config.name.clone());
 
     repo_config.write_to_known(&current_dir)?;
 

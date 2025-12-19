@@ -53,13 +53,15 @@ impl FromCliInputWithContext for PackConfig {
 
         let mut parent = None;
 
+        let pack_vec: Vec<String> = repo_config.packs.iter().cloned().collect();
+
         if !repo_config.packs.is_empty() {
             // We don't check for loops because we assume that users will never edit the pack config manually
             parent = dialoguer::Select::new()
                 .with_prompt("Select Parent Pack (if any)")
-                .items(&repo_config.packs)
+                .items(&pack_vec)
                 .interact_opt()?
-                .map(|i| repo_config.packs[i].clone());
+                .map(|i| pack_vec[i].clone());
         }
 
         Ok(PackConfig::new(

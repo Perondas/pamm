@@ -1,15 +1,16 @@
 use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RepoConfig {
     pub name: String,
     pub description: String,
     /// Store the names of packs available in this repo
-    pub packs: Vec<String>,
+    pub packs: HashSet<String>,
 }
 
 impl RepoConfig {
-    pub fn new(name: String, description: String, packs: Vec<String>) -> Self {
+    pub fn new(name: String, description: String, packs: HashSet<String>) -> Self {
         RepoConfig {
             name,
             description,
