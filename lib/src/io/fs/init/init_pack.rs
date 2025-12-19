@@ -1,6 +1,6 @@
-use crate::fs::fs_writable::NamedFSWritable;
+use crate::io::fs::fs_writable::NamedFSWritable;
+use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::manifest::pack_manifest::PackManifest;
-use crate::name_consts::get_pack_addon_directory_name;
 use crate::pack::pack_config::PackConfig;
 use std::fs;
 use std::path::Path;

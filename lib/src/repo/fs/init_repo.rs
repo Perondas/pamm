@@ -1,5 +1,5 @@
-use crate::fs::fs_writable::KnownFSWritable;
-use crate::net::downloadable::{KnownDownloadable, NamedDownloadable};
+use crate::io::fs::fs_writable::KnownFSWritable;
+use crate::io::net::downloadable::{KnownDownloadable, NamedDownloadable};
 use crate::pack::pack_config::PackConfig;
 use crate::repo::repo_config::RepoConfig;
 use crate::repo::repo_user_settings::RepoUserSettings;

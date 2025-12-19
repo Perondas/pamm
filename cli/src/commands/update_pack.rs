@@ -1,8 +1,8 @@
 use crate::utils::diff_to_string::ToPrettyString;
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
-use pamm_lib::fs::fs_readable::NamedFSReadable;
-use pamm_lib::fs::fs_writable::NamedFSWritable;
+use pamm_lib::io::fs::fs_readable::NamedFSReadable;
+use pamm_lib::io::fs::fs_writable::NamedFSWritable;
 use pamm_lib::manifest::pack_manifest::PackManifest;
 use std::env::current_dir;
 

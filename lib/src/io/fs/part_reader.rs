@@ -1,5 +1,5 @@
-use crate::fs::cache::file_cache_entry::FileCacheEntry;
-use crate::fs::cache::kv_cache::KVCache;
+use crate::io::fs::cache::file_cache_entry::FileCacheEntry;
+use crate::io::fs::cache::kv_cache::KVCache;
 use crate::manifest::entries::manifest_entry::FileKind::Generic;
 use crate::manifest::entries::manifest_entry::{EntryKind, ManifestEntry};
 use anyhow::{Result, anyhow};

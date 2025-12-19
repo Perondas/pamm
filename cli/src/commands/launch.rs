@@ -1,6 +1,6 @@
 use anyhow::anyhow;
 use clap::{Args, arg};
-use pamm_lib::fs::fs_readable::NamedFSReadable;
+use pamm_lib::io::fs::fs_readable::NamedFSReadable;
 use pamm_lib::manifest::pack_manifest::PackManifest;
 use pamm_lib::pack::pack_config::PackConfig;
 use std::env::current_dir;
