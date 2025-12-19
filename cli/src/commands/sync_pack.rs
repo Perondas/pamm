@@ -9,8 +9,8 @@ use pamm_lib::manifest::pack_manifest::PackManifest;
 use pamm_lib::net::apply_diff::apply_diff;
 use pamm_lib::net::downloadable::{KnownDownloadable, NamedDownloadable};
 use pamm_lib::pack::pack_config::PackConfig;
-use pamm_lib::repo::local_repo_config::LocalRepoConfig;
 use pamm_lib::repo::repo_config::RepoConfig;
+use pamm_lib::repo::repo_user_settings::RepoUserSettings;
 use std::env::current_dir;
 use std::path::Path;
 
@@ -25,10 +25,10 @@ pub struct SyncPackArgs {
 pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
     let current_dir = current_dir()?;
 
-    let local_repo_config = LocalRepoConfig::read_from_known(&current_dir)?
+    let repo_user_settings = RepoUserSettings::read_from_known(&current_dir)?
         .expect("No remote config found in current directory");
 
-    let repo_config = sync_config(&current_dir, &local_repo_config)?;
+    let repo_config = sync_config(&current_dir, &repo_user_settings)?;
 
     if !repo_config.packs.contains(&args.name) {
         return Err(anyhow::anyhow!(
@@ -39,7 +39,7 @@ pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
 
     let local_manifest = PackManifest::gen_from_fs(&current_dir, &args.name, args.force)?;
 
-    let remote_url = local_repo_config.get_remote();
+    let remote_url = repo_user_settings.get_remote();
 
     let remote_manifest = PackManifest::download_named(remote_url, &args.name)?;
 
@@ -83,9 +83,9 @@ pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
 
 fn sync_config(
     current_dir: &Path,
-    local_repo_config: &LocalRepoConfig,
+    repo_user_settings: &RepoUserSettings,
 ) -> anyhow::Result<RepoConfig> {
-    let remote_url = local_repo_config.get_remote();
+    let remote_url = repo_user_settings.get_remote();
 
     let remote_repo_config = RepoConfig::download_known(remote_url)?;
 

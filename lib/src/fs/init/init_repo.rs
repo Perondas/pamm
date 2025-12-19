@@ -1,8 +1,8 @@
 use crate::fs::fs_writable::KnownFSWritable;
 use crate::net::downloadable::{KnownDownloadable, NamedDownloadable};
 use crate::pack::pack_config::PackConfig;
-use crate::repo::local_repo_config::LocalRepoConfig;
 use crate::repo::repo_config::RepoConfig;
+use crate::repo::repo_user_settings::RepoUserSettings;
 use anyhow::Context;
 use std::fs;
 use std::path::Path;
@@ -41,8 +41,8 @@ impl RepoConfig {
         fs::create_dir(&base_path)?;
         repo.write_to_known(&base_path)?;
 
-        let local_config = LocalRepoConfig::new(remote_url.clone());
-        local_config.write_to_known(&base_path)?;
+        let repo_user_settings = RepoUserSettings::new(remote_url.clone());
+        repo_user_settings.write_to_known(&base_path)?;
 
         for pack in &repo.packs {
             let pack_config = PackConfig::download_named(remote_url, pack)

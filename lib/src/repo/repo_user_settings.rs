@@ -1,16 +1,15 @@
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-// TODO: rename to something better
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct LocalRepoConfig {
+pub struct RepoUserSettings {
     pub(crate) remote: Url,
     // TODO: Add authentication
 }
 
-impl LocalRepoConfig {
+impl RepoUserSettings {
     pub fn new(remote: Url) -> Self {
-        LocalRepoConfig { remote }
+        RepoUserSettings { remote }
     }
 
     pub fn get_remote(&self) -> &Url {
