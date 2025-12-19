@@ -1,4 +1,4 @@
-use crate::fs::fs_writable::{KnownFSWritable, NamedFSWritable};
+use crate::fs::fs_writable::KnownFSWritable;
 use crate::net::downloadable::{KnownDownloadable, NamedDownloadable};
 use crate::pack::pack_config::PackConfig;
 use crate::repo::local_repo_config::LocalRepoConfig;

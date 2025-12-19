@@ -1,4 +1,5 @@
 pub mod cache;
+pub mod delete_pack;
 pub mod fs_readable;
 pub mod fs_writable;
 pub mod init;

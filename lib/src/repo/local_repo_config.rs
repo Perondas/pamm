@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use url::Url;
 
+// TODO: rename to something better
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct LocalRepoConfig {
     pub(crate) remote: Url,
