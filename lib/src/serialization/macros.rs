@@ -4,7 +4,7 @@ macro_rules! hr_serializable {
         impl $crate::serialization::readable::Readable for $ty {
             fn from_reader<R: std::io::Read>(reader: &mut R) -> anyhow::Result<Self> {
                 let res = $crate::serialization::serializers::hr_serializer::from_reader(reader);
-                <anyhow::Result<Self>>::context(
+                <anyhow::Result<Self> as anyhow::Context<_, _>>::context(
                     res,
                     format!("Failed to deserialize {}", stringify!($ty)),
                 )
@@ -15,7 +15,7 @@ macro_rules! hr_serializable {
             fn to_writer<W: std::io::Write>(&self, writer: &mut W) -> anyhow::Result<()> {
                 let res =
                     $crate::serialization::serializers::hr_serializer::to_writer(writer, self);
-                <anyhow::Result<()>>::context(
+                <anyhow::Result<()> as anyhow::Context<_, _>>::context(
                     res,
                     format!("Failed to serialize {}", stringify!($ty)),
                 )
@@ -30,7 +30,7 @@ macro_rules! bin_serializable {
         impl $crate::serialization::readable::Readable for $ty {
             fn from_reader<R: std::io::Read>(reader: &mut R) -> anyhow::Result<Self> {
                 let res = $crate::serialization::serializers::bin_serializer::from_reader(reader);
-                <anyhow::Result<Self>>::context(
+                <anyhow::Result<Self> as anyhow::Context<_, _>>::context(
                     res,
                     format!("Failed to deserialize {}", stringify!($ty)),
                 )
@@ -41,7 +41,7 @@ macro_rules! bin_serializable {
             fn to_writer<W: std::io::Write>(&self, writer: &mut W) -> anyhow::Result<()> {
                 let res =
                     $crate::serialization::serializers::bin_serializer::to_writer(writer, self);
-                <anyhow::Result<()>>::context(
+                <anyhow::Result<()> as anyhow::Context<_, _>>::context(
                     res,
                     format!("Failed to serialize {}", stringify!($ty)),
                 )
