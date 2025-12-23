@@ -1,10 +1,9 @@
-use crate::manifest::entries::manifest_entry::{EntryKind, FileKind, ManifestEntry, PBOPart};
+use crate::index::index_node::{FileKind, IndexNode, NodeKind, PBOPart};
 use anyhow::Result;
 use bi_fs_rs::pbo::handle::PBOHandle;
-use sha1::Digest;
 use std::io::{Read, Seek, SeekFrom};
 
-impl ManifestEntry {
+impl IndexNode {
     pub fn from_handle(handle: &mut PBOHandle, rel_path: &str) -> Result<Self> {
         let mut offset = 0;
         let mut parts = Vec::with_capacity(handle.files.len());
@@ -18,9 +17,9 @@ impl ManifestEntry {
             handle.handle.read_exact(&mut data)?;
 
             // Hash Data
-            let mut file_hasher = sha1::Sha1::new();
-            sha1::Digest::update(&mut file_hasher, &data);
-            let file_checksum = file_hasher.finalize().to_vec();
+            let mut file_hasher = blake3::Hasher::new();
+            file_hasher.update(&data);
+            let file_checksum = file_hasher.finalize().as_bytes().to_vec();
 
             parts.push(PBOPart {
                 name: file.filename.to_string(),
@@ -32,13 +31,13 @@ impl ManifestEntry {
         }
 
         // Compute PBO checksum
-        let mut pbo_hasher = sha1::Sha1::new();
-        sha1::Digest::update(&mut pbo_hasher, handle.checksum.data);
+        let mut pbo_hasher = blake3::Hasher::new();
+        pbo_hasher.update(&handle.checksum.data);
         for part in &parts {
-            sha1::Digest::update(&mut pbo_hasher, &part.checksum);
+            pbo_hasher.update(&part.checksum);
         }
-        sha1::Digest::update(&mut pbo_hasher, rel_path.as_bytes());
-        let pbo_checksum = pbo_hasher.finalize().to_vec();
+        pbo_hasher.update(rel_path.as_bytes());
+        let pbo_checksum = pbo_hasher.finalize().as_bytes().to_vec();
 
         let last_modified = handle
             .handle
@@ -54,7 +53,7 @@ impl ManifestEntry {
         Ok(Self {
             name: rel_path.to_string(),
             checksum: pbo_checksum,
-            kind: EntryKind::File {
+            kind: NodeKind::File {
                 last_modified,
                 length: handle.length,
                 kind: FileKind::Pbo {

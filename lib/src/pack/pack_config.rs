@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use crate::pack::server_info::ServerInfo;
 use serde::{Deserialize, Serialize};
 
@@ -8,6 +9,7 @@ pub struct PackConfig {
     pub client_params: Vec<String>,
     pub servers: Vec<ServerInfo>,
     pub parent: Option<String>,
+    addons: HashMap<String, Vec<u8>>,
 }
 
 impl PackConfig {
@@ -24,6 +26,7 @@ impl PackConfig {
             client_params,
             servers,
             parent,
+            addons: HashMap::new(),
         }
     }
 }

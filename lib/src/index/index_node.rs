@@ -1,15 +1,15 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct ManifestEntry {
+pub struct IndexNode {
     pub name: String,
     pub checksum: Vec<u8>,
-    pub kind: EntryKind,
+    pub kind: NodeKind,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub enum EntryKind {
-    Folder(Vec<ManifestEntry>),
+pub enum NodeKind {
+    Folder(Vec<IndexNode>),
     File {
         last_modified: u64,
         length: u64,
