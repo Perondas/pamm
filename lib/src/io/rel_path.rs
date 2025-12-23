@@ -3,7 +3,7 @@ use url::Url;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub(crate) struct RelPath {
-     components: Vec<String>,
+    components: Vec<String>,
 }
 
 impl Default for RelPath {
@@ -42,6 +42,10 @@ impl RelPath {
             .extend(self.components.iter());
 
         url
+    }
+
+    pub fn as_str(&self) -> String {
+        self.components.join("/")
     }
 }
 

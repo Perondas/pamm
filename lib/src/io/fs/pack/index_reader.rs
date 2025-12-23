@@ -1,11 +1,14 @@
-use crate::index::index_node::{FileKind, IndexNode, NodeKind};
+use crate::index::index_node::FileKind;
+use crate::index::index_node::IndexNode;
+use crate::index::index_node::NodeKind;
 use crate::io::fs::cache::file_cache_entry::FileCacheEntry;
 use crate::io::fs::cache::kv_cache::KVCache;
-use crate::io::name_consts::{get_pack_addon_directory_name, CACHE_DB_DIR_NAME};
+use crate::io::name_consts::CACHE_DB_DIR_NAME;
+use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::io::rel_path::RelPath;
 use crate::pack::pack_config::PackConfig;
 use crate::pack::pack_index::PackIndex;
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use bi_fs_rs::pbo::handle::PBOHandle;
 use rayon::iter::ParallelIterator;
 use rayon::prelude::IntoParallelIterator;
@@ -72,8 +75,9 @@ impl IndexReader {
         let folder_indexes = sorted_entries
             .into_par_iter()
             .map(|entry| {
-                let entry_name = file_name_to_string(&entry.path());
+                let entry_name = file_name_to_string(entry.file_name());
                 let rel_entry_path = rel_path.push(&entry_name);
+
                 if entry.path().is_file() {
                     self.index_file(rel_entry_path)
                 } else if entry.path().is_dir() {
@@ -112,7 +116,52 @@ impl IndexReader {
             .as_secs();
         let length = metadata.len();
 
-        read_file_to_part(fs_path, &self.cache)
+        let stored_node = self.cache.get::<_, FileCacheEntry>(&rel_path.as_str())?;
+
+        if let Some(FileCacheEntry {
+            length: cached_length,
+            last_modified: cached_last_modified,
+            index:
+                node @ IndexNode {
+                    kind: NodeKind::File { .. },
+                    ..
+                },
+        }) = stored_node
+            && cached_last_modified == last_modified
+            && cached_length == length
+        {
+            return Ok(node);
+        }
+
+        let index = if PBO_NAME_REGEX.is_match(
+            fs_path
+                .file_name()
+                .and_then(|s| s.to_str())
+                .ok_or(anyhow!("Bad path: {:?}", fs_path))?,
+        ) {
+            match index_pbo(&fs_path) {
+                Ok(part) => Ok(part),
+                Err(e) => {
+                    println!(
+                        "Warning: Failed to read PBO file {:?}, falling back to generic file. Error: {}",
+                        fs_path, e
+                    );
+                    index_generic_file(&fs_path)
+                }
+            }
+        } else {
+            index_generic_file(&fs_path)
+        }?;
+
+        let file_cache = FileCacheEntry {
+            last_modified,
+            length,
+            index: index.clone(),
+        };
+
+        self.cache.set(rel_path.as_str(), file_cache)?;
+
+        Ok(index)
     }
 }
 
@@ -127,107 +176,41 @@ fn file_name_to_string<P: AsRef<Path> + Debug>(fs_path: P) -> String {
 
 fn sort_folders(read_dir: ReadDir) -> Result<Vec<DirEntry>> {
     let mut entries: Vec<_> = read_dir.collect::<Result<_, _>>()?;
-    entries.sort_by_key(|e| file_name_to_string(&e.file_name()));
+    entries.sort_by_key(|e| file_name_to_string(e.file_name()));
     Ok(entries)
 }
 
-fn read_file_to_part(fs_path: PathBuf, cache: &KVCache) -> Result<IndexNode> {
-    let metadata = std::fs::metadata(&fs_path)?;
-    let last_modified = metadata
-        .modified()?
-        .duration_since(std::time::UNIX_EPOCH)?
-        .as_secs();
-    let length = metadata.len();
-
-    let old_part: Option<FileCacheEntry> = cache.get(path_to_key(&fs_path)?)?;
-
-    if let Some(old_part) = old_part
-        && old_part.last_modified == last_modified
-        && old_part.length == length
-    {
-        return Ok(old_part.index);
-    }
-
-    let part = if PBO_NAME_REGEX.is_match(
-        fs_path
-            .file_name()
-            .and_then(|s| s.to_str())
-            .ok_or(anyhow!("Bad path: {:?}", fs_path))?,
-    ) {
-        match read_pbo_to_part(&fs_path) {
-            Ok(part) => Ok(part),
-            Err(e) => {
-                println!(
-                    "Warning: Failed to read PBO file {:?}, falling back to generic file. Error: {}",
-                    fs_path, e
-                );
-                read_generic_file_to_part(&fs_path)
-            }
-        }
-    } else {
-        read_generic_file_to_part(&fs_path)
-    }?;
-
-    let file_cache = FileCacheEntry {
-        last_modified,
-        length,
-        index: part.clone(),
-    };
-
-    cache.set(path_to_key(&fs_path)?, file_cache)?;
-
-    Ok(part)
-}
-
-fn read_pbo_to_part(fs_path: &PathBuf) -> Result<IndexNode> {
+fn index_pbo(fs_path: &PathBuf) -> Result<IndexNode> {
     if !fs_path.is_file() {
         anyhow::bail!("Path is not a file: {:?}", fs_path);
     }
 
-    let rel_path = fs_path.file_name().unwrap().to_str().unwrap().to_owned();
+    let name = file_name_to_string(fs_path);
 
     let mut pbo_handle = PBOHandle::open_file(fs_path)?;
 
-    IndexNode::from_handle(&mut pbo_handle, &rel_path)
+    IndexNode::from_handle(&mut pbo_handle, &name)
 }
 
-fn read_generic_file_to_part(fs_path: &PathBuf) -> Result<IndexNode> {
+fn index_generic_file(fs_path: &PathBuf) -> Result<IndexNode> {
     if !fs_path.is_file() {
         anyhow::bail!("Path is not a file: {:?}", fs_path);
     }
 
-    let file_name = fs_path.file_name().unwrap().to_str().unwrap().to_owned();
+    let file_name = file_name_to_string(fs_path);
 
-    let data = std::fs::read(fs_path)?;
-    let length = data.len() as u64;
+    let mut file = std::fs::File::open(fs_path)?;
     let mut hasher = blake3::Hasher::new();
-    hasher.update(&data);
+    let length = std::io::copy(&mut file, &mut hasher)?;
     hasher.update(file_name.as_bytes());
     let checksum = hasher.finalize().as_bytes().to_vec();
-
-    let last_modified = std::fs::metadata(fs_path)
-        .and_then(|meta| meta.modified())
-        .map(|time| {
-            time.duration_since(std::time::UNIX_EPOCH)
-                .unwrap()
-                .as_secs()
-        })
-        .unwrap_or(0);
 
     Ok(IndexNode {
         name: file_name,
         checksum,
         kind: NodeKind::File {
-            last_modified,
             length,
             kind: FileKind::Generic,
         },
     })
-}
-
-pub fn path_to_key(path: &Path) -> anyhow::Result<String> {
-    Ok(path
-        .to_str()
-        .ok_or(anyhow!("invalid path: {:?}", path))?
-        .to_owned())
 }
