@@ -2,7 +2,7 @@ use crate::utils::diff_to_string::ToPrettyString;
 use anyhow::{Context, anyhow};
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
-use pamm_lib::io::fs::delete_pack::delete_pack;
+use pamm_lib::io::fs::pack::delete_pack::delete_pack;
 use pamm_lib::io::fs::fs_readable::KnownFSReadable;
 use pamm_lib::io::fs::fs_writable::{KnownFSWritable, NamedFSWritable};
 use pamm_lib::io::net::apply_diff::apply_diff;

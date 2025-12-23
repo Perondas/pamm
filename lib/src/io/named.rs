@@ -1,13 +1,13 @@
-use crate::manifest::pack_manifest::PackManifest;
+use crate::index::index_node::IndexNode;
 use crate::pack::pack_config::PackConfig;
 
 pub trait NamedFile {
     fn get_name(identifier: &str) -> String;
 }
 
-impl NamedFile for PackManifest {
+impl NamedFile for IndexNode {
     fn get_name(identifier: &str) -> String {
-        format!("{}.pack.manifest.pamm", identifier)
+        format!("{}.index.pamm", identifier)
     }
 }
 

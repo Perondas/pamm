@@ -1,5 +1,5 @@
 use anyhow::anyhow;
-use clap::{Args, arg};
+use clap::Args;
 use pamm_lib::io::fs::fs_readable::NamedFSReadable;
 use pamm_lib::manifest::pack_manifest::PackManifest;
 use pamm_lib::pack::pack_config::PackConfig;

@@ -1,23 +1,23 @@
-use crate::manifest::entries::manifest_entry::ManifestEntry;
-use crate::manifest::entries::manifest_entry::PBOPart;
 use serde::{Deserialize, Serialize};
+use crate::index::index_node::{IndexNode, PBOPart};
 
 #[derive(Debug)]
-pub enum EntryDiff {
-    Created(ManifestEntry),
+pub enum NodeDiff {
+    Created(IndexNode),
     Deleted(String),
-    Modified(EntryModification),
+    Modified(NodeModification),
+    None,
 }
 
 #[derive(Debug)]
-pub struct EntryModification {
+pub struct NodeModification {
     pub name: String,
-    pub kind: ModifiedEntryKind,
+    pub kind: ModifiedNodeKind,
 }
 
 #[derive(Debug)]
-pub enum ModifiedEntryKind {
-    Folder(Vec<EntryDiff>),
+pub enum ModifiedNodeKind {
+    Folder(Vec<NodeDiff>),
     File {
         new_length: u64,
         target_checksum: Vec<u8>,
@@ -31,8 +31,7 @@ pub enum FileModification {
         new_order: Vec<PBOPart>,
         required_checksums: Vec<Vec<u8>>,
         required_parts_size: u64,
-        new_length: u64,
-        blob_offset: u64,
+        new_blob_offset: u64,
     },
     Generic,
 }
