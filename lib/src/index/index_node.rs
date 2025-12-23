@@ -10,11 +10,7 @@ pub struct IndexNode {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum NodeKind {
     Folder(Vec<IndexNode>),
-    File {
-        last_modified: u64,
-        length: u64,
-        kind: FileKind,
-    },
+    File { length: u64, kind: FileKind },
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

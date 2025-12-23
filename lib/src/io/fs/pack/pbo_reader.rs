@@ -4,7 +4,7 @@ use bi_fs_rs::pbo::handle::PBOHandle;
 use std::io::{Read, Seek, SeekFrom};
 
 impl IndexNode {
-    pub fn from_handle(handle: &mut PBOHandle, rel_path: &str) -> Result<Self> {
+    pub fn from_handle(handle: &mut PBOHandle, file_name: &str) -> Result<Self> {
         let mut offset = 0;
         let mut parts = Vec::with_capacity(handle.files.len());
 
@@ -36,25 +36,13 @@ impl IndexNode {
         for part in &parts {
             pbo_hasher.update(&part.checksum);
         }
-        pbo_hasher.update(rel_path.as_bytes());
+        pbo_hasher.update(file_name.as_bytes());
         let pbo_checksum = pbo_hasher.finalize().as_bytes().to_vec();
 
-        let last_modified = handle
-            .handle
-            .metadata()
-            .and_then(|meta| meta.modified())
-            .map(|time| {
-                time.duration_since(std::time::UNIX_EPOCH)
-                    .unwrap()
-                    .as_secs()
-            })
-            .unwrap_or(0);
-
         Ok(Self {
-            name: rel_path.to_string(),
+            name: file_name.to_string(),
             checksum: pbo_checksum,
             kind: NodeKind::File {
-                last_modified,
                 length: handle.length,
                 kind: FileKind::Pbo {
                     parts,
