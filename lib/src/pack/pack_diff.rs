@@ -1,10 +1,17 @@
 use crate::index::diff_index::diff_index;
+use crate::index::get_size::GetSize;
 use crate::index::node_diff::NodeDiff;
 use crate::pack::pack_index::PackIndex;
 use crate::util::iterator_diff::{DiffResult, diff_iterators};
 use anyhow::Result;
 
-pub struct PackDiff(pub(crate) Vec<NodeDiff>);
+pub struct PackDiff(pub Vec<NodeDiff>);
+
+impl PackDiff {
+    pub fn has_changes(&self) -> bool {
+        self.0.iter().any(|c| !matches!(c, NodeDiff::None))
+    }
+}
 
 pub fn diff_packs(old_pack: PackIndex, new_pack: PackIndex) -> Result<PackDiff> {
     let DiffResult {
@@ -27,4 +34,10 @@ pub fn diff_packs(old_pack: PackIndex, new_pack: PackIndex) -> Result<PackDiff> 
 
     let combined = added.into_iter().chain(removed).chain(modified).collect();
     Ok(PackDiff(combined))
+}
+
+impl GetSize for PackDiff {
+    fn get_size(&self) -> u64 {
+        self.0.iter().map(|diff| diff.get_size()).sum()
+    }
 }

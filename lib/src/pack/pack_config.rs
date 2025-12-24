@@ -1,6 +1,6 @@
-use std::collections::HashMap;
 use crate::pack::server_info::ServerInfo;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PackConfig {
@@ -9,7 +9,7 @@ pub struct PackConfig {
     pub client_params: Vec<String>,
     pub servers: Vec<ServerInfo>,
     pub parent: Option<String>,
-    addons: HashMap<String, Vec<u8>>,
+    pub(crate) addons: HashMap<String, Vec<u8>>,
 }
 
 impl PackConfig {
@@ -28,5 +28,10 @@ impl PackConfig {
             parent,
             addons: HashMap::new(),
         }
+    }
+
+    pub fn with_addons(mut self, addons: HashMap<String, Vec<u8>>) -> Self {
+        self.addons = addons;
+        self
     }
 }
