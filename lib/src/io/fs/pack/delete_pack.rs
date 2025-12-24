@@ -5,7 +5,7 @@ use anyhow::{Context, Result, anyhow};
 use std::path::Path;
 
 pub fn delete_pack(base_path: &Path, pack_name: &str) -> Result<()> {
-    let config_path = PackConfig::get_name(pack_name);
+    let config_path = PackConfig::get_file_name(pack_name);
 
     let full_path = base_path.join(config_path);
 

@@ -24,6 +24,7 @@ static ADDON_FOLDER_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^@.*$
 pub struct IndexReader {
     addon_dir: PathBuf,
     cache: KVCache,
+    pack_name: String,
 }
 
 impl IndexReader {
@@ -37,7 +38,11 @@ impl IndexReader {
         let cache_dir = addon_dir.join(CACHE_DB_DIR_NAME);
         let cache = KVCache::new(cache_dir)?;
 
-        Ok(Self { addon_dir, cache })
+        Ok(Self {
+            addon_dir,
+            cache,
+            pack_name: config.name.clone(),
+        })
     }
 
     pub fn index_addons(&self) -> Result<PackIndex> {
@@ -57,7 +62,10 @@ impl IndexReader {
             .map(|p| self.index_dir(p))
             .collect::<Result<Vec<_>>>()?;
 
-        Ok(PackIndex(indexes))
+        Ok(PackIndex {
+            addons: indexes,
+            pack_name: self.pack_name.clone(),
+        })
     }
 
     fn index_dir(&self, rel_path: RelPath) -> Result<IndexNode> {

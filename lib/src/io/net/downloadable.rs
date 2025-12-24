@@ -38,7 +38,7 @@ pub trait NamedDownloadable: Downloadable + NamedFile {
 
 impl<T: Downloadable + NamedFile> NamedDownloadable for T {
     fn download_named(url: &Url, identifier: &str) -> anyhow::Result<Self> {
-        let full_url = url.join(&Self::get_name(identifier))?;
+        let full_url = url.join(&Self::get_file_name(identifier))?;
         Self::download(&full_url)
     }
 }

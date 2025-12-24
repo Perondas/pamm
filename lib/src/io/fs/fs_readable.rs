@@ -35,7 +35,7 @@ pub trait NamedFSReadable: FsReadable + NamedFile {
 
 impl<T: FsReadable + NamedFile> NamedFSReadable for T {
     fn read_from_named<P: AsRef<Path>>(path: P, identifier: &str) -> anyhow::Result<Option<Self>> {
-        let full_path = path.as_ref().join(Self::get_name(identifier));
+        let full_path = path.as_ref().join(Self::get_file_name(identifier));
         Self::read_from_path(full_path)
     }
 }
