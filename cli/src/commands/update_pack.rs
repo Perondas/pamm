@@ -3,7 +3,9 @@ use clap::Args;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::io::fs::fs_readable::NamedFSReadable;
 use pamm_lib::io::fs::fs_writable::NamedFSWritable;
-use pamm_lib::manifest::pack_manifest::PackManifest;
+use pamm_lib::io::fs::pack::index_generator::IndexGenerator;
+use pamm_lib::pack::pack_config::PackConfig;
+use pamm_lib::pack::pack_diff::diff_packs;
 use std::env::current_dir;
 
 #[derive(Debug, Args)]
@@ -19,12 +21,16 @@ pub struct UpdatePackArgs {
 pub fn update_pack_command(args: UpdatePackArgs) -> anyhow::Result<()> {
     let current_dir = current_dir()?;
 
-    let stored_manifest =
-        PackManifest::read_from_named(&current_dir, &args.name)?.unwrap_or_default();
+    let config =
+        PackConfig::read_from_named(&current_dir, &args.name)?.expect("Missing pack config");
 
-    let fs_manifest = PackManifest::gen_from_fs(&current_dir, &args.name, args.force_refresh)?;
+    let stored_index = config.read_index_from_fs(&current_dir)?;
 
-    let diff = stored_manifest.determine_pack_diff(&fs_manifest)?;
+    let index_generator = IndexGenerator::from_config(&config, &current_dir)?;
+
+    let actual_index = index_generator.index_addons()?;
+
+    let diff = diff_packs(stored_index, actual_index.clone())?;
 
     if !diff.has_changes() {
         println!("No changes found");
@@ -43,7 +49,11 @@ pub fn update_pack_command(args: UpdatePackArgs) -> anyhow::Result<()> {
         return Ok(());
     }
 
-    fs_manifest.write_to_named(&current_dir, &args.name)?;
+    diff.write_index_to_fs(&current_dir, &actual_index)?;
+
+    let config = config.with_addons(actual_index.to_map());
+
+    config.write_to_named(&current_dir, &config.name)?;
 
     Ok(())
 }

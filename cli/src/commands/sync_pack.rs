@@ -2,12 +2,10 @@ use crate::utils::diff_to_string::ToPrettyString;
 use anyhow::{Context, anyhow};
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
-use pamm_lib::io::fs::pack::delete_pack::delete_pack;
-use pamm_lib::io::fs::fs_readable::KnownFSReadable;
+use pamm_lib::io::fs::fs_readable::{KnownFSReadable, NamedFSReadable};
 use pamm_lib::io::fs::fs_writable::{KnownFSWritable, NamedFSWritable};
-use pamm_lib::io::net::apply_diff::apply_diff;
+use pamm_lib::io::fs::pack::delete_pack::delete_pack;
 use pamm_lib::io::net::downloadable::{KnownDownloadable, NamedDownloadable};
-use pamm_lib::manifest::pack_manifest::PackManifest;
 use pamm_lib::pack::pack_config::PackConfig;
 use pamm_lib::repo::repo_config::RepoConfig;
 use pamm_lib::repo::repo_user_settings::RepoUserSettings;
@@ -36,6 +34,13 @@ pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
             args.name
         ));
     }
+
+    let local_pack_config = PackConfig::read_from_named(&current_dir, &args.name)?.ok_or(
+        anyhow::anyhow!("Pack config for '{}' not found locally", args.name),
+    )?;
+
+    let remote_pack_config =
+        PackConfig::download_named(repo_user_settings.get_remote(), &args.name)?;
 
     let local_manifest = PackManifest::gen_from_fs(&current_dir, &args.name, args.force)?;
 
