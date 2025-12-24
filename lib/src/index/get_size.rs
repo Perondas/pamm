@@ -1,5 +1,5 @@
 use crate::index::index_node::{IndexNode, NodeKind};
-use crate::index::node_diff::{ModifiedNodeKind, NodeDiff};
+use crate::index::node_diff::{FileModification, ModifiedNodeKind, NodeDiff};
 
 pub trait GetSize {
     fn get_size(&self) -> u64;
@@ -20,7 +20,10 @@ impl GetSize for NodeDiff {
             NodeDiff::Created(entry) => entry.get_size(),
             NodeDiff::Modified(modification) => match &modification.kind {
                 ModifiedNodeKind::Folder(e) => e.iter().map(|child| child.get_size()).sum(),
-                ModifiedNodeKind::File { new_length, .. } => *new_length,
+                ModifiedNodeKind::File { modification, .. } => match modification {
+                    FileModification::PBO { new_length, .. } => *new_length,
+                    FileModification::Generic { new_length } => *new_length,
+                },
             },
             NodeDiff::Deleted(_) | NodeDiff::None => 0,
         }

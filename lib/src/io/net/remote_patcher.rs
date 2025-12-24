@@ -1,0 +1,152 @@
+use crate::index::index_node::PBOPart;
+use crate::index::node_diff::FileModification;
+use crate::io::net::byte_range_response::{ByteRangeResponse, IntoByteRangeResponse};
+use crate::io::net::dowload_file::download_file;
+use crate::io::rel_path::RelPath;
+use anyhow::{Context, Result};
+use bi_fs_rs::pbo::handle::PBOHandle;
+use std::fs::File;
+use std::io::Write;
+use std::path::Path;
+use std::{fs, iter};
+use ureq::BodyReader;
+use url::Url;
+
+pub struct RemotePatcher {
+    base_url: Url,
+}
+
+impl RemotePatcher {
+    pub fn new(base_url: Url) -> Self {
+        Self { base_url }
+    }
+
+    pub(crate) fn patch_file(
+        &self,
+        rel_path: &RelPath,
+        file_path: &Path,
+        modification: FileModification,
+    ) -> Result<()> {
+        let file_url = rel_path.with_base_url(&self.base_url);
+
+        match modification {
+            FileModification::PBO {
+                new_length,
+                new_order,
+                required_checksums,
+                new_blob_offset,
+                ..
+            } => {
+                let mut pbo_handle = PBOHandle::open_file(&file_path)?;
+
+                let temp_file_path = file_path.with_added_extension("pamm.temp");
+
+                let mut temp_file = File::create(&temp_file_path)?;
+
+                let mut parts = get_required_pbo_parts(
+                    &file_url,
+                    &new_order,
+                    &required_checksums,
+                    new_length,
+                    new_blob_offset,
+                )?;
+
+                let new_headers = parts
+                    .next()
+                    .ok_or_else(|| anyhow::anyhow!("No response for PBO header"))??;
+
+                temp_file.write_all(&new_headers)?;
+
+                for part in new_order {
+                    if required_checksums.contains(&part.checksum) {
+                        let part_data = parts
+                            .next()
+                            .ok_or_else(|| anyhow::anyhow!("No response for PBO part"))??;
+                        temp_file.write_all(&part_data)?;
+                    } else {
+                        let data = pbo_handle.get_file_content(&part.name)?;
+                        temp_file.write_all(&data)?;
+                    }
+                }
+
+                let checksum_data = parts
+                    .next()
+                    .ok_or_else(|| anyhow::anyhow!("No response for PBO checksum"))??;
+                temp_file.write_all(&checksum_data)?;
+
+                if parts.next().is_some() {
+                    return Err(anyhow::anyhow!("Received more entries than expected"));
+                }
+
+                if temp_file.metadata()?.len() != new_length {
+                    return Err(anyhow::anyhow!(
+                        "Patched PBO length does not match expected length. Expected length: {}. Actual length: {}",
+                        new_length,
+                        temp_file.metadata()?.len()
+                    ));
+                }
+
+                drop(pbo_handle);
+                drop(temp_file);
+                fs::rename(temp_file_path, file_path)?;
+
+                Ok(())
+            }
+            FileModification::Generic { new_length } => {
+                download_file(file_path, file_url, new_length)
+            }
+        }
+    }
+
+    pub fn create_file(
+        &self,
+        rel_path: &RelPath,
+        file_path: &Path,
+        expected_len: u64,
+    ) -> Result<()> {
+        let file_url = rel_path.with_base_url(&self.base_url);
+
+        download_file(file_path, file_url, expected_len)
+    }
+}
+
+fn get_required_pbo_parts(
+    url: &Url,
+    new_order: &[PBOPart],
+    required_checksums: &[Vec<u8>],
+    new_length: u64,
+    blob_offset: u64,
+) -> Result<ByteRangeResponse<BodyReader<'static>>> {
+    let request_builder = ureq::get(url.to_string());
+
+    // We always get the entire header
+    // TODO: can we only get part of it? Is that worth it?
+    let pbo_header_range = (0_u64, blob_offset);
+    let pbo_checksum_rage = (new_length - 21, new_length);
+    let modified_ranges = new_order
+        .iter()
+        .filter(|p| required_checksums.contains(&p.checksum))
+        .map(|p| {
+            let start = p.start_offset + blob_offset;
+            (start, start + p.length as u64)
+        });
+
+    let ranges = iter::once(pbo_header_range)
+        .chain(modified_ranges)
+        .chain(iter::once(pbo_checksum_rage))
+        .collect::<Vec<_>>();
+
+    let ranges_str = ranges
+        .iter()
+        .map(|(from, to)| format!("{}-{}", from, to - 1))
+        .collect::<Vec<_>>()
+        .join(", ");
+    let resp = request_builder
+        .header("Range", format!("bytes={}", ranges_str))
+        .call()
+        .context(format!("Failed to fetch range for {}", url))?;
+
+    let responses = resp.into_byte_range_response()?;
+
+    Ok(responses)
+}
