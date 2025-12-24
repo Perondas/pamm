@@ -62,9 +62,9 @@ fn diff_file(
             NodeDiff::Modified(NodeModification {
                 name: r_name,
                 kind: ModifiedNodeKind::File {
-                    new_length: r_length,
                     target_checksum: r_checksum,
                     modification: FileModification::PBO {
+                        new_length: r_length,
                         required_parts_size,
                         required_checksums,
                         new_order: r_parts,
@@ -77,9 +77,10 @@ fn diff_file(
         _ => NodeDiff::Modified(NodeModification {
             name: r_name,
             kind: ModifiedNodeKind::File {
-                new_length: r_length,
                 target_checksum: r_checksum,
-                modification: FileModification::Generic,
+                modification: FileModification::Generic {
+                    new_length: r_length,
+                },
             },
         }),
     }

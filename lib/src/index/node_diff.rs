@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::index::index_node::{IndexNode, PBOPart};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug)]
 pub enum NodeDiff {
@@ -19,7 +19,6 @@ pub struct NodeModification {
 pub enum ModifiedNodeKind {
     Folder(Vec<NodeDiff>),
     File {
-        new_length: u64,
         target_checksum: Vec<u8>,
         modification: FileModification,
     },
@@ -28,10 +27,13 @@ pub enum ModifiedNodeKind {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum FileModification {
     PBO {
+        new_length: u64,
         new_order: Vec<PBOPart>,
         required_checksums: Vec<Vec<u8>>,
         required_parts_size: u64,
         new_blob_offset: u64,
     },
-    Generic,
+    Generic {
+        new_length: u64,
+    },
 }

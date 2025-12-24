@@ -4,7 +4,7 @@ use crate::pack::pack_index::PackIndex;
 use crate::util::iterator_diff::{DiffResult, diff_iterators};
 use anyhow::Result;
 
-pub struct PackDiff(Vec<NodeDiff>);
+pub struct PackDiff(pub(crate) Vec<NodeDiff>);
 
 pub fn diff_packs(old_pack: PackIndex, new_pack: PackIndex) -> Result<PackDiff> {
     let DiffResult {
