@@ -1,8 +1,8 @@
 use crate::index::index_node::{FileKind, IndexNode, NodeKind, PBOPart};
 use crate::index::node_diff::{FileModification, ModifiedNodeKind, NodeDiff, NodeModification};
-use std::collections::HashMap;
+use crate::util::iterator_diff::{DiffResult, diff_iterators};
 
-fn diff_index(left: IndexNode, right: IndexNode) -> anyhow::Result<NodeDiff> {
+pub fn diff_index(left: IndexNode, right: IndexNode) -> anyhow::Result<NodeDiff> {
     let IndexNode {
         kind: l_kind,
         checksum: l_checksum,
@@ -98,35 +98,30 @@ fn diff_pbo_parts(left_parts: &[PBOPart], right_parts: &[PBOPart]) -> (Vec<Vec<u
 
 // Left is old right is new
 fn diff_folders(
-    left: Vec<IndexNode>,
-    right: Vec<IndexNode>,
+    old: Vec<IndexNode>,
+    new: Vec<IndexNode>,
     r_name: String,
 ) -> anyhow::Result<NodeDiff> {
-    let mut left_map = iter_to_map(left);
+    let DiffResult {
+        added,
+        removed,
+        same,
+    } = diff_iterators(old, new, |node| node.name.clone());
 
-    let mut right_map = iter_to_map(right);
-
-    // Ones that are in right but not left are added
-    let added: Vec<_> = right_map
-        .extract_if(|path, _| !left_map.contains_key(path))
-        .map(|(_, part)| NodeDiff::Created(part))
-        .collect();
-
-    // Ones that are in the left but not right are deleted
-    let removed: Vec<_> = left_map
-        .extract_if(|path, _| !right_map.contains_key(path))
-        .map(|(path, _)| NodeDiff::Deleted(path))
-        .collect();
-
-    let changes: Result<Vec<_>, _> = right_map
+    let added = added
         .into_iter()
-        .map(|(path, right_part)| (left_map.remove(&path).expect("Should exist"), right_part))
+        .map(|node| NodeDiff::Created(node))
+        .collect::<Vec<_>>();
+
+    let removed = removed
+        .into_iter()
+        .map(|node| NodeDiff::Deleted(node.name))
+        .collect::<Vec<_>>();
+
+    let changes: Result<Vec<_>, _> = same
+        .into_iter()
         .map(|(left, right)| diff_index(left, right))
         .collect();
-
-    if !left_map.is_empty() {
-        unreachable!("Left map should be empty after processing all right entries");
-    }
 
     let all: Vec<NodeDiff> = added.into_iter().chain(removed).chain(changes?).collect();
 
@@ -138,11 +133,4 @@ fn diff_folders(
             kind: ModifiedNodeKind::Folder(all),
         }))
     }
-}
-
-fn iter_to_map(entries: Vec<IndexNode>) -> HashMap<String, IndexNode> {
-    entries
-        .into_iter()
-        .map(|e| (e.name.to_owned(), e))
-        .collect()
 }

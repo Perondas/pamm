@@ -13,7 +13,7 @@ impl FromCliInputWithContext for PackConfig {
             .with_prompt("Repo Name")
             .allow_empty(true)
             .validate_with(|input: &String| -> Result<(), &str> {
-                let path = PackConfig::get_name(input);
+                let path = PackConfig::get_file_name(input);
                 if PathBuf::from(path).exists() {
                     Err("A folder or file with this name already exists")
                 } else {

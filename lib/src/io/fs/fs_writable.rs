@@ -31,7 +31,7 @@ pub trait NamedFSWritable: FsWritable + NamedFile {
 
 impl<T: FsWritable + NamedFile> NamedFSWritable for T {
     fn write_to_named<P: AsRef<Path>>(&self, path: P, identifier: &str) -> anyhow::Result<()> {
-        let full_path = path.as_ref().join(Self::get_name(identifier));
+        let full_path = path.as_ref().join(Self::get_file_name(identifier));
         self.write_to_path(full_path)
     }
 }
