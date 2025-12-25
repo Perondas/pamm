@@ -3,12 +3,12 @@ use crate::index::index_node::IndexNode;
 use crate::index::index_node::NodeKind;
 use crate::io::fs::cache::file_cache_entry::FileCacheEntry;
 use crate::io::fs::cache::kv_cache::KVCache;
-use crate::io::name_consts::CACHE_DB_DIR_NAME;
 use crate::io::name_consts::get_pack_addon_directory_name;
+use crate::io::name_consts::CACHE_DB_DIR_NAME;
 use crate::io::rel_path::RelPath;
 use crate::pack::pack_config::PackConfig;
 use crate::pack::pack_index::PackIndex;
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Result};
 use bi_fs_rs::pbo::handle::PBOHandle;
 use rayon::iter::ParallelIterator;
 use rayon::prelude::IntoParallelIterator;
@@ -43,6 +43,10 @@ impl IndexGenerator {
             cache,
             pack_name: config.name.clone(),
         })
+    }
+
+    pub fn clear_cache(&self) -> Result<()> {
+        self.cache.remove_all()
     }
 
     pub fn index_addons(&self) -> Result<PackIndex> {

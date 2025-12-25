@@ -28,6 +28,10 @@ pub fn update_pack_command(args: UpdatePackArgs) -> anyhow::Result<()> {
 
     let index_generator = IndexGenerator::from_config(&config, &current_dir)?;
 
+    if args.force_refresh {
+        index_generator.clear_cache()?;
+    }
+
     let actual_index = index_generator.index_addons()?;
 
     let diff = diff_packs(stored_index, actual_index.clone())?;
