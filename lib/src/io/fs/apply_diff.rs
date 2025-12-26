@@ -7,17 +7,29 @@ use anyhow::Context;
 use rayon::iter::ParallelIterator;
 use rayon::prelude::IntoParallelIterator;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+use url::Url;
+use crate::io::name_consts::get_pack_addon_directory_name;
+use crate::pack::pack_config::PackConfig;
 
 pub struct DiffApplier {
-    base_dir: PathBuf,
+    addon_dir: PathBuf,
     remote_patcher: RemotePatcher,
 }
 
+impl PackConfig {
+    pub fn diff_applier(&self, base_dir: &Path, base_url: &Url) -> DiffApplier {
+        let addon_dir = base_dir.join(get_pack_addon_directory_name(&self.name));
+        let remote_patcher = self.remote_patcher(base_url);
+
+        DiffApplier::new(addon_dir, remote_patcher)
+    }
+}
+
 impl DiffApplier {
-    pub fn new(base_dir: PathBuf, remote_patcher: RemotePatcher) -> Self {
+    pub fn new(addon_dir: PathBuf, remote_patcher: RemotePatcher) -> Self {
         Self {
-            base_dir,
+            addon_dir,
             remote_patcher,
         }
     }
@@ -54,7 +66,7 @@ impl DiffApplier {
 
     fn delete_node(&self, name: String, parent_path: RelPath) -> anyhow::Result<()> {
         let path = parent_path.push(&name);
-        let full_path = path.with_base_path(&self.base_dir);
+        let full_path = path.with_base_path(&self.addon_dir);
 
         if full_path.is_dir() {
             fs::remove_dir_all(&full_path).context("Failed to delete directory")
@@ -74,7 +86,7 @@ impl DiffApplier {
         match node.kind {
             NodeKind::File { length, .. } => {
                 self.remote_patcher
-                    .create_file(&path, &path.with_base_path(&self.base_dir), length)
+                    .create_file(&path, &path.with_base_path(&self.addon_dir), length)
             }
             NodeKind::Folder(children) => {
                 for child in children {
@@ -91,7 +103,7 @@ impl DiffApplier {
         parent_path: RelPath,
     ) -> anyhow::Result<()> {
         let path = parent_path.push(&modification.name);
-        let file_path = path.with_base_path(&self.base_dir);
+        let file_path = path.with_base_path(&self.addon_dir);
 
         match modification.kind {
             ModifiedNodeKind::Folder(children) => {

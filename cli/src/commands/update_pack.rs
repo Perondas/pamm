@@ -55,7 +55,7 @@ pub fn update_pack_command(args: UpdatePackArgs) -> anyhow::Result<()> {
 
     diff.write_index_to_fs(&current_dir, &actual_index)?;
 
-    let config = config.with_addons(actual_index.to_map());
+    let config = config.with_addons(actual_index.to_names());
 
     config.write_to_named(&current_dir, &config.name)?;
 

@@ -111,7 +111,7 @@ fn diff_folders(
 
     let added = added
         .into_iter()
-        .map(|node| NodeDiff::Created(node))
+        .map(NodeDiff::Created)
         .collect::<Vec<_>>();
 
     let removed = removed
