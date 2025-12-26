@@ -1,7 +1,7 @@
 use crate::index::index_node::PBOPart;
 use crate::index::node_diff::FileModification;
 use crate::io::net::byte_range_response::{ByteRangeResponse, IntoByteRangeResponse};
-use crate::io::net::dowload_file::download_file;
+use crate::io::net::download_file::download_file;
 use crate::io::rel_path::RelPath;
 use anyhow::{Context, Result};
 use bi_fs_rs::pbo::handle::PBOHandle;
@@ -11,14 +11,26 @@ use std::path::Path;
 use std::{fs, iter};
 use ureq::BodyReader;
 use url::Url;
+use crate::io::name_consts::get_pack_addon_directory_name;
+use crate::pack::pack_config::PackConfig;
 
 pub struct RemotePatcher {
-    base_url: Url,
+    addon_dir_url: Url,
+}
+
+impl PackConfig {
+    pub fn remote_patcher(&self, base_url: &Url) -> RemotePatcher {
+        let addon_dir_url = base_url
+            .join(&format!("{}/", get_pack_addon_directory_name(&self.name)))
+            .expect("Failed to construct addon dir URL");
+
+        RemotePatcher::new(addon_dir_url)
+    }
 }
 
 impl RemotePatcher {
-    pub fn new(base_url: Url) -> Self {
-        Self { base_url }
+    pub(crate) fn new(addon_dir_url: Url) -> Self {
+        Self { addon_dir_url }
     }
 
     pub(crate) fn patch_file(
@@ -27,7 +39,7 @@ impl RemotePatcher {
         file_path: &Path,
         modification: FileModification,
     ) -> Result<()> {
-        let file_url = rel_path.with_base_url(&self.base_url);
+        let file_url = rel_path.with_base_url(&self.addon_dir_url);
 
         match modification {
             FileModification::PBO {
@@ -37,7 +49,7 @@ impl RemotePatcher {
                 new_blob_offset,
                 ..
             } => {
-                let mut pbo_handle = PBOHandle::open_file(&file_path)?;
+                let mut pbo_handle = PBOHandle::open_file(file_path)?;
 
                 let temp_file_path = file_path.with_added_extension("pamm.temp");
 
@@ -98,13 +110,13 @@ impl RemotePatcher {
         }
     }
 
-    pub fn create_file(
+    pub(crate) fn create_file(
         &self,
         rel_path: &RelPath,
         file_path: &Path,
         expected_len: u64,
     ) -> Result<()> {
-        let file_url = rel_path.with_base_url(&self.base_url);
+        let file_url = rel_path.with_base_url(&self.addon_dir_url);
 
         download_file(file_path, file_url, expected_len)
     }

@@ -1,7 +1,6 @@
 use anyhow::anyhow;
 use clap::Args;
 use pamm_lib::io::fs::fs_readable::NamedFSReadable;
-use pamm_lib::manifest::pack_manifest::PackManifest;
 use pamm_lib::pack::pack_config::PackConfig;
 use std::env::current_dir;
 use std::path::PathBuf;
@@ -17,7 +16,7 @@ pub fn launch_command(args: LaunchArgs) -> anyhow::Result<()> {
 
     let pack_config = PackConfig::read_from_named(&current_dir, &args.name)?
         .ok_or(anyhow!("Config for pack {} not found", args.name))?;
-    let addons = get_addon_paths(&args.name, &current_dir)?;
+    let addons = get_addon_paths(&pack_config, &current_dir)?;
 
     let mut launch_url = String::from("steam://rungameid/107410// -nolauncher ");
 
@@ -41,40 +40,24 @@ pub fn launch_command(args: LaunchArgs) -> anyhow::Result<()> {
 }
 
 fn get_addon_paths(
-    name: &str,
+    config: &PackConfig,
     base_path: &PathBuf,
 ) -> anyhow::Result<Box<dyn Iterator<Item = String>>> {
-    let local_manifest = PackManifest::read_from_named(base_path, name)?
-        .ok_or(anyhow!("Manifest for pack {} not found", name))?;
-    let pack_config = PackConfig::read_from_named(base_path, name)?
-        .ok_or(anyhow!("Config for pack {} not found", name))?;
+    let stored_index = config.read_index_from_fs(base_path)?;
 
-    let res = local_manifest
-        .get_addon_paths(base_path)?
-        .into_iter()
-        .map(clean_path);
+    let res = stored_index.get_addon_paths(base_path);
 
-    println!("Loaded addons for pack {}:", name);
+    println!("Loaded addons for pack {}:", config.name);
 
-    if let Some(parent_name) = pack_config.parent {
+    if let Some(parent_name) = &config.parent {
+        let parent_config = PackConfig::read_from_named(base_path, parent_name)?
+            .ok_or(anyhow!("Config for parent pack {} not found", parent_name))?;
         Ok(Box::new(
-            res.chain(get_addon_paths(&parent_name, base_path)?),
+            res.into_iter().chain(get_addon_paths(&parent_config, base_path)?),
         ))
     } else {
         Ok(Box::new(res.into_iter()))
     }
 }
 
-#[cfg(target_os = "windows")]
-fn clean_path(path: PathBuf) -> String {
-    path.to_str()
-        .expect("mods must be UTF-8")
-        .strip_prefix("\\\\?\\")
-        .unwrap()
-        .to_string()
-}
 
-#[cfg(target_os = "linux")]
-fn clean_path(path: PathBuf) -> String {
-    path.to_str().expect("mods must be UTF-8").to_string()
-}

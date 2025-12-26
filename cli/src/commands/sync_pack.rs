@@ -1,12 +1,14 @@
 use crate::utils::diff_to_string::ToPrettyString;
-use anyhow::{Context, anyhow};
+use anyhow::{anyhow, Context};
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::io::fs::fs_readable::{KnownFSReadable, NamedFSReadable};
 use pamm_lib::io::fs::fs_writable::{KnownFSWritable, NamedFSWritable};
 use pamm_lib::io::fs::pack::delete_pack::delete_pack;
+use pamm_lib::io::fs::pack::index_generator::IndexGenerator;
 use pamm_lib::io::net::downloadable::{KnownDownloadable, NamedDownloadable};
 use pamm_lib::pack::pack_config::PackConfig;
+use pamm_lib::pack::pack_diff::diff_packs;
 use pamm_lib::repo::repo_config::RepoConfig;
 use pamm_lib::repo::repo_user_settings::RepoUserSettings;
 use std::env::current_dir;
@@ -17,7 +19,7 @@ pub struct SyncPackArgs {
     #[arg()]
     pub name: String,
     #[arg(short, long, default_value_t = false)]
-    pub force: bool,
+    pub force_refresh: bool,
 }
 
 pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
@@ -39,16 +41,20 @@ pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
         anyhow::anyhow!("Pack config for '{}' not found locally", args.name),
     )?;
 
+    let index_generator = IndexGenerator::from_config(&local_pack_config, &current_dir)?;
+
+    if args.force_refresh {
+        index_generator.clear_cache()?;
+    }
+
+    let actual_index = index_generator.index_addons()?;
+
     let remote_pack_config =
         PackConfig::download_named(repo_user_settings.get_remote(), &args.name)?;
 
-    let local_manifest = PackManifest::gen_from_fs(&current_dir, &args.name, args.force)?;
+    let remote_index = remote_pack_config.download_index(repo_user_settings.get_remote())?;
 
-    let remote_url = repo_user_settings.get_remote();
-
-    let remote_manifest = PackManifest::download_named(remote_url, &args.name)?;
-
-    let diff = local_manifest.determine_pack_diff(&remote_manifest)?;
+    let diff = diff_packs(actual_index, remote_index.clone())?;
 
     if !diff.has_changes() {
         println!("Pack is already up to date.");
@@ -58,7 +64,7 @@ pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
     println!("{}", diff.to_pretty_string());
 
     let outcome = dialoguer::Confirm::with_theme(&ColorfulTheme::default())
-        .with_prompt("Do you want to apply these changes?")
+        .with_prompt("Do you want to download these changes?")
         .default(false)
         .interact()?;
 
@@ -67,19 +73,10 @@ pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
         return Ok(());
     }
 
-    apply_diff(&current_dir, &args.name, diff, remote_url)?;
+    let diff_applier =
+        local_pack_config.diff_applier(&current_dir, repo_user_settings.get_remote());
 
-    let fs_manifest = PackManifest::gen_from_fs(&current_dir, &args.name, false)?;
-
-    fs_manifest.write_to_named(&current_dir, &args.name)?;
-
-    let diff_after_patch = fs_manifest.determine_pack_diff(&remote_manifest)?;
-
-    if diff_after_patch.has_changes() {
-        return Err(anyhow::anyhow!(
-            "Pack is still out of date after applying diff"
-        ));
-    }
+    diff_applier.apply(diff)?;
 
     println!("Pack synchronized successfully.");
 
