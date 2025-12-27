@@ -20,14 +20,18 @@ impl GetSize for NodeDiff {
             NodeDiff::Created(entry) => entry.get_size(),
             NodeDiff::Modified(modification) => match &modification.kind {
                 ModifiedNodeKind::Folder(e) => e.iter().map(|child| child.get_size()).sum(),
-                ModifiedNodeKind::File { modification, .. } => match modification {
-                    FileModification::PBO { new_length, .. } => *new_length,
-                    FileModification::Generic { new_length } => *new_length,
-                },
+                ModifiedNodeKind::File { modification, .. } => modification.get_size(),
             },
             NodeDiff::Deleted(_) | NodeDiff::None => 0,
         }
     }
 }
 
-
+impl GetSize for FileModification {
+    fn get_size(&self) -> u64 {
+        match self {
+            FileModification::PBO { new_length, .. } => *new_length,
+            FileModification::Generic { new_length } => *new_length,
+        }
+    }
+}

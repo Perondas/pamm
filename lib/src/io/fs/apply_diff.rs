@@ -1,4 +1,4 @@
-use crate::index::get_change_count::GetChangeCount;
+use crate::index::get_size::GetSize;
 use crate::index::index_node::{IndexNode, NodeKind};
 use crate::index::node_diff::{ModifiedNodeKind, NodeDiff, NodeModification};
 use crate::io::name_consts::get_pack_addon_directory_name;
@@ -46,8 +46,8 @@ impl<P: ProgressReporter> DiffApplier<P> {
     pub fn apply(&self, diff: PackDiff) -> anyhow::Result<()> {
         let PackDiff(node_diffs) = diff;
 
-        let total_changes: u64 = node_diffs.iter().map(|c| c.get_change_count()).sum();
-        self.progress_reporter.start(total_changes);
+        let total_size: u64 = node_diffs.iter().map(|c| c.get_size()).sum();
+        self.progress_reporter.start_for_download(total_size);
         self.progress_reporter.report_message("Applying diff...");
 
         let res = node_diffs
@@ -89,7 +89,6 @@ impl<P: ProgressReporter> DiffApplier<P> {
         let path = parent_path.push(&name);
         let full_path = path.with_base_path(&self.addon_dir);
 
-        self.progress_reporter.report_progress(1);
         self.progress_reporter
             .report_message(&format!("Deleting {:?}", full_path));
 
@@ -119,7 +118,7 @@ impl<P: ProgressReporter> DiffApplier<P> {
                     length,
                 )?;
 
-                self.progress_reporter.report_progress(1);
+                self.progress_reporter.report_progress(length);
 
                 Ok(())
             }
@@ -153,11 +152,12 @@ impl<P: ProgressReporter> DiffApplier<P> {
                 }
             }
             ModifiedNodeKind::File { modification, .. } => {
+                let size = modification.get_size();
                 self.progress_reporter
                     .report_message(&format!("Modifying file {}", path));
                 self.remote_patcher
                     .patch_file(&path, &file_path, modification)?;
-                self.progress_reporter.report_progress(1);
+                self.progress_reporter.report_progress(size);
             }
         }
 
