@@ -90,7 +90,7 @@ impl<P: ProgressReporter> DiffApplier<P> {
         let full_path = path.with_base_path(&self.addon_dir);
 
         self.progress_reporter
-            .report_message(&format!("Deleting {:?}", full_path));
+            .report_message(&format!("Deleting {}", path));
 
         if full_path.is_dir() {
             fs::remove_dir_all(&full_path).context("Failed to delete directory")
