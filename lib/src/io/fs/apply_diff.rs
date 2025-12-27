@@ -60,11 +60,16 @@ impl<P: ProgressReporter> DiffApplier<P> {
         let errors: Vec<anyhow::Error> = res.into_iter().filter_map(|r| r.err()).collect();
 
         if !errors.is_empty() {
-            let combined_error = errors.into_iter().fold(
-                anyhow::anyhow!("One or more errors occurred while applying diff"),
-                |acc, err| acc.context(err),
-            );
-            return Err(combined_error);
+            let combined_error = errors
+                .into_iter()
+                .map(|e| format!("{:#}", e))
+                .collect::<Vec<_>>()
+                .join("\n");
+
+            return Err(anyhow::anyhow!(
+                "Errors occurred while applying diff:\n{}",
+                combined_error
+            ));
         }
 
         Ok(())
@@ -109,8 +114,6 @@ impl<P: ProgressReporter> DiffApplier<P> {
 
         match node.kind {
             NodeKind::File { length, .. } => {
-
-
                 self.remote_patcher.create_file(
                     &path,
                     &path.with_base_path(&self.addon_dir),
@@ -157,7 +160,8 @@ impl<P: ProgressReporter> DiffApplier<P> {
                 self.progress_reporter
                     .report_message(&format!("Modifying file {}", path));
                 self.remote_patcher
-                    .patch_file(&path, &file_path, modification)?;
+                    .patch_file(&path, &file_path, modification)
+                    .context(format!("Failed to patch: {}", path))?;
                 self.progress_reporter.report_progress(size);
             }
         }

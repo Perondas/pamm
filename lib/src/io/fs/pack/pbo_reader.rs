@@ -19,6 +19,8 @@ impl IndexNode {
             // Hash Data
             let mut file_hasher = blake3::Hasher::new();
             file_hasher.update(&data);
+            file_hasher.update(&file.filename.0);
+            file_hasher.update(&file.size.to_le_bytes());
             let file_checksum = file_hasher.finalize().as_bytes().to_vec();
 
             parts.push(PBOPart {

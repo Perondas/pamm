@@ -1,8 +1,10 @@
 use crate::index::index_node::PBOPart;
 use crate::index::node_diff::FileModification;
+use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::io::net::byte_range_response::{ByteRangeResponse, IntoByteRangeResponse};
 use crate::io::net::download_file::download_file;
 use crate::io::rel_path::RelPath;
+use crate::pack::pack_config::PackConfig;
 use anyhow::{Context, Result};
 use bi_fs_rs::pbo::handle::PBOHandle;
 use std::fs::File;
@@ -11,8 +13,6 @@ use std::path::Path;
 use std::{fs, iter};
 use ureq::BodyReader;
 use url::Url;
-use crate::io::name_consts::get_pack_addon_directory_name;
-use crate::pack::pack_config::PackConfig;
 
 pub struct RemotePatcher {
     addon_dir_url: Url,
@@ -76,7 +76,8 @@ impl RemotePatcher {
                             .ok_or_else(|| anyhow::anyhow!("No response for PBO part"))??;
                         temp_file.write_all(&part_data)?;
                     } else {
-                        let data = pbo_handle.get_file_content(&part.name)?;
+                        let data = pbo_handle
+                            .get_file_content(&part.name)?;
                         temp_file.write_all(&data)?;
                     }
                 }
