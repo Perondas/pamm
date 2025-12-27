@@ -71,6 +71,12 @@ impl<P: ProgressReporter> DiffApplier<P> {
     }
 
     fn apply_node_diff(&self, node_diff: NodeDiff, parent_path: RelPath) -> anyhow::Result<()> {
+        /*  self.progress_reporter.report_message(&format!(
+            "Applying node diff:{:#?} to {:?}",
+            node_diff,
+            parent_path.with_base_path(&self.addon_dir)
+        ));*/
+
         match node_diff {
             NodeDiff::Created(node) => self.create_node(node, parent_path),
             NodeDiff::Deleted(name) => self.delete_node(name, parent_path),
@@ -118,6 +124,12 @@ impl<P: ProgressReporter> DiffApplier<P> {
                 Ok(())
             }
             NodeKind::Folder(children) => {
+                let dir_path = path.with_base_path(&self.addon_dir);
+                self.progress_reporter
+                    .report_message(&format!("Creating directory {:?}", dir_path));
+                fs::create_dir(&dir_path)
+                    .with_context(|| format!("Failed to create directory {:?}", dir_path))?;
+
                 for child in children {
                     self.create_node(child, path.clone())?;
                 }
