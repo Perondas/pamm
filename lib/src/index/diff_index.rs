@@ -1,6 +1,6 @@
 use crate::index::index_node::{FileKind, IndexNode, NodeKind, PBOPart};
 use crate::index::node_diff::{FileModification, ModifiedNodeKind, NodeDiff, NodeModification};
-use crate::util::iterator_diff::{DiffResult, diff_iterators};
+use crate::util::iterator_diff::{diff_iterators, DiffResult};
 
 pub fn diff_index(left: IndexNode, right: IndexNode) -> anyhow::Result<NodeDiff> {
     let IndexNode {
@@ -109,10 +109,7 @@ fn diff_folders(
         same,
     } = diff_iterators(old, new, |node| node.name.clone());
 
-    let added = added
-        .into_iter()
-        .map(NodeDiff::Created)
-        .collect::<Vec<_>>();
+    let added = added.into_iter().map(NodeDiff::Created).collect::<Vec<_>>();
 
     let removed = removed
         .into_iter()

@@ -76,8 +76,7 @@ impl RemotePatcher {
                             .ok_or_else(|| anyhow::anyhow!("No response for PBO part"))??;
                         temp_file.write_all(&part_data)?;
                     } else {
-                        let data = pbo_handle
-                            .get_file_content(&part.name)?;
+                        let data = pbo_handle.get_file_content(&part.name)?;
                         temp_file.write_all(&data)?;
                     }
                 }

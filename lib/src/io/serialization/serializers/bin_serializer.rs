@@ -1,6 +1,6 @@
 use anyhow::Context;
-use serde::Serialize;
 use serde::de::DeserializeOwned;
+use serde::Serialize;
 
 // Binary serialization using bincode
 

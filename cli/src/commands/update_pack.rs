@@ -17,7 +17,7 @@ pub struct UpdatePackArgs {
     /// Force refresh all addons, ignoring cached state
     #[arg(short, long, action)]
     pub force_refresh: bool,
-    
+
     /// Silent mode, minimal output
     #[arg(short, long, action)]
     pub silent: bool,
@@ -30,15 +30,14 @@ pub fn update_pack_command(args: UpdatePackArgs) -> anyhow::Result<()> {
         PackConfig::read_from_named(&current_dir, &args.name)?.expect("Missing pack config");
 
     let stored_index = config.read_index_from_fs(&current_dir)?;
-    
+
     let progress_reporter = if args.silent {
         IndicatifProgressReporter::disabled()
     } else {
         IndicatifProgressReporter::default()
     };
 
-    let index_generator =
-        IndexGenerator::from_config(&config, &current_dir, progress_reporter)?;
+    let index_generator = IndexGenerator::from_config(&config, &current_dir, progress_reporter)?;
 
     if args.force_refresh {
         index_generator.clear_cache()?;

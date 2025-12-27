@@ -1,15 +1,16 @@
 use crate::index::index_node::IndexNode;
 use crate::io::name_consts::{get_pack_addon_directory_name, INDEX_DIR_NAME};
+use crate::io::net::downloadable::NamedDownloadable;
 use crate::pack::pack_config::PackConfig;
 use crate::pack::pack_index::PackIndex;
 use anyhow::Result;
 use rayon::prelude::*;
 use url::Url;
-use crate::io::net::downloadable::NamedDownloadable;
 
 impl PackConfig {
     pub fn download_index(&self, base_url: &Url) -> Result<PackIndex> {
-        let addon_dir = base_url.join(&format!("{}/", get_pack_addon_directory_name(&self.name)))?;
+        let addon_dir =
+            base_url.join(&format!("{}/", get_pack_addon_directory_name(&self.name)))?;
         let index_dir = addon_dir.join(&format!("{}/", INDEX_DIR_NAME))?;
 
         let indexes = self

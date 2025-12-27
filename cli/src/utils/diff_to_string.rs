@@ -18,13 +18,8 @@ impl ToPrettyString for PackDiff {
             result.push_str("Changes:\n");
             result.push_str(&diffs_to_string(changes, ""));
             result.push('\n');
-            result.push_str(
-                format!(
-                    "Total change size: {}",
-                    DecimalBytes(self.get_size())
-                )
-                .as_str(),
-            );
+            result
+                .push_str(format!("Total change size: {}", DecimalBytes(self.get_size())).as_str());
         }
 
         result
@@ -62,7 +57,11 @@ fn entry_creation_to_string(entry: &IndexNode, base_path: &str) -> String {
             result
         }
         NodeKind::File { length, .. } => {
-            format!("Created file: {} of length {}\n", path, DecimalBytes(*length))
+            format!(
+                "Created file: {} of length {}\n",
+                path,
+                DecimalBytes(*length)
+            )
         }
     }
 }
@@ -74,7 +73,11 @@ fn entry_modification_to_string(entry: &NodeModification, base_path: &str) -> St
         ModifiedNodeKind::Folder(children) => diffs_to_string(children, base_path),
         ModifiedNodeKind::File { modification, .. } => match modification {
             FileModification::Generic { new_length } => {
-                format!("Modified file: {} to new length: {}\n", path, DecimalBytes(*new_length))
+                format!(
+                    "Modified file: {} to new length: {}\n",
+                    path,
+                    DecimalBytes(*new_length)
+                )
             }
             FileModification::PBO {
                 required_parts_size,
@@ -83,7 +86,9 @@ fn entry_modification_to_string(entry: &NodeModification, base_path: &str) -> St
             } => {
                 format!(
                     "Modified PBO file: {} with to new length: {}\nThis PBO patch requires {} of data.\n",
-                    path, DecimalBytes(*new_length), DecimalBytes(*required_parts_size)
+                    path,
+                    DecimalBytes(*new_length),
+                    DecimalBytes(*required_parts_size)
                 )
             }
         },
