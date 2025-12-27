@@ -1,3 +1,4 @@
+use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::ToPrettyString;
 use anyhow::{anyhow, Context};
 use clap::Args;
@@ -73,8 +74,11 @@ pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
         return Ok(());
     }
 
-    let diff_applier =
-        local_pack_config.diff_applier(&current_dir, repo_user_settings.get_remote());
+    let diff_applier = local_pack_config.diff_applier(
+        &current_dir,
+        repo_user_settings.get_remote(),
+        IndicatifProgressReporter::new(),
+    );
 
     diff_applier.apply(diff)?;
 

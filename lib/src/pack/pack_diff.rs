@@ -11,6 +11,9 @@ impl PackDiff {
     pub fn has_changes(&self) -> bool {
         self.0.iter().any(|c| !matches!(c, NodeDiff::None))
     }
+    pub fn change_count(&self) -> usize {
+        self.0.iter().filter(|c| !matches!(c, NodeDiff::None)).count()
+    }
 }
 
 pub fn diff_packs(old_pack: PackIndex, new_pack: PackIndex) -> Result<PackDiff> {
