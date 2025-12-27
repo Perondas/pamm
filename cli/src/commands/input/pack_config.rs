@@ -10,7 +10,7 @@ use std::path::PathBuf;
 impl FromCliInputWithContext for PackConfig {
     fn from_cli_input(repo_config: &RepoConfig) -> Result<Self> {
         let name = dialoguer::Input::<String>::with_theme(&ColorfulTheme::default())
-            .with_prompt("Repo Name")
+            .with_prompt("Pack Name")
             .allow_empty(true)
             .validate_with(|input: &String| -> Result<(), &str> {
                 let path = PackConfig::get_file_name(input);
