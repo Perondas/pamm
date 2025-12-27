@@ -21,6 +21,9 @@ pub struct SyncPackArgs {
     pub name: String,
     #[arg(short, long, default_value_t = false)]
     pub force_refresh: bool,
+    /// Silent mode, minimal output
+    #[arg(short, long, action)]
+    pub silent: bool,
 }
 
 pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
@@ -42,11 +45,14 @@ pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
         anyhow::anyhow!("Pack config for '{}' not found locally", args.name),
     )?;
 
-    let index_generator = IndexGenerator::from_config(
-        &local_pack_config,
-        &current_dir,
-        IndicatifProgressReporter::new(),
-    )?;
+    let progress_reporter = if args.silent {
+        IndicatifProgressReporter::disabled()
+    } else {
+        IndicatifProgressReporter::default()
+    };
+
+    let index_generator =
+        IndexGenerator::from_config(&local_pack_config, &current_dir, progress_reporter)?;
 
     if args.force_refresh {
         index_generator.clear_cache()?;
