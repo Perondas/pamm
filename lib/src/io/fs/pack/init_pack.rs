@@ -1,4 +1,4 @@
-use crate::io::name_consts::get_pack_addon_directory_name;
+use crate::io::name_consts::{get_pack_addon_directory_name, INDEX_DIR_NAME};
 use crate::pack::pack_config::PackConfig;
 use std::fs;
 use std::path::Path;
@@ -14,7 +14,11 @@ impl PackConfig {
 
         fs::create_dir(parent_dir.join(&addon_dir_name))?;
 
-        self.write_to_named(&parent_dir, &self.name)?;
+        let index_dir = parent_dir.join(&addon_dir_name).join(INDEX_DIR_NAME);
+
+        fs::create_dir(&index_dir)?;
+
+        self.write_to_named(parent_dir, &self.name)?;
 
         Ok(())
     }
