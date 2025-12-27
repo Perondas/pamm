@@ -2,6 +2,7 @@ use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use crate::index::index_node::IndexNode;
 use serde::{Deserialize, Serialize};
+use crate::io::fs::util::clean_path::clean_path;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PackIndex {
@@ -24,19 +25,4 @@ impl PackIndex {
             .map(clean_path)
             .collect()
     }
-}
-
-
-#[cfg(target_os = "windows")]
-fn clean_path(path: PathBuf) -> String {
-    path.to_str()
-        .expect("mods must be UTF-8")
-        .strip_prefix("\\\\?\\")
-        .unwrap()
-        .to_string()
-}
-
-#[cfg(target_os = "linux")]
-fn clean_path(path: PathBuf) -> String {
-    path.to_str().expect("mods must be UTF-8").to_string()
 }
