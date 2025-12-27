@@ -62,7 +62,7 @@ fn entry_creation_to_string(entry: &IndexNode, base_path: &str) -> String {
             result
         }
         NodeKind::File { length, .. } => {
-            format!("Created file: {} of length {}\n", path, length)
+            format!("Created file: {} of length {}\n", path, format_size(*length, DECIMAL))
         }
     }
 }
@@ -74,7 +74,7 @@ fn entry_modification_to_string(entry: &NodeModification, base_path: &str) -> St
         ModifiedNodeKind::Folder(children) => diffs_to_string(children, base_path),
         ModifiedNodeKind::File { modification, .. } => match modification {
             FileModification::Generic { new_length } => {
-                format!("Modified file: {} to new length: {}\n", path, new_length)
+                format!("Modified file: {} to new length: {}\n", path, format_size(*new_length, DECIMAL))
             }
             FileModification::PBO {
                 required_parts_size,
@@ -82,8 +82,8 @@ fn entry_modification_to_string(entry: &NodeModification, base_path: &str) -> St
                 ..
             } => {
                 format!(
-                    "Modified PBO file: {} with to new length: {}\nThis PBO patch requires {} bytes of data.\n",
-                    path, new_length, required_parts_size
+                    "Modified PBO file: {} with to new length: {}\nThis PBO patch requires {} of data.\n",
+                    path, format_size(*new_length, DECIMAL), format_size(*required_parts_size, DECIMAL)
                 )
             }
         },
