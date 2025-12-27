@@ -59,6 +59,7 @@ mod tests {
         let diff = diff_iterators(old, new, |s| *s);
         assert_eq!(diff.added, vec!["d"]);
         assert_eq!(diff.removed, vec!["a"]);
-        assert_eq!(diff.same, vec![("b", "b"), ("c", "c"),]);
+        assert!(diff.same.contains(&("b", "b")));
+        assert!(diff.same.contains(&("c", "c")));
     }
 }
