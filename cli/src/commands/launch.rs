@@ -1,9 +1,10 @@
 use anyhow::anyhow;
+use anyhow::Result;
 use clap::Args;
 use pamm_lib::io::fs::fs_readable::NamedFSReadable;
 use pamm_lib::pack::pack_config::PackConfig;
 use std::env::current_dir;
-use std::path::PathBuf;
+use std::path::Path;
 
 #[derive(Debug, Args)]
 pub struct LaunchArgs {
@@ -25,7 +26,7 @@ pub fn launch_command(args: LaunchArgs) -> anyhow::Result<()> {
         launch_url.push(' ');
     }
 
-    let addons_combined = addons.collect::<Vec<_>>().join(";");
+    let addons_combined = addons.join(";");
 
     println!("Mods to load: {}", addons_combined);
 
@@ -39,25 +40,18 @@ pub fn launch_command(args: LaunchArgs) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn get_addon_paths(
-    config: &PackConfig,
-    base_path: &PathBuf,
-) -> anyhow::Result<Box<dyn Iterator<Item = String>>> {
-    let stored_index = config.read_index_from_fs(base_path)?;
-
-    let res = stored_index.get_addon_paths(base_path);
-
-    println!("Loaded addons for pack {}:", config.name);
+fn get_addon_paths(config: &PackConfig, base_path: &Path) -> Result<Vec<String>> {
+    let own_addons = config.get_addon_paths(base_path);
 
     if let Some(parent_name) = &config.parent {
         let parent_config = PackConfig::read_from_named(base_path, parent_name)?
             .ok_or(anyhow!("Config for parent pack {} not found", parent_name))?;
-        Ok(Box::new(
-            res.into_iter().chain(get_addon_paths(&parent_config, base_path)?),
-        ))
+
+        Ok(own_addons
+            .into_iter()
+            .chain(get_addon_paths(&parent_config, base_path)?)
+            .collect())
     } else {
-        Ok(Box::new(res.into_iter()))
+        Ok(own_addons)
     }
 }
-
-
