@@ -2,7 +2,7 @@ use crate::index::diff_index::diff_index;
 use crate::index::get_size::GetSize;
 use crate::index::node_diff::NodeDiff;
 use crate::pack::pack_index::PackIndex;
-use crate::util::iterator_diff::{DiffResult, diff_iterators};
+use crate::util::iterator_diff::{diff_iterators, DiffResult};
 use anyhow::Result;
 
 pub struct PackDiff(pub Vec<NodeDiff>);
@@ -12,7 +12,10 @@ impl PackDiff {
         self.0.iter().any(|c| !matches!(c, NodeDiff::None))
     }
     pub fn change_count(&self) -> usize {
-        self.0.iter().filter(|c| !matches!(c, NodeDiff::None)).count()
+        self.0
+            .iter()
+            .filter(|c| !matches!(c, NodeDiff::None))
+            .count()
     }
 }
 

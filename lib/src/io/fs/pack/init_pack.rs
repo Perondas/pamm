@@ -1,8 +1,8 @@
+use crate::io::fs::fs_writable::NamedFSWritable;
 use crate::io::name_consts::{get_pack_addon_directory_name, INDEX_DIR_NAME};
 use crate::pack::pack_config::PackConfig;
 use std::fs;
 use std::path::Path;
-use crate::io::fs::fs_writable::NamedFSWritable;
 
 impl PackConfig {
     pub fn init_blank_on_fs(&self, parent_dir: &Path) -> anyhow::Result<()> {

@@ -50,9 +50,11 @@ impl ProgressReporter for IndicatifProgressReporter {
             return;
         }
         let progress_bar = ProgressBar::no_length();
-        progress_bar.set_style(ProgressStyle::default_spinner()
-            .template("{spinner:.green} [{elapsed_precise}] {msg}")
-            .unwrap());
+        progress_bar.set_style(
+            ProgressStyle::default_spinner()
+                .template("{spinner:.green} [{elapsed_precise}] {msg}")
+                .unwrap(),
+        );
         progress_bar.enable_steady_tick(Duration::from_secs(1));
         let mut pb_lock = self.progress_bar.write().unwrap();
         *pb_lock = Some(progress_bar);

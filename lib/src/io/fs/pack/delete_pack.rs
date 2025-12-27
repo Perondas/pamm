@@ -1,7 +1,7 @@
 use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::io::named::NamedFile;
 use crate::pack::pack_config::PackConfig;
-use anyhow::{Context, Result, anyhow};
+use anyhow::{anyhow, Context, Result};
 use std::path::Path;
 
 pub fn delete_pack(base_path: &Path, pack_name: &str) -> Result<()> {

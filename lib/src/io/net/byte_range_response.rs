@@ -1,10 +1,10 @@
-use anyhow::Context;
 use anyhow::anyhow;
+use anyhow::Context;
 use regex::Regex;
 use std::io::{BufRead, BufReader, Read};
 use std::sync::LazyLock;
-use ureq::http::Response;
 use ureq::http::header::CONTENT_TYPE;
+use ureq::http::Response;
 use ureq::{Body, BodyReader};
 
 static CONTENT_RANGE_HEADER: LazyLock<Regex> =
