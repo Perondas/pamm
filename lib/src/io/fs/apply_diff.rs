@@ -126,7 +126,7 @@ impl<P: ProgressReporter> DiffApplier<P> {
             NodeKind::Folder(children) => {
                 let dir_path = path.with_base_path(&self.addon_dir);
                 self.progress_reporter
-                    .report_message(&format!("Creating directory {:?}", dir_path));
+                    .report_message(&format!("Creating directory {}", path));
                 fs::create_dir(&dir_path)
                     .with_context(|| format!("Failed to create directory {:?}", dir_path))?;
 
