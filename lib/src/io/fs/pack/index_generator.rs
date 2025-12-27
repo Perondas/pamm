@@ -116,8 +116,6 @@ impl<P: ProgressReporter> IndexGenerator<P> {
         let checksum = hasher.finalize().as_bytes().to_vec();
 
         self.progress_reporter.report_progress(1);
-        self.progress_reporter
-            .report_message(&format!("Indexed folder: {:?}", fs_path));
 
         Ok(IndexNode {
             name,
@@ -155,8 +153,6 @@ impl<P: ProgressReporter> IndexGenerator<P> {
             && cached_length == length
         {
             self.progress_reporter.report_progress(1);
-            self.progress_reporter
-                .report_message(&format!("Cached file: {:?}", fs_path));
             return Ok(node);
         }
 
@@ -190,7 +186,7 @@ impl<P: ProgressReporter> IndexGenerator<P> {
 
         self.progress_reporter.report_progress(1);
         self.progress_reporter
-            .report_message(&format!("Indexed file: {:?}", fs_path));
+            .report_message(&format!("Indexed file: {}", rel_path));
 
         Ok(index)
     }
