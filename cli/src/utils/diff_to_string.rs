@@ -1,4 +1,4 @@
-use humansize::{DECIMAL, format_size};
+use indicatif::DecimalBytes;
 use pamm_lib::index::get_size::GetSize;
 use pamm_lib::index::index_node::{IndexNode, NodeKind};
 use pamm_lib::index::node_diff::{FileModification, ModifiedNodeKind, NodeDiff, NodeModification};
@@ -21,7 +21,7 @@ impl ToPrettyString for PackDiff {
             result.push_str(
                 format!(
                     "Total change size: {}",
-                    format_size(self.get_size(), DECIMAL)
+                    DecimalBytes(self.get_size())
                 )
                 .as_str(),
             );
@@ -62,7 +62,7 @@ fn entry_creation_to_string(entry: &IndexNode, base_path: &str) -> String {
             result
         }
         NodeKind::File { length, .. } => {
-            format!("Created file: {} of length {}\n", path, format_size(*length, DECIMAL))
+            format!("Created file: {} of length {}\n", path, DecimalBytes(*length))
         }
     }
 }
@@ -74,7 +74,7 @@ fn entry_modification_to_string(entry: &NodeModification, base_path: &str) -> St
         ModifiedNodeKind::Folder(children) => diffs_to_string(children, base_path),
         ModifiedNodeKind::File { modification, .. } => match modification {
             FileModification::Generic { new_length } => {
-                format!("Modified file: {} to new length: {}\n", path, format_size(*new_length, DECIMAL))
+                format!("Modified file: {} to new length: {}\n", path, DecimalBytes(*new_length))
             }
             FileModification::PBO {
                 required_parts_size,
@@ -83,7 +83,7 @@ fn entry_modification_to_string(entry: &NodeModification, base_path: &str) -> St
             } => {
                 format!(
                     "Modified PBO file: {} with to new length: {}\nThis PBO patch requires {} of data.\n",
-                    path, format_size(*new_length, DECIMAL), format_size(*required_parts_size, DECIMAL)
+                    path, DecimalBytes(*new_length), DecimalBytes(*required_parts_size)
                 )
             }
         },
