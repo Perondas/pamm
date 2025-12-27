@@ -109,8 +109,7 @@ impl<P: ProgressReporter> DiffApplier<P> {
 
         match node.kind {
             NodeKind::File { length, .. } => {
-                self.progress_reporter
-                    .report_message(&format!("Downloading file {}", path));
+
 
                 self.remote_patcher.create_file(
                     &path,
@@ -118,6 +117,8 @@ impl<P: ProgressReporter> DiffApplier<P> {
                     length,
                 )?;
 
+                self.progress_reporter
+                    .report_message(&format!("Downloaded file {}", path));
                 self.progress_reporter.report_progress(length);
 
                 Ok(())

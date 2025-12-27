@@ -58,7 +58,7 @@ impl FromCliInputWithContext for PackConfig {
         if !repo_config.packs.is_empty() {
             // We don't check for loops because we assume that users will never edit the pack config manually
             parent = dialoguer::Select::new()
-                .with_prompt("Select Parent Pack (if any)")
+                .with_prompt("Select Parent Pack (if any) ESC to skip")
                 .items(&pack_vec)
                 .interact_opt()?
                 .map(|i| pack_vec[i].clone());
