@@ -72,6 +72,8 @@ impl<P: ProgressReporter> IndexGenerator<P> {
             .map(|p| self.index_dir(p))
             .collect::<Result<Vec<_>>>()?;
 
+        self.progress_reporter.finish();
+
         Ok(PackIndex {
             addons: indexes,
             pack_name: self.pack_name.clone(),
