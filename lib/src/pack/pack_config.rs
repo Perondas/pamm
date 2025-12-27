@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use crate::pack::server_info::ServerInfo;
 use serde::{Deserialize, Serialize};
 
@@ -8,7 +9,7 @@ pub struct PackConfig {
     pub client_params: Vec<String>,
     pub servers: Vec<ServerInfo>,
     pub parent: Option<String>,
-    pub(crate) addons: Vec<String>,
+    pub(crate) addons: HashSet<String>,
 }
 
 impl PackConfig {
@@ -25,11 +26,11 @@ impl PackConfig {
             client_params,
             servers,
             parent,
-            addons: Vec::new(),
+            addons: HashSet::new(),
         }
     }
 
-    pub fn with_addons(mut self, addons: Vec<String>) -> Self {
+    pub fn with_addons(mut self, addons: HashSet<String>) -> Self {
         self.addons = addons;
         self
     }

@@ -1,6 +1,7 @@
 pub mod args;
 pub mod commands;
 pub mod utils;
+pub mod progress_reporting;
 
 use crate::args::{AppSubcommand, Args};
 use crate::commands::add_pack::add_pack_command;

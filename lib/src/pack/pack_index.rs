@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use crate::index::index_node::IndexNode;
 use serde::{Deserialize, Serialize};
@@ -9,7 +10,7 @@ pub struct PackIndex {
 }
 
 impl PackIndex {
-    pub fn to_names(self) -> Vec<String> {
+    pub fn to_names(self) -> HashSet<String> {
         self.addons
             .into_iter()
             .map(|node| node.name)

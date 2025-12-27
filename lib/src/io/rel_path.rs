@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use std::path::{Path, PathBuf};
 use url::Url;
 
@@ -9,6 +10,12 @@ pub(crate) struct RelPath {
 impl Default for RelPath {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl Display for RelPath {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.as_str())
     }
 }
 
