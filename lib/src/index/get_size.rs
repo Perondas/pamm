@@ -30,7 +30,7 @@ impl GetSize for NodeDiff {
 impl GetSize for FileModification {
     fn get_size(&self) -> u64 {
         match self {
-            FileModification::PBO { new_length, .. } => *new_length,
+            FileModification::PBO { required_parts_size, .. } => *required_parts_size,
             FileModification::Generic { new_length } => *new_length,
         }
     }
