@@ -1,6 +1,7 @@
-use indicatif::ProgressBar;
+use indicatif::{ProgressBar, ProgressStyle};
 use pamm_lib::io::progress_reporting::progress_reporter::ProgressReporter;
 use std::sync::{Arc, RwLock};
+use std::time::Duration;
 
 #[derive(Clone)]
 pub struct IndicatifProgressReporter {
@@ -21,7 +22,7 @@ impl IndicatifProgressReporter {
             progress_bar: Arc::new(RwLock::new(None)),
         }
     }
-    
+
     pub fn disabled() -> Self {
         Self {
             enabled: false,
@@ -31,11 +32,15 @@ impl IndicatifProgressReporter {
 }
 
 impl ProgressReporter for IndicatifProgressReporter {
-    fn start(&self, total_work: u64) {
+    fn start_for_download(&self, total_work: u64) {
         if !self.enabled {
             return;
         }
         let progress_bar = ProgressBar::new(total_work);
+        progress_bar.set_style(ProgressStyle::default_bar()
+            .template("{spinner:.green} [{elapsed_precise}] [{bar:60.cyan/blue}] {bytes}/{total_bytes}@{bytes_per_sec} ({eta})")
+            .unwrap());
+        progress_bar.enable_steady_tick(Duration::from_secs(1));
         let mut pb_lock = self.progress_bar.write().unwrap();
         *pb_lock = Some(progress_bar);
     }
@@ -45,6 +50,10 @@ impl ProgressReporter for IndicatifProgressReporter {
             return;
         }
         let progress_bar = ProgressBar::no_length();
+        progress_bar.set_style(ProgressStyle::default_spinner()
+            .template("{spinner:.green} [{elapsed_precise}] {msg}")
+            .unwrap());
+        progress_bar.enable_steady_tick(Duration::from_secs(1));
         let mut pb_lock = self.progress_bar.write().unwrap();
         *pb_lock = Some(progress_bar);
     }
