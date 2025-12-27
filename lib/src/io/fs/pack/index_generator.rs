@@ -5,6 +5,7 @@ use crate::io::fs::cache::file_cache_entry::FileCacheEntry;
 use crate::io::fs::cache::kv_cache::KVCache;
 use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::io::name_consts::CACHE_DB_DIR_NAME;
+use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::io::rel_path::RelPath;
 use crate::pack::pack_config::PackConfig;
 use crate::pack::pack_index::PackIndex;
@@ -21,14 +22,15 @@ use std::sync::LazyLock;
 static PBO_NAME_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^(.+)\.pbo$").unwrap());
 static ADDON_FOLDER_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^@.*$").unwrap());
 
-pub struct IndexGenerator {
+pub struct IndexGenerator<P: ProgressReporter> {
     addon_dir: PathBuf,
     cache: KVCache,
     pack_name: String,
+    progress_reporter: P,
 }
 
-impl IndexGenerator {
-    pub fn from_config(config: &PackConfig, base_dir: &Path) -> Result<Self> {
+impl<P: ProgressReporter> IndexGenerator<P> {
+    pub fn from_config(config: &PackConfig, base_dir: &Path, progress_reporter: P) -> Result<Self> {
         let addon_dir = base_dir.join(get_pack_addon_directory_name(&config.name));
 
         if !addon_dir.is_dir() {
@@ -42,6 +44,7 @@ impl IndexGenerator {
             addon_dir,
             cache,
             pack_name: config.name.clone(),
+            progress_reporter,
         })
     }
 
@@ -53,6 +56,9 @@ impl IndexGenerator {
         let addon_folders = std::fs::read_dir(&self.addon_dir)?;
 
         let base_path = RelPath::new();
+
+        self.progress_reporter.start_without_len();
+        self.progress_reporter.report_message("Indexing addons...");
 
         let rel_paths = addon_folders
             .filter_map(Result::ok)
@@ -107,6 +113,10 @@ impl IndexGenerator {
         }
         let checksum = hasher.finalize().as_bytes().to_vec();
 
+        self.progress_reporter.report_progress(1);
+        self.progress_reporter
+            .report_message(&format!("Indexed folder: {:?}", fs_path));
+
         Ok(IndexNode {
             name,
             checksum,
@@ -142,6 +152,9 @@ impl IndexGenerator {
             && cached_last_modified == last_modified
             && cached_length == length
         {
+            self.progress_reporter.report_progress(1);
+            self.progress_reporter
+                .report_message(&format!("Cached file: {:?}", fs_path));
             return Ok(node);
         }
 
@@ -153,11 +166,11 @@ impl IndexGenerator {
         ) {
             match index_pbo(&fs_path) {
                 Ok(part) => Ok(part),
-                Err(e) => {
-                    println!(
-                        "Warning: Failed to read PBO file {:?}, falling back to generic file. Error: {}",
-                        fs_path, e
-                    );
+                Err(_) => {
+                    self.progress_reporter.report_message(&format!(
+                        "Warning: Failed to read PBO file {}, falling back to generic file",
+                        rel_path
+                    ));
                     index_generic_file(&fs_path)
                 }
             }
@@ -172,6 +185,10 @@ impl IndexGenerator {
         };
 
         self.cache.set(rel_path.as_str(), file_cache)?;
+
+        self.progress_reporter.report_progress(1);
+        self.progress_reporter
+            .report_message(&format!("Indexed file: {:?}", fs_path));
 
         Ok(index)
     }

@@ -1,3 +1,4 @@
+use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::ToPrettyString;
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
@@ -26,7 +27,8 @@ pub fn update_pack_command(args: UpdatePackArgs) -> anyhow::Result<()> {
 
     let stored_index = config.read_index_from_fs(&current_dir)?;
 
-    let index_generator = IndexGenerator::from_config(&config, &current_dir)?;
+    let index_generator =
+        IndexGenerator::from_config(&config, &current_dir, IndicatifProgressReporter::new())?;
 
     if args.force_refresh {
         index_generator.clear_cache()?;

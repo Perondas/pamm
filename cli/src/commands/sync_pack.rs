@@ -42,7 +42,11 @@ pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
         anyhow::anyhow!("Pack config for '{}' not found locally", args.name),
     )?;
 
-    let index_generator = IndexGenerator::from_config(&local_pack_config, &current_dir)?;
+    let index_generator = IndexGenerator::from_config(
+        &local_pack_config,
+        &current_dir,
+        IndicatifProgressReporter::new(),
+    )?;
 
     if args.force_refresh {
         index_generator.clear_cache()?;
