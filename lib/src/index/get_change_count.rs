@@ -1,6 +1,8 @@
 use crate::index::index_node::{IndexNode, NodeKind};
 use crate::index::node_diff::{ModifiedNodeKind, NodeDiff, NodeModification};
 
+// TODO: maybe remove this trait
+#[allow(dead_code)]
 pub(crate) trait GetChangeCount {
     fn get_change_count(&self) -> u64;
 }
