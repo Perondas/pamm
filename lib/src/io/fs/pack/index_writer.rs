@@ -1,7 +1,7 @@
 use crate::index::index_node::IndexNode;
 use crate::index::node_diff::{NodeDiff, NodeModification};
 use crate::io::fs::fs_deletable::NamedFsDeletable;
-use crate::io::fs::fs_writable::{IdentifiableFSWritable, NamedFSWritable};
+use crate::io::fs::fs_writable::IdentifiableFSWritable;
 use crate::io::name_consts::{INDEX_DIR_NAME, get_pack_addon_directory_name};
 use crate::pack::pack_diff::PackDiff;
 use crate::pack::pack_index::PackIndex;

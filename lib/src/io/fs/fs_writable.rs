@@ -16,11 +16,11 @@ impl<T: Writable> FsWritable for T {
 }
 
 pub trait KnownFSWritable: FsWritable + KnownFile {
-    fn write_to_known<P: AsRef<Path>>(&self, path: P) -> anyhow::Result<()>;
+    fn write_to<P: AsRef<Path>>(&self, path: P) -> anyhow::Result<()>;
 }
 
 impl<T: FsWritable + KnownFile> KnownFSWritable for T {
-    fn write_to_known<P: AsRef<Path>>(&self, path: P) -> anyhow::Result<()> {
+    fn write_to<P: AsRef<Path>>(&self, path: P) -> anyhow::Result<()> {
         let full_path = path.as_ref().join(Self::file_name());
         self.write_to_path(full_path)
     }

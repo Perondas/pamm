@@ -17,7 +17,7 @@ pub fn add_pack_command(_args: AddPackArgs) -> anyhow::Result<()> {
 
     repo_config.packs.insert(pack_config.name.clone());
 
-    repo_config.write_to_known(&current_dir)?;
+    repo_config.write_to(&current_dir)?;
 
     pack_config.init_blank_on_fs(&current_dir)?;
 

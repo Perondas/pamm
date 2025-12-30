@@ -17,7 +17,7 @@ impl RepoConfig {
         let base_path = parent_dir.join(&self.name);
 
         fs::create_dir(&base_path)?;
-        self.write_to_known(&base_path)?;
+        self.write_to(&base_path)?;
 
         Ok(())
     }
@@ -39,10 +39,10 @@ impl RepoConfig {
         }
 
         fs::create_dir(&base_path)?;
-        repo.write_to_known(&base_path)?;
+        repo.write_to(&base_path)?;
 
         let repo_user_settings = RepoUserSettings::new(remote_url.clone());
-        repo_user_settings.write_to_known(&base_path)?;
+        repo_user_settings.write_to(&base_path)?;
 
         for pack in &repo.packs {
             let pack_config = PackConfig::download_named(remote_url, pack)

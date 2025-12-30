@@ -1,6 +1,6 @@
 use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::ToPrettyString;
-use anyhow::{anyhow, Context};
+use anyhow::{Context, anyhow};
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::io::fs::fs_readable::{KnownFSReadable, NamedFSReadable};
@@ -160,7 +160,7 @@ fn sync_config(
         remote_pack_config.write_to_named(current_dir, pack)?;
     }
 
-    remote_repo_config.write_to_known(current_dir)?;
+    remote_repo_config.write_to(current_dir)?;
 
     Ok(remote_repo_config)
 }
