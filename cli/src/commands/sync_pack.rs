@@ -4,7 +4,7 @@ use anyhow::{Context, anyhow};
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::io::fs::fs_readable::{KnownFSReadable, NamedFSReadable};
-use pamm_lib::io::fs::fs_writable::{KnownFSWritable, NamedFSWritable};
+use pamm_lib::io::fs::fs_writable::KnownFSWritable;
 use pamm_lib::io::fs::pack::delete_pack::delete_pack;
 use pamm_lib::io::fs::pack::index_generator::IndexGenerator;
 use pamm_lib::io::net::downloadable::{KnownDownloadable, NamedDownloadable};
@@ -157,7 +157,7 @@ fn sync_config(
     for pack in existing {
         let remote_pack_config = PackConfig::download_named(remote_url, pack)
             .context(format!("Failed to download pack {} configuration", &pack))?;
-        remote_pack_config.write_to_named(current_dir, pack)?;
+        remote_pack_config.write_to(current_dir)?;
     }
 
     remote_repo_config.write_to(current_dir)?;
