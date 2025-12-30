@@ -3,7 +3,7 @@ use crate::utils::diff_to_string::ToPrettyString;
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::io::fs::fs_readable::NamedFSReadable;
-use pamm_lib::io::fs::fs_writable::NamedFSWritable;
+use pamm_lib::io::fs::fs_writable::{IdentifiableFSWritable, NamedFSWritable};
 use pamm_lib::io::fs::pack::index_generator::IndexGenerator;
 use pamm_lib::pack::pack_config::PackConfig;
 use pamm_lib::pack::pack_diff::diff_packs;
@@ -68,7 +68,7 @@ pub fn update_pack_command(args: UpdatePackArgs) -> anyhow::Result<()> {
 
     let config = config.with_addons(actual_index.to_names());
 
-    config.write_to_named(&current_dir, &config.name)?;
+    config.write_to(&current_dir)?;
 
     Ok(())
 }

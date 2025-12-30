@@ -1,3 +1,4 @@
+pub mod identifiable;
 pub mod index;
 pub mod io;
 pub mod pack;

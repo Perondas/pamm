@@ -1,8 +1,8 @@
 use crate::index::index_node::IndexNode;
 use crate::index::node_diff::{NodeDiff, NodeModification};
 use crate::io::fs::fs_deletable::NamedFsDeletable;
-use crate::io::fs::fs_writable::NamedFSWritable;
-use crate::io::name_consts::{get_pack_addon_directory_name, INDEX_DIR_NAME};
+use crate::io::fs::fs_writable::{IdentifiableFSWritable, NamedFSWritable};
+use crate::io::name_consts::{INDEX_DIR_NAME, get_pack_addon_directory_name};
 use crate::pack::pack_diff::PackDiff;
 use crate::pack::pack_index::PackIndex;
 use std::path::Path;
@@ -13,7 +13,7 @@ impl PackIndex {
         let index_dir = addon_dir.join(INDEX_DIR_NAME);
 
         for addon in &self.addons {
-            addon.write_to_named(&index_dir, &addon.name)?;
+            addon.write_to(&index_dir)?;
         }
 
         Ok(())
@@ -31,7 +31,7 @@ impl PackDiff {
                 | NodeDiff::Modified(NodeModification { name, .. }) => {
                     if let Some(new_node) = new_index.addons.iter().find(|node| &node.name == name)
                     {
-                        new_node.write_to_named(&index_dir, name)?;
+                        new_node.write_to(&index_dir)?;
                     }
                 }
                 NodeDiff::Deleted(name) => {

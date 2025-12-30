@@ -1,5 +1,7 @@
+use crate::named;
 use serde::{Deserialize, Serialize};
 
+named!(IndexNode);
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct IndexNode {
     pub name: String,

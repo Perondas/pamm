@@ -1,10 +1,12 @@
 use crate::io::fs::util::clean_path::clean_path;
 use crate::io::name_consts::get_pack_addon_directory_name;
+use crate::named;
 use crate::pack::server_info::ServerInfo;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::path::Path;
 
+named!(PackConfig);
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PackConfig {
     pub name: String,

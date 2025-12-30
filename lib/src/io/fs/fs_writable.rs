@@ -1,5 +1,6 @@
+use crate::identifiable::Identifiable;
 use crate::io::known_file::KnownFile;
-use crate::io::named::NamedFile;
+use crate::io::named_file::NamedFile;
 use crate::io::serialization::writable::Writable;
 use std::path::Path;
 
@@ -33,5 +34,15 @@ impl<T: FsWritable + NamedFile> NamedFSWritable for T {
     fn write_to_named<P: AsRef<Path>>(&self, path: P, identifier: &str) -> anyhow::Result<()> {
         let full_path = path.as_ref().join(Self::get_file_name(identifier));
         self.write_to_path(full_path)
+    }
+}
+
+pub trait IdentifiableFSWritable: NamedFSWritable + Identifiable {
+    fn write_to<P: AsRef<Path>>(&self, base_path: P) -> anyhow::Result<()>;
+}
+
+impl<T: NamedFSWritable + Identifiable> IdentifiableFSWritable for T {
+    fn write_to<P: AsRef<Path>>(&self, base_path: P) -> anyhow::Result<()> {
+        self.write_to_named(base_path, self.get_identifier())
     }
 }

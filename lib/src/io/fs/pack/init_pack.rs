@@ -1,5 +1,5 @@
-use crate::io::fs::fs_writable::NamedFSWritable;
-use crate::io::name_consts::{get_pack_addon_directory_name, INDEX_DIR_NAME};
+use crate::io::fs::fs_writable::{IdentifiableFSWritable, NamedFSWritable};
+use crate::io::name_consts::{INDEX_DIR_NAME, get_pack_addon_directory_name};
 use crate::pack::pack_config::PackConfig;
 use std::fs;
 use std::path::Path;
@@ -18,7 +18,7 @@ impl PackConfig {
 
         fs::create_dir(&index_dir)?;
 
-        self.write_to_named(parent_dir, &self.name)?;
+        self.write_to(parent_dir)?;
 
         Ok(())
     }

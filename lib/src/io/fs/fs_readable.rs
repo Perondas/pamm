@@ -1,5 +1,6 @@
+use crate::identifiable::Identifiable;
 use crate::io::known_file::KnownFile;
-use crate::io::named::NamedFile;
+use crate::io::named_file::NamedFile;
 use crate::io::serialization::readable::Readable;
 use std::path::Path;
 
