@@ -4,6 +4,7 @@ use anyhow::{Context, anyhow};
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::io::fs::fs_readable::{KnownFSReadable, NamedFSReadable};
+use pamm_lib::io::fs::fs_writable::IdentifiableFSWritable;
 use pamm_lib::io::fs::fs_writable::KnownFSWritable;
 use pamm_lib::io::fs::pack::delete_pack::delete_pack;
 use pamm_lib::io::fs::pack::index_generator::IndexGenerator;
@@ -52,7 +53,7 @@ pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
     };
 
     let index_generator =
-        IndexGenerator::from_config(&local_pack_config, &current_dir, progress_reporter)?;
+        IndexGenerator::from_config(&local_pack_config, &current_dir, progress_reporter.clone())?;
 
     if args.force_refresh {
         index_generator.clear_cache()?;
@@ -87,7 +88,7 @@ pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
     let diff_applier = local_pack_config.diff_applier(
         &current_dir,
         repo_user_settings.get_remote(),
-        IndicatifProgressReporter::new(),
+        progress_reporter,
     );
 
     diff_applier.apply(diff)?;

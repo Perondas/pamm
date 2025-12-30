@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PackUserSettings {
     // TODO: add fields as needed
+    pub enabled_optionals: Vec<String>,
 }
 
 impl Default for PackUserSettings {
@@ -13,6 +14,8 @@ impl Default for PackUserSettings {
 
 impl PackUserSettings {
     pub fn new() -> Self {
-        Self {}
+        Self {
+            enabled_optionals: Vec::new(),
+        }
     }
 }

@@ -1,5 +1,5 @@
 use crate::index::index_node::IndexNode;
-use crate::io::name_consts::{get_pack_addon_directory_name, INDEX_DIR_NAME};
+use crate::io::name_consts::{INDEX_DIR_NAME, get_pack_addon_directory_name};
 use crate::io::net::downloadable::NamedDownloadable;
 use crate::pack::pack_config::PackConfig;
 use crate::pack::pack_index::PackIndex;
@@ -16,7 +16,7 @@ impl PackConfig {
         let indexes = self
             .addons
             .par_iter()
-            .map(|name| IndexNode::download_named(&index_dir, name))
+            .map(|addon| IndexNode::download_named(&index_dir, &addon.name))
             .collect::<Result<Vec<_>>>()?;
 
         Ok(PackIndex {

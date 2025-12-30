@@ -1,6 +1,7 @@
 use crate::io::fs::util::clean_path::clean_path;
 use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::named;
+use crate::pack::addon::Addon;
 use crate::pack::server_info::ServerInfo;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
@@ -14,7 +15,7 @@ pub struct PackConfig {
     pub client_params: Vec<String>,
     pub servers: Vec<ServerInfo>,
     pub parent: Option<String>,
-    pub(crate) addons: HashSet<String>,
+    pub(crate) addons: HashSet<Addon>,
 }
 
 impl PackConfig {
@@ -35,7 +36,7 @@ impl PackConfig {
         }
     }
 
-    pub fn with_addons(mut self, addons: HashSet<String>) -> Self {
+    pub fn with_addons(mut self, addons: HashSet<Addon>) -> Self {
         self.addons = addons;
         self
     }
@@ -45,7 +46,7 @@ impl PackConfig {
 
         self.addons
             .iter()
-            .map(|addon| addon_dir.join(addon))
+            .map(|addon| addon_dir.join(&addon.name))
             .map(|p| p.canonicalize().unwrap())
             .map(clean_path)
             .collect()

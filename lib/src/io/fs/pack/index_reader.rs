@@ -1,6 +1,6 @@
 use crate::index::index_node::IndexNode;
 use crate::io::fs::fs_readable::NamedFSReadable;
-use crate::io::name_consts::{get_pack_addon_directory_name, INDEX_DIR_NAME};
+use crate::io::name_consts::{INDEX_DIR_NAME, get_pack_addon_directory_name};
 use crate::pack::pack_config::PackConfig;
 use crate::pack::pack_index::PackIndex;
 use anyhow::Result;
@@ -15,7 +15,7 @@ impl PackConfig {
         let indexes = self
             .addons
             .par_iter()
-            .filter_map(|name| IndexNode::read_from_named(&index_dir, name).transpose())
+            .filter_map(|addon| IndexNode::read_from_named(&index_dir, &addon.name).transpose())
             .collect::<Result<Vec<_>>>()?;
 
         Ok(PackIndex {
