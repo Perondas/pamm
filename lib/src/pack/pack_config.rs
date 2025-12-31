@@ -2,6 +2,7 @@ use crate::io::fs::util::clean_path::clean_path;
 use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::named;
 use crate::pack::addon::AddonSettings;
+use crate::pack::pack_user_settings::PackUserSettings;
 use crate::pack::server_info::ServerInfo;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
@@ -57,5 +58,15 @@ impl PackConfig {
             .map(|p| p.canonicalize().unwrap())
             .map(clean_path)
             .collect()
+    }
+
+    pub fn remove_disabled_optionals(&mut self, user_settings: &PackUserSettings) {
+        self.addons.retain(|name, settings| {
+            if settings.is_optional {
+                user_settings.enabled_optionals.contains(name)
+            } else {
+                true
+            }
+        });
     }
 }

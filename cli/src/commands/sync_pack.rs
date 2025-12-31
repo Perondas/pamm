@@ -1,6 +1,6 @@
 use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::ToPrettyString;
-use anyhow::{Context, anyhow};
+use anyhow::{anyhow, Context};
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::io::fs::fs_readable::{KnownFSReadable, NamedFSReadable};
@@ -11,6 +11,7 @@ use pamm_lib::io::fs::pack::index_generator::IndexGenerator;
 use pamm_lib::io::net::downloadable::{KnownDownloadable, NamedDownloadable};
 use pamm_lib::pack::pack_config::PackConfig;
 use pamm_lib::pack::pack_diff::diff_packs;
+use pamm_lib::pack::pack_user_settings::PackUserSettings;
 use pamm_lib::repo::repo_config::RepoConfig;
 use pamm_lib::repo::repo_user_settings::RepoUserSettings;
 use std::env::current_dir;
@@ -46,6 +47,10 @@ pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
         anyhow::anyhow!("Pack config for '{}' not found locally", args.name),
     )?;
 
+    let user_settings = PackUserSettings::read_from_named(&current_dir, &args.name)?.ok_or(
+        anyhow::anyhow!("Pack user settings for '{}' not found locally", args.name),
+    )?;
+
     let progress_reporter = if args.silent {
         IndicatifProgressReporter::disabled()
     } else {
@@ -61,8 +66,10 @@ pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
 
     let actual_index = index_generator.index_addons()?;
 
-    let remote_pack_config =
+    let mut remote_pack_config =
         PackConfig::download_named(repo_user_settings.get_remote(), &args.name)?;
+
+    remote_pack_config.remove_disabled_optionals(&user_settings);
 
     let remote_index = remote_pack_config.download_indexes(repo_user_settings.get_remote())?;
 
