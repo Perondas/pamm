@@ -21,7 +21,7 @@ impl PackConfig {
 
         let settings = PackUserSettings::default();
 
-        settings.write_to_named(&index_dir, &self.name)?;
+        settings.write_to_named(parent_dir, &self.name)?;
 
         self.write_to(parent_dir)?;
 
