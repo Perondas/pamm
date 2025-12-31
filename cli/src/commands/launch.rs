@@ -5,6 +5,7 @@ use pamm_lib::io::fs::fs_readable::NamedFSReadable;
 use pamm_lib::pack::pack_config::PackConfig;
 use std::env::current_dir;
 use std::path::Path;
+use pamm_lib::pack::pack_user_settings::PackUserSettings;
 
 #[derive(Debug, Args)]
 pub struct LaunchArgs {
@@ -18,15 +19,7 @@ pub fn launch_command(args: LaunchArgs) -> anyhow::Result<()> {
     let mut pack_config = PackConfig::read_from_named(&current_dir, &args.name)?
         .ok_or(anyhow!("Config for pack {} not found", args.name))?;
 
-    let user_settings = pamm_lib::pack::pack_user_settings::PackUserSettings::read_from_named(
-        &current_dir,
-        &args.name,
-    )?
-    .ok_or(anyhow!("User settings for pack {} not found", args.name))?;
-
-    pack_config.remove_disabled_optionals(&user_settings);
-
-    let addons = get_addon_paths(&pack_config, &current_dir)?;
+    let addons = get_addon_paths(&mut pack_config, &current_dir)?;
 
     let mut launch_url = String::from("steam://rungameid/107410// -nolauncher ");
 
@@ -49,16 +42,24 @@ pub fn launch_command(args: LaunchArgs) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn get_addon_paths(config: &PackConfig, base_path: &Path) -> Result<Vec<String>> {
+fn get_addon_paths(config: &mut PackConfig, base_path: &Path) -> Result<Vec<String>> {
+    let user_settings = PackUserSettings::read_from_named(
+        base_path,
+        &config.name,
+    )?
+        .ok_or(anyhow!("User settings for pack {} not found", config.name))?;
+
+    config.remove_disabled_optionals(&user_settings);
+
     let own_addons = config.get_addon_paths(base_path);
 
     if let Some(parent_name) = &config.parent {
-        let parent_config = PackConfig::read_from_named(base_path, parent_name)?
+        let mut parent_config = PackConfig::read_from_named(base_path, parent_name)?
             .ok_or(anyhow!("Config for parent pack {} not found", parent_name))?;
 
         Ok(own_addons
             .into_iter()
-            .chain(get_addon_paths(&parent_config, base_path)?)
+            .chain(get_addon_paths(&mut parent_config, base_path)?)
             .collect())
     } else {
         Ok(own_addons)
