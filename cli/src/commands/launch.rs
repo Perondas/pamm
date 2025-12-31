@@ -3,9 +3,9 @@ use anyhow::Result;
 use clap::Args;
 use pamm_lib::io::fs::fs_readable::NamedFSReadable;
 use pamm_lib::pack::pack_config::PackConfig;
+use pamm_lib::pack::pack_user_settings::PackUserSettings;
 use std::env::current_dir;
 use std::path::Path;
-use pamm_lib::pack::pack_user_settings::PackUserSettings;
 
 #[derive(Debug, Args)]
 pub struct LaunchArgs {
@@ -28,11 +28,11 @@ pub fn launch_command(args: LaunchArgs) -> anyhow::Result<()> {
         launch_url.push(' ');
     }
 
-    let addons_combined = addons.join(";");
+    let addons_combined = format!("\"-mod={}\"", addons.join(";"));
 
     println!("Mods to load: {}", addons_combined);
 
-    launch_url.push_str(&format!("-mod={}", urlencoding::encode(&addons_combined)));
+    launch_url.push_str(&format!("{}", urlencoding::encode(&addons_combined)));
 
     println!("Launching Arma 3 with URL:");
     println!("{}", launch_url);
@@ -43,10 +43,7 @@ pub fn launch_command(args: LaunchArgs) -> anyhow::Result<()> {
 }
 
 fn get_addon_paths(config: &mut PackConfig, base_path: &Path) -> Result<Vec<String>> {
-    let user_settings = PackUserSettings::read_from_named(
-        base_path,
-        &config.name,
-    )?
+    let user_settings = PackUserSettings::read_from_named(base_path, &config.name)?
         .ok_or(anyhow!("User settings for pack {} not found", config.name))?;
 
     config.remove_disabled_optionals(&user_settings);
