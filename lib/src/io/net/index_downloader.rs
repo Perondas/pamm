@@ -8,7 +8,7 @@ use rayon::prelude::*;
 use url::Url;
 
 impl PackConfig {
-    pub fn download_index(&self, base_url: &Url) -> Result<PackIndex> {
+    pub fn download_indexes(&self, base_url: &Url) -> Result<PackIndex> {
         let addon_dir =
             base_url.join(&format!("{}/", get_pack_addon_directory_name(&self.name)))?;
         let index_dir = addon_dir.join(&format!("{}/", INDEX_DIR_NAME))?;
@@ -16,7 +16,7 @@ impl PackConfig {
         let indexes = self
             .addons
             .par_iter()
-            .map(|addon| IndexNode::download_named(&index_dir, &addon.name))
+            .map(|addon| IndexNode::download_named(&index_dir, &addon.0))
             .collect::<Result<Vec<_>>>()?;
 
         Ok(PackIndex {

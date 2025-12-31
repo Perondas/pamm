@@ -64,7 +64,7 @@ pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
     let remote_pack_config =
         PackConfig::download_named(repo_user_settings.get_remote(), &args.name)?;
 
-    let remote_index = remote_pack_config.download_index(repo_user_settings.get_remote())?;
+    let remote_index = remote_pack_config.download_indexes(repo_user_settings.get_remote())?;
 
     let diff = diff_packs(actual_index, remote_index.clone())?;
 

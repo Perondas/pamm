@@ -15,7 +15,7 @@ impl PackConfig {
         let indexes = self
             .addons
             .par_iter()
-            .filter_map(|addon| IndexNode::read_from_named(&index_dir, &addon.name).transpose())
+            .filter_map(|addon| IndexNode::read_from_named(&index_dir, &addon.0).transpose())
             .collect::<Result<Vec<_>>>()?;
 
         Ok(PackIndex {

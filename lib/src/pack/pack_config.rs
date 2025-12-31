@@ -1,10 +1,10 @@
 use crate::io::fs::util::clean_path::clean_path;
 use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::named;
-use crate::pack::addon::Addon;
+use crate::pack::addon::AddonSettings;
 use crate::pack::server_info::ServerInfo;
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::path::Path;
 
 named!(PackConfig);
@@ -15,7 +15,7 @@ pub struct PackConfig {
     pub client_params: Vec<String>,
     pub servers: Vec<ServerInfo>,
     pub parent: Option<String>,
-    pub(crate) addons: HashSet<Addon>,
+    pub(crate) addons: HashMap<String, AddonSettings>,
 }
 
 impl PackConfig {
@@ -32,12 +32,19 @@ impl PackConfig {
             client_params,
             servers,
             parent,
-            addons: HashSet::new(),
+            addons: HashMap::new(),
         }
     }
 
-    pub fn with_addons(mut self, addons: HashSet<Addon>) -> Self {
-        self.addons = addons;
+    pub fn update_addons(mut self, addons: HashSet<String>) -> Self {
+        self.addons = addons
+            .into_iter()
+            .map(|name| {
+                let settings = self.addons.remove(&name).unwrap_or_default();
+                (name, settings)
+            })
+            .collect();
+
         self
     }
 
@@ -46,7 +53,7 @@ impl PackConfig {
 
         self.addons
             .iter()
-            .map(|addon| addon_dir.join(&addon.name))
+            .map(|addon| addon_dir.join(&addon.0))
             .map(|p| p.canonicalize().unwrap())
             .map(clean_path)
             .collect()
