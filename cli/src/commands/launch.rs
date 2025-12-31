@@ -15,8 +15,17 @@ pub struct LaunchArgs {
 pub fn launch_command(args: LaunchArgs) -> anyhow::Result<()> {
     let current_dir = current_dir()?;
 
-    let pack_config = PackConfig::read_from_named(&current_dir, &args.name)?
+    let mut pack_config = PackConfig::read_from_named(&current_dir, &args.name)?
         .ok_or(anyhow!("Config for pack {} not found", args.name))?;
+
+    let user_settings = pamm_lib::pack::pack_user_settings::PackUserSettings::read_from_named(
+        &current_dir,
+        &args.name,
+    )?
+    .ok_or(anyhow!("User settings for pack {} not found", args.name))?;
+
+    pack_config.remove_disabled_optionals(&user_settings);
+
     let addons = get_addon_paths(&pack_config, &current_dir)?;
 
     let mut launch_url = String::from("steam://rungameid/107410// -nolauncher ");
