@@ -1,4 +1,4 @@
 [workspace]
 resolver = "2"
 
-members = ["bi_fs_rs", "cli", "lib"]
+members = ["bi_fs_rs", "cli", "lib", "ui/rust"]
