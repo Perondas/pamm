@@ -8,6 +8,9 @@ crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
 flutter_rust_bridge = "=2.11.1"
+pamm_lib = { path = "../../lib" }
+url = "2.5.7"
+anyhow = "1.0.100"
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }
