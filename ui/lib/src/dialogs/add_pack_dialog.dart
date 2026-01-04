@@ -3,6 +3,8 @@ import 'package:file_picker/file_picker.dart';
 
 import 'package:ui/src/rust/api/commands/get_remote_repo_info.dart';
 import 'package:ui/src/rust/api/commands/init_from_remote.dart';
+import 'package:ui/src/models/stored_repo.dart';
+import 'package:ui/src/services/repos_store.dart';
 
 class AddPackDialog extends StatefulWidget {
   const AddPackDialog({super.key});
@@ -68,6 +70,9 @@ class _AddPackDialogState extends State<AddPackDialog> {
       final result = await Future(() => initFromRemote(remote: remote, targetDir: target));
       // Show the returned repo config as confirmation.
       setState(() => _repoInfo = result);
+      // Persist the repo config and chosen path to shared_preferences
+      final stored = StoredRepo.fromRepoConfig(result, target);
+      await ReposStore.add(stored);
       if (!mounted) return; // Avoid using context after async gap
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Initialized repo "${result.name}" at $target')),
