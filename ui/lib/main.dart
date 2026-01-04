@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:ui/src/rust/api/simple.dart';
+import 'package:ui/src/pages/main_screen.dart';
+import 'package:ui/src/rust/api/commands/init_from_remote.dart';
 import 'package:ui/src/rust/frb_generated.dart';
 
 Future<void> main() async {
@@ -13,14 +16,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text('flutter_rust_bridge quickstart')),
-        body: Center(
-          child: Text(
-            'Action: Call Rust `greet("Tom")`\nResult: `${greet(name: "Tom")}`',
-          ),
-        ),
-      ),
+      home: MainScreen(),
+      theme: ThemeData.from(colorScheme: ColorScheme.light()),
     );
   }
 }
