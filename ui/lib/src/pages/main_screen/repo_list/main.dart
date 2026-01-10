@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ui/src/pages/main_screen/repo_list/edit_repo_dialog.dart';
 
 import '../../../models/stored_repo.dart';
 import '../../../rust/api/commands/init_from_remote.dart';
@@ -8,7 +9,7 @@ import 'add_repo_dialog.dart';
 class RepoList extends StatefulWidget {
   const RepoList(this.selectedRepoChanged, {super.key});
 
-  final ValueChanged<StoredRepo> selectedRepoChanged;
+  final ValueChanged<StoredRepo?> selectedRepoChanged;
 
   @override
   State<RepoList> createState() => _RepoListState();
@@ -27,33 +28,25 @@ class _RepoListState extends State<RepoList> {
   Future<void> _loadRepos() async {
     final list = await ReposStore.load();
     if (!mounted) return;
+    var selectedExists = list.any((r) => r.path == _selectedRepo?.path);
     setState(() {
-      _repos = list;
-      // preserve selection if possible, otherwise select first
-      if (_selectedRepo != null) {
-        try {
-          _selectedRepo = list.firstWhere((r) => r.path == _selectedRepo!.path);
-        } catch (e) {
-          _selectedRepo = list.isNotEmpty ? list.first : null;
-        }
-      } else {
-        _selectedRepo = list.isNotEmpty ? list.first : null;
+      if (!selectedExists) {
+        _selectedRepo = null;
       }
+      _repos = list;
     });
+
+    widget.selectedRepoChanged(_selectedRepo);
   }
 
   Future<void> _onAddRepo() async {
     final result = await showDialog<RepoConfig?>(
       context: context,
-      builder: (_) => AddPackDialog(),
+      builder: (_) => AddRepoDialog(),
     );
     if (result != null) {
       // reload store to include newly added repo
       await _loadRepos();
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Added repo: ${result.name}')));
     }
   }
 
@@ -113,6 +106,16 @@ class _RepoListState extends State<RepoList> {
         });
         widget.selectedRepoChanged(r);
       },
+      trailing: IconButton(
+        onPressed: () async {
+          await showDialog<RepoConfig?>(
+            context: context,
+            builder: (_) => EditRepoDialog(r),
+          );
+          await _loadRepos();
+        },
+        icon: Icon(Icons.more_vert),
+      ),
     );
   }
 }

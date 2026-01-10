@@ -12,7 +12,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   StoredRepo? _selectedRepo;
 
-  void _onSelectRepo(StoredRepo repo) {
+  void _onSelectRepo(StoredRepo? repo) {
     setState(() {
       _selectedRepo = repo;
     });

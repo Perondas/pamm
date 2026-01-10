@@ -7,14 +7,14 @@ import 'package:ui/src/rust/api/commands/get_remote_repo_info.dart';
 import 'package:ui/src/rust/api/commands/init_from_remote.dart';
 import 'package:ui/src/services/repos_store.dart';
 
-class AddPackDialog extends StatefulWidget {
-  const AddPackDialog({super.key});
+class AddRepoDialog extends StatefulWidget {
+  const AddRepoDialog({super.key});
 
   @override
-  State<AddPackDialog> createState() => _AddPackDialogState();
+  State<AddRepoDialog> createState() => _AddRepoDialogState();
 }
 
-class _AddPackDialogState extends State<AddPackDialog> {
+class _AddRepoDialogState extends State<AddRepoDialog> {
   final TextEditingController _remoteController = TextEditingController();
   final TextEditingController _targetDirController = TextEditingController();
 
@@ -130,7 +130,7 @@ class _AddPackDialogState extends State<AddPackDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Add Repository from Remote'),
+      title: Text('Add Repository'),
       content: SizedBox(
         width: 600,
         child: Column(
@@ -186,7 +186,7 @@ class _AddPackDialogState extends State<AddPackDialog> {
         controller: _remoteController,
         decoration: InputDecoration(
           labelText: 'Repository URL',
-          hintText: 'https://github.com/owner/repo.git',
+          hintText: 'https://my.great/repo/url',
         ),
         onSubmitted: (_) {
           _tryProgressStepper();
