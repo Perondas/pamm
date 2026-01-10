@@ -1,7 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:ui/src/pages/main_screen.dart';
+import 'package:ui/src/pages/main_screen/main.dart';
 import 'package:ui/src/rust/api/commands/init_from_remote.dart';
 import 'package:ui/src/rust/frb_generated.dart';
 

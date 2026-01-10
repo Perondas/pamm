@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ui/src/dialogs/add_pack_dialog.dart';
+import 'package:ui/src/pages/main_screen/repo_list/add_repo_dialog.dart';
 import 'package:ui/src/models/stored_repo.dart';
 import 'package:ui/src/rust/api/commands/init_from_remote.dart';
 import 'package:ui/src/services/repos_store.dart';
