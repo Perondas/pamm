@@ -15,7 +15,7 @@ class ReposStore {
     return raw.map((s) {
       try {
         final m = jsonDecode(s) as Map<String, dynamic>;
-        return StoredRepo.fromJson(m);
+        return StoredRepo.from(m);
       } catch (e) {
         return StoredRepo(name: 'invalid', description: e.toString(), packs: [], path: '');
       }
@@ -31,6 +31,12 @@ class ReposStore {
   static Future<void> add(StoredRepo repo) async {
     final list = await load();
     list.add(repo);
+    await saveAll(list);
+  }
+
+  static Future<void> remove(StoredRepo repo) async {
+    final list = await load();
+    list.removeWhere((r) => r.path == repo.path);
     await saveAll(list);
   }
 
