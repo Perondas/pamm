@@ -52,44 +52,35 @@ class _RepoListState extends State<RepoList> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border(
-            right: BorderSide(color: Colors.grey.shade500, width: 2.5),
-          ),
-        ),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton.icon(
-                onPressed: _onAddRepo,
-                icon: Icon(Icons.add),
-                label: Text("Add Repository"),
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadiusGeometry.all(Radius.circular(20)),
-                  ),
-                ),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ElevatedButton.icon(
+            onPressed: _onAddRepo,
+            icon: Icon(Icons.add),
+            label: Text("Add Repository"),
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadiusGeometry.all(Radius.circular(20)),
               ),
             ),
-            Expanded(
-              child: _repos.isEmpty
-                  ? ListTile(
-                      leading: Icon(Icons.info_outline),
-                      title: Text('No repositories added'),
-                      subtitle: Text('Click "Add Repository" to add one'),
-                    )
-                  : ListView.builder(
-                      itemBuilder: (context, index) =>
-                          _buildRepoListTitle(_repos[index]),
-                      itemCount: _repos.length,
-                    ),
-            ),
-          ],
+          ),
         ),
-      ),
+        Expanded(
+          child: _repos.isEmpty
+              ? ListTile(
+                  leading: Icon(Icons.info_outline),
+                  title: Text('No repositories added'),
+                  subtitle: Text('Click "Add Repository" to add one'),
+                )
+              : ListView.builder(
+                  itemBuilder: (context, index) =>
+                      _buildRepoListTitle(_repos[index]),
+                  itemCount: _repos.length,
+                ),
+        ),
+      ],
     );
   }
 

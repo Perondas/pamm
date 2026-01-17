@@ -25,8 +25,24 @@ class _MainScreenState extends State<MainScreen> {
       //appBar: AppBar(title: Text("Pamm"), elevation: 1),
       body: Row(
         children: [
-          RepoList(_onSelectRepo),
-          RepoDetails(_selectedRepo),
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  right: BorderSide(color: Colors.grey.shade500, width: 2.5),
+                ),
+              ),
+              child: RepoList(_onSelectRepo),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Container(
+              child: _selectedRepo == null
+                  ? Center(child: Text("Select a repository to view details"))
+                  : RepoDetails(_selectedRepo!),
+            ),
+          ),
         ],
       ),
     );
