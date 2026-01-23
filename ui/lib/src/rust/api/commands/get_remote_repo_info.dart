@@ -7,5 +7,7 @@ import '../../frb_generated.dart';
 import 'init_from_remote.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-RepoConfig getRemoteRepoInfo({required String remote}) => RustLib.instance.api
+Future<RepoConfig> getRemoteRepoInfo({required String remote}) => RustLib
+    .instance
+    .api
     .crateApiCommandsGetRemoteRepoInfoGetRemoteRepoInfo(remote: remote);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ui/src/pages/sync_screen/main.dart';
 
 import '../../../models/stored_repo.dart';
 
@@ -42,8 +43,9 @@ class _RepoDetailsState extends State<RepoDetails> {
                     )
                   : ListView.builder(
                       itemBuilder: (context, index) => _buildPackListTitle(
+                        context,
                         widget.selectedRepo.packs[index],
-                        widget.selectedRepo.path,
+                        widget.selectedRepo.path + '\\' + widget.selectedRepo.name,
                       ),
                       itemCount: widget.selectedRepo.packs.length,
                       shrinkWrap: true,
@@ -56,7 +58,11 @@ class _RepoDetailsState extends State<RepoDetails> {
   }
 }
 
-ListTile _buildPackListTitle(String packName, String repoPath) {
+ListTile _buildPackListTitle(
+  BuildContext context,
+  String packName,
+  String repoPath,
+) {
   return ListTile(
     leading: Icon(Icons.videogame_asset),
     title: Text(packName),
@@ -64,8 +70,16 @@ ListTile _buildPackListTitle(String packName, String repoPath) {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(onPressed: () async {}, icon: Icon(Icons.play_arrow)),
-        IconButton(onPressed: () async {}, icon: Icon(Icons.download)),
-
+        IconButton(
+          onPressed: () async {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => SyncScreen(packName, repoPath),
+              ),
+            );
+          },
+          icon: Icon(Icons.download),
+        ),
       ],
     ),
   );
