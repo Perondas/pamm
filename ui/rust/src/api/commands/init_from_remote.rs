@@ -5,7 +5,6 @@ use std::collections::HashSet;
 use std::path::Path;
 use url::Url;
 
-#[frb(sync)]
 pub fn init_from_remote(remote: &str, target_dir: &str) -> anyhow::Result<RepoConfig> {
     let current_dir = Path::new(target_dir);
     let remote = Url::parse(remote)?;
