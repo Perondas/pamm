@@ -1,8 +1,10 @@
+use flutter_rust_bridge::frb;
 use pamm_lib::index::get_size::GetSize;
 use pamm_lib::index::index_node::{IndexNode, NodeKind};
 use pamm_lib::index::node_diff::{FileModification, ModifiedNodeKind, NodeDiff, NodeModification};
 use pamm_lib::pack::pack_diff::PackDiff;
 
+#[frb(ignore)]
 pub trait ToPrettyString {
     fn to_pretty_string(&self) -> String;
 }
@@ -35,7 +37,7 @@ fn diffs_to_string(diffs: &[NodeDiff], base_path: &str) -> String {
             NodeDiff::Modified(modification) => {
                 entry_modification_to_string(modification, base_path)
             }
-            NodeDiff::None => "".to_string(),
+            NodeDiff::None(_) => "".to_string(),
         };
         result.push_str(&added);
     }

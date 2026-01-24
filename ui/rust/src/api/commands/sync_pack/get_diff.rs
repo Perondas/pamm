@@ -1,20 +1,25 @@
-use crate::api::commands::sync_pack::diff_to_string::ToPrettyString;
+use crate::api::frb;
+use crate::api::commands::sync_pack::file_change::{get_file_changes, FileChange};
 use crate::api::progress_reporting::DartProgressReporter;
+use pamm_lib::index::get_size::GetSize;
 use pamm_lib::io::fs::fs_readable::{KnownFSReadable, NamedFSReadable};
 use pamm_lib::io::fs::pack::index_generator::IndexGenerator;
 use pamm_lib::io::net::downloadable::NamedDownloadable;
 use pamm_lib::pack::pack_config::PackConfig;
-use pamm_lib::pack::pack_diff::diff_packs;
+use pamm_lib::pack::pack_diff::{diff_packs, PackDiff};
 use pamm_lib::pack::pack_user_settings::PackUserSettings;
 use pamm_lib::repo::repo_config::RepoConfig;
 use pamm_lib::repo::repo_user_settings::RepoUserSettings;
+use std::collections::{HashMap, HashSet};
 use std::path::Path;
+use pamm_lib::index::node_diff::NodeDiff;
+use crate::frb_generated::RustAutoOpaque;
 
 pub fn get_diff(
     pack_name: String,
     repo_path: String,
     dart_progress_reporter: &DartProgressReporter,
-) -> anyhow::Result<String> {
+) -> anyhow::Result<DiffResult> {
     let current_dir = Path::new(&repo_path);
 
     let repo_user_settings = RepoUserSettings::read_from_known(current_dir)?
@@ -55,5 +60,33 @@ pub fn get_diff(
 
     let diff = diff_packs(actual_index, remote_index.clone())?;
 
-    Ok(diff.to_pretty_string())
+    let file_changes = diff
+        .0
+        .iter()
+        .map(|diff| {
+            let name = diff.get_name().to_owned();
+            let changes = get_file_changes(diff);
+            (name, changes)
+        })
+        .collect();
+
+    Ok(DiffResult {
+        has_changes: diff.has_changes(),
+        change_count: diff.change_count(),
+        total_change_size: diff.get_size(),
+        diff: RustAutoOpaque::new(OpaqueDiff(diff)),
+        file_changes,
+    })
 }
+
+pub struct DiffResult {
+    pub diff: RustAutoOpaque<OpaqueDiff>,
+    pub has_changes: bool,
+    pub change_count: usize,
+    pub total_change_size: u64,
+    pub file_changes: HashMap<String, Vec<FileChange>>,
+}
+
+// Required for the generator to not fail to import PackDiff
+#[frb(opaque)]
+pub struct OpaqueDiff(pub(crate) PackDiff);

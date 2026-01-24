@@ -3,7 +3,7 @@ use crate::index::node_diff::{ModifiedNodeKind, NodeDiff, NodeModification};
 
 // TODO: maybe remove this trait
 #[allow(dead_code)]
-pub(crate) trait GetChangeCount {
+pub trait GetChangeCount {
     fn get_change_count(&self) -> u64;
 }
 
@@ -35,7 +35,7 @@ impl GetChangeCount for NodeDiff {
             NodeDiff::Created(node) => node.get_change_count(),
             NodeDiff::Deleted(_) => 1,
             NodeDiff::Modified(modification) => modification.get_change_count(),
-            NodeDiff::None => 0,
+            NodeDiff::None(_) => 0,
         }
     }
 }

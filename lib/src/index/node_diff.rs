@@ -6,7 +6,7 @@ pub enum NodeDiff {
     Created(IndexNode),
     Deleted(String),
     Modified(NodeModification),
-    None,
+    None(String),
 }
 
 #[derive(Debug)]
@@ -19,6 +19,7 @@ pub struct NodeModification {
 pub enum ModifiedNodeKind {
     Folder(Vec<NodeDiff>),
     File {
+        old_length: u64,
         target_checksum: Vec<u8>,
         modification: FileModification,
     },
@@ -36,4 +37,16 @@ pub enum FileModification {
     Generic {
         new_length: u64,
     },
+}
+
+
+impl NodeDiff {
+    pub fn get_name(&self) -> &str {
+        match self {
+            NodeDiff::Created(node) => &node.name,
+            NodeDiff::Deleted(name) => name,
+            NodeDiff::Modified(modification) => &modification.name,
+            NodeDiff::None(name) => name,
+        }
+    }
 }

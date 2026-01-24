@@ -86,7 +86,7 @@ impl<P: ProgressReporter> DiffApplier<P> {
             NodeDiff::Created(node) => self.create_node(node, parent_path),
             NodeDiff::Deleted(name) => self.delete_node(name, parent_path),
             NodeDiff::Modified(modification) => self.apply_modification(modification, parent_path),
-            NodeDiff::None => Ok(()),
+            NodeDiff::None(_) => Ok(()),
         }
     }
 

@@ -37,7 +37,7 @@ fn diffs_to_string(diffs: &[NodeDiff], base_path: &str) -> String {
             NodeDiff::Modified(modification) => {
                 entry_modification_to_string(modification, base_path)
             }
-            NodeDiff::None => "".to_string(),
+            NodeDiff::None(_) => "".to_string(),
         };
         result.push_str(&added);
     }

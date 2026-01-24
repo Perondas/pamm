@@ -22,7 +22,7 @@ impl GetSize for NodeDiff {
                 ModifiedNodeKind::Folder(e) => e.iter().map(|child| child.get_size()).sum(),
                 ModifiedNodeKind::File { modification, .. } => modification.get_size(),
             },
-            NodeDiff::Deleted(_) | NodeDiff::None => 0,
+            NodeDiff::Deleted(_) | NodeDiff::None(_) => 0,
         }
     }
 }

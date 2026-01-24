@@ -5,9 +5,10 @@
 
 import '../../../frb_generated.dart';
 import '../../progress_reporting.dart';
+import 'file_change.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-Future<String> getDiff({
+Future<DiffResult> getDiff({
   required String packName,
   required String repoPath,
   required DartProgressReporter dartProgressReporter,
@@ -16,3 +17,41 @@ Future<String> getDiff({
   repoPath: repoPath,
   dartProgressReporter: dartProgressReporter,
 );
+
+// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<OpaqueDiff>>
+abstract class OpaqueDiff implements RustOpaqueInterface {}
+
+class DiffResult {
+  final OpaqueDiff diff;
+  final bool hasChanges;
+  final BigInt changeCount;
+  final BigInt totalChangeSize;
+  final Map<String, List<FileChange>> fileChanges;
+
+  const DiffResult({
+    required this.diff,
+    required this.hasChanges,
+    required this.changeCount,
+    required this.totalChangeSize,
+    required this.fileChanges,
+  });
+
+  @override
+  int get hashCode =>
+      diff.hashCode ^
+      hasChanges.hashCode ^
+      changeCount.hashCode ^
+      totalChangeSize.hashCode ^
+      fileChanges.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DiffResult &&
+          runtimeType == other.runtimeType &&
+          diff == other.diff &&
+          hasChanges == other.hasChanges &&
+          changeCount == other.changeCount &&
+          totalChangeSize == other.totalChangeSize &&
+          fileChanges == other.fileChanges;
+}
