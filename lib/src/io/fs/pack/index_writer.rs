@@ -37,7 +37,7 @@ impl PackDiff {
                 NodeDiff::Deleted(name) => {
                     IndexNode::delete_named(&index_dir, name)?;
                 }
-                NodeDiff::None => (),
+                NodeDiff::None(_) => (),
             }
         }
 

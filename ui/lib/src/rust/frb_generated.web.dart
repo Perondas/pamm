@@ -10,6 +10,7 @@ import 'api.dart';
 import 'api/commands/get_remote_repo_info.dart';
 import 'api/commands/init_from_remote.dart';
 import 'api/commands/sync_pack/diff_to_string.dart';
+import 'api/commands/sync_pack/file_change.dart';
 import 'api/commands/sync_pack/get_diff.dart';
 import 'api/progress_reporting.dart';
 import 'dart:async';
@@ -29,8 +30,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   get rust_arc_decrement_strong_count_DartProgressReporterPtr => wire
       .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartProgressReporter;
 
+  CrossPlatformFinalizerArg
+  get rust_arc_decrement_strong_count_OpaqueDiffPtr => wire
+      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff;
+
   @protected
   AnyhowException dco_decode_AnyhowException(dynamic raw);
+
+  @protected
+  OpaqueDiff
+  dco_decode_AutoExplicit_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
+    dynamic raw,
+  );
 
   @protected
   DartProgressReporter
@@ -45,8 +56,19 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  Map<String, List<FileChange>> dco_decode_Map_String_list_file_change_None(
+    dynamic raw,
+  );
+
+  @protected
   DartProgressReporter
   dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartProgressReporter(
+    dynamic raw,
+  );
+
+  @protected
+  OpaqueDiff
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
     dynamic raw,
   );
 
@@ -69,13 +91,40 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool dco_decode_bool(dynamic raw);
 
   @protected
+  ChangeType dco_decode_change_type(dynamic raw);
+
+  @protected
+  DiffResult dco_decode_diff_result(dynamic raw);
+
+  @protected
+  FileChange dco_decode_file_change(dynamic raw);
+
+  @protected
+  PlatformInt64 dco_decode_i_64(dynamic raw);
+
+  @protected
   List<String> dco_decode_list_String(dynamic raw);
+
+  @protected
+  List<FileChange> dco_decode_list_file_change(dynamic raw);
 
   @protected
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
 
   @protected
+  List<(String, List<FileChange>)>
+  dco_decode_list_record_string_list_file_change(dynamic raw);
+
+  @protected
+  (String, List<FileChange>) dco_decode_record_string_list_file_change(
+    dynamic raw,
+  );
+
+  @protected
   RepoConfig dco_decode_repo_config(dynamic raw);
+
+  @protected
+  BigInt dco_decode_u_64(dynamic raw);
 
   @protected
   int dco_decode_u_8(dynamic raw);
@@ -90,6 +139,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer);
 
   @protected
+  OpaqueDiff
+  sse_decode_AutoExplicit_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   DartProgressReporter
   sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartProgressReporter(
     SseDeserializer deserializer,
@@ -102,8 +157,19 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  Map<String, List<FileChange>> sse_decode_Map_String_list_file_change_None(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   DartProgressReporter
   sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartProgressReporter(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  OpaqueDiff
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
     SseDeserializer deserializer,
   );
 
@@ -127,13 +193,40 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool sse_decode_bool(SseDeserializer deserializer);
 
   @protected
+  ChangeType sse_decode_change_type(SseDeserializer deserializer);
+
+  @protected
+  DiffResult sse_decode_diff_result(SseDeserializer deserializer);
+
+  @protected
+  FileChange sse_decode_file_change(SseDeserializer deserializer);
+
+  @protected
+  PlatformInt64 sse_decode_i_64(SseDeserializer deserializer);
+
+  @protected
   List<String> sse_decode_list_String(SseDeserializer deserializer);
+
+  @protected
+  List<FileChange> sse_decode_list_file_change(SseDeserializer deserializer);
 
   @protected
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
 
   @protected
+  List<(String, List<FileChange>)>
+  sse_decode_list_record_string_list_file_change(SseDeserializer deserializer);
+
+  @protected
+  (String, List<FileChange>) sse_decode_record_string_list_file_change(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   RepoConfig sse_decode_repo_config(SseDeserializer deserializer);
+
+  @protected
+  BigInt sse_decode_u_64(SseDeserializer deserializer);
 
   @protected
   int sse_decode_u_8(SseDeserializer deserializer);
@@ -155,6 +248,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void
+  sse_encode_AutoExplicit_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
+    OpaqueDiff self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
   sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartProgressReporter(
     DartProgressReporter self,
     SseSerializer serializer,
@@ -168,9 +268,22 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_Map_String_list_file_change_None(
+    Map<String, List<FileChange>> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void
   sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartProgressReporter(
     DartProgressReporter self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
+    OpaqueDiff self,
     SseSerializer serializer,
   );
 
@@ -196,7 +309,25 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_bool(bool self, SseSerializer serializer);
 
   @protected
+  void sse_encode_change_type(ChangeType self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_diff_result(DiffResult self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_file_change(FileChange self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_i_64(PlatformInt64 self, SseSerializer serializer);
+
+  @protected
   void sse_encode_list_String(List<String> self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_file_change(
+    List<FileChange> self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_list_prim_u_8_strict(
@@ -205,7 +336,22 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_list_record_string_list_file_change(
+    List<(String, List<FileChange>)> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_record_string_list_file_change(
+    (String, List<FileChange>) self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_repo_config(RepoConfig self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_u_64(BigInt self, SseSerializer serializer);
 
   @protected
   void sse_encode_u_8(int self, SseSerializer serializer);
@@ -240,6 +386,22 @@ class RustLibWire implements BaseWire {
       .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartProgressReporter(
         ptr,
       );
+
+  void
+  rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
+    int ptr,
+  ) => wasmModule
+      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
+        ptr,
+      );
+
+  void
+  rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
+    int ptr,
+  ) => wasmModule
+      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
+        ptr,
+      );
 }
 
 @JS('wasm_bindgen')
@@ -255,6 +417,16 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
 
   external void
   rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartProgressReporter(
+    int ptr,
+  );
+
+  external void
+  rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
+    int ptr,
+  );
+
+  external void
+  rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
     int ptr,
   );
 }

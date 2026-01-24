@@ -17,18 +17,22 @@ pub fn diff_index(left: IndexNode, right: IndexNode) -> anyhow::Result<NodeDiff>
     } = right;
 
     if l_checksum == r_checksum {
-        return Ok(NodeDiff::None);
+        return Ok(NodeDiff::None(r_name));
     }
 
     let diff = match (l_kind, r_kind) {
         (
-            NodeKind::File { kind: l_kind, .. },
+            NodeKind::File {
+                kind: l_kind,
+                length: l_length,
+                ..
+            },
             NodeKind::File {
                 kind: r_kind,
                 length: r_length,
                 ..
             },
-        ) => diff_file(l_kind, r_kind, r_checksum, r_name, r_length),
+        ) => diff_file(l_kind, r_kind, r_checksum, r_name, r_length, l_length),
         (NodeKind::Folder(left_children), NodeKind::Folder(right_children)) => {
             diff_folders(left_children, right_children, r_name)?
         }
@@ -48,6 +52,7 @@ fn diff_file(
     r_kind: FileKind,
     r_checksum: Vec<u8>,
     r_name: String,
+    l_length: u64,
     r_length: u64,
 ) -> NodeDiff {
     match (l_kind, r_kind) {
@@ -63,6 +68,7 @@ fn diff_file(
             NodeDiff::Modified(NodeModification {
                 name: r_name,
                 kind: ModifiedNodeKind::File {
+                    old_length: l_length,
                     target_checksum: r_checksum,
                     modification: FileModification::PBO {
                         new_length: r_length,
@@ -78,6 +84,7 @@ fn diff_file(
         _ => NodeDiff::Modified(NodeModification {
             name: r_name,
             kind: ModifiedNodeKind::File {
+                old_length: l_length,
                 target_checksum: r_checksum,
                 modification: FileModification::Generic {
                     new_length: r_length,
@@ -125,7 +132,7 @@ fn diff_folders(
     let all: Vec<NodeDiff> = added.into_iter().chain(removed).chain(changes?).collect();
 
     if all.is_empty() {
-        Ok(NodeDiff::None)
+        Ok(NodeDiff::None(r_name))
     } else {
         Ok(NodeDiff::Modified(NodeModification {
             name: r_name,

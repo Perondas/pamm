@@ -9,12 +9,12 @@ pub struct PackDiff(pub Vec<NodeDiff>);
 
 impl PackDiff {
     pub fn has_changes(&self) -> bool {
-        self.0.iter().any(|c| !matches!(c, NodeDiff::None))
+        self.0.iter().any(|c| !matches!(c, NodeDiff::None(_)))
     }
     pub fn change_count(&self) -> usize {
         self.0
             .iter()
-            .filter(|c| !matches!(c, NodeDiff::None))
+            .filter(|c| !matches!(c, NodeDiff::None(_)))
             .count()
     }
 }
