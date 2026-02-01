@@ -69,6 +69,13 @@ impl RemotePatcher {
 
                 temp_file.write_all(&new_headers)?;
 
+                ensure!(
+                    temp_file.metadata()?.len() == new_blob_start,
+                    "Patched PBO blob start does not match expected blob start. Expected blob start: {}. Actual blob start: {}",
+                    new_blob_start,
+                    temp_file.metadata()?.len()
+                );
+
                 for part in new_order {
                     if required_checksums.contains(&part.checksum) {
                         let part_data = parts
@@ -96,6 +103,13 @@ impl RemotePatcher {
                 let checksum_data = parts
                     .next()
                     .ok_or_else(|| anyhow::anyhow!("No response for PBO checksum"))??;
+
+                ensure!(
+                    checksum_data.len() == 20,
+                    "Received PBO checksum length does not match expected length. Expected length: 20. Actual length: {}",
+                    checksum_data.len()
+                );
+
                 temp_file.write_all(&checksum_data)?;
 
                 if parts.next().is_some() {
@@ -148,14 +162,14 @@ fn get_required_pbo_parts(
     // We always get the entire header + the padding bit
     // TODO: can we only get part of it? Is that worth it?
     let pbo_header_range = (0_u64, blob_start - 1);
-    let pbo_checksum_rage = (new_length - 19, new_length);
+    let pbo_checksum_rage = (new_length - 20, new_length - 1);
 
     let modified_ranges = new_order
         .iter()
         .filter(|p| required_checksums.contains(&p.checksum))
         .map(|p| {
             let start = p.start_offset + blob_start;
-            (start, start + p.length as u64)
+            (start, start + p.length as u64 - 1)
         });
 
     let ranges = iter::once(pbo_header_range)
@@ -165,7 +179,7 @@ fn get_required_pbo_parts(
 
     let ranges_str = ranges
         .iter()
-        .map(|(from, to)| format!("{}-{}", from, to - 1))
+        .map(|(from, to)| format!("{}-{}", from, to))
         .collect::<Vec<_>>()
         .join(", ");
     let resp = request_builder
