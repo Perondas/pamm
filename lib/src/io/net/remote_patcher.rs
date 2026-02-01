@@ -5,7 +5,7 @@ use crate::io::net::byte_range_response::{ByteRangeResponse, IntoByteRangeRespon
 use crate::io::net::download_file::download_file;
 use crate::io::rel_path::RelPath;
 use crate::pack::pack_config::PackConfig;
-use anyhow::{Context, Result};
+use anyhow::{ensure, Context, Result};
 use bi_fs_rs::pbo::handle::PBOHandle;
 use std::fs::File;
 use std::io::Write;
@@ -46,7 +46,7 @@ impl RemotePatcher {
                 new_length,
                 new_order,
                 required_checksums,
-                new_blob_start: new_blob_start,
+                new_blob_start,
                 ..
             } => {
                 let mut pbo_handle = PBOHandle::open_file(file_path)?;
@@ -74,9 +74,21 @@ impl RemotePatcher {
                         let part_data = parts
                             .next()
                             .ok_or_else(|| anyhow::anyhow!("No response for PBO part"))??;
+                        ensure!(
+                            part_data.len() == part.length as usize,
+                            "Received PBO part length does not match expected length. Expected length: {}. Actual length: {}",
+                            part.length,
+                            part_data.len()
+                        );
                         temp_file.write_all(&part_data)?;
                     } else {
                         let data = pbo_handle.get_file_content(&part.name)?;
+                        ensure!(
+                            data.len() == part.length as usize,
+                            "Cached PBO part length does not match expected length. Expected length: {}. Actual length: {}",
+                            part.length,
+                            data.len()
+                        );
                         temp_file.write_all(&data)?;
                     }
                 }
@@ -130,20 +142,20 @@ fn get_required_pbo_parts(
     blob_start: u64,
 ) -> Result<ByteRangeResponse<BodyReader<'static>>> {
     let request_builder = ureq::get(url.to_string());
-    
+
     // Ranges are inclusive
 
     // We always get the entire header + the padding bit
     // TODO: can we only get part of it? Is that worth it?
     let pbo_header_range = (0_u64, blob_start - 1);
     let pbo_checksum_rage = (new_length - 19, new_length);
-    
+
     let modified_ranges = new_order
         .iter()
         .filter(|p| required_checksums.contains(&p.checksum))
         .map(|p| {
             let start = p.start_offset + blob_start;
-            (start, start + p.length as u64 - 1)
+            (start, start + p.length as u64)
         });
 
     let ranges = iter::once(pbo_header_range)

@@ -164,11 +164,12 @@ impl<P: ProgressReporter> IndexGenerator<P> {
         ) {
             match index_pbo(&fs_path) {
                 Ok(part) => Ok(part),
-                Err(_) => {
+                Err(e) => {
                     self.progress_reporter.report_message(&format!(
                         "Warning: Failed to read PBO file {}, falling back to generic file",
                         rel_path
                     ));
+                    eprintln!("{:#?}",e);
                     index_generic_file(&fs_path)
                 }
             }

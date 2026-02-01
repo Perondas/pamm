@@ -43,11 +43,13 @@ impl IndexNode {
 
         // Header len + 1 + blob + checksum
         let computed_len: u64 =
-            (handle.blob_start + 1) + parts.iter().map(|p| p.length as u64).sum::<u64>() + 20;
+            (handle.blob_start) + parts.iter().map(|p| p.length as u64).sum::<u64>() + 20;
 
         ensure!(
             computed_len == handle.length,
-            "Computed PBO length does not match handle length"
+            "Computed PBO length does not match handle length. Computed: {}, Handle: {}",
+            computed_len,
+            handle.length
         );
 
         Ok(Self {
