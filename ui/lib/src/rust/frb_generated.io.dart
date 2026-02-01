@@ -9,6 +9,7 @@ import 'api/commands/init_from_remote.dart';
 import 'api/commands/sync_pack/diff_to_string.dart';
 import 'api/commands/sync_pack/file_change.dart';
 import 'api/commands/sync_pack/get_diff.dart';
+import 'api/commands/sync_pack/sync_pack.dart';
 import 'api/progress_reporting.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -44,6 +45,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   DartProgressReporter
   dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartProgressReporter(
+    dynamic raw,
+  );
+
+  @protected
+  OpaqueDiff
+  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
     dynamic raw,
   );
 
@@ -145,6 +152,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   DartProgressReporter
   sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartProgressReporter(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  OpaqueDiff
+  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
     SseDeserializer deserializer,
   );
 
@@ -255,6 +268,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void
   sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartProgressReporter(
     DartProgressReporter self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
+    OpaqueDiff self,
     SseSerializer serializer,
   );
 

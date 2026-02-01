@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:format_bytes/format_bytes.dart';
+import 'package:ui/src/pages/download_screen/main.dart';
 import 'package:ui/src/rust/api/commands/sync_pack/file_change.dart';
 import 'package:ui/src/rust/api/commands/sync_pack/get_diff.dart';
 import 'package:ui/src/services/progress_reporter_service.dart';
@@ -9,7 +10,6 @@ class SyncScreen extends StatefulWidget {
   SyncScreen(this.packName, this.repoPath, {super.key});
 
   final String packName;
-
   final String repoPath;
   final ProgressReporterService progressReporterService =
       ProgressReporterService();
@@ -41,8 +41,17 @@ class _SyncScreenState extends State<SyncScreen> {
     );
   }
 
-  TextButton _buildDownloadButton(BuildContext context) =>
-      TextButton(onPressed: () {}, child: Text("Download"));
+  TextButton _buildDownloadButton(BuildContext context) => TextButton(
+    onPressed: () {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) =>
+              DownloadScreen(widget.packName, widget.repoPath, diffResult!),
+        ),
+      );
+    },
+    child: Text("Download"),
+  );
 
   TextButton _buildSyncButton() {
     return TextButton(
