@@ -11,12 +11,29 @@ class ProgressReporter extends StatefulWidget {
 }
 
 class _ProgressReporterState extends State<ProgressReporter> {
+  bool isFinished = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.service.isFinished.listen(
+      onChange: (value) {
+        setState(() {
+          isFinished = value;
+        });
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (isFinished) {
+      return const Text('Completed');
+    }
     return StreamBuilder(
       stream: widget.service.messageStream,
       builder: (context, snapshot) {
-        final message = snapshot.data ?? 'Starting...';
+        final message = snapshot.data ?? '';
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [

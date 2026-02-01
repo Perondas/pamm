@@ -169,6 +169,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
+  dart_observable:
+    dependency: "direct main"
+    description:
+      name: dart_observable
+      sha256: "05f493db34e611c09be8b3bbe8dbdf7757aef3c2e650f0a93c2eb01065d3b986"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.7"
   dart_style:
     dependency: transitive
     description:
@@ -264,6 +272,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  format_bytes:
+    dependency: "direct main"
+    description:
+      name: format_bytes
+      sha256: "1d51717e9d59c517241416a62140a42bdaf2afbdec02086369e68d86fc6691e9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   freezed:
     dependency: "direct dev"
     description:
@@ -312,6 +328,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
+  intl:
+    dependency: transitive
+    description:
+      name: intl
+      sha256: "3bc132a9dbce73a7e4a21a17d06e1878839ffbf975568bc875c60537824b0c4d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.18.1"
   io:
     dependency: transitive
     description:

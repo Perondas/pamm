@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:format_bytes/format_bytes.dart';
 import 'package:ui/src/rust/api/commands/sync_pack/file_change.dart';
 import 'package:ui/src/rust/api/commands/sync_pack/get_diff.dart';
 import 'package:ui/src/services/progress_reporter_service.dart';
@@ -19,68 +20,101 @@ class SyncScreen extends StatefulWidget {
 
 class _SyncScreenState extends State<SyncScreen> {
   bool isSyncing = false;
+  bool isDoneSyncing = false;
   DiffResult? diffResult;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Synchronization Progress')),
+      appBar: AppBar(title: Text('Updating ${widget.packName}')),
       body: Column(
         children: [
-          TextButton(
-            onPressed: () async {
-              if (isSyncing) return;
-              setState(() {
-                isSyncing = true;
-              });
-              var diff = await getDiff(
-                packName: widget.packName,
-                repoPath: widget.repoPath,
-                dartProgressReporter:
-                    widget.progressReporterService.underlyingReporter,
-              );
-              setState(() {
-                diffResult = diff;
-                isSyncing = false;
-              });
-            },
-            child: const Text('Start Sync'),
+          Center(
+            child: isDoneSyncing
+                ? _buildDownloadButton(context)
+                : _buildSyncButton(),
           ),
           ProgressReporter(widget.progressReporterService),
-          if (diffResult?.hasChanges ?? false) ...[
-            const Text('Diff Result:'),
-            Text('Total Download Size: ${diffResult?.totalChangeSize} bytes'),
-            Text('Change Count: ${diffResult?.changeCount}'),
-            Expanded(
-              child: ListView(
-                children: diffResult!.fileChanges.entries.map((entry) {
-                  return ExpansionTile(
-                    title: Text('Addon: ${entry.key}'),
-                    children: entry.value.map((fileChange) {
-                      return ListTile(
-                        title: Text('File: ${fileChange.filePath}'),
-                        subtitle: switch (fileChange.change) {
-                          ChangeType_Created(:final size) => Text(
-                            'Created - Size: $size bytes',
-                          ),
-                          ChangeType_Deleted() => const Text('Deleted'),
-                          ChangeType_Modified(
-                            :final dlSize,
-                            :final sizeChange,
-                          ) =>
-                            Text(
-                              'Modified - Size Change: $sizeChange bytes, Download Size: $dlSize bytes',
-                            ),
-                        },
-                      );
-                    }).toList(),
-                  );
-                }).toList(),
-              ),
-            ),
-          ],
+          if (diffResult?.hasChanges ?? false) ..._buildDiffResult(),
         ],
       ),
     );
   }
+
+  TextButton _buildDownloadButton(BuildContext context) =>
+      TextButton(onPressed: () {}, child: Text("Download"));
+
+  TextButton _buildSyncButton() {
+    return TextButton(
+      onPressed: () async {
+        if (isSyncing) return;
+        setState(() {
+          isSyncing = true;
+        });
+        var diff = await getDiff(
+          packName: widget.packName,
+          repoPath: widget.repoPath,
+          dartProgressReporter:
+              widget.progressReporterService.underlyingReporter,
+        );
+        setState(() {
+          diffResult = diff;
+          isSyncing = false;
+          isDoneSyncing = true;
+        });
+      },
+      child: const Text('Check for update'),
+    );
+  }
+
+  List<Widget> _buildDiffResult() {
+    return [
+      Text(
+        'Total Download Size: ${format(diffResult?.totalChangeSize.toInt() ?? 0)}',
+      ),
+      Text('Changed addons: ${diffResult?.changeCount}'),
+      Expanded(
+        child: ListView(
+          children: diffResult!.fileChanges.entries.map((entry) {
+            return ExpansionTile(
+              title: Text(entry.key),
+              subtitle: Row(
+                children: [
+                  Text('${entry.value.length} changes'),
+                  const SizedBox(width: 16),
+                  Text(
+                    'Download size: ${format(entry.value.fold(0, (previousValue, element) {
+                      return sizeChangeToDlSize(element.change) + previousValue;
+                    }))}',
+                  ),
+                ],
+              ),
+              children: entry.value.map((fileChange) {
+                return ListTile(
+                  title: Text('File: ${fileChange.filePath}'),
+                  subtitle: switch (fileChange.change) {
+                    ChangeType_Created(:final size) => Text(
+                      'Download - Size: ${format(size.toInt())}',
+                    ),
+                    ChangeType_Deleted() => const Text('Delete'),
+                    ChangeType_Modified(:final dlSize, :final sizeChange) => Text(
+                      'Patch - Size Change: ${format(sizeChange)}, Download Size: ${format(dlSize.toInt())}',
+                    ),
+                  },
+                );
+              }).toList(),
+            );
+          }).toList(),
+        ),
+      ),
+    ];
+  }
+}
+
+int sizeChangeToDlSize(ChangeType change) {
+  return switch (change) {
+    ChangeType_Created(:final size) => size.toInt(),
+    ChangeType_Deleted() => 0,
+    ChangeType_Modified(:final dlSize) => dlSize.toInt(),
+  };
 }
