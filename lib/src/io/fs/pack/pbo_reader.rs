@@ -32,6 +32,15 @@ impl IndexNode {
             offset += file.size as u64;
         }
 
+        // Skip past the checksum
+        handle.handle.seek_relative(20)?;
+
+        // We should be at the end of the file
+        ensure!(
+            handle.handle.stream_position()? == handle.length,
+            "File is not at the end"
+        );
+
         // Compute PBO checksum
         let mut pbo_hasher = blake3::Hasher::new();
         pbo_hasher.update(&handle.checksum.data);
