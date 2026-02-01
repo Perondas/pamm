@@ -31,7 +31,7 @@ pub enum FileModification {
         new_order: Vec<PBOPart>,
         required_checksums: Vec<Vec<u8>>,
         required_parts_size: u64,
-        new_blob_offset: u64,
+        new_blob_start: u64,
     },
     Generic {
         new_length: u64,

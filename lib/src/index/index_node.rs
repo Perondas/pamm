@@ -18,7 +18,7 @@ pub enum NodeKind {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum FileKind {
     Pbo {
-        blob_offset: u64,
+        blob_start: u64,
         parts: Vec<PBOPart>,
     },
     Generic,

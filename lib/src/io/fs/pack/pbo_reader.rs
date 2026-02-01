@@ -1,5 +1,5 @@
 use crate::index::index_node::{FileKind, IndexNode, NodeKind, PBOPart};
-use anyhow::Result;
+use anyhow::{ensure, Result};
 use bi_fs_rs::pbo::handle::PBOHandle;
 use std::io::{Read, Seek, SeekFrom};
 
@@ -41,6 +41,15 @@ impl IndexNode {
         pbo_hasher.update(file_name.as_bytes());
         let pbo_checksum = pbo_hasher.finalize().as_bytes().to_vec();
 
+        // Header len + 1 + blob + checksum
+        let computed_len: u64 =
+            (handle.blob_start + 1) + parts.iter().map(|p| p.length as u64).sum::<u64>() + 20;
+
+        ensure!(
+            computed_len == handle.length,
+            "Computed PBO length does not match handle length"
+        );
+
         Ok(Self {
             name: file_name.to_string(),
             checksum: pbo_checksum,
@@ -48,7 +57,7 @@ impl IndexNode {
                 length: handle.length,
                 kind: FileKind::Pbo {
                     parts,
-                    blob_offset: handle.blob_start,
+                    blob_start: handle.blob_start,
                 },
             },
         })

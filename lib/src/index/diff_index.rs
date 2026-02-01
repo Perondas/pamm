@@ -54,7 +54,7 @@ fn diff_file(
             FileKind::Pbo { parts: l_parts, .. },
             FileKind::Pbo {
                 parts: r_parts,
-                blob_offset,
+                blob_start,
                 ..
             },
         ) => {
@@ -68,7 +68,7 @@ fn diff_file(
                         required_parts_size,
                         required_checksums,
                         new_order: r_parts,
-                        new_blob_offset: blob_offset,
+                        new_blob_start: blob_start,
                     },
                 },
             })

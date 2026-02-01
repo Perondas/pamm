@@ -46,7 +46,7 @@ impl RemotePatcher {
                 new_length,
                 new_order,
                 required_checksums,
-                new_blob_offset,
+                new_blob_start: new_blob_start,
                 ..
             } => {
                 let mut pbo_handle = PBOHandle::open_file(file_path)?;
@@ -60,7 +60,7 @@ impl RemotePatcher {
                     &new_order,
                     &required_checksums,
                     new_length,
-                    new_blob_offset,
+                    new_blob_start,
                 )?;
 
                 let new_headers = parts
@@ -127,20 +127,23 @@ fn get_required_pbo_parts(
     new_order: &[PBOPart],
     required_checksums: &[Vec<u8>],
     new_length: u64,
-    blob_offset: u64,
+    blob_start: u64,
 ) -> Result<ByteRangeResponse<BodyReader<'static>>> {
     let request_builder = ureq::get(url.to_string());
+    
+    // Ranges are inclusive
 
-    // We always get the entire header
+    // We always get the entire header + the padding bit
     // TODO: can we only get part of it? Is that worth it?
-    let pbo_header_range = (0_u64, blob_offset);
-    let pbo_checksum_rage = (new_length - 21, new_length);
+    let pbo_header_range = (0_u64, blob_start - 1);
+    let pbo_checksum_rage = (new_length - 19, new_length);
+    
     let modified_ranges = new_order
         .iter()
         .filter(|p| required_checksums.contains(&p.checksum))
         .map(|p| {
-            let start = p.start_offset + blob_offset;
-            (start, start + p.length as u64)
+            let start = p.start_offset + blob_start;
+            (start, start + p.length as u64 - 1)
         });
 
     let ranges = iter::once(pbo_header_range)
