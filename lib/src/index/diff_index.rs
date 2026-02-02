@@ -1,3 +1,4 @@
+use rayon::prelude::*;
 use crate::index::index_node::{FileKind, IndexNode, NodeKind, PBOPart};
 use crate::index::node_diff::{FileModification, ModifiedNodeKind, NodeDiff, NodeModification};
 use crate::util::iterator_diff::{diff_iterators, DiffResult};
@@ -117,7 +118,7 @@ fn diff_folders(
         .collect::<Vec<_>>();
 
     let changes: Result<Vec<_>, _> = same
-        .into_iter()
+        .into_par_iter()
         .map(|(left, right)| diff_index(left, right))
         .collect();
 
