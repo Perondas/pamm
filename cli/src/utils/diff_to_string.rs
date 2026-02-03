@@ -80,7 +80,7 @@ fn entry_modification_to_string(entry: &NodeModification, base_path: &str) -> St
                 )
             }
             FileModification::PBO {
-                required_parts_size,
+                dl_size,
                 new_length,
                 ..
             } => {
@@ -88,7 +88,7 @@ fn entry_modification_to_string(entry: &NodeModification, base_path: &str) -> St
                     "Modified PBO file: {} with to new length: {}\nThis PBO patch requires {} of data.\n",
                     path,
                     DecimalBytes(*new_length),
-                    DecimalBytes(*required_parts_size)
+                    DecimalBytes(*dl_size)
                 )
             }
         },

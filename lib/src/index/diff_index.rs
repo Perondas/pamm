@@ -1,7 +1,7 @@
-use rayon::prelude::*;
 use crate::index::index_node::{FileKind, IndexNode, NodeKind, PBOPart};
 use crate::index::node_diff::{FileModification, ModifiedNodeKind, NodeDiff, NodeModification};
 use crate::util::iterator_diff::{diff_iterators, DiffResult};
+use rayon::prelude::*;
 
 pub fn diff_index(left: IndexNode, right: IndexNode) -> anyhow::Result<NodeDiff> {
     let IndexNode {
@@ -66,7 +66,7 @@ fn diff_file(
                     target_checksum: r_checksum,
                     modification: FileModification::PBO {
                         new_length: r_length,
-                        required_parts_size,
+                        dl_size: required_parts_size + blob_start + 20,
                         required_checksums,
                         new_order: r_parts,
                         new_blob_start: blob_start,

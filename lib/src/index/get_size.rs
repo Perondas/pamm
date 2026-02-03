@@ -31,9 +31,9 @@ impl GetSize for FileModification {
     fn get_size(&self) -> u64 {
         match self {
             FileModification::PBO {
-                required_parts_size,
+                dl_size,
                 ..
-            } => *required_parts_size,
+            } => *dl_size,
             FileModification::Generic { new_length } => *new_length,
         }
     }
