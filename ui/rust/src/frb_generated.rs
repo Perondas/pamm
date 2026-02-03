@@ -296,38 +296,16 @@ fn wire__crate__api__commands__sync_pack__sync_pack__sync_pack_impl(
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_pack_name = <String>::sse_decode(&mut deserializer);
             let api_repo_path = <String>::sse_decode(&mut deserializer);
-            let api_dart_progress_reporter = <RustOpaqueMoi<
-                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DartProgressReporter>,
-            >>::sse_decode(&mut deserializer);
+            let api_dart_progress_reporter = <DartProgressReporter>::sse_decode(&mut deserializer);
             let api_pack_diff = <OpaqueDiff>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || {
-                        let mut api_dart_progress_reporter_guard = None;
-                        let decode_indices_ =
-                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
-                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                    &api_dart_progress_reporter,
-                                    0,
-                                    false,
-                                )],
-                            );
-                        for i in decode_indices_ {
-                            match i {
-                                0 => {
-                                    api_dart_progress_reporter_guard =
-                                        Some(api_dart_progress_reporter.lockable_decode_sync_ref())
-                                }
-                                _ => unreachable!(),
-                            }
-                        }
-                        let api_dart_progress_reporter_guard =
-                            api_dart_progress_reporter_guard.unwrap();
                         let output_ok = crate::api::commands::sync_pack::sync_pack::sync_pack(
                             api_pack_name,
                             api_repo_path,
-                            &*api_dart_progress_reporter_guard,
+                            api_dart_progress_reporter,
                             api_pack_diff,
                         )?;
                         Ok(output_ok)
@@ -675,25 +653,25 @@ fn pde_ffi_dispatcher_primary_impl(
 ) {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        3 => wire__crate__api__commands__sync_pack__get_diff__get_diff_impl(
+        2 => wire__crate__api__commands__sync_pack__get_diff__get_diff_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        4 => wire__crate__api__commands__get_remote_repo_info__get_remote_repo_info_impl(
+        3 => wire__crate__api__commands__get_remote_repo_info__get_remote_repo_info_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        6 => wire__crate__api__commands__init_from_remote__init_from_remote_impl(
+        5 => wire__crate__api__commands__init_from_remote__init_from_remote_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        7 => wire__crate__api__commands__sync_pack__sync_pack__sync_pack_impl(
+        6 => wire__crate__api__commands__sync_pack__sync_pack__sync_pack_impl(
             port,
             ptr,
             rust_vec_len,
@@ -711,12 +689,12 @@ fn pde_ffi_dispatcher_sync_impl(
 ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        2 => wire__crate__api__progress_reporting__create_dart_progress_reporter_impl(
+        1 => wire__crate__api__progress_reporting__create_dart_progress_reporter_impl(
             ptr,
             rust_vec_len,
             data_len,
         ),
-        5 => wire__crate__api__init_app_impl(ptr, rust_vec_len, data_len),
+        4 => wire__crate__api__init_app_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }

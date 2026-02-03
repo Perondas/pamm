@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:format_bytes/format_bytes.dart';
 import 'package:ui/src/services/progress_reporter_service.dart';
 
 class ProgressReporter extends StatefulWidget {
@@ -13,6 +14,7 @@ class ProgressReporter extends StatefulWidget {
 class _ProgressReporterState extends State<ProgressReporter> {
   bool isFinished = false;
   BigInt? total;
+  BigInt progress = BigInt.zero;
   final List<String> messages = [];
   final ScrollController _scrollController = ScrollController();
 
@@ -35,6 +37,12 @@ class _ProgressReporterState extends State<ProgressReporter> {
         });
       },
     );
+    widget.service.progressStream.listen((progressValue) {
+      if (!mounted) return;
+      setState(() {
+        progress = progress + progressValue;
+      });
+    });
     widget.service.messageStream.listen((message) {
       if (!mounted) return;
       if (message.isNotEmpty) {
@@ -63,17 +71,38 @@ class _ProgressReporterState extends State<ProgressReporter> {
 
   @override
   Widget build(BuildContext context) {
-    if (isFinished) {
-      return const Text('Completed');
-    }
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        // Progress section
+        if (!isFinished && total != null) ...[
+          if (total == BigInt.zero) ...[
+            Column(
+              children: [
+                Text('Progress: ${progress.toString()}'),
+                const SizedBox(height: 8),
+                const LinearProgressIndicator(value: null, minHeight: 10),
+              ],
+            ),
+          ] else ...[
+            Column(
+              children: [
+                Text('${format(progress.toInt())} / ${format(total!.toInt())}'),
+                const SizedBox(height: 8),
+                LinearProgressIndicator(
+                  value: progress.toDouble() / total!.toDouble(),
+                  minHeight: 10,
+                ),
+              ],
+            ),
+          ],
+        ],
+        const SizedBox(height: 16),
+
         // Scrolling messages view
         if (messages.isNotEmpty)
           Container(
-            height: 120,
+            height: 200,
             width: double.infinity,
             decoration: BoxDecoration(
               border: Border.all(color: Colors.grey.shade300),
@@ -90,36 +119,6 @@ class _ProgressReporterState extends State<ProgressReporter> {
                 );
               },
             ),
-          ),
-        const SizedBox(height: 16),
-        // Progress section
-        if (total != null)
-          StreamBuilder<BigInt>(
-            stream: widget.service.progressStream,
-            builder: (context, progressSnapshot) {
-              final progress = progressSnapshot.data ?? BigInt.zero;
-
-              if (total == BigInt.zero) {
-                // Indeterminate progress with actual number display
-                return Column(
-                  children: [
-                    Text('Progress: ${progress.toString()}'),
-                    const SizedBox(height: 8),
-                    const LinearProgressIndicator(), // Indeterminate
-                  ],
-                );
-              } else {
-                // Determinate progress
-                final progressValue = progress.toDouble() / total!.toDouble();
-                return Column(
-                  children: [
-                    Text('${progress.toString()} / ${total.toString()}'),
-                    const SizedBox(height: 8),
-                    LinearProgressIndicator(value: progressValue.clamp(0.0, 1.0)),
-                  ],
-                );
-              }
-            },
           ),
       ],
     );

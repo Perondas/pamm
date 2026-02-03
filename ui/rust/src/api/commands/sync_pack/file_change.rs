@@ -58,11 +58,11 @@ fn collect_modified_files(node: &NodeModification) -> Vec<FileChange> {
             let (size_change, dl_size) = match modification {
                 FileModification::PBO {
                     new_length,
-                    required_parts_size,
+                    dl_size,
                     ..
                 } => (
                     *new_length as i64 - *old_length as i64,
-                    *required_parts_size,
+                    *dl_size,
                 ),
                 FileModification::Generic { new_length } => (
                     *new_length as i64 - *old_length as i64,

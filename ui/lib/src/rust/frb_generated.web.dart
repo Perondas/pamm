@@ -9,7 +9,6 @@
 import 'api.dart';
 import 'api/commands/get_remote_repo_info.dart';
 import 'api/commands/init_from_remote.dart';
-import 'api/commands/sync_pack/diff_to_string.dart';
 import 'api/commands/sync_pack/file_change.dart';
 import 'api/commands/sync_pack/get_diff.dart';
 import 'api/commands/sync_pack/sync_pack.dart';
@@ -90,9 +89,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   String dco_decode_String(dynamic raw);
-
-  @protected
-  ToPrettyString dco_decode_TraitDef_ToPrettyString(dynamic raw);
 
   @protected
   bool dco_decode_bool(dynamic raw);
