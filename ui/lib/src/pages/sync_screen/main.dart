@@ -86,36 +86,40 @@ class _SyncScreenState extends State<SyncScreen> {
       Text('Changed addons: ${diffResult?.changeCount}'),
       Expanded(
         child: ListView(
-          children: diffResult!.fileChanges.entries.map((entry) {
-            return ExpansionTile(
-              title: Text(entry.key),
-              subtitle: Row(
-                children: [
-                  Text('${entry.value.length} changes'),
-                  const SizedBox(width: 16),
-                  Text(
-                    'Download size: ${format(entry.value.fold(0, (previousValue, element) {
-                      return sizeChangeToDlSize(element.change) + previousValue;
-                    }))}',
+          children: diffResult!.fileChanges.entries
+              .where((element) => element.value.isNotEmpty)
+              .map((entry) {
+                return ExpansionTile(
+                  title: Text(entry.key),
+                  subtitle: Row(
+                    children: [
+                      Text('${entry.value.length} changes'),
+                      const SizedBox(width: 16),
+                      Text(
+                        'Download size: ${format(entry.value.fold(0, (previousValue, element) {
+                          return sizeChangeToDlSize(element.change) + previousValue;
+                        }))}',
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              children: entry.value.map((fileChange) {
-                return ListTile(
-                  title: Text('File: ${fileChange.filePath}'),
-                  subtitle: switch (fileChange.change) {
-                    ChangeType_Created(:final size) => Text(
-                      'Download - Size: ${format(size.toInt())}',
-                    ),
-                    ChangeType_Deleted() => const Text('Delete'),
-                    ChangeType_Modified(:final dlSize, :final sizeChange) => Text(
-                      'Patch - Size Change: ${format(sizeChange)}, Download Size: ${format(dlSize.toInt())}',
-                    ),
-                  },
+                  children: entry.value.map((fileChange) {
+                    return ListTile(
+                      title: Text('File: ${fileChange.filePath}'),
+                      subtitle: switch (fileChange.change) {
+                        ChangeType_Created(:final size) => Text(
+                          'Download - Size: ${format(size.toInt())}',
+                        ),
+                        ChangeType_Deleted() => const Text('Delete'),
+                        ChangeType_Modified(:final dlSize, :final sizeChange) =>
+                          Text(
+                            'Patch - Size Change: ${format(sizeChange)}, Download Size: ${format(dlSize.toInt())}',
+                          ),
+                      },
+                    );
+                  }).toList(),
                 );
-              }).toList(),
-            );
-          }).toList(),
+              })
+              .toList(),
         ),
       ),
     ];
