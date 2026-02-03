@@ -18,7 +18,7 @@ impl ProgressReporter for DartProgressReporter {
     }
 
     fn start_without_len(&self) {
-        //NOOP
+        let _ = self.report_total_sink.add("0".to_string());
     }
 
     fn report_progress(&self, progress: u64) {

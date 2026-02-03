@@ -65,7 +65,9 @@ class _SyncScreenState extends State<SyncScreen> {
           repoPath: widget.repoPath,
           dartProgressReporter:
               widget.progressReporterService.underlyingReporter,
+          clearCache: true,
         );
+        if (!mounted) return;
         setState(() {
           diffResult = diff;
           isSyncing = false;

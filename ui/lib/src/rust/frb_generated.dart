@@ -93,6 +93,7 @@ abstract class RustLibApi extends BaseApi {
     required String packName,
     required String repoPath,
     required DartProgressReporter dartProgressReporter,
+    required bool clearCache,
   });
 
   Future<RepoConfig> crateApiCommandsGetRemoteRepoInfoGetRemoteRepoInfo({
@@ -191,6 +192,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     required String packName,
     required String repoPath,
     required DartProgressReporter dartProgressReporter,
+    required bool clearCache,
   }) {
     return handler.executeNormal(
       NormalTask(
@@ -202,6 +204,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             dartProgressReporter,
             serializer,
           );
+          sse_encode_bool(clearCache, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
@@ -214,7 +217,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: sse_decode_AnyhowException,
         ),
         constMeta: kCrateApiCommandsSyncPackGetDiffGetDiffConstMeta,
-        argValues: [packName, repoPath, dartProgressReporter],
+        argValues: [packName, repoPath, dartProgressReporter, clearCache],
         apiImpl: this,
       ),
     );
@@ -223,7 +226,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiCommandsSyncPackGetDiffGetDiffConstMeta =>
       const TaskConstMeta(
         debugName: "get_diff",
-        argNames: ["packName", "repoPath", "dartProgressReporter"],
+        argNames: [
+          "packName",
+          "repoPath",
+          "dartProgressReporter",
+          "clearCache",
+        ],
       );
 
   @override

@@ -19,6 +19,7 @@ pub fn get_diff(
     pack_name: String,
     repo_path: String,
     dart_progress_reporter: &DartProgressReporter,
+    clear_cache: bool,
 ) -> anyhow::Result<DiffResult> {
     let current_dir = Path::new(&repo_path);
 
@@ -45,9 +46,13 @@ pub fn get_diff(
 
     let index_generator = IndexGenerator::from_config(
         &local_pack_config,
-        &current_dir,
+        current_dir,
         dart_progress_reporter.clone(),
     )?;
+
+    if clear_cache {
+        index_generator.clear_cache()?;
+    }
 
     let actual_index = index_generator.index_addons()?;
 

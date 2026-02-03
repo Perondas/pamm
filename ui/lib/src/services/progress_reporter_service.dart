@@ -9,7 +9,7 @@ class ProgressReporterService {
   late RustStreamSink<String> _messageSink;
   late RustStreamSink<bool> _finishSink;
 
-  late Stream<BigInt> _totalStream;
+  late Observable<BigInt?> _total;
   late Stream<BigInt> _progressStream;
   late Stream<String> _messageStream;
   late Observable<bool> _finished;
@@ -27,9 +27,10 @@ class ProgressReporterService {
       finishSink: _finishSink,
     );
 
-    _totalStream = _totalSink.stream
-        .map((value) => BigInt.parse(value))
-        .asBroadcastStream();
+    _total = Observable<BigInt?>.fromStream(
+      initial: null,
+      stream: _totalSink.stream.map((value) => BigInt.parse(value)),
+    );
     _progressStream = _progressSink.stream
         .map((value) => BigInt.parse(value))
         .asBroadcastStream();
@@ -46,7 +47,7 @@ class ProgressReporterService {
 
   Stream<BigInt> get progressStream => _progressStream;
 
-  Stream<BigInt> get totalStream => _totalStream;
+  Observable<BigInt?> get total => _total;
 
   Stream<String> get messageStream => _messageStream;
 

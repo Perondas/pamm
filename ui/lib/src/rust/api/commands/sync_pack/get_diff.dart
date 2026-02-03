@@ -12,10 +12,12 @@ Future<DiffResult> getDiff({
   required String packName,
   required String repoPath,
   required DartProgressReporter dartProgressReporter,
+  required bool clearCache,
 }) => RustLib.instance.api.crateApiCommandsSyncPackGetDiffGetDiff(
   packName: packName,
   repoPath: repoPath,
   dartProgressReporter: dartProgressReporter,
+  clearCache: clearCache,
 );
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<OpaqueDiff>>

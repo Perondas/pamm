@@ -126,6 +126,7 @@ fn wire__crate__api__commands__sync_pack__get_diff__get_diff_impl(
             let api_dart_progress_reporter = <RustOpaqueMoi<
                 flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DartProgressReporter>,
             >>::sse_decode(&mut deserializer);
+            let api_clear_cache = <bool>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
@@ -154,6 +155,7 @@ fn wire__crate__api__commands__sync_pack__get_diff__get_diff_impl(
                             api_pack_name,
                             api_repo_path,
                             &*api_dart_progress_reporter_guard,
+                            api_clear_cache,
                         )?;
                         Ok(output_ok)
                     })(),
