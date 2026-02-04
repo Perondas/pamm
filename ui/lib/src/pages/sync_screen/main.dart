@@ -30,12 +30,17 @@ class _SyncScreenState extends State<SyncScreen> {
       body: Column(
         children: [
           Center(
-            child: isDoneSyncing
+            child: isDoneSyncing && (diffResult?.hasChanges ?? false)
                 ? _buildDownloadButton(context)
                 : _buildSyncButton(),
           ),
           ProgressReporter(widget.progressReporterService),
-          if (diffResult?.hasChanges ?? false) ..._buildDiffResult(),
+          if (diffResult != null) ...[
+            if (diffResult!.hasChanges)
+              ..._buildDiffResult()
+            else
+              const Center(child: Text('No changes found.')),
+          ],
         ],
       ),
     );
@@ -74,7 +79,7 @@ class _SyncScreenState extends State<SyncScreen> {
           isDoneSyncing = true;
         });
       },
-      child: const Text('Check for update'),
+      child: const Text('Check for updates'),
     );
   }
 
