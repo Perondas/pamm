@@ -9,12 +9,16 @@ use std::path::Path;
 use url::Url;
 
 impl RepoConfig {
-    pub fn init_blank_on_fs(&self, parent_dir: &Path) -> anyhow::Result<()> {
-        if !parent_dir.is_dir() {
-            anyhow::bail!("{} is not a directory", parent_dir.display());
+    pub fn init_blank_on_fs(&self, dest_dir: &Path) -> anyhow::Result<()> {
+        if !dest_dir.is_dir() {
+            anyhow::bail!("{} is not a directory", dest_dir.display());
         }
 
-        let base_path = parent_dir.join(&self.name);
+        let base_path = dest_dir.join(&self.name);
+        
+        if base_path.exists() {
+            anyhow::bail!("Directory {} already exists", base_path.display());
+        }
 
         fs::create_dir(&base_path)?;
         self.write_to(&base_path)?;
