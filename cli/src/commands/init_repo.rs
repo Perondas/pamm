@@ -1,6 +1,7 @@
 use crate::commands::input::from_cli_input::FromCliInput;
 use pamm_lib::repo::repo_config::RepoConfig;
 
+// TODO: Allow non interactive mode with args
 pub fn init_repo_command() -> anyhow::Result<()> {
     let repo_config = RepoConfig::from_cli_input()?;
 

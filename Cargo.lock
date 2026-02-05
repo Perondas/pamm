@@ -1221,10 +1221,8 @@ dependencies = [
  "clap",
  "dialoguer",
  "indicatif",
- "open",
  "pamm_lib",
  "url",
- "urlencoding",
 ]
 
 [[package]]
@@ -1235,6 +1233,7 @@ dependencies = [
  "bi_fs_rs",
  "bincode",
  "blake3",
+ "open",
  "rayon",
  "regex",
  "serde",
@@ -1242,6 +1241,7 @@ dependencies = [
  "sled",
  "ureq",
  "url",
+ "urlencoding",
 ]
 
 [[package]]

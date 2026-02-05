@@ -5,7 +5,7 @@ pub mod utils;
 
 use crate::args::{AppSubcommand, Args};
 use crate::commands::add_pack::add_pack_command;
-use crate::commands::init_pack::init_repo_command;
+use crate::commands::init_repo::init_repo_command;
 use crate::commands::init_remote::init_remote_command;
 use crate::commands::launch::launch_command;
 use crate::commands::sync_pack::sync_pack_command;
