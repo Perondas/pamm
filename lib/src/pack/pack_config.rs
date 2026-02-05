@@ -54,7 +54,7 @@ impl PackConfig {
 
         self.addons
             .iter()
-            .map(|addon| addon_dir.join(&addon.0))
+            .map(|addon| addon_dir.join(addon.0))
             .map(|p| p.canonicalize().unwrap())
             .map(clean_path)
             .collect()

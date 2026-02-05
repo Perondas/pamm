@@ -1,12 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Hash, PartialEq, Eq, Clone, Serialize, Deserialize)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone, Serialize, Deserialize, Default)]
 pub struct AddonSettings {
     pub is_optional: bool,
-}
-
-impl Default for AddonSettings {
-    fn default() -> Self {
-        Self { is_optional: false }
-    }
 }
