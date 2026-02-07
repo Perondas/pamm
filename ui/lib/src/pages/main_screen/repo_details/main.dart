@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ui/src/pages/sync_screen/main.dart';
+import 'package:ui/src/rust/api/commands/launch.dart';
 
 import '../../../models/stored_repo.dart';
 
@@ -69,7 +70,12 @@ ListTile _buildPackListTitle(
     trailing: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        IconButton(onPressed: () async {}, icon: Icon(Icons.play_arrow)),
+        IconButton(
+          onPressed: () async {
+            await launch(repoDir: repoPath, packName: packName);
+          },
+          icon: Icon(Icons.play_arrow),
+        ),
         IconButton(
           onPressed: () async {
             Navigator.of(context).push(

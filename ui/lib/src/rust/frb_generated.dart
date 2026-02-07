@@ -6,6 +6,7 @@
 import 'api.dart';
 import 'api/commands/get_remote_repo_info.dart';
 import 'api/commands/init_from_remote.dart';
+import 'api/commands/launch.dart';
 import 'api/commands/sync_pack/file_change.dart';
 import 'api/commands/sync_pack/get_diff.dart';
 import 'api/commands/sync_pack/sync_pack.dart';
@@ -70,7 +71,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => -1761643658;
+  int get rustContentHash => 1685736993;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -104,6 +105,11 @@ abstract class RustLibApi extends BaseApi {
   Future<RepoConfig> crateApiCommandsInitFromRemoteInitFromRemote({
     required String remote,
     required String targetDir,
+  });
+
+  Future<void> crateApiCommandsLaunchLaunch({
+    required String repoDir,
+    required String packName,
   });
 
   Future<void> crateApiCommandsSyncPackSyncPackSyncPack({
@@ -325,6 +331,41 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<void> crateApiCommandsLaunchLaunch({
+    required String repoDir,
+    required String packName,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(repoDir, serializer);
+          sse_encode_String(packName, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 6,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiCommandsLaunchLaunchConstMeta,
+        argValues: [repoDir, packName],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiCommandsLaunchLaunchConstMeta =>
+      const TaskConstMeta(
+        debugName: "launch",
+        argNames: ["repoDir", "packName"],
+      );
+
+  @override
   Future<void> crateApiCommandsSyncPackSyncPackSyncPack({
     required String packName,
     required String repoPath,
@@ -348,7 +389,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 6,
+            funcId: 7,
             port: port_,
           );
         },

@@ -122,20 +122,18 @@ fn sync_config(
         .filter(|p| !remote_repo_config.packs.contains(*p))
         .collect::<Vec<_>>();
 
-    if !removed.is_empty() {
-        for pack in removed {
-            println!("Pack '{}' has been removed from remote repository.", pack);
-            let outcome = dialoguer::Confirm::with_theme(&ColorfulTheme::default())
-                .with_prompt(format!(
-                    "Do you want to remove the local pack '{}' as well?",
-                    pack
-                ))
-                .default(false)
-                .interact()?;
-            if outcome {
-                delete_pack(current_dir, pack)?;
-                println!("Pack '{}' removed locally.", pack);
-            }
+    for pack in removed {
+        println!("Pack '{}' has been removed from remote repository.", pack);
+        let outcome = dialoguer::Confirm::with_theme(&ColorfulTheme::default())
+            .with_prompt(format!(
+                "Do you want to remove the local pack '{}' as well?",
+                pack
+            ))
+            .default(false)
+            .interact()?;
+        if outcome {
+            delete_pack(current_dir, pack)?;
+            println!("Pack '{}' removed locally.", pack);
         }
     }
 
@@ -145,15 +143,13 @@ fn sync_config(
         .filter(|p| !local_repo_config.packs.contains(*p))
         .collect::<Vec<_>>();
 
-    if !added.is_empty() {
-        for pack in added {
-            let pack_config = PackConfig::download_named(remote_url, pack)
-                .context(format!("Failed to download pack {} configuration", &pack))?;
+    for pack in added {
+        let pack_config = PackConfig::download_named(remote_url, pack)
+            .context(format!("Failed to download pack {} configuration", &pack))?;
 
-            pack_config.init_blank_on_fs(current_dir)?;
+        pack_config.init_blank_on_fs(current_dir)?;
 
-            println!("Pack '{}' has been added to repository.", pack);
-        }
+        println!("Pack '{}' has been added to repository.", pack);
     }
 
     let existing = remote_repo_config

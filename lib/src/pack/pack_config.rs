@@ -4,6 +4,7 @@ use crate::named;
 use crate::pack::addon::AddonSettings;
 use crate::pack::pack_user_settings::PackUserSettings;
 use crate::pack::server_info::ServerInfo;
+use anyhow::Context;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
@@ -55,7 +56,11 @@ impl PackConfig {
         self.addons
             .iter()
             .map(|addon| addon_dir.join(addon.0))
-            .map(|p| p.canonicalize().unwrap())
+            .map(|p| {
+                p.canonicalize()
+                    .with_context(|| format!("Failed to canonicalize {}", p.display()))
+                    .unwrap()
+            })
             .map(clean_path)
             .collect()
     }
