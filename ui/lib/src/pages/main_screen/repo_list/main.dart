@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:ui/src/pages/main_screen/repo_list/edit_repo_dialog.dart';
-
-import '../../../models/stored_repo.dart';
-import '../../../rust/api/commands/init_from_remote.dart';
-import '../../../services/repos_store.dart';
+import 'package:ui/src/models/repo_with_path.dart';
+import 'package:ui/src/rust/api/commands/init_from_remote.dart';
+import 'package:ui/src/services/repo_path_store.dart';
 import 'add_repo_dialog.dart';
 
 class RepoList extends StatefulWidget {
   const RepoList(this.selectedRepoChanged, {super.key});
 
-  final ValueChanged<StoredRepo?> selectedRepoChanged;
+  final ValueChanged<RepoWithPath?> selectedRepoChanged;
 
   @override
   State<RepoList> createState() => _RepoListState();
 }
 
 class _RepoListState extends State<RepoList> {
-  List<StoredRepo> _repos = [];
-  StoredRepo? _selectedRepo;
+  List<String> _repoPaths = [];
+  RepoWithPath? _selectedRepo;
 
   @override
   void initState() {
@@ -26,21 +25,24 @@ class _RepoListState extends State<RepoList> {
   }
 
   Future<void> _loadRepos() async {
-    final list = await ReposStore.load();
+    final set = await RepoPathStore.getRepoPaths();
     if (!mounted) return;
-    var selectedExists = list.any((r) => r.path == _selectedRepo?.path);
+    var selectedExists = set.contains(_selectedRepo?.path);
+    var list = set.toList();
+    list.sort();
+
     setState(() {
       if (!selectedExists) {
         _selectedRepo = null;
       }
-      _repos = list;
+      _repoPaths = list;
     });
 
     widget.selectedRepoChanged(_selectedRepo);
   }
 
   Future<void> _onAddRepo() async {
-    final result = await showDialog<RepoConfig?>(
+    final result = await showDialog<RepoWithPath?>(
       context: context,
       builder: (_) => AddRepoDialog(),
     );
@@ -68,7 +70,7 @@ class _RepoListState extends State<RepoList> {
           ),
         ),
         Expanded(
-          child: _repos.isEmpty
+          child: _repoPaths.isEmpty
               ? ListTile(
                   leading: Icon(Icons.info_outline),
                   title: Text('No repositories added'),
@@ -76,18 +78,18 @@ class _RepoListState extends State<RepoList> {
                 )
               : ListView.builder(
                   itemBuilder: (context, index) =>
-                      _buildRepoListTitle(_repos[index]),
-                  itemCount: _repos.length,
+                      _buildRepoListTitle(_repoPaths[index]),
+                  itemCount: _repoPaths.length,
                 ),
         ),
       ],
     );
   }
 
-  ListTile _buildRepoListTitle(StoredRepo r) {
+  ListTile _buildRepoListTitle(RepoWithPath r) {
     return ListTile(
       leading: Icon(Icons.folder),
-      title: Text(r.name),
+      title: Text(r.repo.name),
       subtitle: Text(r.path),
       selected: _selectedRepo != null && r.path == _selectedRepo!.path,
       selectedTileColor: Colors.grey.shade200,

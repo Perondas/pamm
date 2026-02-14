@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:ui/src/models/stored_repo.dart';
-import 'package:ui/src/services/repos_store.dart';
+import 'package:ui/src/models/repo_with_path.dart';
+import 'package:ui/src/rust/api/commands/init_from_remote.dart';
+import 'package:ui/src/services/repo_path_store.dart';
 import 'package:ui/src/widgets/confirm_dialog.dart';
 
 class EditRepoDialog extends StatefulWidget {
-  const EditRepoDialog(this.repo, {super.key});
+  const EditRepoDialog(this.selectedRepo, {super.key});
 
-  final StoredRepo repo;
+  final RepoWithPath selectedRepo;
+
+  String get path => selectedRepo.path;
+
+  RepoConfig get repo => selectedRepo.repo;
 
   @override
   State<EditRepoDialog> createState() => _EditRepoDialogState();
@@ -23,7 +28,7 @@ class _EditRepoDialogState extends State<EditRepoDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Repository Path: ${widget.repo.path}'),
+            Text('Repository Path: ${widget.path}'),
             SizedBox(height: 16),
             if (widget.repo.description.isNotEmpty) ...[
               Text('Description: ${widget.repo.description}'),
@@ -41,7 +46,7 @@ class _EditRepoDialogState extends State<EditRepoDialog> {
                     false;
 
                 if (confirm) {
-                  await ReposStore.remove(widget.repo);
+                  await RepoPathStore.remove(widget.path);
                   if (!mounted) return;
                   Navigator.of(context).pop();
                 }
