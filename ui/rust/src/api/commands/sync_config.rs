@@ -9,7 +9,7 @@ use pamm_lib::repo::repo_config::RepoConfig;
 use pamm_lib::repo::repo_user_settings::RepoUserSettings;
 use std::path::Path;
 
-fn sync_config(repo_path: String) -> anyhow::Result<RepoConfig> {
+pub fn sync_config(repo_path: String) -> anyhow::Result<RepoConfig> {
     let repo_path = Path::new(&repo_path);
     let repo_user_settings = RepoUserSettings::read_from_known(repo_path)?
         .ok_or(anyhow!("No remote config found in current directory"))?;

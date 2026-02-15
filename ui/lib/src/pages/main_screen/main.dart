@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ui/src/models/stored_repo.dart';
+import 'package:ui/src/models/repo_with_path.dart';
 import 'package:ui/src/pages/main_screen/repo_details/main.dart';
 import 'package:ui/src/pages/main_screen/repo_list/main.dart';
 
@@ -11,9 +11,9 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  StoredRepo? _selectedRepo;
+  RepoWithPath? _selectedRepo;
 
-  void _onSelectRepo(StoredRepo? repo) {
+  void _onSelectRepo(RepoWithPath? repo) {
     setState(() {
       _selectedRepo = repo;
     });

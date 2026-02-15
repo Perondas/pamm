@@ -7,6 +7,8 @@ import 'api.dart';
 import 'api/commands/get_remote_repo_info.dart';
 import 'api/commands/init_from_remote.dart';
 import 'api/commands/launch.dart';
+import 'api/commands/load_repo.dart';
+import 'api/commands/sync_config.dart';
 import 'api/commands/sync_pack/file_change.dart';
 import 'api/commands/sync_pack/get_diff.dart';
 import 'api/commands/sync_pack/sync_pack.dart';

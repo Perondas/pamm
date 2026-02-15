@@ -3,8 +3,6 @@ import 'dart:convert';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../models/stored_repo.dart';
-
 class RepoPathStore {
   static const _key = 'pamm_repositories_v2';
 

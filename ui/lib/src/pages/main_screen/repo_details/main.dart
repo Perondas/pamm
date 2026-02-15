@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:ui/src/models/repo_with_path.dart';
 import 'package:ui/src/pages/sync_screen/main.dart';
 import 'package:ui/src/rust/api/commands/launch.dart';
-
-import '../../../models/stored_repo.dart';
 
 class RepoDetails extends StatefulWidget {
   const RepoDetails(this.selectedRepo, {super.key});
 
-  final StoredRepo selectedRepo;
+  final RepoWithPath selectedRepo;
 
   @override
   State<RepoDetails> createState() => _RepoDetailsState();
@@ -46,7 +45,9 @@ class _RepoDetailsState extends State<RepoDetails> {
                       itemBuilder: (context, index) => _buildPackListTitle(
                         context,
                         widget.selectedRepo.packs[index],
-                        widget.selectedRepo.path + '\\' + widget.selectedRepo.name,
+                        widget.selectedRepo.path +
+                            '\\' +
+                            widget.selectedRepo.name,
                       ),
                       itemCount: widget.selectedRepo.packs.length,
                       shrinkWrap: true,

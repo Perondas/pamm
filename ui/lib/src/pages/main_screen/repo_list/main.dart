@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ui/src/pages/main_screen/repo_list/edit_repo_dialog.dart';
 import 'package:ui/src/models/repo_with_path.dart';
+import 'package:ui/src/pages/main_screen/repo_list/list_item.dart';
 import 'package:ui/src/rust/api/commands/init_from_remote.dart';
 import 'package:ui/src/services/repo_path_store.dart';
 import 'add_repo_dialog.dart';
@@ -86,29 +87,7 @@ class _RepoListState extends State<RepoList> {
     );
   }
 
-  ListTile _buildRepoListTitle(RepoWithPath r) {
-    return ListTile(
-      leading: Icon(Icons.folder),
-      title: Text(r.repo.name),
-      subtitle: Text(r.path),
-      selected: _selectedRepo != null && r.path == _selectedRepo!.path,
-      selectedTileColor: Colors.grey.shade200,
-      onTap: () {
-        setState(() {
-          _selectedRepo = r;
-        });
-        widget.selectedRepoChanged(r);
-      },
-      trailing: IconButton(
-        onPressed: () async {
-          await showDialog<RepoConfig?>(
-            context: context,
-            builder: (_) => EditRepoDialog(r),
-          );
-          await _loadRepos();
-        },
-        icon: Icon(Icons.more_vert),
-      ),
-    );
+  Widget _buildRepoListTitle(String pathToRepo) {
+    return RepoListItem(pathToRepo);
   }
 }
