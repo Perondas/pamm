@@ -44,7 +44,7 @@ class _RepoDetailsState extends State<RepoDetails> {
                       itemBuilder: (context, index) => _buildPackListTitle(
                         context,
                         repo.packs.toList()[index],
-                        '${widget.selectedRepo.path}\\${repo.name}',
+                        widget.selectedRepo.path,
                       ),
                       itemCount: repo.packs.length,
                       shrinkWrap: true,
