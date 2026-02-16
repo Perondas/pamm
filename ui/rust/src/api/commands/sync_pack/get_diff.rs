@@ -12,7 +12,7 @@ use pamm_lib::repo::repo_config::RepoConfig;
 use pamm_lib::repo::repo_user_settings::RepoUserSettings;
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
-use pamm_lib::index::node_diff::NodeDiff;
+use anyhow::anyhow;
 use crate::frb_generated::RustAutoOpaque;
 
 pub fn get_diff(
@@ -23,8 +23,10 @@ pub fn get_diff(
 ) -> anyhow::Result<DiffResult> {
     let current_dir = Path::new(&repo_path);
 
-    let repo_user_settings = RepoUserSettings::read_from_known(current_dir)?
-        .expect("No remote config found in current directory");
+    let repo_user_settings = RepoUserSettings::read_from_known(current_dir)?.ok_or(anyhow!(
+        "Repository user settings not found in: {:#?}",
+        current_dir
+    ))?;
 
     let repo_config = RepoConfig::read_from_known(current_dir)?
         .expect("No repo config found in current directory");
