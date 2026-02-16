@@ -15,6 +15,8 @@ class RepoDetails extends StatefulWidget {
 class _RepoDetailsState extends State<RepoDetails> {
   @override
   Widget build(BuildContext context) {
+    var repo = widget.selectedRepo.repo;
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: SingleChildScrollView(
@@ -22,13 +24,10 @@ class _RepoDetailsState extends State<RepoDetails> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            //AppBar(title: Text(widget.selectedRepo?.name ?? '')),
-            Text(
-              widget.selectedRepo.name,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            //AppBar(title: Text(repo?.name ?? '')),
+            Text(repo.name, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            Text(widget.selectedRepo.description),
+            Text(repo.description),
             const SizedBox(height: 12),
             Text('Path:', style: TextStyle(fontWeight: FontWeight.bold)),
             Text(widget.selectedRepo.path),
@@ -36,7 +35,7 @@ class _RepoDetailsState extends State<RepoDetails> {
             Text('Packs:', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Flexible(
-              child: widget.selectedRepo.packs.isEmpty
+              child: repo.packs.isEmpty
                   ? ListTile(
                       leading: Icon(Icons.info_outline),
                       title: Text('No packs found in this repository'),
@@ -44,12 +43,10 @@ class _RepoDetailsState extends State<RepoDetails> {
                   : ListView.builder(
                       itemBuilder: (context, index) => _buildPackListTitle(
                         context,
-                        widget.selectedRepo.packs[index],
-                        widget.selectedRepo.path +
-                            '\\' +
-                            widget.selectedRepo.name,
+                        repo.packs.toList()[index],
+                        '${widget.selectedRepo.path}\\${repo.name}',
                       ),
-                      itemCount: widget.selectedRepo.packs.length,
+                      itemCount: repo.packs.length,
                       shrinkWrap: true,
                     ),
             ),

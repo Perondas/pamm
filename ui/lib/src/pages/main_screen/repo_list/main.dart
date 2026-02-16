@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:ui/src/pages/main_screen/repo_list/edit_repo_dialog.dart';
 import 'package:ui/src/models/repo_with_path.dart';
-import 'package:ui/src/pages/main_screen/repo_list/list_item.dart';
+import 'package:ui/src/pages/main_screen/repo_list/edit_repo_dialog.dart';
 import 'package:ui/src/rust/api/commands/init_from_remote.dart';
 import 'package:ui/src/services/repo_path_store.dart';
+import 'package:ui/src/services/repo_state_store.dart';
+
 import 'add_repo_dialog.dart';
 
 class RepoList extends StatefulWidget {
@@ -16,7 +17,7 @@ class RepoList extends StatefulWidget {
 }
 
 class _RepoListState extends State<RepoList> {
-  List<String> _repoPaths = [];
+  List<RepoStateManager> _repos = [];
   RepoWithPath? _selectedRepo;
 
   @override
@@ -36,7 +37,7 @@ class _RepoListState extends State<RepoList> {
       if (!selectedExists) {
         _selectedRepo = null;
       }
-      _repoPaths = list;
+      _repos = list.map((path) => RepoStateManager(path)).toList();
     });
 
     widget.selectedRepoChanged(_selectedRepo);
@@ -71,7 +72,7 @@ class _RepoListState extends State<RepoList> {
           ),
         ),
         Expanded(
-          child: _repoPaths.isEmpty
+          child: _repos.isEmpty
               ? ListTile(
                   leading: Icon(Icons.info_outline),
                   title: Text('No repositories added'),
@@ -79,15 +80,71 @@ class _RepoListState extends State<RepoList> {
                 )
               : ListView.builder(
                   itemBuilder: (context, index) =>
-                      _buildRepoListTitle(_repoPaths[index]),
-                  itemCount: _repoPaths.length,
+                      _buildRepoListTitle(_repos[index]),
+                  itemCount: _repos.length,
                 ),
         ),
       ],
     );
   }
 
-  Widget _buildRepoListTitle(String pathToRepo) {
-    return RepoListItem(pathToRepo);
+  Widget _buildRepoListTitle(RepoStateManager repoStateManager) {
+    return ListenableBuilder(
+      listenable: repoStateManager,
+      builder: (context, snapshot) {
+        if (repoStateManager.configLoadError != null) {
+          return ListTile(
+            leading: Icon(Icons.error, color: Colors.red),
+            title: Text(repoStateManager.repoPath),
+            subtitle: Text("Error loading repo"),
+            trailing: IconButton(
+              onPressed: () async {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(repoStateManager.configLoadError!),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              icon: Icon(Icons.warning),
+            ),
+          );
+        } else if (repoStateManager.repoState != null) {
+          final repo = repoStateManager.repoState!.repo;
+          final path = repoStateManager.repoState!.path;
+          return ListTile(
+            leading: Icon(Icons.folder),
+            title: Text(repo.name),
+            subtitle: Text(path),
+            selected: _selectedRepo != null && path == _selectedRepo!.path,
+            selectedTileColor: Colors.grey.shade200,
+            onTap: () {
+              setState(() {
+                _selectedRepo = repoStateManager.repoState!;
+              });
+              widget.selectedRepoChanged(repoStateManager.repoState!);
+            },
+            trailing: IconButton(
+              onPressed: () async {
+                await showDialog<RepoConfig?>(
+                  context: context,
+                  builder: (_) => EditRepoDialog(repoStateManager.repoState!),
+                );
+                await _loadRepos();
+              },
+              icon: Icon(Icons.more_vert),
+            ),
+          );
+        } else {
+          return ListTile(
+            leading: CircularProgressIndicator(),
+            title: Text(repoStateManager.repoPath),
+            subtitle: Text("Loading..."),
+          );
+        }
+      },
+    );
   }
 }

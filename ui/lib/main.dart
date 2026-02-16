@@ -11,6 +11,7 @@ final getIt = GetIt.instance;
 
 Future<void> main() async {
   await RustLib.init();
+  configureDI();
   runApp(const MyApp());
 }
 
