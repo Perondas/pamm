@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:ui/src/models/repo_with_path.dart';
 import 'package:ui/src/rust/api/commands/load_repo.dart';
+import 'package:ui/src/rust/api/commands/sync_config.dart';
 
 class RepoStateManager with ChangeNotifier {
   final String repoPath;
@@ -32,10 +33,9 @@ class RepoStateManager with ChangeNotifier {
 
   Future<void> _checkForConfigUpdates() async {
     try {
-      //var isUpToDate = await checkRepoConfigUpToDate(repoPath: repoPath);
-      var isUpToDate =
-          true; // TODO: implement this in rust and uncomment above line
-      isConfigUpToDate = isUpToDate;
+      var repo = await syncConfig(repoPath: repoPath);
+      isConfigUpToDate = true;
+      repoState = RepoWithPath(repo, repoPath);
       notifyListeners();
     } catch (e) {
       configUpdateError =
