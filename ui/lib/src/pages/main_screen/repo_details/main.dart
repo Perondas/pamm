@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ui/src/models/repo_with_path.dart';
+import 'package:ui/src/pages/main_screen/repo_details/edit_pack_dialog.dart';
 import 'package:ui/src/pages/sync_screen/main.dart';
 import 'package:ui/src/rust/api/commands/launch.dart';
 
@@ -83,6 +84,15 @@ ListTile _buildPackListTitle(
             );
           },
           icon: Icon(Icons.download),
+        ),
+        IconButton(
+          onPressed: () async {
+            await showDialog(
+              context: context,
+              builder: (_) => EditPackDialog(repoPath, packName),
+            );
+          },
+          icon: Icon(Icons.settings),
         ),
       ],
     ),

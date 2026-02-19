@@ -8,6 +8,9 @@ import 'api/commands/get_remote_repo_info.dart';
 import 'api/commands/init_from_remote.dart';
 import 'api/commands/launch.dart';
 import 'api/commands/load_repo.dart';
+import 'api/commands/optionals/load_optionals.dart';
+import 'api/commands/optionals/optional_addon.dart';
+import 'api/commands/optionals/save_optionals.dart';
 import 'api/commands/sync_config.dart';
 import 'api/commands/sync_pack/file_change.dart';
 import 'api/commands/sync_pack/get_diff.dart';
@@ -73,7 +76,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => 381307111;
+  int get rustContentHash => -991649559;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -114,8 +117,20 @@ abstract class RustLibApi extends BaseApi {
     required String packName,
   });
 
+  Future<List<OptionalAddon>>
+  crateApiCommandsOptionalsLoadOptionalsLoadOptionals({
+    required String repotPath,
+    required String packName,
+  });
+
   Future<RepoConfig> crateApiCommandsLoadRepoLoadRepo({
     required String repoPath,
+  });
+
+  Future<void> crateApiCommandsOptionalsSaveOptionalsSaveOptionals({
+    required String repotPath,
+    required String packName,
+    required List<OptionalAddon> optionals,
   });
 
   Future<RepoConfig> crateApiCommandsSyncConfigSyncConfig({
@@ -376,6 +391,44 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<List<OptionalAddon>>
+  crateApiCommandsOptionalsLoadOptionalsLoadOptionals({
+    required String repotPath,
+    required String packName,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(repotPath, serializer);
+          sse_encode_String(packName, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 7,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_optional_addon,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta:
+            kCrateApiCommandsOptionalsLoadOptionalsLoadOptionalsConstMeta,
+        argValues: [repotPath, packName],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiCommandsOptionalsLoadOptionalsLoadOptionalsConstMeta =>
+      const TaskConstMeta(
+        debugName: "load_optionals",
+        argNames: ["repotPath", "packName"],
+      );
+
+  @override
   Future<RepoConfig> crateApiCommandsLoadRepoLoadRepo({
     required String repoPath,
   }) {
@@ -387,7 +440,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 7,
+            funcId: 8,
             port: port_,
           );
         },
@@ -406,6 +459,45 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "load_repo", argNames: ["repoPath"]);
 
   @override
+  Future<void> crateApiCommandsOptionalsSaveOptionalsSaveOptionals({
+    required String repotPath,
+    required String packName,
+    required List<OptionalAddon> optionals,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(repotPath, serializer);
+          sse_encode_String(packName, serializer);
+          sse_encode_list_optional_addon(optionals, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 9,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta:
+            kCrateApiCommandsOptionalsSaveOptionalsSaveOptionalsConstMeta,
+        argValues: [repotPath, packName, optionals],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiCommandsOptionalsSaveOptionalsSaveOptionalsConstMeta =>
+      const TaskConstMeta(
+        debugName: "save_optionals",
+        argNames: ["repotPath", "packName", "optionals"],
+      );
+
+  @override
   Future<RepoConfig> crateApiCommandsSyncConfigSyncConfig({
     required String repoPath,
   }) {
@@ -417,7 +509,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 8,
+            funcId: 10,
             port: port_,
           );
         },
@@ -459,7 +551,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 9,
+            funcId: 11,
             port: port_,
           );
         },
@@ -667,6 +759,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<OptionalAddon> dco_decode_list_optional_addon(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_optional_addon).toList();
+  }
+
+  @protected
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as Uint8List;
@@ -679,6 +777,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     return (raw as List<dynamic>)
         .map(dco_decode_record_string_list_file_change)
         .toList();
+  }
+
+  @protected
+  OptionalAddon dco_decode_optional_addon(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2)
+      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    return OptionalAddon(
+      name: dco_decode_String(arr[0]),
+      enabled: dco_decode_bool(arr[1]),
+    );
   }
 
   @protected
@@ -939,6 +1049,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<OptionalAddon> sse_decode_list_optional_addon(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <OptionalAddon>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_optional_addon(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var len_ = sse_decode_i_32(deserializer);
@@ -956,6 +1080,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       ans_.add(sse_decode_record_string_list_file_change(deserializer));
     }
     return ans_;
+  }
+
+  @protected
+  OptionalAddon sse_decode_optional_addon(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_name = sse_decode_String(deserializer);
+    var var_enabled = sse_decode_bool(deserializer);
+    return OptionalAddon(name: var_name, enabled: var_enabled);
   }
 
   @protected
@@ -1228,6 +1360,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_list_optional_addon(
+    List<OptionalAddon> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_optional_addon(item, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_list_prim_u_8_strict(
     Uint8List self,
     SseSerializer serializer,
@@ -1247,6 +1391,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     for (final item in self) {
       sse_encode_record_string_list_file_change(item, serializer);
     }
+  }
+
+  @protected
+  void sse_encode_optional_addon(OptionalAddon self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.name, serializer);
+    sse_encode_bool(self.enabled, serializer);
   }
 
   @protected

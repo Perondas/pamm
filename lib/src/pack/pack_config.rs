@@ -17,7 +17,7 @@ pub struct PackConfig {
     pub client_params: Vec<String>,
     pub servers: Vec<ServerInfo>,
     pub parent: Option<String>,
-    pub(crate) addons: HashMap<String, AddonSettings>,
+    pub addons: HashMap<String, AddonSettings>,
 }
 
 impl PackConfig {

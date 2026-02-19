@@ -8,6 +8,9 @@ import 'api/commands/get_remote_repo_info.dart';
 import 'api/commands/init_from_remote.dart';
 import 'api/commands/launch.dart';
 import 'api/commands/load_repo.dart';
+import 'api/commands/optionals/load_optionals.dart';
+import 'api/commands/optionals/optional_addon.dart';
+import 'api/commands/optionals/save_optionals.dart';
 import 'api/commands/sync_config.dart';
 import 'api/commands/sync_pack/file_change.dart';
 import 'api/commands/sync_pack/get_diff.dart';
@@ -113,11 +116,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<FileChange> dco_decode_list_file_change(dynamic raw);
 
   @protected
+  List<OptionalAddon> dco_decode_list_optional_addon(dynamic raw);
+
+  @protected
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
 
   @protected
   List<(String, List<FileChange>)>
   dco_decode_list_record_string_list_file_change(dynamic raw);
+
+  @protected
+  OptionalAddon dco_decode_optional_addon(dynamic raw);
 
   @protected
   (String, List<FileChange>) dco_decode_record_string_list_file_change(
@@ -221,11 +230,19 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<FileChange> sse_decode_list_file_change(SseDeserializer deserializer);
 
   @protected
+  List<OptionalAddon> sse_decode_list_optional_addon(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
 
   @protected
   List<(String, List<FileChange>)>
   sse_decode_list_record_string_list_file_change(SseDeserializer deserializer);
+
+  @protected
+  OptionalAddon sse_decode_optional_addon(SseDeserializer deserializer);
 
   @protected
   (String, List<FileChange>) sse_decode_record_string_list_file_change(
@@ -347,6 +364,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_list_optional_addon(
+    List<OptionalAddon> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_list_prim_u_8_strict(
     Uint8List self,
     SseSerializer serializer,
@@ -357,6 +380,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     List<(String, List<FileChange>)> self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_optional_addon(OptionalAddon self, SseSerializer serializer);
 
   @protected
   void sse_encode_record_string_list_file_change(

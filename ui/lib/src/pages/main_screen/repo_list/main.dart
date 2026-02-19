@@ -200,7 +200,7 @@ class _RepoListState extends State<RepoList> {
                   );
                   await _loadRepos();
                 },
-                icon: Icon(Icons.more_vert),
+                icon: Icon(Icons.settings),
               ),
             ],
           ),

@@ -21,49 +21,51 @@ class _EditRepoDialogState extends State<EditRepoDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Edit ${widget.repo.name}'),
+      title: Text('Edit ${widget.repo.name}',  style: Theme.of(context).textTheme.headlineLarge,),
       content: SizedBox(
         width: 600,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Repository Path: ${widget.path}'),
-            SizedBox(height: 16),
-            if (widget.repo.description.isNotEmpty) ...[
-              Text('Description: ${widget.repo.description}'),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Repository Path: ${widget.path}', style: TextStyle(fontWeight: FontWeight.bold)),
+              SizedBox(height: 16),
+              if (widget.repo.description.isNotEmpty) ...[
+                Text('Description: ${widget.repo.description}'),
+              ],
+              FilledButton(
+                onPressed: () async {
+                  final confirm =
+                      await showDialog<bool?>(
+                        context: context,
+                        builder: (_) => ConfirmDialog(
+                          content:
+                              'Are you sure you want to delete the repository "${widget.repo.name}"? This will not delete the files on disk.',
+                        ),
+                      ) ??
+                      false;
+          
+                  if (confirm) {
+                    await RepoPathStore.remove(widget.path);
+                    if (!mounted) return;
+                    Navigator.of(context).pop();
+                  }
+                },
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.all(Colors.redAccent),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.delete_forever),
+                    SizedBox(width: 8),
+                    Text("Delete ${widget.repo.name}"),
+                  ],
+                ),
+              ),
             ],
-            FilledButton(
-              onPressed: () async {
-                final confirm =
-                    await showDialog<bool?>(
-                      context: context,
-                      builder: (_) => ConfirmDialog(
-                        content:
-                            'Are you sure you want to delete the repository "${widget.repo.name}"? This will not delete the files on disk.',
-                      ),
-                    ) ??
-                    false;
-
-                if (confirm) {
-                  await RepoPathStore.remove(widget.path);
-                  if (!mounted) return;
-                  Navigator.of(context).pop();
-                }
-              },
-              style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all(Colors.redAccent),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.delete_forever),
-                  SizedBox(width: 8),
-                  Text("Delete ${widget.repo.name}"),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
       actions: [
