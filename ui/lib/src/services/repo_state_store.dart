@@ -12,6 +12,10 @@ class RepoStateManager with ChangeNotifier {
   String? configLoadError;
   String? configUpdateError;
 
+  bool get hasError => configLoadError != null || configUpdateError != null;
+
+  bool get doneLoading => hasError || repoState != null;
+
   RepoStateManager(this.repoPath) {
     _loadRepoState();
   }
