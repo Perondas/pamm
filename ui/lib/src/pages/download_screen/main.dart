@@ -20,22 +20,36 @@ class DownloadScreen extends StatefulWidget {
 
 class _DownloadScreenState extends State<DownloadScreen> {
   bool done = false;
+  String? error;
 
   @override
   void initState() {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await syncPack(
-        packName: widget.packName,
-        repoPath: widget.repoPath,
-        dartProgressReporter: widget.progressReporterService.underlyingReporter,
-        packDiff: widget.diffResult.diff,
-      );
+      try {
+        await syncPack(
+          packName: widget.packName,
+          repoPath: widget.repoPath,
+          dartProgressReporter:
+              widget.progressReporterService.underlyingReporter,
+          packDiff: widget.diffResult.diff,
+        );
 
-      if (!mounted) return;
-      setState(() {});
-      done = true;
+        if (!mounted) return;
+        setState(() {});
+        done = true;
+      } catch (e) {
+        if (!mounted) return;
+
+        setState(() {
+          error = e.toString();
+        });
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error downloading pack: $e")));
+      }
     });
   }
 
@@ -56,6 +70,15 @@ class _DownloadScreenState extends State<DownloadScreen> {
                   Navigator.of(context).pop();
                 },
                 child: const Text("Done"),
+              ),
+            if (error != null)
+              IconButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Error downloading pack: $error")),
+                  );
+                },
+                icon: Icon(Icons.bug_report, color: Colors.red),
               ),
             ProgressReporter(widget.progressReporterService),
           ],
