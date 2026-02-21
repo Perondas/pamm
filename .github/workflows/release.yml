@@ -108,7 +108,6 @@ jobs:
       - name:   Package Release
         uses: sibiraj-s/action-archiver@v1
         with:
-          working-directory: 'ui'
           format: '${{ matrix.archiveKind }}'
           output: 'pamm_ui-${{github.ref_name}}-${{ matrix.target }}.${{ matrix.archive }}'
           path: '${{ matrix.buildDir }}'
