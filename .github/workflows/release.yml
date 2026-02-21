@@ -90,9 +90,13 @@ jobs:
           submodules: 'recursive'
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
-      - uses: subosito/flutter-action@v1
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v1
         with:
           channel: 'stable'
+      - name: Install build deps for Linux
+        if: matrix.target == 'linux'
+        run: sudo apt-get install -y build-essential libgtk-3-dev
       - name: Install project dependencies
         run: flutter pub get
       - name: Generate intermediates
