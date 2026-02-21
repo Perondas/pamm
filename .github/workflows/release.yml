@@ -70,14 +70,12 @@ jobs:
         include:
           - target: linux
             os: ubuntu-22.04
-            archiveKind: tar
             archive: tar.gz
-            buildDir: ui/build/linux/x64/release/bundle
+            buildDir: build/linux/x64/release/bundle
           - target: windows
             os: windows-latest
-            archiveKind: zip
             archive: zip
-            buildDir: ui/build/windows/x64/runner/Release
+            buildDir: build/windows/x64/runner/Release
     defaults:
       run:
         working-directory: ./ui
@@ -106,11 +104,10 @@ jobs:
       - name: Build artifacts
         run: flutter build ${{ matrix.target }} --release
       - name: Package Release
-        uses: thedoctor0/zip-release@master
+        uses: ihiroky/archive-action@v1
         with:
-          type: '${{ matrix.archiveKind }}'
-          filename: pamm_ui-${{github.ref_name}}-${{ matrix.target }}.${{ matrix.archive }}
-          directory: ${{ matrix.buildDir }}
+          root_dir: ${{ matrix.buildDir }}
+          file_path: pamm_ui-${{github.ref_name}}-${{ matrix.target }}.${{ matrix.archive }}
 
       - name: Release to github
         uses: softprops/action-gh-release@v1
