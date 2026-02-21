@@ -1,4 +1,3 @@
-use flutter_rust_bridge::frb;
 use pamm_lib::io::net::downloadable::KnownDownloadable;
 use pamm_lib::repo::repo_config::RepoConfig;
 use url::Url;

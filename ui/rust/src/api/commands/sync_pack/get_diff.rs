@@ -10,7 +10,7 @@ use pamm_lib::pack::pack_diff::{diff_packs, PackDiff};
 use pamm_lib::pack::pack_user_settings::PackUserSettings;
 use pamm_lib::repo::repo_config::RepoConfig;
 use pamm_lib::repo::repo_user_settings::RepoUserSettings;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::path::Path;
 use anyhow::anyhow;
 use crate::frb_generated::RustAutoOpaque;
