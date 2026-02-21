@@ -13,7 +13,7 @@ Future<DiffResult> getDiff({
   required String repoPath,
   required DartProgressReporter dartProgressReporter,
   required bool clearCache,
-}) => RustLib.instance.api.crateApiCommandsSyncPackGetDiffGetDiff(
+}) => RustLib.instance.api.crateApiCommandsPackSyncGetDiffGetDiff(
   packName: packName,
   repoPath: repoPath,
   dartProgressReporter: dartProgressReporter,

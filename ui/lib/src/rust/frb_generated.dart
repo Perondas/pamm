@@ -11,10 +11,10 @@ import 'api/commands/load_repo.dart';
 import 'api/commands/optionals/load_optionals.dart';
 import 'api/commands/optionals/optional_addon.dart';
 import 'api/commands/optionals/save_optionals.dart';
+import 'api/commands/pack_sync/file_change.dart';
+import 'api/commands/pack_sync/get_diff.dart';
+import 'api/commands/pack_sync/sync_pack.dart';
 import 'api/commands/sync_config.dart';
-import 'api/commands/sync_pack/file_change.dart';
-import 'api/commands/sync_pack/get_diff.dart';
-import 'api/commands/sync_pack/sync_pack.dart';
 import 'api/progress_reporting.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -76,7 +76,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => -991649559;
+  int get rustContentHash => -1537298542;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -94,7 +94,7 @@ abstract class RustLibApi extends BaseApi {
     required RustStreamSink<bool> finishSink,
   });
 
-  Future<DiffResult> crateApiCommandsSyncPackGetDiffGetDiff({
+  Future<DiffResult> crateApiCommandsPackSyncGetDiffGetDiff({
     required String packName,
     required String repoPath,
     required DartProgressReporter dartProgressReporter,
@@ -137,7 +137,7 @@ abstract class RustLibApi extends BaseApi {
     required String repoPath,
   });
 
-  Future<void> crateApiCommandsSyncPackSyncPackSyncPack({
+  Future<void> crateApiCommandsPackSyncSyncPackSyncPack({
     required String packName,
     required String repoPath,
     required DartProgressReporter dartProgressReporter,
@@ -218,7 +218,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<DiffResult> crateApiCommandsSyncPackGetDiffGetDiff({
+  Future<DiffResult> crateApiCommandsPackSyncGetDiffGetDiff({
     required String packName,
     required String repoPath,
     required DartProgressReporter dartProgressReporter,
@@ -246,14 +246,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeSuccessData: sse_decode_diff_result,
           decodeErrorData: sse_decode_AnyhowException,
         ),
-        constMeta: kCrateApiCommandsSyncPackGetDiffGetDiffConstMeta,
+        constMeta: kCrateApiCommandsPackSyncGetDiffGetDiffConstMeta,
         argValues: [packName, repoPath, dartProgressReporter, clearCache],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiCommandsSyncPackGetDiffGetDiffConstMeta =>
+  TaskConstMeta get kCrateApiCommandsPackSyncGetDiffGetDiffConstMeta =>
       const TaskConstMeta(
         debugName: "get_diff",
         argNames: [
@@ -528,7 +528,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "sync_config", argNames: ["repoPath"]);
 
   @override
-  Future<void> crateApiCommandsSyncPackSyncPackSyncPack({
+  Future<void> crateApiCommandsPackSyncSyncPackSyncPack({
     required String packName,
     required String repoPath,
     required DartProgressReporter dartProgressReporter,
@@ -559,16 +559,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeSuccessData: sse_decode_unit,
           decodeErrorData: sse_decode_AnyhowException,
         ),
-        constMeta: kCrateApiCommandsSyncPackSyncPackSyncPackConstMeta,
+        constMeta: kCrateApiCommandsPackSyncSyncPackSyncPackConstMeta,
         argValues: [packName, repoPath, dartProgressReporter, packDiff],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiCommandsSyncPackSyncPackSyncPackConstMeta =>
+  TaskConstMeta get kCrateApiCommandsPackSyncSyncPackSyncPackConstMeta =>
       const TaskConstMeta(
-        debugName: "pack_sync",
+        debugName: "sync_pack",
         argNames: ["packName", "repoPath", "dartProgressReporter", "packDiff"],
       );
 

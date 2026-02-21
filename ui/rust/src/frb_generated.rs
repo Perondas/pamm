@@ -39,7 +39,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -991649559;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1537298542;
 
 // Section: executor
 
@@ -99,7 +99,7 @@ fn wire__crate__api__progress_reporting__create_dart_progress_reporter_impl(
         },
     )
 }
-fn wire__crate__api__commands__sync_pack__get_diff__get_diff_impl(
+fn wire__crate__api__commands__pack_sync__get_diff__get_diff_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -465,7 +465,7 @@ fn wire__crate__api__commands__sync_config__sync_config_impl(
         },
     )
 }
-fn wire__crate__api__commands__sync_pack__sync_pack__sync_pack_impl(
+fn wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -473,7 +473,7 @@ fn wire__crate__api__commands__sync_pack__sync_pack__sync_pack_impl(
 ) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "pack_sync",
+            debug_name: "sync_pack",
             port: Some(port_),
             mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
         },
@@ -874,7 +874,7 @@ fn pde_ffi_dispatcher_primary_impl(
 ) {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        2 => wire__crate__api__commands__sync_pack__get_diff__get_diff_impl(
+        2 => wire__crate__api__commands__pack_sync__get_diff__get_diff_impl(
             port,
             ptr,
             rust_vec_len,
@@ -914,7 +914,7 @@ fn pde_ffi_dispatcher_primary_impl(
             rust_vec_len,
             data_len,
         ),
-        11 => wire__crate__api__commands__sync_pack__sync_pack__sync_pack_impl(
+        11 => wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(
             port,
             ptr,
             rust_vec_len,

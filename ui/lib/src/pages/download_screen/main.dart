@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ui/src/rust/api/commands/sync_pack/get_diff.dart';
-import 'package:ui/src/rust/api/commands/sync_pack/sync_pack.dart';
+import 'package:ui/src/rust/api/commands/pack_sync/get_diff.dart';
+import 'package:ui/src/rust/api/commands/pack_sync/sync_pack.dart';
 import 'package:ui/src/services/progress_reporter_service.dart';
 import 'package:ui/src/widgets/progress_reporter.dart';
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:format_bytes/format_bytes.dart';
 import 'package:ui/src/pages/download_screen/main.dart';
-import 'package:ui/src/rust/api/commands/sync_pack/file_change.dart';
-import 'package:ui/src/rust/api/commands/sync_pack/get_diff.dart';
+import 'package:ui/src/rust/api/commands/pack_sync/file_change.dart';
+import 'package:ui/src/rust/api/commands/pack_sync/get_diff.dart';
 import 'package:ui/src/services/progress_reporter_service.dart';
 import 'package:ui/src/widgets/progress_reporter.dart';
 

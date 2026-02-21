@@ -13,7 +13,7 @@ Future<void> syncPack({
   required String repoPath,
   required DartProgressReporter dartProgressReporter,
   required OpaqueDiff packDiff,
-}) => RustLib.instance.api.crateApiCommandsSyncPackSyncPackSyncPack(
+}) => RustLib.instance.api.crateApiCommandsPackSyncSyncPackSyncPack(
   packName: packName,
   repoPath: repoPath,
   dartProgressReporter: dartProgressReporter,
