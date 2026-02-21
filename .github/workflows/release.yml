@@ -14,7 +14,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  rust-build-test-lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -30,6 +30,7 @@ jobs:
         run: cargo clippy -- -D warnings
 
   create-release:
+    needs: rust-build-test-lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
