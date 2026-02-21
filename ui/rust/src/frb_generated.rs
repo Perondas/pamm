@@ -25,7 +25,7 @@
 
 // Section: imports
 
-use crate::api::commands::sync_pack::get_diff::*;
+use crate::api::commands::pack_sync::get_diff::*;
 use crate::api::progress_reporting::*;
 use flutter_rust_bridge::for_generated::byteorder::{NativeEndian, ReadBytesExt, WriteBytesExt};
 use flutter_rust_bridge::for_generated::{transform_result_dco, Lifetimeable, Lockable};
@@ -151,7 +151,7 @@ fn wire__crate__api__commands__sync_pack__get_diff__get_diff_impl(
                         }
                         let api_dart_progress_reporter_guard =
                             api_dart_progress_reporter_guard.unwrap();
-                        let output_ok = crate::api::commands::sync_pack::get_diff::get_diff(
+                        let output_ok = crate::api::commands::pack_sync::get_diff::get_diff(
                             api_pack_name,
                             api_repo_path,
                             &*api_dart_progress_reporter_guard,
@@ -473,7 +473,7 @@ fn wire__crate__api__commands__sync_pack__sync_pack__sync_pack_impl(
 ) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "sync_pack",
+            debug_name: "pack_sync",
             port: Some(port_),
             mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
         },
@@ -495,7 +495,7 @@ fn wire__crate__api__commands__sync_pack__sync_pack__sync_pack_impl(
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || {
-                        let output_ok = crate::api::commands::sync_pack::sync_pack::sync_pack(
+                        let output_ok = crate::api::commands::pack_sync::sync_pack::sync_pack(
                             api_pack_name,
                             api_repo_path,
                             api_dart_progress_reporter,
@@ -571,14 +571,14 @@ impl SseDecode for OpaqueDiff {
 impl SseDecode
     for std::collections::HashMap<
         String,
-        Vec<crate::api::commands::sync_pack::file_change::FileChange>,
+        Vec<crate::api::commands::pack_sync::file_change::FileChange>,
     >
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut inner = <Vec<(
             String,
-            Vec<crate::api::commands::sync_pack::file_change::FileChange>,
+            Vec<crate::api::commands::pack_sync::file_change::FileChange>,
         )>>::sse_decode(deserializer);
         return inner.into_iter().collect();
     }
@@ -643,24 +643,24 @@ impl SseDecode for bool {
     }
 }
 
-impl SseDecode for crate::api::commands::sync_pack::file_change::ChangeType {
+impl SseDecode for crate::api::commands::pack_sync::file_change::ChangeType {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut tag_ = <i32>::sse_decode(deserializer);
         match tag_ {
             0 => {
                 let mut var_size = <u64>::sse_decode(deserializer);
-                return crate::api::commands::sync_pack::file_change::ChangeType::Created {
+                return crate::api::commands::pack_sync::file_change::ChangeType::Created {
                     size: var_size,
                 };
             }
             1 => {
-                return crate::api::commands::sync_pack::file_change::ChangeType::Deleted;
+                return crate::api::commands::pack_sync::file_change::ChangeType::Deleted;
             }
             2 => {
                 let mut var_sizeChange = <i64>::sse_decode(deserializer);
                 let mut var_dlSize = <u64>::sse_decode(deserializer);
-                return crate::api::commands::sync_pack::file_change::ChangeType::Modified {
+                return crate::api::commands::pack_sync::file_change::ChangeType::Modified {
                     size_change: var_sizeChange,
                     dl_size: var_dlSize,
                 };
@@ -672,7 +672,7 @@ impl SseDecode for crate::api::commands::sync_pack::file_change::ChangeType {
     }
 }
 
-impl SseDecode for crate::api::commands::sync_pack::get_diff::DiffResult {
+impl SseDecode for crate::api::commands::pack_sync::get_diff::DiffResult {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_diff = <RustAutoOpaqueMoi<OpaqueDiff>>::sse_decode(deserializer);
@@ -681,9 +681,9 @@ impl SseDecode for crate::api::commands::sync_pack::get_diff::DiffResult {
         let mut var_totalChangeSize = <u64>::sse_decode(deserializer);
         let mut var_fileChanges = <std::collections::HashMap<
             String,
-            Vec<crate::api::commands::sync_pack::file_change::FileChange>,
+            Vec<crate::api::commands::pack_sync::file_change::FileChange>,
         >>::sse_decode(deserializer);
-        return crate::api::commands::sync_pack::get_diff::DiffResult {
+        return crate::api::commands::pack_sync::get_diff::DiffResult {
             diff: var_diff,
             has_changes: var_hasChanges,
             change_count: var_changeCount,
@@ -693,13 +693,13 @@ impl SseDecode for crate::api::commands::sync_pack::get_diff::DiffResult {
     }
 }
 
-impl SseDecode for crate::api::commands::sync_pack::file_change::FileChange {
+impl SseDecode for crate::api::commands::pack_sync::file_change::FileChange {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_filePath = <String>::sse_decode(deserializer);
         let mut var_change =
-            <crate::api::commands::sync_pack::file_change::ChangeType>::sse_decode(deserializer);
-        return crate::api::commands::sync_pack::file_change::FileChange {
+            <crate::api::commands::pack_sync::file_change::ChangeType>::sse_decode(deserializer);
+        return crate::api::commands::pack_sync::file_change::FileChange {
             file_path: var_filePath,
             change: var_change,
         };
@@ -725,14 +725,14 @@ impl SseDecode for Vec<String> {
     }
 }
 
-impl SseDecode for Vec<crate::api::commands::sync_pack::file_change::FileChange> {
+impl SseDecode for Vec<crate::api::commands::pack_sync::file_change::FileChange> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut len_ = <i32>::sse_decode(deserializer);
         let mut ans_ = vec![];
         for idx_ in 0..len_ {
             ans_.push(
-                <crate::api::commands::sync_pack::file_change::FileChange>::sse_decode(
+                <crate::api::commands::pack_sync::file_change::FileChange>::sse_decode(
                     deserializer,
                 ),
             );
@@ -772,7 +772,7 @@ impl SseDecode for Vec<u8> {
 impl SseDecode
     for Vec<(
         String,
-        Vec<crate::api::commands::sync_pack::file_change::FileChange>,
+        Vec<crate::api::commands::pack_sync::file_change::FileChange>,
     )>
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -782,7 +782,7 @@ impl SseDecode
         for idx_ in 0..len_ {
             ans_.push(<(
                 String,
-                Vec<crate::api::commands::sync_pack::file_change::FileChange>,
+                Vec<crate::api::commands::pack_sync::file_change::FileChange>,
             )>::sse_decode(deserializer));
         }
         return ans_;
@@ -804,14 +804,14 @@ impl SseDecode for crate::api::commands::optionals::optional_addon::OptionalAddo
 impl SseDecode
     for (
         String,
-        Vec<crate::api::commands::sync_pack::file_change::FileChange>,
+        Vec<crate::api::commands::pack_sync::file_change::FileChange>,
     )
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_field0 = <String>::sse_decode(deserializer);
         let mut var_field1 =
-            <Vec<crate::api::commands::sync_pack::file_change::FileChange>>::sse_decode(
+            <Vec<crate::api::commands::pack_sync::file_change::FileChange>>::sse_decode(
                 deserializer,
             );
         return (var_field0, var_field1);
@@ -978,16 +978,16 @@ impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<OpaqueDiff>> for OpaqueDiff {
 }
 
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for crate::api::commands::sync_pack::file_change::ChangeType {
+impl flutter_rust_bridge::IntoDart for crate::api::commands::pack_sync::file_change::ChangeType {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
-            crate::api::commands::sync_pack::file_change::ChangeType::Created { size } => {
+            crate::api::commands::pack_sync::file_change::ChangeType::Created { size } => {
                 [0.into_dart(), size.into_into_dart().into_dart()].into_dart()
             }
-            crate::api::commands::sync_pack::file_change::ChangeType::Deleted => {
+            crate::api::commands::pack_sync::file_change::ChangeType::Deleted => {
                 [1.into_dart()].into_dart()
             }
-            crate::api::commands::sync_pack::file_change::ChangeType::Modified {
+            crate::api::commands::pack_sync::file_change::ChangeType::Modified {
                 size_change,
                 dl_size,
             } => [
@@ -1003,18 +1003,18 @@ impl flutter_rust_bridge::IntoDart for crate::api::commands::sync_pack::file_cha
     }
 }
 impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
-    for crate::api::commands::sync_pack::file_change::ChangeType
+    for crate::api::commands::pack_sync::file_change::ChangeType
 {
 }
-impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::sync_pack::file_change::ChangeType>
-    for crate::api::commands::sync_pack::file_change::ChangeType
+impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::pack_sync::file_change::ChangeType>
+    for crate::api::commands::pack_sync::file_change::ChangeType
 {
-    fn into_into_dart(self) -> crate::api::commands::sync_pack::file_change::ChangeType {
+    fn into_into_dart(self) -> crate::api::commands::pack_sync::file_change::ChangeType {
         self
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for crate::api::commands::sync_pack::get_diff::DiffResult {
+impl flutter_rust_bridge::IntoDart for crate::api::commands::pack_sync::get_diff::DiffResult {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
             self.diff.into_into_dart().into_dart(),
@@ -1027,18 +1027,18 @@ impl flutter_rust_bridge::IntoDart for crate::api::commands::sync_pack::get_diff
     }
 }
 impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
-    for crate::api::commands::sync_pack::get_diff::DiffResult
+    for crate::api::commands::pack_sync::get_diff::DiffResult
 {
 }
-impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::sync_pack::get_diff::DiffResult>
-    for crate::api::commands::sync_pack::get_diff::DiffResult
+impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::pack_sync::get_diff::DiffResult>
+    for crate::api::commands::pack_sync::get_diff::DiffResult
 {
-    fn into_into_dart(self) -> crate::api::commands::sync_pack::get_diff::DiffResult {
+    fn into_into_dart(self) -> crate::api::commands::pack_sync::get_diff::DiffResult {
         self
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for crate::api::commands::sync_pack::file_change::FileChange {
+impl flutter_rust_bridge::IntoDart for crate::api::commands::pack_sync::file_change::FileChange {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
             self.file_path.into_into_dart().into_dart(),
@@ -1048,13 +1048,13 @@ impl flutter_rust_bridge::IntoDart for crate::api::commands::sync_pack::file_cha
     }
 }
 impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
-    for crate::api::commands::sync_pack::file_change::FileChange
+    for crate::api::commands::pack_sync::file_change::FileChange
 {
 }
-impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::sync_pack::file_change::FileChange>
-    for crate::api::commands::sync_pack::file_change::FileChange
+impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::pack_sync::file_change::FileChange>
+    for crate::api::commands::pack_sync::file_change::FileChange
 {
-    fn into_into_dart(self) -> crate::api::commands::sync_pack::file_change::FileChange {
+    fn into_into_dart(self) -> crate::api::commands::pack_sync::file_change::FileChange {
         self
     }
 }
@@ -1146,14 +1146,14 @@ impl SseEncode for OpaqueDiff {
 impl SseEncode
     for std::collections::HashMap<
         String,
-        Vec<crate::api::commands::sync_pack::file_change::FileChange>,
+        Vec<crate::api::commands::pack_sync::file_change::FileChange>,
     >
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <Vec<(
             String,
-            Vec<crate::api::commands::sync_pack::file_change::FileChange>,
+            Vec<crate::api::commands::pack_sync::file_change::FileChange>,
         )>>::sse_encode(self.into_iter().collect(), serializer);
     }
 }
@@ -1215,18 +1215,18 @@ impl SseEncode for bool {
     }
 }
 
-impl SseEncode for crate::api::commands::sync_pack::file_change::ChangeType {
+impl SseEncode for crate::api::commands::pack_sync::file_change::ChangeType {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         match self {
-            crate::api::commands::sync_pack::file_change::ChangeType::Created { size } => {
+            crate::api::commands::pack_sync::file_change::ChangeType::Created { size } => {
                 <i32>::sse_encode(0, serializer);
                 <u64>::sse_encode(size, serializer);
             }
-            crate::api::commands::sync_pack::file_change::ChangeType::Deleted => {
+            crate::api::commands::pack_sync::file_change::ChangeType::Deleted => {
                 <i32>::sse_encode(1, serializer);
             }
-            crate::api::commands::sync_pack::file_change::ChangeType::Modified {
+            crate::api::commands::pack_sync::file_change::ChangeType::Modified {
                 size_change,
                 dl_size,
             } => {
@@ -1241,7 +1241,7 @@ impl SseEncode for crate::api::commands::sync_pack::file_change::ChangeType {
     }
 }
 
-impl SseEncode for crate::api::commands::sync_pack::get_diff::DiffResult {
+impl SseEncode for crate::api::commands::pack_sync::get_diff::DiffResult {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <RustAutoOpaqueMoi<OpaqueDiff>>::sse_encode(self.diff, serializer);
@@ -1250,16 +1250,16 @@ impl SseEncode for crate::api::commands::sync_pack::get_diff::DiffResult {
         <u64>::sse_encode(self.total_change_size, serializer);
         <std::collections::HashMap<
             String,
-            Vec<crate::api::commands::sync_pack::file_change::FileChange>,
+            Vec<crate::api::commands::pack_sync::file_change::FileChange>,
         >>::sse_encode(self.file_changes, serializer);
     }
 }
 
-impl SseEncode for crate::api::commands::sync_pack::file_change::FileChange {
+impl SseEncode for crate::api::commands::pack_sync::file_change::FileChange {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.file_path, serializer);
-        <crate::api::commands::sync_pack::file_change::ChangeType>::sse_encode(
+        <crate::api::commands::pack_sync::file_change::ChangeType>::sse_encode(
             self.change,
             serializer,
         );
@@ -1283,12 +1283,12 @@ impl SseEncode for Vec<String> {
     }
 }
 
-impl SseEncode for Vec<crate::api::commands::sync_pack::file_change::FileChange> {
+impl SseEncode for Vec<crate::api::commands::pack_sync::file_change::FileChange> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <i32>::sse_encode(self.len() as _, serializer);
         for item in self {
-            <crate::api::commands::sync_pack::file_change::FileChange>::sse_encode(
+            <crate::api::commands::pack_sync::file_change::FileChange>::sse_encode(
                 item, serializer,
             );
         }
@@ -1320,7 +1320,7 @@ impl SseEncode for Vec<u8> {
 impl SseEncode
     for Vec<(
         String,
-        Vec<crate::api::commands::sync_pack::file_change::FileChange>,
+        Vec<crate::api::commands::pack_sync::file_change::FileChange>,
     )>
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -1329,7 +1329,7 @@ impl SseEncode
         for item in self {
             <(
                 String,
-                Vec<crate::api::commands::sync_pack::file_change::FileChange>,
+                Vec<crate::api::commands::pack_sync::file_change::FileChange>,
             )>::sse_encode(item, serializer);
         }
     }
@@ -1346,13 +1346,13 @@ impl SseEncode for crate::api::commands::optionals::optional_addon::OptionalAddo
 impl SseEncode
     for (
         String,
-        Vec<crate::api::commands::sync_pack::file_change::FileChange>,
+        Vec<crate::api::commands::pack_sync::file_change::FileChange>,
     )
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.0, serializer);
-        <Vec<crate::api::commands::sync_pack::file_change::FileChange>>::sse_encode(
+        <Vec<crate::api::commands::pack_sync::file_change::FileChange>>::sse_encode(
             self.1, serializer,
         );
     }
@@ -1411,7 +1411,7 @@ mod io {
     // Section: imports
 
     use super::*;
-    use crate::api::commands::sync_pack::get_diff::*;
+    use crate::api::commands::pack_sync::get_diff::*;
     use crate::api::progress_reporting::*;
     use flutter_rust_bridge::for_generated::byteorder::{
         NativeEndian, ReadBytesExt, WriteBytesExt,
@@ -1463,7 +1463,7 @@ mod web {
     // Section: imports
 
     use super::*;
-    use crate::api::commands::sync_pack::get_diff::*;
+    use crate::api::commands::pack_sync::get_diff::*;
     use crate::api::progress_reporting::*;
     use flutter_rust_bridge::for_generated::byteorder::{
         NativeEndian, ReadBytesExt, WriteBytesExt,

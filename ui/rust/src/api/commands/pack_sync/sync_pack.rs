@@ -1,4 +1,4 @@
-use crate::api::commands::sync_pack::get_diff::OpaqueDiff;
+use crate::api::commands::pack_sync::get_diff::OpaqueDiff;
 use crate::api::progress_reporting::DartProgressReporter;
 use anyhow::anyhow;
 use pamm_lib::io::fs::fs_readable::{KnownFSReadable, NamedFSReadable};

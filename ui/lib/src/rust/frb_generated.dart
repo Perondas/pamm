@@ -568,7 +568,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kCrateApiCommandsSyncPackSyncPackSyncPackConstMeta =>
       const TaskConstMeta(
-        debugName: "sync_pack",
+        debugName: "pack_sync",
         argNames: ["packName", "repoPath", "dartProgressReporter", "packDiff"],
       );
 
