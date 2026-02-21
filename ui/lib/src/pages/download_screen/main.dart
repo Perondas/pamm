@@ -44,6 +44,7 @@ class _DownloadScreenState extends State<DownloadScreen> {
 
         setState(() {
           error = e.toString();
+          done = true;
         });
 
         ScaffoldMessenger.of(
