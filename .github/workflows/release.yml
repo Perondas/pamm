@@ -72,12 +72,12 @@ jobs:
             os: ubuntu-22.04
             archiveKind: tar
             archive: tar.gz
-            buildDir: build/linux/x64/release/bundle
+            buildDir: ui/build/linux/x64/release/bundle
           - target: windows
             os: windows-latest
             archiveKind: zip
             archive: zip
-            buildDir: build/windows/x64/runner/Release
+            buildDir: ui/build/windows/x64/runner/Release
     defaults:
       run:
         working-directory: ./ui
@@ -109,7 +109,6 @@ jobs:
         uses: thedoctor0/zip-release@master
         with:
           type: '${{ matrix.archiveKind }}'
-          path: 'ui'
           filename: pamm_ui-${{github.ref_name}}-${{ matrix.target }}.${{ matrix.archive }}
           directory: ${{ matrix.buildDir }}
 
