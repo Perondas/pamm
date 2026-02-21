@@ -17,6 +17,8 @@ class _RepoDetailsState extends State<RepoDetails> {
   @override
   Widget build(BuildContext context) {
     var repo = widget.selectedRepo.repo;
+    var sortedPacks = repo.packs.toList();
+    sortedPacks.sort();
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -44,7 +46,7 @@ class _RepoDetailsState extends State<RepoDetails> {
                   : ListView.builder(
                       itemBuilder: (context, index) => _buildPackListTitle(
                         context,
-                        repo.packs.toList()[index],
+                        sortedPacks[index],
                         widget.selectedRepo.path,
                       ),
                       itemCount: repo.packs.length,
