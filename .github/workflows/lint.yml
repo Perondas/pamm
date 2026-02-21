@@ -11,9 +11,7 @@ env:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout repository
       uses: actions/checkout@master
@@ -25,4 +23,4 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
     - name: Lint
-      run: cargo clippy --verbose
+      run: cargo clippy -- -D warnings

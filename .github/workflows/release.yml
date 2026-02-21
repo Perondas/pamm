@@ -10,7 +10,25 @@ on:
     tags:
       - v[0-9]+.*
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@master
+        with:
+          fetch-depth: '0'
+          submodules: 'recursive'
+      - name: Build
+        run: cargo build --verbose
+      - name: Run tests
+        run: cargo test --verbose
+      - name: Lint
+        run: cargo clippy -- -D warnings
+
   create-release:
     runs-on: ubuntu-latest
     steps:
