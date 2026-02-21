@@ -21,6 +21,7 @@ class SyncScreen extends StatefulWidget {
 class _SyncScreenState extends State<SyncScreen> {
   bool isSyncing = false;
   bool isDoneSyncing = false;
+  String? error;
   DiffResult? diffResult;
 
   @override
@@ -34,6 +35,17 @@ class _SyncScreenState extends State<SyncScreen> {
                 ? _buildDownloadButton(context)
                 : _buildSyncButton(),
           ),
+          if (error != null) ...[
+            IconButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Error checking for updates: $error")),
+                );
+              },
+              icon: Icon(Icons.bug_report),
+              color: Colors.red,
+            ),
+          ],
           ProgressReporter(widget.progressReporterService),
           if (diffResult != null) ...[
             if (diffResult!.hasChanges)
@@ -65,19 +77,30 @@ class _SyncScreenState extends State<SyncScreen> {
         setState(() {
           isSyncing = true;
         });
-        var diff = await getDiff(
-          packName: widget.packName,
-          repoPath: widget.repoPath,
-          dartProgressReporter:
-              widget.progressReporterService.underlyingReporter,
-          clearCache: true,
-        );
-        if (!mounted) return;
-        setState(() {
-          diffResult = diff;
-          isSyncing = false;
-          isDoneSyncing = true;
-        });
+        try {
+          var diff = await getDiff(
+            packName: widget.packName,
+            repoPath: widget.repoPath,
+            dartProgressReporter:
+                widget.progressReporterService.underlyingReporter,
+            clearCache: true,
+          );
+          if (!mounted) return;
+          setState(() {
+            diffResult = diff;
+            isSyncing = false;
+            isDoneSyncing = true;
+          });
+        } catch (e) {
+          setState(() {
+            isSyncing = false;
+            error = e.toString();
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Error checking for updates: $e")),
+          );
+        }
       },
       child: const Text('Check for updates'),
     );
