@@ -20,7 +20,7 @@ jobs:
           # (required) GitHub token for creating GitHub Releases.
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  upload-assets:
+  build-cli:
     needs: create-release
     strategy:
       matrix:
@@ -62,3 +62,58 @@ jobs:
         uses: actions/attest-build-provenance@v3
         with:
           subject-path: 'pamm_cli-*.tar.gz,pamm_cli-*.zip'
+
+  build-gui:
+    needs: create-release
+    strategy:
+      matrix:
+        include:
+          - target: linux
+            os: ubuntu-22.04
+            archiveKind: tar
+            archive: tar.gz
+            buildDir: build/linux/x64/release/bundle
+          - target: windows
+            os: windows-latest
+            archiveKind: zip
+            archive: zip
+            buildDir: build/windows/x64/runner/Release
+    defaults:
+      run:
+        working-directory: ./ui
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@master
+        with:
+          fetch-depth: '0'
+          submodules: 'recursive'
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: 'stable'
+      - name: Install project dependencies
+        run: flutter pub get
+      - name: Generate intermediates
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+      - name: Enable build
+        run: flutter config --enable-${{ matrix.target }}-desktop
+      - name: Build artifacts
+        run: flutter build ${{ matrix.target }} --release
+      - name: Package Release
+        uses: thedoctor0/zip-release@master
+        with:
+          type: '${{ matrix.archiveKind }}'
+          filename: pamm_ui-${{github.ref_name}}-${{ matrix.target }}.${{ matrix.archive }}
+          directory: ${{ matrix.buildDir }}
+
+      - name: Release to github
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{github.ref_name}}
+          files: pamm_ui-${{github.ref_name}}-${{ matrix.target }}.${{ matrix.archive }}
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: 'pamm_ui-${{github.ref_name}}-${{ matrix.target }}.${{ matrix.archive }}'
