@@ -105,13 +105,13 @@ jobs:
         run: flutter config --enable-${{ matrix.target }}-desktop
       - name: Build artifacts
         run: flutter build ${{ matrix.target }} --release
-      - name: Package Release
-        uses: thedoctor0/zip-release@master
+      - name:   Package Release
+        uses: sibiraj-s/action-archiver@v1
         with:
-          type: '${{ matrix.archiveKind }}'
-          filename: pamm_ui-${{github.ref_name}}-${{ matrix.target }}.${{ matrix.archive }}
-          directory: ${{ matrix.buildDir }}
-
+          working-directory: 'ui'
+          format: '${{ matrix.archiveKind }}'
+          output: 'pamm_ui-${{github.ref_name}}-${{ matrix.target }}.${{ matrix.archive }}'
+          path: '${{ matrix.buildDir }}'
       - name: Release to github
         uses: softprops/action-gh-release@v1
         env:
