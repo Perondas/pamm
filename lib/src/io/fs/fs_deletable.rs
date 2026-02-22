@@ -1,5 +1,6 @@
 use crate::io::known_file::KnownFile;
 use crate::io::named_file::NamedFile;
+use anyhow::{Context, anyhow};
 use std::path::Path;
 
 pub trait KnownFsDeletable: Sized + KnownFile {
@@ -10,7 +11,8 @@ impl<T: KnownFile + Sized> KnownFsDeletable for T {
     fn delete_known<P: AsRef<Path>>(path: P) -> anyhow::Result<()> {
         let full_path = path.as_ref().join(Self::file_name());
         if full_path.exists() {
-            std::fs::remove_file(full_path)?;
+            std::fs::remove_file(&full_path)
+                .context(anyhow!("Failed to delete file {:?}", full_path))?;
         }
         Ok(())
     }
@@ -24,7 +26,8 @@ impl<T: NamedFile + Sized> NamedFsDeletable for T {
     fn delete_named<P: AsRef<Path>>(path: P, identifier: &str) -> anyhow::Result<()> {
         let full_path = path.as_ref().join(Self::get_file_name(identifier));
         if full_path.exists() {
-            std::fs::remove_file(full_path)?;
+            std::fs::remove_file(&full_path)
+                .context(anyhow!("Failed to delete file {:?}", full_path))?;
         }
         Ok(())
     }

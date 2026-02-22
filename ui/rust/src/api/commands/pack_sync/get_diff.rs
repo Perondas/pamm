@@ -2,7 +2,7 @@ use crate::api::commands::pack_sync::file_change::{get_file_changes, FileChange}
 use crate::api::frb;
 use crate::api::progress_reporting::DartProgressReporter;
 use crate::frb_generated::RustAutoOpaque;
-use anyhow::anyhow;
+use anyhow::{anyhow, Context};
 use pamm_lib::index::get_size::GetSize;
 use pamm_lib::io::fs::fs_readable::{KnownFSReadable, NamedFSReadable};
 use pamm_lib::io::fs::pack::index_generator::IndexGenerator;
@@ -23,13 +23,13 @@ pub fn get_diff(
 ) -> anyhow::Result<DiffResult> {
     let current_dir = Path::new(&repo_path);
 
-    let repo_user_settings = RepoUserSettings::read_from_known(current_dir)?.ok_or(anyhow!(
+    let repo_user_settings = RepoUserSettings::read_from_known(current_dir).context(anyhow!(
         "Repository user settings not found in: {:#?}",
         current_dir
     ))?;
 
-    let repo_config = RepoConfig::read_from_known(current_dir)?
-        .expect("No repo config found in current directory");
+    let repo_config = RepoConfig::read_from_known(current_dir)
+        .context("No repo config found in current directory")?;
 
     if !repo_config.packs.contains(&pack_name) {
         return Err(anyhow::anyhow!(
@@ -38,11 +38,11 @@ pub fn get_diff(
         ));
     }
 
-    let local_pack_config = PackConfig::read_from_named(current_dir, &pack_name)?.ok_or(
+    let local_pack_config = PackConfig::read_from_named(current_dir, &pack_name).context(
         anyhow::anyhow!("Pack config for '{}' not found locally", pack_name),
     )?;
 
-    let user_settings = PackUserSettings::read_from_named(current_dir, &pack_name)?.ok_or(
+    let user_settings = PackUserSettings::read_from_named(current_dir, &pack_name).context(
         anyhow::anyhow!("Pack user settings for '{}' not found locally", pack_name),
     )?;
 

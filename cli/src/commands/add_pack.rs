@@ -1,4 +1,5 @@
 use crate::commands::input::from_cli_input::FromCliInputWithContext;
+use anyhow::Context;
 use clap::Args;
 use pamm_lib::io::fs::fs_readable::KnownFSReadable;
 use pamm_lib::io::fs::fs_writable::KnownFSWritable;
@@ -11,7 +12,8 @@ pub struct AddPackArgs {}
 pub fn add_pack_command(_args: AddPackArgs) -> anyhow::Result<()> {
     let current_dir = std::env::current_dir()?;
 
-    let mut repo_config = RepoConfig::read_from_known(&current_dir)?.expect("Missing repo config");
+    let mut repo_config =
+        RepoConfig::read_from_known(&current_dir).context("Could not find repo config")?;
 
     let pack_config = PackConfig::from_cli_input(&repo_config)?;
 

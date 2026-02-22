@@ -1,5 +1,6 @@
 use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::ToPrettyString;
+use anyhow::Context;
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::io::fs::fs_readable::NamedFSReadable;
@@ -27,7 +28,7 @@ pub fn update_pack_command(args: UpdatePackArgs) -> anyhow::Result<()> {
     let current_dir = current_dir()?;
 
     let config =
-        PackConfig::read_from_named(&current_dir, &args.name)?.expect("Missing pack config");
+        PackConfig::read_from_named(&current_dir, &args.name).context("Missing pack config")?;
 
     let stored_index = config.read_index_from_fs(&current_dir)?;
 

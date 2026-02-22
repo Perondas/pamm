@@ -1,6 +1,6 @@
 use crate::api::commands::pack_sync::get_diff::OpaqueDiff;
 use crate::api::progress_reporting::DartProgressReporter;
-use anyhow::anyhow;
+use anyhow::{anyhow, Context};
 use pamm_lib::io::fs::fs_readable::{KnownFSReadable, NamedFSReadable};
 use pamm_lib::pack::pack_config::PackConfig;
 use pamm_lib::repo::repo_user_settings::RepoUserSettings;
@@ -20,11 +20,11 @@ pub fn sync_pack(
 
     let current_dir = Path::new(&repo_path);
 
-    let local_pack_config = PackConfig::read_from_named(current_dir, &pack_name)?.ok_or(
+    let local_pack_config = PackConfig::read_from_named(current_dir, &pack_name).context(
         anyhow::anyhow!("Pack config for '{}' not found locally", pack_name),
     )?;
 
-    let repo_user_settings = RepoUserSettings::read_from_known(current_dir)?.ok_or(anyhow!(
+    let repo_user_settings = RepoUserSettings::read_from_known(current_dir).context(anyhow!(
         "Repository user settings not found in: {:#?}",
         current_dir
     ))?;

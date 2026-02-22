@@ -1,5 +1,5 @@
 use crate::api::commands::optionals::optional_addon::OptionalAddon;
-use anyhow::anyhow;
+use anyhow::{anyhow, Context};
 use pamm_lib::io::fs::fs_readable::NamedFSReadable;
 use pamm_lib::io::fs::fs_writable::NamedFSWritable;
 use pamm_lib::pack::pack_config::PackConfig;
@@ -12,8 +12,8 @@ pub fn save_optionals(
 ) -> anyhow::Result<()> {
     let repot_path = std::path::Path::new(&repot_path);
 
-    let pack_config = PackConfig::read_from_named(repot_path, &pack_name)?
-        .ok_or(anyhow!("Pack configuration not found"))?;
+    let pack_config = PackConfig::read_from_named(repot_path, &pack_name)
+        .context(anyhow!("Pack configuration not found"))?;
 
     let enabled = optionals
         .into_iter()
@@ -27,8 +27,8 @@ pub fn save_optionals(
         .map(|optional| optional.name)
         .collect();
 
-    let mut settings = PackUserSettings::read_from_named(repot_path, &pack_name)?
-        .ok_or(anyhow!("Pack user settings not found"))?;
+    let mut settings = PackUserSettings::read_from_named(repot_path, &pack_name)
+        .context(anyhow!("Pack user settings not found"))?;
 
     settings.enabled_optionals = enabled;
 

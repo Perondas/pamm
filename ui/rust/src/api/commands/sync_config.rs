@@ -11,15 +11,15 @@ use std::path::Path;
 
 pub fn sync_config(repo_path: String) -> anyhow::Result<RepoConfig> {
     let repo_path = Path::new(&repo_path);
-    let repo_user_settings = RepoUserSettings::read_from_known(repo_path)?
-        .ok_or(anyhow!("No remote config found in current directory"))?;
+    let repo_user_settings = RepoUserSettings::read_from_known(repo_path)
+        .context(anyhow!("No remote config found in current directory"))?;
 
     let remote_url = repo_user_settings.get_remote();
 
     let remote_repo_config = RepoConfig::download_known(remote_url)?;
 
     let local_repo_config =
-        RepoConfig::read_from_known(repo_path)?.ok_or(anyhow!("Local repo config not found"))?;
+        RepoConfig::read_from_known(repo_path).context(anyhow!("Local repo config not found"))?;
 
     let removed = local_repo_config
         .packs

@@ -1,6 +1,6 @@
 use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::ToPrettyString;
-use anyhow::{anyhow, Context};
+use anyhow::{Context, anyhow};
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::io::fs::fs_readable::{KnownFSReadable, NamedFSReadable};
@@ -31,8 +31,8 @@ pub struct SyncPackArgs {
 pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
     let current_dir = current_dir()?;
 
-    let repo_user_settings = RepoUserSettings::read_from_known(&current_dir)?
-        .expect("No remote config found in current directory");
+    let repo_user_settings = RepoUserSettings::read_from_known(&current_dir)
+        .context("Could not find user settings in current directory")?;
 
     let repo_config = sync_config(&current_dir, &repo_user_settings)?;
 
@@ -43,12 +43,11 @@ pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
         ));
     }
 
-    let local_pack_config = PackConfig::read_from_named(&current_dir, &args.name)?.ok_or(
-        anyhow::anyhow!("Pack config for '{}' not found locally", args.name),
-    )?;
+    let local_pack_config = PackConfig::read_from_named(&current_dir, &args.name)
+        .context(anyhow!("Pack config for '{}' not found locally", args.name))?;
 
-    let user_settings = PackUserSettings::read_from_named(&current_dir, &args.name)?.ok_or(
-        anyhow::anyhow!("Pack user settings for '{}' not found locally", args.name),
+    let user_settings = PackUserSettings::read_from_named(&current_dir, &args.name).context(
+        anyhow!("Pack user settings for '{}' not found locally", args.name),
     )?;
 
     let progress_reporter = if args.silent {
@@ -114,7 +113,7 @@ fn sync_config(
     let remote_repo_config = RepoConfig::download_known(remote_url)?;
 
     let local_repo_config =
-        RepoConfig::read_from_known(current_dir)?.ok_or(anyhow!("Local repo config not found"))?;
+        RepoConfig::read_from_known(current_dir).context(anyhow!("Local repo config not found"))?;
 
     let removed = local_repo_config
         .packs
