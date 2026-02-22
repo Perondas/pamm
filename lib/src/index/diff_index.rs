@@ -1,6 +1,6 @@
 use crate::index::index_node::{FileKind, IndexNode, NodeKind, PBOPart};
 use crate::index::node_diff::{FileModification, ModifiedNodeKind, NodeDiff, NodeModification};
-use crate::util::iterator_diff::{diff_iterators, DiffResult};
+use crate::util::iterator_diff::{DiffResult, diff_iterators};
 use rayon::prelude::*;
 
 pub fn diff_index(left: IndexNode, right: IndexNode) -> anyhow::Result<NodeDiff> {
@@ -32,7 +32,7 @@ pub fn diff_index(left: IndexNode, right: IndexNode) -> anyhow::Result<NodeDiff>
                 length: r_length,
                 ..
             },
-        ) => diff_file(l_kind, r_kind, r_checksum, r_name, r_length, l_length),
+        ) => diff_file(l_kind, r_kind, r_checksum, r_name, l_length, r_length),
         (NodeKind::Folder(left_children), NodeKind::Folder(right_children)) => {
             diff_folders(left_children, right_children, r_name)?
         }
