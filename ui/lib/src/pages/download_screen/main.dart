@@ -63,26 +63,35 @@ class _DownloadScreenState extends State<DownloadScreen> {
           title: Text('Downloading ${widget.packName}'),
           automaticallyImplyLeading: false,
         ),
-        body: Column(
-          children: [
-            if (done)
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text("Done"),
-              ),
-            if (error != null)
-              IconButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Error downloading pack: $error")),
-                  );
-                },
-                icon: Icon(Icons.bug_report, color: Colors.red),
-              ),
-            ProgressReporter(widget.progressReporterService),
-          ],
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              if (done)
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text("Done"),
+                ),
+              if (error != null)
+                IconButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Error downloading pack: $error")),
+                    );
+                  },
+                  icon: Icon(Icons.bug_report, color: Colors.red),
+                ),
+              Expanded(child: ProgressReporter(widget.progressReporterService)),
+            ],
+          ),
         ),
       ),
     );

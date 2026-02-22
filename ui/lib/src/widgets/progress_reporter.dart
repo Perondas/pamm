@@ -73,11 +73,13 @@ class _ProgressReporterState extends State<ProgressReporter> {
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Progress section
         if (!isFinished && total != null) ...[
           if (total == BigInt.zero) ...[
             Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text('Progress: ${progress.toString()}'),
                 const SizedBox(height: 8),
@@ -86,6 +88,7 @@ class _ProgressReporterState extends State<ProgressReporter> {
             ),
           ] else ...[
             Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text('${format(progress.toInt())} / ${format(total!.toInt())}'),
                 const SizedBox(height: 8),
@@ -100,15 +103,14 @@ class _ProgressReporterState extends State<ProgressReporter> {
         const SizedBox(height: 16),
 
         // Scrolling messages view
-        if (messages.isNotEmpty)
-          Container(
-            height: 200,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(4),
-            ),
+        if (messages.isNotEmpty) ...[
+          Padding(
+            padding: EdgeInsetsGeometry.directional(start: 8, bottom: 8),
+            child: Text("Logs", style: Theme.of(context).textTheme.titleMedium),
+          ),
+          Expanded(
             child: ListView.builder(
+              shrinkWrap: true,
               controller: _scrollController,
               padding: const EdgeInsets.all(8),
               itemCount: messages.length,
@@ -120,6 +122,7 @@ class _ProgressReporterState extends State<ProgressReporter> {
               },
             ),
           ),
+        ],
       ],
     );
   }

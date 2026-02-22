@@ -28,37 +28,57 @@ class _SyncScreenState extends State<SyncScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Updating ${widget.packName}')),
-      body: Column(
-        children: [
-          Center(
-            child: isDoneSyncing && (diffResult?.hasChanges ?? false)
-                ? _buildDownloadButton(context)
-                : _buildSyncButton(),
-          ),
-          if (error != null) ...[
-            IconButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Error checking for updates: $error")),
-                );
-              },
-              icon: Icon(Icons.bug_report),
-              color: Colors.red,
+      body: Padding(
+        padding: EdgeInsetsGeometry.all(8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: EdgeInsetsGeometry.directional(bottom: 8),
+              child: Center(
+                child: isDoneSyncing && (diffResult?.hasChanges ?? false)
+                    ? _buildDownloadButton(context)
+                    : _buildSyncButton(),
+              ),
+            ),
+            if (error != null) ...[
+              IconButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Error checking for updates: $error"),
+                    ),
+                  );
+                },
+                icon: Icon(Icons.bug_report),
+                color: Colors.red,
+              ),
+            ],
+            if (diffResult != null) ...[
+              if (diffResult!.hasChanges)
+                ..._buildDiffResult()
+              else
+                const Center(
+                  child: Text(
+                    'No changes found',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
+                  ),
+                ),
+            ],
+            Expanded(
+              flex: 1,
+              child: Padding(
+                padding: EdgeInsetsGeometry.all(8),
+                child: ProgressReporter(widget.progressReporterService),
+              ),
             ),
           ],
-          ProgressReporter(widget.progressReporterService),
-          if (diffResult != null) ...[
-            if (diffResult!.hasChanges)
-              ..._buildDiffResult()
-            else
-              const Center(child: Text('No changes found.')),
-          ],
-        ],
+        ),
       ),
     );
   }
 
-  TextButton _buildDownloadButton(BuildContext context) => TextButton(
+  Widget _buildDownloadButton(BuildContext context) => ElevatedButton(
     onPressed: () {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
@@ -70,8 +90,8 @@ class _SyncScreenState extends State<SyncScreen> {
     child: Text("Download"),
   );
 
-  TextButton _buildSyncButton() {
-    return TextButton(
+  Widget _buildSyncButton() {
+    return ElevatedButton(
       onPressed: () async {
         if (isSyncing) return;
         setState(() {
@@ -113,6 +133,7 @@ class _SyncScreenState extends State<SyncScreen> {
       ),
       Text('Changed addons: ${diffResult?.changeCount}'),
       Expanded(
+        flex: 2,
         child: ListView(
           children: diffResult!.fileChanges.entries
               .where((element) => element.value.isNotEmpty)
