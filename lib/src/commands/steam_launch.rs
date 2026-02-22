@@ -4,9 +4,16 @@ use crate::pack::pack_user_settings::PackUserSettings;
 use std::path::Path;
 
 pub fn launch_via_steam(repo_dir: &Path, pack_name: &str) -> anyhow::Result<()> {
+    log::info!("Launching pack '{}' via Steam", pack_name);
+
     let mut pack_config = PackConfig::read_from_named(repo_dir, pack_name)?;
 
     let addons = get_addon_paths(&mut pack_config, repo_dir)?;
+    log::debug!(
+        "Resolved {} addon path(s) for pack '{}'",
+        addons.len(),
+        pack_name
+    );
 
     let mut launch_url = String::from("steam://rungameid/107410// -nolauncher ");
 
@@ -19,12 +26,15 @@ pub fn launch_via_steam(repo_dir: &Path, pack_name: &str) -> anyhow::Result<()> 
 
     launch_url.push_str(&format!("{}", urlencoding::encode(&addons_combined)));
 
+    log::debug!("Steam launch URL: {}", launch_url);
     open::that(launch_url)?;
 
     Ok(())
 }
 
 fn get_addon_paths(config: &mut PackConfig, base_path: &Path) -> anyhow::Result<Vec<String>> {
+    log::debug!("Resolving addon paths for pack '{}'", config.name);
+
     let user_settings = PackUserSettings::read_from_named(base_path, &config.name)?;
 
     config.remove_disabled_optionals(&user_settings);
@@ -32,6 +42,11 @@ fn get_addon_paths(config: &mut PackConfig, base_path: &Path) -> anyhow::Result<
     let own_addons = config.get_addon_paths(base_path);
 
     if let Some(parent_name) = &config.parent {
+        log::debug!(
+            "Pack '{}' has parent '{}', resolving parent addons",
+            config.name,
+            parent_name
+        );
         let mut parent_config = PackConfig::read_from_named(base_path, parent_name)?;
 
         Ok(own_addons

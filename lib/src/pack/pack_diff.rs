@@ -2,9 +2,10 @@ use crate::index::diff_index::diff_index;
 use crate::index::get_size::GetSize;
 use crate::index::node_diff::NodeDiff;
 use crate::pack::pack_index::PackIndex;
-use crate::util::iterator_diff::{diff_iterators, DiffResult};
+use crate::util::iterator_diff::{DiffResult, diff_iterators};
 use anyhow::Result;
 
+#[derive(Debug)]
 pub struct PackDiff(pub Vec<NodeDiff>);
 
 impl PackDiff {
@@ -20,11 +21,20 @@ impl PackDiff {
 }
 
 pub fn diff_packs(old_pack: PackIndex, new_pack: PackIndex) -> Result<PackDiff> {
+    log::info!("Diffing pack '{}': local vs remote", new_pack.pack_name);
+
     let DiffResult {
         added,
         removed,
         same,
     } = diff_iterators(old_pack.addons, new_pack.addons, |node| node.name.clone());
+
+    log::debug!(
+        "Pack diff: {} added, {} removed, {} to check for modifications",
+        added.len(),
+        removed.len(),
+        same.len()
+    );
 
     let added = added.into_iter().map(NodeDiff::Created).collect::<Vec<_>>();
 

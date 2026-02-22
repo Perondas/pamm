@@ -11,6 +11,10 @@ use clap::{Parser, Subcommand};
 pub struct Args {
     #[clap(subcommand)]
     pub command: AppSubcommand,
+
+    /// Optional log level (e.g., "info", "debug", "error")
+    #[clap(long)]
+    pub log_level: Option<String>,
 }
 
 #[derive(Debug, Subcommand)]

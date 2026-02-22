@@ -9,15 +9,29 @@ use url::Url;
 
 impl PackConfig {
     pub fn download_indexes(&self, base_url: &Url) -> Result<PackIndex> {
+        log::info!(
+            "Downloading indexes for pack '{}' from {}",
+            self.name,
+            base_url
+        );
+
         let addon_dir =
             base_url.join(&format!("{}/", get_pack_addon_directory_name(&self.name)))?;
         let index_dir = addon_dir.join(&format!("{}/", INDEX_DIR_NAME))?;
+
+        log::debug!("Index directory URL: {}", index_dir);
 
         let indexes = self
             .addons
             .par_iter()
             .map(|addon| IndexNode::download_named(&index_dir, addon.0))
             .collect::<Result<Vec<_>>>()?;
+
+        log::info!(
+            "Downloaded {} index(es) for pack '{}'",
+            indexes.len(),
+            self.name
+        );
 
         Ok(PackIndex {
             addons: indexes,

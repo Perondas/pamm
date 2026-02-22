@@ -7,6 +7,13 @@ pub(crate) fn download_file(
     file_url: Url,
     expected_len: u64,
 ) -> anyhow::Result<()> {
+    log::debug!(
+        "Downloading {} -> {:?} (expected {} bytes)",
+        file_url,
+        file_path,
+        expected_len
+    );
+
     let resp = ureq::get(file_url.to_string()).call()?;
     let body = resp.into_body();
 
@@ -21,5 +28,7 @@ pub(crate) fn download_file(
             file_url
         );
     }
+
+    log::debug!("Downloaded {} ({} bytes)", file_url, actual_len);
     Ok(())
 }

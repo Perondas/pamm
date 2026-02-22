@@ -47,6 +47,12 @@ impl<P: ProgressReporter> DiffApplier<P> {
         let PackDiff(node_diffs) = diff;
 
         let total_size: u64 = node_diffs.iter().map(|c| c.get_size()).sum();
+        log::info!(
+            "Applying diff: {} change(s), {} bytes total",
+            node_diffs.len(),
+            total_size
+        );
+
         self.progress_reporter.start_for_download(total_size);
         self.progress_reporter.report_message("Applying diff...");
 
@@ -60,6 +66,7 @@ impl<P: ProgressReporter> DiffApplier<P> {
         let errors: Vec<anyhow::Error> = res.into_iter().filter_map(|r| r.err()).collect();
 
         if !errors.is_empty() {
+            log::error!("{} error(s) occurred while applying diff", errors.len());
             let combined_error = errors
                 .into_iter()
                 .map(|e| format!("{:#}", e))
@@ -72,6 +79,7 @@ impl<P: ProgressReporter> DiffApplier<P> {
             ));
         }
 
+        log::info!("Diff applied successfully");
         Ok(())
     }
 
@@ -94,6 +102,7 @@ impl<P: ProgressReporter> DiffApplier<P> {
         let path = parent_path.push(&name);
         let full_path = path.with_base_path(&self.addon_dir);
 
+        log::debug!("Deleting {}", path);
         self.progress_reporter
             .report_message(&format!("Deleting {}", path));
 
@@ -114,6 +123,7 @@ impl<P: ProgressReporter> DiffApplier<P> {
 
         match node.kind {
             NodeKind::File { length, .. } => {
+                log::debug!("Creating file {} ({} bytes)", path, length);
                 self.remote_patcher.create_file(
                     &path,
                     &path.with_base_path(&self.addon_dir),
@@ -128,6 +138,7 @@ impl<P: ProgressReporter> DiffApplier<P> {
             }
             NodeKind::Folder(children) => {
                 let dir_path = path.with_base_path(&self.addon_dir);
+                log::debug!("Creating directory {}", path);
                 self.progress_reporter
                     .report_message(&format!("Creating directory {}", path));
                 fs::create_dir(&dir_path)
@@ -151,12 +162,14 @@ impl<P: ProgressReporter> DiffApplier<P> {
 
         match modification.kind {
             ModifiedNodeKind::Folder(children) => {
+                log::debug!("Applying modifications to folder {}", path);
                 for child in children {
                     self.apply_node_diff(child, path.clone())?;
                 }
             }
             ModifiedNodeKind::File { modification, .. } => {
                 let size = modification.get_size();
+                log::debug!("Patching file {} ({} bytes)", path, size);
                 self.progress_reporter
                     .report_message(&format!("Modifying file {}", path));
                 self.remote_patcher

@@ -1,3 +1,4 @@
+use crate::log_wrapper::LogWrapper;
 use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::ToPrettyString;
 use anyhow::Context;
@@ -24,7 +25,7 @@ pub struct UpdatePackArgs {
     pub silent: bool,
 }
 
-pub fn update_pack_command(args: UpdatePackArgs) -> anyhow::Result<()> {
+pub fn update_pack_command(args: UpdatePackArgs, log_wrapper: LogWrapper) -> anyhow::Result<()> {
     let current_dir = current_dir()?;
 
     let config =
@@ -33,9 +34,9 @@ pub fn update_pack_command(args: UpdatePackArgs) -> anyhow::Result<()> {
     let stored_index = config.read_index_from_fs(&current_dir)?;
 
     let progress_reporter = if args.silent {
-        IndicatifProgressReporter::disabled()
+        IndicatifProgressReporter::disabled(log_wrapper)
     } else {
-        IndicatifProgressReporter::default()
+        IndicatifProgressReporter::new(log_wrapper)
     };
 
     let index_generator = IndexGenerator::from_config(&config, &current_dir, progress_reporter)?;

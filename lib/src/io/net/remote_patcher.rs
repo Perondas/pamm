@@ -5,7 +5,7 @@ use crate::io::net::byte_range_response::{ByteRangeResponse, IntoByteRangeRespon
 use crate::io::net::download_file::download_file;
 use crate::io::rel_path::RelPath;
 use crate::pack::pack_config::PackConfig;
-use anyhow::{ensure, Context, Result};
+use anyhow::{Context, Result, ensure};
 use bi_fs_rs::pbo::handle::PBOHandle;
 use std::fs::File;
 use std::io::Write;
@@ -40,6 +40,7 @@ impl RemotePatcher {
         modification: FileModification,
     ) -> Result<()> {
         let file_url = rel_path.with_base_url(&self.addon_dir_url);
+        log::debug!("Patching file {:?} from {}", file_path, file_url);
 
         match modification {
             FileModification::PBO {
@@ -128,9 +129,14 @@ impl RemotePatcher {
                 drop(temp_file);
                 fs::rename(temp_file_path, file_path)?;
 
+                log::debug!("PBO patch applied successfully to {:?}", file_path);
                 Ok(())
             }
             FileModification::Generic { new_length } => {
+                log::debug!(
+                    "Downloading generic file replacement ({} bytes)",
+                    new_length
+                );
                 download_file(file_path, file_url, new_length)
             }
         }
@@ -143,7 +149,12 @@ impl RemotePatcher {
         expected_len: u64,
     ) -> Result<()> {
         let file_url = rel_path.with_base_url(&self.addon_dir_url);
-
+        log::debug!(
+            "Creating file {:?} from {} ({} bytes)",
+            file_path,
+            file_url,
+            expected_len
+        );
         download_file(file_path, file_url, expected_len)
     }
 }

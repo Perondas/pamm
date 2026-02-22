@@ -1,3 +1,4 @@
+use crate::log_wrapper::LogWrapper;
 use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::ToPrettyString;
 use anyhow::{Context, anyhow};
@@ -28,7 +29,7 @@ pub struct SyncPackArgs {
     pub silent: bool,
 }
 
-pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
+pub fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow::Result<()> {
     let current_dir = current_dir()?;
 
     let repo_user_settings = RepoUserSettings::read_from_known(&current_dir)
@@ -51,9 +52,9 @@ pub fn sync_pack_command(args: SyncPackArgs) -> anyhow::Result<()> {
     )?;
 
     let progress_reporter = if args.silent {
-        IndicatifProgressReporter::disabled()
+        IndicatifProgressReporter::disabled(log_wrapper)
     } else {
-        IndicatifProgressReporter::default()
+        IndicatifProgressReporter::new(log_wrapper)
     };
 
     let index_generator =
