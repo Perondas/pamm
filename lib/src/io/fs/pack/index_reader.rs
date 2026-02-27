@@ -1,8 +1,8 @@
-use crate::index::index_node::IndexNode;
+use crate::models::index::index_node::IndexNode;
 use crate::io::fs::fs_readable::NamedFSReadable;
 use crate::io::name_consts::{INDEX_DIR_NAME, get_pack_addon_directory_name};
-use crate::pack::pack_config::PackConfig;
-use crate::pack::pack_index::PackIndex;
+use crate::models::pack::pack_config::PackConfig;
+use crate::models::pack::pack_index::PackIndex;
 use anyhow::Result;
 use rayon::prelude::*;
 use std::path::Path;

@@ -1,5 +1,5 @@
 use clap::Args;
-use pamm_lib::repo::repo_config::RepoConfig;
+use pamm_lib::models::repo::repo_config::RepoConfig;
 use url::Url;
 
 #[derive(Debug, Args)]

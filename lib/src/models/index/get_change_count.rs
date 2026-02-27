@@ -1,5 +1,5 @@
-use crate::index::index_node::{IndexNode, NodeKind};
-use crate::index::node_diff::{ModifiedNodeKind, NodeDiff, NodeModification};
+use crate::models::index::index_node::{IndexNode, NodeKind};
+use crate::models::index::node_diff::{ModifiedNodeKind, NodeDiff, NodeModification};
 
 pub trait GetChangeCount {
     fn get_change_count(&self) -> u64;

@@ -1,4 +1,4 @@
-use crate::index::index_node::IndexNode;
+use crate::models::index::index_node::IndexNode;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]

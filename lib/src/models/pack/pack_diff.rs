@@ -1,7 +1,7 @@
-use crate::index::diff_index::diff_index;
-use crate::index::get_size::GetSize;
-use crate::index::node_diff::NodeDiff;
-use crate::pack::pack_index::PackIndex;
+use crate::models::index::diff_index::diff_index;
+use crate::models::index::get_size::GetSize;
+use crate::models::index::node_diff::NodeDiff;
+use crate::models::pack::pack_index::PackIndex;
 use crate::util::iterator_diff::{DiffResult, diff_iterators};
 use anyhow::Result;
 

@@ -1,9 +1,9 @@
 use crate::io::fs::util::clean_path::clean_path;
 use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::named;
-use crate::pack::addon::AddonSettings;
-use crate::pack::pack_user_settings::PackUserSettings;
-use crate::pack::server_info::ServerInfo;
+use crate::models::pack::addon::AddonSettings;
+use crate::models::pack::pack_user_settings::PackUserSettings;
+use crate::models::pack::server_info::ServerInfo;
 use anyhow::Context;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};

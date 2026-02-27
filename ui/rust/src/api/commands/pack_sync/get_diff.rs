@@ -3,18 +3,18 @@ use crate::api::frb;
 use crate::api::progress_reporting::DartProgressReporter;
 use crate::frb_generated::RustAutoOpaque;
 use anyhow::{anyhow, Context};
-use pamm_lib::index::get_size::GetSize;
+use pamm_lib::models::index::get_size::GetSize;
 use pamm_lib::io::fs::fs_readable::{KnownFSReadable, NamedFSReadable};
 use pamm_lib::io::fs::pack::index_generator::IndexGenerator;
 use pamm_lib::io::net::downloadable::NamedDownloadable;
-use pamm_lib::pack::pack_config::PackConfig;
-use pamm_lib::pack::pack_diff::{diff_packs, PackDiff};
-use pamm_lib::pack::pack_user_settings::PackUserSettings;
-use pamm_lib::repo::repo_config::RepoConfig;
-use pamm_lib::repo::repo_user_settings::RepoUserSettings;
+use pamm_lib::models::pack::pack_config::PackConfig;
+use pamm_lib::models::pack::pack_diff::{diff_packs, PackDiff};
+use pamm_lib::models::pack::pack_user_settings::PackUserSettings;
+use pamm_lib::models::repo::repo_config::RepoConfig;
+use pamm_lib::models::repo::repo_user_settings::RepoUserSettings;
 use std::collections::HashMap;
 use std::path::Path;
-use pamm_lib::identifiable::Identifiable;
+use pamm_lib::models::identifiable::Identifiable;
 
 pub fn get_diff(
     pack_name: String,

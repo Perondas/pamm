@@ -1,5 +1,5 @@
-use crate::index::index_node::{FileKind, IndexNode, NodeKind, PBOPart};
-use crate::index::node_diff::{FileModification, ModifiedNodeKind, NodeDiff, NodeModification};
+use crate::models::index::index_node::{FileKind, IndexNode, NodeKind, PBOPart};
+use crate::models::index::node_diff::{FileModification, ModifiedNodeKind, NodeDiff, NodeModification};
 use crate::util::iterator_diff::{DiffResult, diff_iterators};
 use rayon::prelude::*;
 

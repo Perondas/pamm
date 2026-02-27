@@ -4,9 +4,9 @@ use pamm_lib::io::fs::fs_writable::IdentifiableFSWritable;
 use pamm_lib::io::fs::fs_writable::KnownFSWritable;
 use pamm_lib::io::fs::pack::delete_pack::delete_pack;
 use pamm_lib::io::net::downloadable::{KnownDownloadable, NamedDownloadable};
-use pamm_lib::pack::pack_config::PackConfig;
-use pamm_lib::repo::repo_config::RepoConfig;
-use pamm_lib::repo::repo_user_settings::RepoUserSettings;
+use pamm_lib::models::pack::pack_config::PackConfig;
+use pamm_lib::models::repo::repo_config::RepoConfig;
+use pamm_lib::models::repo::repo_user_settings::RepoUserSettings;
 use std::path::Path;
 
 pub fn sync_config(repo_path: String) -> anyhow::Result<RepoConfig> {

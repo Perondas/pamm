@@ -2,8 +2,8 @@ use crate::api::commands::optionals::optional_addon::OptionalAddon;
 use anyhow::{anyhow, Context};
 use pamm_lib::io::fs::fs_readable::NamedFSReadable;
 use pamm_lib::io::fs::fs_writable::NamedFSWritable;
-use pamm_lib::pack::pack_config::PackConfig;
-use pamm_lib::pack::pack_user_settings::PackUserSettings;
+use pamm_lib::models::pack::pack_config::PackConfig;
+use pamm_lib::models::pack::pack_user_settings::PackUserSettings;
 
 pub fn save_optionals(
     repot_path: String,

@@ -1,5 +1,5 @@
-use crate::identifiable::Identifiable;
-use crate::index::index_node::{IndexNode, PBOPart};
+use crate::models::identifiable::Identifiable;
+use crate::models::index::index_node::{IndexNode, PBOPart};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug)]

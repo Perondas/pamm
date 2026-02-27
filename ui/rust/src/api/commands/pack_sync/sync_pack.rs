@@ -2,8 +2,8 @@ use crate::api::commands::pack_sync::get_diff::OpaqueDiff;
 use crate::api::progress_reporting::DartProgressReporter;
 use anyhow::{anyhow, Context};
 use pamm_lib::io::fs::fs_readable::{KnownFSReadable, NamedFSReadable};
-use pamm_lib::pack::pack_config::PackConfig;
-use pamm_lib::repo::repo_user_settings::RepoUserSettings;
+use pamm_lib::models::pack::pack_config::PackConfig;
+use pamm_lib::models::repo::repo_user_settings::RepoUserSettings;
 use std::path::Path;
 
 pub fn sync_pack(

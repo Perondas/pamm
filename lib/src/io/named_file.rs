@@ -1,6 +1,6 @@
-use crate::index::index_node::IndexNode;
-use crate::pack::pack_config::PackConfig;
-use crate::pack::pack_user_settings::PackUserSettings;
+use crate::models::index::index_node::IndexNode;
+use crate::models::pack::pack_config::PackConfig;
+use crate::models::pack::pack_user_settings::PackUserSettings;
 
 pub trait NamedFile {
     fn get_file_name(identifier: &str) -> String;

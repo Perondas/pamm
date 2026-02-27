@@ -1,6 +1,6 @@
 use flutter_rust_bridge::for_generated::anyhow;
 use flutter_rust_bridge::frb;
-pub use pamm_lib::repo::repo_config::RepoConfig;
+pub use pamm_lib::models::repo::repo_config::RepoConfig;
 use std::collections::HashSet;
 use std::path::Path;
 use url::Url;

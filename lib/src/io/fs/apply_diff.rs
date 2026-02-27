@@ -1,12 +1,12 @@
-use crate::index::get_size::GetSize;
-use crate::index::index_node::{IndexNode, NodeKind};
-use crate::index::node_diff::{ModifiedNodeKind, NodeDiff, NodeModification};
+use crate::models::index::get_size::GetSize;
+use crate::models::index::index_node::{IndexNode, NodeKind};
+use crate::models::index::node_diff::{ModifiedNodeKind, NodeDiff, NodeModification};
 use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::io::net::remote_patcher::RemotePatcher;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::io::rel_path::RelPath;
-use crate::pack::pack_config::PackConfig;
-use crate::pack::pack_diff::PackDiff;
+use crate::models::pack::pack_config::PackConfig;
+use crate::models::pack::pack_diff::PackDiff;
 use anyhow::Context;
 use rayon::iter::ParallelIterator;
 use rayon::prelude::IntoParallelIterator;

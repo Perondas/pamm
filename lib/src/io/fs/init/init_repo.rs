@@ -1,8 +1,8 @@
 use crate::io::fs::fs_writable::KnownFSWritable;
 use crate::io::net::downloadable::{KnownDownloadable, NamedDownloadable};
-use crate::pack::pack_config::PackConfig;
-use crate::repo::repo_config::RepoConfig;
-use crate::repo::repo_user_settings::RepoUserSettings;
+use crate::models::pack::pack_config::PackConfig;
+use crate::models::repo::repo_config::RepoConfig;
+use crate::models::repo::repo_user_settings::RepoUserSettings;
 use anyhow::Context;
 use std::fs;
 use std::path::Path;

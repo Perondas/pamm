@@ -7,8 +7,8 @@ use dialoguer::theme::ColorfulTheme;
 use pamm_lib::io::fs::fs_readable::NamedFSReadable;
 use pamm_lib::io::fs::fs_writable::IdentifiableFSWritable;
 use pamm_lib::io::fs::pack::index_generator::IndexGenerator;
-use pamm_lib::pack::pack_config::PackConfig;
-use pamm_lib::pack::pack_diff::diff_packs;
+use pamm_lib::models::pack::pack_config::PackConfig;
+use pamm_lib::models::pack::pack_diff::diff_packs;
 use std::env::current_dir;
 
 #[derive(Debug, Args)]

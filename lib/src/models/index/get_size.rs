@@ -1,5 +1,5 @@
-use crate::index::index_node::{IndexNode, NodeKind};
-use crate::index::node_diff::{FileModification, ModifiedNodeKind, NodeDiff};
+use crate::models::index::index_node::{IndexNode, NodeKind};
+use crate::models::index::node_diff::{FileModification, ModifiedNodeKind, NodeDiff};
 
 pub trait GetSize {
     fn get_size(&self) -> u64;

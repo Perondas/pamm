@@ -1,5 +1,5 @@
-use crate::repo::repo_config::RepoConfig;
-use crate::repo::repo_user_settings::RepoUserSettings;
+use crate::models::repo::repo_config::RepoConfig;
+use crate::models::repo::repo_user_settings::RepoUserSettings;
 
 pub trait KnownFile {
     fn file_name() -> &'static str;

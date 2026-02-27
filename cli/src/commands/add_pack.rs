@@ -3,8 +3,8 @@ use anyhow::Context;
 use clap::Args;
 use pamm_lib::io::fs::fs_readable::KnownFSReadable;
 use pamm_lib::io::fs::fs_writable::KnownFSWritable;
-use pamm_lib::pack::pack_config::PackConfig;
-use pamm_lib::repo::repo_config::RepoConfig;
+use pamm_lib::models::pack::pack_config::PackConfig;
+use pamm_lib::models::repo::repo_config::RepoConfig;
 
 #[derive(Debug, Args)]
 pub struct AddPackArgs {}

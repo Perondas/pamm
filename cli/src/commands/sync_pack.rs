@@ -10,11 +10,11 @@ use pamm_lib::io::fs::fs_writable::KnownFSWritable;
 use pamm_lib::io::fs::pack::delete_pack::delete_pack;
 use pamm_lib::io::fs::pack::index_generator::IndexGenerator;
 use pamm_lib::io::net::downloadable::{KnownDownloadable, NamedDownloadable};
-use pamm_lib::pack::pack_config::PackConfig;
-use pamm_lib::pack::pack_diff::diff_packs;
-use pamm_lib::pack::pack_user_settings::PackUserSettings;
-use pamm_lib::repo::repo_config::RepoConfig;
-use pamm_lib::repo::repo_user_settings::RepoUserSettings;
+use pamm_lib::models::pack::pack_config::PackConfig;
+use pamm_lib::models::pack::pack_diff::diff_packs;
+use pamm_lib::models::pack::pack_user_settings::PackUserSettings;
+use pamm_lib::models::repo::repo_config::RepoConfig;
+use pamm_lib::models::repo::repo_user_settings::RepoUserSettings;
 use std::env::current_dir;
 use std::path::Path;
 

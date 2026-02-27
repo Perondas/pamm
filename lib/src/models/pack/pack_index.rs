@@ -1,4 +1,4 @@
-use crate::index::index_node::IndexNode;
+use crate::models::index::index_node::IndexNode;
 use crate::io::fs::util::clean_path::clean_path;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
