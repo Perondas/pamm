@@ -14,6 +14,7 @@ use pamm_lib::repo::repo_config::RepoConfig;
 use pamm_lib::repo::repo_user_settings::RepoUserSettings;
 use std::collections::HashMap;
 use std::path::Path;
+use pamm_lib::identifiable::Identifiable;
 
 pub fn get_diff(
     pack_name: String,
@@ -71,7 +72,7 @@ pub fn get_diff(
         .0
         .iter()
         .map(|diff| {
-            let name = diff.get_name().to_owned();
+            let name = diff.get_identifier().to_owned();
             let changes = get_file_changes(diff);
             (name, changes)
         })
