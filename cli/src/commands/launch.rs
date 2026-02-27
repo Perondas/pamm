@@ -1,5 +1,5 @@
 use clap::Args;
-use pamm_lib::commands::steam_launch::launch_via_steam;
+use pamm_lib::actions::launch::steam::launch_via_steam;
 use std::env::current_dir;
 
 #[derive(Debug, Args)]
