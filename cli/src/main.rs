@@ -17,7 +17,7 @@ use clap::Parser;
 fn main() -> Result<()> {
     let args = Args::parse();
 
-    let log_level = args.log_level.unwrap_or("trace".to_string());
+    let log_level = args.log_level.unwrap_or("warn".to_string());
 
     let log_wrapper = log_wrapper::LogWrapper::new(
         env_logger::Builder::from_env(env_logger::Env::default().default_filter_or(log_level))
