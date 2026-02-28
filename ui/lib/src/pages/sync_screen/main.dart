@@ -103,7 +103,7 @@ class _SyncScreenState extends State<SyncScreen> {
             repoPath: widget.repoPath,
             dartProgressReporter:
                 widget.progressReporterService.underlyingReporter,
-            clearCache: true,
+            clearCache: false,
           );
           if (!mounted) return;
           setState(() {
