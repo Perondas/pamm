@@ -1,22 +1,19 @@
 use crate::log_wrapper::LogWrapper;
 use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::ToPrettyString;
-use anyhow::{Context, anyhow};
+use anyhow::{anyhow, Context};
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
+use pamm_lib::actions::sync::interactor::ConfigSyncInteractor;
+use pamm_lib::actions::sync::sync_pack::sync_pack_config;
 use pamm_lib::io::fs::fs_readable::{KnownFSReadable, NamedFSReadable};
-use pamm_lib::io::fs::fs_writable::IdentifiableFSWritable;
-use pamm_lib::io::fs::fs_writable::KnownFSWritable;
-use pamm_lib::io::fs::pack::delete_pack::delete_pack;
 use pamm_lib::io::fs::pack::index_generator::IndexGenerator;
-use pamm_lib::io::net::downloadable::{KnownDownloadable, NamedDownloadable};
+use pamm_lib::io::net::downloadable::NamedDownloadable;
 use pamm_lib::models::pack::pack_config::PackConfig;
 use pamm_lib::models::pack::pack_diff::diff_packs;
 use pamm_lib::models::pack::pack_user_settings::PackUserSettings;
-use pamm_lib::models::repo::repo_config::RepoConfig;
 use pamm_lib::models::repo::repo_user_settings::RepoUserSettings;
 use std::env::current_dir;
-use std::path::Path;
 
 #[derive(Debug, Args)]
 pub struct SyncPackArgs {
@@ -35,7 +32,7 @@ pub fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow:
     let repo_user_settings = RepoUserSettings::read_from_known(&current_dir)
         .context("Could not find user settings in current directory")?;
 
-    let repo_config = sync_config(&current_dir, &repo_user_settings)?;
+    let repo_config = sync_pack_config(&current_dir, &DialogerInteractor)?;
 
     if !repo_config.packs.contains(&args.name) {
         return Err(anyhow::anyhow!(
@@ -105,66 +102,22 @@ pub fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow:
     Ok(())
 }
 
-fn sync_config(
-    current_dir: &Path,
-    repo_user_settings: &RepoUserSettings,
-) -> anyhow::Result<RepoConfig> {
-    let remote_url = repo_user_settings.get_remote();
+struct DialogerInteractor;
 
-    let remote_repo_config = RepoConfig::download_known(remote_url)?;
-
-    let local_repo_config =
-        RepoConfig::read_from_known(current_dir).context(anyhow!("Local repo config not found"))?;
-
-    let removed = local_repo_config
-        .packs
-        .iter()
-        .filter(|p| !remote_repo_config.packs.contains(*p))
-        .collect::<Vec<_>>();
-
-    for pack in removed {
-        println!("Pack '{}' has been removed from remote repository.", pack);
+impl ConfigSyncInteractor for DialogerInteractor {
+    fn confirm_pack_removal(&self, pack_name: &str) -> anyhow::Result<bool> {
         let outcome = dialoguer::Confirm::with_theme(&ColorfulTheme::default())
             .with_prompt(format!(
-                "Do you want to remove the local pack '{}' as well?",
-                pack
+                "Pack '{}' has been removed from remote repository. Do you want to remove all local files as well?",
+                pack_name
             ))
             .default(false)
             .interact()?;
-        if outcome {
-            delete_pack(current_dir, pack)?;
-            println!("Pack '{}' removed locally.", pack);
-        }
+        Ok(outcome)
     }
 
-    let added = remote_repo_config
-        .packs
-        .iter()
-        .filter(|p| !local_repo_config.packs.contains(*p))
-        .collect::<Vec<_>>();
-
-    for pack in added {
-        let pack_config = PackConfig::download_named(remote_url, pack)
-            .context(format!("Failed to download pack {} configuration", &pack))?;
-
-        pack_config.init_blank_on_fs(current_dir)?;
-
-        println!("Pack '{}' has been added to repository.", pack);
+    fn notify_pack_added(&self, pack_name: &str) -> anyhow::Result<()> {
+        println!("Pack '{}' has been added to repository.", pack_name);
+        Ok(())
     }
-
-    let existing = remote_repo_config
-        .packs
-        .iter()
-        .filter(|p| local_repo_config.packs.contains(*p))
-        .collect::<Vec<_>>();
-
-    for pack in existing {
-        let remote_pack_config = PackConfig::download_named(remote_url, pack)
-            .context(format!("Failed to download pack {} configuration", &pack))?;
-        remote_pack_config.write_to(current_dir)?;
-    }
-
-    remote_repo_config.write_to(current_dir)?;
-
-    Ok(remote_repo_config)
 }
