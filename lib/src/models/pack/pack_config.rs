@@ -1,12 +1,13 @@
 use crate::io::fs::util::clean_path::clean_path;
 use crate::io::name_consts::get_pack_addon_directory_name;
-use crate::named;
 use crate::models::pack::addon::AddonSettings;
+use crate::models::pack::pack_diff::PackDiff;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use crate::models::pack::server_info::ServerInfo;
+use crate::named;
 use anyhow::Context;
 use serde::{Deserialize, Serialize};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::path::Path;
 
 named!(PackConfig);
@@ -38,12 +39,13 @@ impl PackConfig {
         }
     }
 
-    pub fn update_addons(mut self, addons: HashSet<String>) -> Self {
+    pub fn update_addons(mut self, diff: &PackDiff) -> Self {
+        let addons = diff.target_index.get_addon_names();
         self.addons = addons
             .into_iter()
             .map(|name| {
-                let settings = self.addons.remove(&name).unwrap_or_default();
-                (name, settings)
+                let settings = self.addons.remove(name).unwrap_or_default();
+                (name.to_string(), settings)
             })
             .collect();
 

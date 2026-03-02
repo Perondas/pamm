@@ -1,32 +1,29 @@
 use crate::actions::sync::interactor::ConfigSyncInteractor;
-use crate::io::fs::fs_readable::KnownFSReadable;
-use crate::io::fs::fs_writable::IdentifiableFSWritable;
-use crate::io::fs::fs_writable::KnownFSWritable;
-use crate::io::fs::pack::delete_pack::delete_pack;
+use crate::handle::repo_handle::RepoHandle;
 use crate::io::net::downloadable::{KnownDownloadable, NamedDownloadable};
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::repo::repo_config::RepoConfig;
-use crate::models::repo::repo_user_settings::RepoUserSettings;
 use anyhow::{anyhow, Context};
 use log::debug;
-use std::path::Path;
 
+// TODO: make associated with RepoHandle
 pub fn sync_pack_config(
-    pack_dir: &Path,
+    repo_handle: &mut RepoHandle,
     interactor: &impl ConfigSyncInteractor,
-) -> anyhow::Result<RepoConfig> {
-    let repo_user_settings = RepoUserSettings::read_from_known(pack_dir)
-        .context(anyhow!("Failed to read settings file in {:#?}", pack_dir))?;
+) -> anyhow::Result<()> {
+    let repo_user_settings = repo_handle
+        .repo_user_settings
+        .as_ref()
+        .ok_or_else(|| anyhow!("Repo user settings not found"))?;
 
-    let remote_url = repo_user_settings.get_remote();
+    let remote_url = repo_user_settings.get_remote().clone();
 
-    let remote_repo_config = RepoConfig::download_known(remote_url).context(anyhow!(
+    let remote_repo_config = RepoConfig::download_known(&remote_url).context(anyhow!(
         "Failed to download remote config from {}",
         remote_url
     ))?;
 
-    let local_repo_config = RepoConfig::read_from_known(pack_dir)
-        .context(anyhow!("Failed to read repo config in {:#?}", pack_dir))?;
+    let local_repo_config = repo_handle.get_config().clone();
 
     let removed = local_repo_config
         .packs
@@ -37,10 +34,7 @@ pub fn sync_pack_config(
     for pack in removed {
         debug!("Pack '{}' has been removed from remote repository.", pack);
         let outcome = interactor.confirm_pack_removal(pack)?;
-        if outcome {
-            delete_pack(pack_dir, pack)?;
-            debug!("Pack '{}' removed locally.", pack);
-        }
+        repo_handle.delete_pack(pack, outcome)?;
     }
 
     let added = remote_repo_config
@@ -50,10 +44,10 @@ pub fn sync_pack_config(
         .collect::<Vec<_>>();
 
     for pack in added {
-        let pack_config = PackConfig::download_named(remote_url, pack)
+        let pack_config = PackConfig::download_named(&remote_url, pack)
             .context(format!("Failed to download pack {} configuration", &pack))?;
 
-        pack_config.init_blank_on_fs(pack_dir)?;
+        repo_handle.add_pack(&pack_config)?;
 
         interactor.notify_pack_added(pack)?;
     }
@@ -65,12 +59,12 @@ pub fn sync_pack_config(
         .collect::<Vec<_>>();
 
     for pack in existing {
-        let remote_pack_config = PackConfig::download_named(remote_url, pack)
+        let remote_pack_config = PackConfig::download_named(&remote_url, pack)
             .context(format!("Failed to download pack {} configuration", &pack))?;
-        remote_pack_config.write_to(pack_dir)?;
+        repo_handle.update_pack(&remote_pack_config)?;
     }
 
-    remote_repo_config.write_to(pack_dir)?;
+    repo_handle.update_repo_config(remote_repo_config)?;
 
-    Ok(remote_repo_config)
+    Ok(())
 }

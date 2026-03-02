@@ -1,13 +1,10 @@
 use crate::log_wrapper::LogWrapper;
 use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::ToPrettyString;
-use anyhow::Context;
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
-use pamm_lib::io::fs::fs_readable::NamedFSReadable;
-use pamm_lib::io::fs::fs_writable::IdentifiableFSWritable;
+use pamm_lib::handle::repo_handle::RepoHandle;
 use pamm_lib::io::fs::pack::index_generator::IndexGenerator;
-use pamm_lib::models::pack::pack_config::PackConfig;
 use pamm_lib::models::pack::pack_diff::diff_packs;
 use std::env::current_dir;
 
@@ -26,12 +23,9 @@ pub struct UpdatePackArgs {
 }
 
 pub fn update_pack_command(args: UpdatePackArgs, log_wrapper: LogWrapper) -> anyhow::Result<()> {
-    let current_dir = current_dir()?;
+    let handle = RepoHandle::open(&current_dir()?)?;
 
-    let config =
-        PackConfig::read_from_named(&current_dir, &args.name).context("Missing pack config")?;
-
-    let stored_index = config.read_index_from_fs(&current_dir)?;
+    let stored_index = handle.get_pack_index(&args.name)?;
 
     let progress_reporter = if args.silent {
         IndicatifProgressReporter::disabled(log_wrapper)
@@ -39,7 +33,7 @@ pub fn update_pack_command(args: UpdatePackArgs, log_wrapper: LogWrapper) -> any
         IndicatifProgressReporter::new(log_wrapper)
     };
 
-    let index_generator = IndexGenerator::from_config(&config, &current_dir, progress_reporter)?;
+    let index_generator = IndexGenerator::from_handle(&handle, &args.name, progress_reporter)?;
 
     if args.force_refresh {
         index_generator.clear_cache()?;
@@ -66,11 +60,7 @@ pub fn update_pack_command(args: UpdatePackArgs, log_wrapper: LogWrapper) -> any
         return Ok(());
     }
 
-    diff.write_index_to_fs(&current_dir, &actual_index)?;
-
-    let config = config.update_addons(actual_index.to_names());
-
-    config.write_to(&current_dir)?;
+    handle.apply_diff(&diff)?;
 
     Ok(())
 }

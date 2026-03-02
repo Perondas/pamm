@@ -1,9 +1,15 @@
 use crate::handle::repo_handle::RepoHandle;
-use crate::io::fs::fs_readable::NamedFSReadable;
+use crate::io::fs::fs_readable::{KnownFSReadable, NamedFSReadable};
+use crate::io::name_consts::{get_pack_addon_directory_name, INDEX_DIR_NAME};
+use crate::models::index::index_node::IndexNode;
 use crate::models::pack::pack_config::PackConfig;
+use crate::models::pack::pack_index::PackIndex;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use crate::models::repo::repo_config::RepoConfig;
-use anyhow::{Context, anyhow, ensure};
+use crate::models::repo::repo_user_settings::RepoUserSettings;
+use anyhow::{anyhow, ensure, Context};
+use rayon::iter::ParallelIterator;
+use rayon::prelude::IntoParallelRefIterator;
 
 impl RepoHandle {
     pub fn get_config(&self) -> &RepoConfig {
@@ -37,6 +43,36 @@ impl RepoHandle {
         ))?;
 
         Ok((pack_config, pack_user_settings))
+    }
+
+    pub fn get_repo_user_settings(&self) -> anyhow::Result<&RepoUserSettings> {
+        self.repo_user_settings
+            .as_ref()
+            .ok_or(anyhow!("Repo user settings not found"))
+    }
+
+    pub fn get_pack_index(&self, pack_name: &str) -> anyhow::Result<PackIndex> {
+        let pack_config = self.get_pack(pack_name)?;
+
+        let addon_dir = self
+            .repo_path
+            .join(get_pack_addon_directory_name(pack_name));
+        let index_dir = addon_dir.join(INDEX_DIR_NAME);
+
+        let indexes = pack_config
+            .addons
+            .par_iter()
+            .map(|addon| IndexNode::read_from_named(&index_dir, addon.0))
+            .collect::<anyhow::Result<Vec<_>>>()?;
+
+        Ok(PackIndex {
+            addons: indexes,
+            pack_name: pack_config.name.clone(),
+        })
+    }
+
+    fn read<T: KnownFSReadable>(&self) -> anyhow::Result<T> {
+        T::read_from_known(&self.repo_path)
     }
 
     fn read_named<T: NamedFSReadable>(&self, identifier: &str) -> anyhow::Result<T> {

@@ -2,19 +2,15 @@ use crate::api::commands::pack_sync::file_change::{get_file_changes, FileChange}
 use crate::api::frb;
 use crate::api::progress_reporting::DartProgressReporter;
 use crate::frb_generated::RustAutoOpaque;
-use anyhow::{anyhow, Context};
-use pamm_lib::models::index::get_size::GetSize;
-use pamm_lib::io::fs::fs_readable::{KnownFSReadable, NamedFSReadable};
+use pamm_lib::handle::repo_handle::RepoHandle;
 use pamm_lib::io::fs::pack::index_generator::IndexGenerator;
 use pamm_lib::io::net::downloadable::NamedDownloadable;
+use pamm_lib::models::identifiable::Identifiable;
+use pamm_lib::models::index::get_size::GetSize;
 use pamm_lib::models::pack::pack_config::PackConfig;
 use pamm_lib::models::pack::pack_diff::{diff_packs, PackDiff};
-use pamm_lib::models::pack::pack_user_settings::PackUserSettings;
-use pamm_lib::models::repo::repo_config::RepoConfig;
-use pamm_lib::models::repo::repo_user_settings::RepoUserSettings;
 use std::collections::HashMap;
 use std::path::Path;
-use pamm_lib::models::identifiable::Identifiable;
 
 pub fn get_diff(
     pack_name: String,
@@ -24,34 +20,14 @@ pub fn get_diff(
 ) -> anyhow::Result<DiffResult> {
     let current_dir = Path::new(&repo_path);
 
-    let repo_user_settings = RepoUserSettings::read_from_known(current_dir).context(anyhow!(
-        "Repository user settings not found in: {:#?}",
-        current_dir
-    ))?;
+    let handle = RepoHandle::open(current_dir)?;
 
-    let repo_config = RepoConfig::read_from_known(current_dir)
-        .context("No repo config found in current directory")?;
+    let repo_user_settings = handle.get_repo_user_settings()?;
 
-    if !repo_config.packs.contains(&pack_name) {
-        return Err(anyhow::anyhow!(
-            "Pack '{}' is not part of the repository",
-            pack_name
-        ));
-    }
+    let (_, user_settings) = handle.get_pack_with_settings(&pack_name)?;
 
-    let local_pack_config = PackConfig::read_from_named(current_dir, &pack_name).context(
-        anyhow::anyhow!("Pack config for '{}' not found locally", pack_name),
-    )?;
-
-    let user_settings = PackUserSettings::read_from_named(current_dir, &pack_name).context(
-        anyhow::anyhow!("Pack user settings for '{}' not found locally", pack_name),
-    )?;
-
-    let index_generator = IndexGenerator::from_config(
-        &local_pack_config,
-        current_dir,
-        dart_progress_reporter.clone(),
-    )?;
+    let index_generator =
+        IndexGenerator::from_handle(&handle, &pack_name, dart_progress_reporter.clone())?;
 
     if clear_cache {
         index_generator.clear_cache()?;
@@ -69,7 +45,7 @@ pub fn get_diff(
     let diff = diff_packs(actual_index, remote_index.clone())?;
 
     let file_changes = diff
-        .0
+        .addon_diffs
         .iter()
         .map(|diff| {
             let name = diff.get_identifier().to_owned();

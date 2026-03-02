@@ -1,13 +1,13 @@
-use crate::models::index::index_node::FileKind;
-use crate::models::index::index_node::IndexNode;
-use crate::models::index::index_node::NodeKind;
+use crate::handle::repo_handle::RepoHandle;
 use crate::io::fs::cache::file_cache_entry::FileCacheEntry;
 use crate::io::fs::cache::kv_cache::KVCache;
 use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::io::name_consts::CACHE_DB_DIR_NAME;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::io::rel_path::RelPath;
-use crate::models::pack::pack_config::PackConfig;
+use crate::models::index::index_node::FileKind;
+use crate::models::index::index_node::IndexNode;
+use crate::models::index::index_node::NodeKind;
 use crate::models::pack::pack_index::PackIndex;
 use anyhow::{anyhow, Result};
 use bi_fs_rs::pbo::handle::PBOHandle;
@@ -30,8 +30,10 @@ pub struct IndexGenerator<P: ProgressReporter> {
 }
 
 impl<P: ProgressReporter> IndexGenerator<P> {
-    pub fn from_config(config: &PackConfig, base_dir: &Path, progress_reporter: P) -> Result<Self> {
-        let addon_dir = base_dir.join(get_pack_addon_directory_name(&config.name));
+    pub fn from_handle(handle: &RepoHandle, pack_name: &str, progress_reporter: P) -> Result<Self> {
+        let addon_dir = handle
+            .repo_path
+            .join(get_pack_addon_directory_name(pack_name));
 
         if !addon_dir.is_dir() {
             anyhow::bail!("Path is not a directory: {:?}", addon_dir);
@@ -43,7 +45,7 @@ impl<P: ProgressReporter> IndexGenerator<P> {
         Ok(Self {
             addon_dir,
             cache,
-            pack_name: config.name.clone(),
+            pack_name: pack_name.to_owned(),
             progress_reporter,
         })
     }
@@ -169,7 +171,7 @@ impl<P: ProgressReporter> IndexGenerator<P> {
                         "Warning: Failed to read PBO file {}, falling back to generic file",
                         rel_path
                     ));
-                    eprintln!("{:#?}",e);
+                    eprintln!("{:#?}", e);
                     index_generic_file(&fs_path)
                 }
             }

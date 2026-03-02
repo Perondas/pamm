@@ -11,8 +11,8 @@ pub struct PackIndex {
 }
 
 impl PackIndex {
-    pub fn to_names(self) -> HashSet<String> {
-        self.addons.into_iter().map(|node| node.name).collect()
+    pub fn get_addon_names(&self) -> HashSet<&str> {
+        self.addons.iter().map(|node| node.name.as_ref()).collect()
     }
 
     pub fn get_addon_paths(&self, base_path: &Path) -> Vec<String> {

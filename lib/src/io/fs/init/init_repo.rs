@@ -26,7 +26,10 @@ impl RepoConfig {
         Ok(base_path)
     }
 
-    pub fn init_from_remote(parent_dir: &Path, remote_url: &Url) -> anyhow::Result<Self> {
+    pub fn init_from_remote(
+        parent_dir: &Path,
+        remote_url: &Url,
+    ) -> anyhow::Result<(Self, RepoUserSettings)> {
         if !parent_dir.is_dir() {
             anyhow::bail!("{} is not a directory", parent_dir.display());
         }
@@ -55,6 +58,6 @@ impl RepoConfig {
             pack_config.init_blank_on_fs(&base_path)?;
         }
 
-        Ok(repo)
+        Ok((repo, repo_user_settings))
     }
 }

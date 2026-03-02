@@ -1,9 +1,11 @@
 use crate::models::index::index_node::{FileKind, IndexNode, NodeKind, PBOPart};
-use crate::models::index::node_diff::{FileModification, ModifiedNodeKind, NodeDiff, NodeModification};
-use crate::util::iterator_diff::{DiffResult, diff_iterators};
+use crate::models::index::node_diff::{
+    FileModification, ModifiedNodeKind, NodeDiff, NodeModification,
+};
+use crate::util::iterator_diff::{diff_iterators, DiffResult};
 use rayon::prelude::*;
 
-pub fn diff_index(left: IndexNode, right: IndexNode) -> anyhow::Result<NodeDiff> {
+pub fn diff_index(left: &IndexNode, right: &IndexNode) -> anyhow::Result<NodeDiff> {
     let IndexNode {
         kind: l_kind,
         checksum: l_checksum,
@@ -17,7 +19,7 @@ pub fn diff_index(left: IndexNode, right: IndexNode) -> anyhow::Result<NodeDiff>
     } = right;
 
     if l_checksum == r_checksum {
-        return Ok(NodeDiff::None(r_name));
+        return Ok(NodeDiff::None(r_name.clone()));
     }
 
     let diff = match (l_kind, r_kind) {
@@ -32,15 +34,15 @@ pub fn diff_index(left: IndexNode, right: IndexNode) -> anyhow::Result<NodeDiff>
                 length: r_length,
                 ..
             },
-        ) => diff_file(l_kind, r_kind, r_checksum, r_name, l_length, r_length),
+        ) => diff_file(l_kind, r_kind, r_checksum, r_name, *l_length, *r_length),
         (NodeKind::Folder(left_children), NodeKind::Folder(right_children)) => {
             diff_folders(left_children, right_children, r_name)?
         }
         // On type mismatch we re-create everything as new
         (_, right_kind) => NodeDiff::Created(IndexNode {
-            name: r_name,
-            checksum: r_checksum,
-            kind: right_kind,
+            name: r_name.to_string(),
+            checksum: r_checksum.clone(),
+            kind: right_kind.clone(),
         }),
     };
 
@@ -48,10 +50,10 @@ pub fn diff_index(left: IndexNode, right: IndexNode) -> anyhow::Result<NodeDiff>
 }
 
 fn diff_file(
-    l_kind: FileKind,
-    r_kind: FileKind,
-    r_checksum: Vec<u8>,
-    r_name: String,
+    l_kind: &FileKind,
+    r_kind: &FileKind,
+    r_checksum: &Vec<u8>,
+    r_name: &str,
     l_length: u64,
     r_length: u64,
 ) -> NodeDiff {
@@ -66,26 +68,26 @@ fn diff_file(
         ) => {
             let (required_checksums, required_parts_size) = diff_pbo_parts(&l_parts, &r_parts);
             NodeDiff::Modified(NodeModification {
-                name: r_name,
+                name: r_name.to_string(),
                 kind: ModifiedNodeKind::File {
                     old_length: l_length,
-                    target_checksum: r_checksum,
+                    target_checksum: r_checksum.clone(),
                     modification: FileModification::PBO {
                         new_length: r_length,
                         dl_size: required_parts_size + blob_start + 20,
                         required_checksums,
-                        new_order: r_parts,
-                        new_blob_start: blob_start,
+                        new_order: r_parts.clone(),
+                        new_blob_start: *blob_start,
                     },
                 },
             })
         }
         // In all other cases treat as generic file diff
         _ => NodeDiff::Modified(NodeModification {
-            name: r_name,
+            name: r_name.to_string(),
             kind: ModifiedNodeKind::File {
                 old_length: l_length,
-                target_checksum: r_checksum,
+                target_checksum: r_checksum.clone(),
                 modification: FileModification::Generic {
                     new_length: r_length,
                 },
@@ -107,9 +109,9 @@ fn diff_pbo_parts(left_parts: &[PBOPart], right_parts: &[PBOPart]) -> (Vec<Vec<u
 
 // Left is old right is new
 fn diff_folders(
-    old: Vec<IndexNode>,
-    new: Vec<IndexNode>,
-    r_name: String,
+    old: &Vec<IndexNode>,
+    new: &Vec<IndexNode>,
+    r_name: &str,
 ) -> anyhow::Result<NodeDiff> {
     let DiffResult {
         added,
@@ -117,11 +119,15 @@ fn diff_folders(
         same,
     } = diff_iterators(old, new, |node| node.name.clone());
 
-    let added = added.into_iter().map(NodeDiff::Created).collect::<Vec<_>>();
+    let added = added
+        .into_iter()
+        .cloned()
+        .map(NodeDiff::Created)
+        .collect::<Vec<_>>();
 
     let removed = removed
         .into_iter()
-        .map(|node| NodeDiff::Deleted(node.name))
+        .map(|node| NodeDiff::Deleted(node.name.to_string()))
         .collect::<Vec<_>>();
 
     let changes: Result<Vec<_>, _> = same
@@ -132,10 +138,10 @@ fn diff_folders(
     let all: Vec<NodeDiff> = added.into_iter().chain(removed).chain(changes?).collect();
 
     if all.is_empty() {
-        Ok(NodeDiff::None(r_name))
+        Ok(NodeDiff::None(r_name.to_string()))
     } else {
         Ok(NodeDiff::Modified(NodeModification {
-            name: r_name,
+            name: r_name.to_string(),
             kind: ModifiedNodeKind::Folder(all),
         }))
     }

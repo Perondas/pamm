@@ -1,18 +1,15 @@
 use crate::log_wrapper::LogWrapper;
 use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::ToPrettyString;
-use anyhow::{anyhow, Context};
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::actions::sync::interactor::ConfigSyncInteractor;
 use pamm_lib::actions::sync::sync_pack::sync_pack_config;
-use pamm_lib::io::fs::fs_readable::{KnownFSReadable, NamedFSReadable};
+use pamm_lib::handle::repo_handle::RepoHandle;
 use pamm_lib::io::fs::pack::index_generator::IndexGenerator;
 use pamm_lib::io::net::downloadable::NamedDownloadable;
 use pamm_lib::models::pack::pack_config::PackConfig;
 use pamm_lib::models::pack::pack_diff::diff_packs;
-use pamm_lib::models::pack::pack_user_settings::PackUserSettings;
-use pamm_lib::models::repo::repo_user_settings::RepoUserSettings;
 use std::env::current_dir;
 
 #[derive(Debug, Args)]
@@ -27,12 +24,11 @@ pub struct SyncPackArgs {
 }
 
 pub fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow::Result<()> {
-    let current_dir = current_dir()?;
+    let mut repo_handle = RepoHandle::open(&current_dir()?)?;
 
-    let repo_user_settings = RepoUserSettings::read_from_known(&current_dir)
-        .context("Could not find user settings in current directory")?;
+    sync_pack_config(&mut repo_handle, &DialogerInteractor)?;
 
-    let repo_config = sync_pack_config(&current_dir, &DialogerInteractor)?;
+    let repo_config = repo_handle.get_config();
 
     if !repo_config.packs.contains(&args.name) {
         return Err(anyhow::anyhow!(
@@ -41,12 +37,7 @@ pub fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow:
         ));
     }
 
-    let local_pack_config = PackConfig::read_from_named(&current_dir, &args.name)
-        .context(anyhow!("Pack config for '{}' not found locally", args.name))?;
-
-    let user_settings = PackUserSettings::read_from_named(&current_dir, &args.name).context(
-        anyhow!("Pack user settings for '{}' not found locally", args.name),
-    )?;
+    let (local_pack_config, user_settings) = repo_handle.get_pack_with_settings(&args.name)?;
 
     let progress_reporter = if args.silent {
         IndicatifProgressReporter::disabled(log_wrapper)
@@ -55,13 +46,15 @@ pub fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow:
     };
 
     let index_generator =
-        IndexGenerator::from_config(&local_pack_config, &current_dir, progress_reporter.clone())?;
+        IndexGenerator::from_handle(&repo_handle, &args.name, progress_reporter.clone())?;
 
     if args.force_refresh {
         index_generator.clear_cache()?;
     }
 
     let actual_index = index_generator.index_addons()?;
+
+    let repo_user_settings = repo_handle.get_repo_user_settings()?;
 
     let mut remote_pack_config =
         PackConfig::download_named(repo_user_settings.get_remote(), &args.name)?;
@@ -90,7 +83,7 @@ pub fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow:
     }
 
     let diff_applier = local_pack_config.diff_applier(
-        &current_dir,
+        &repo_handle,
         repo_user_settings.get_remote(),
         progress_reporter,
     );
