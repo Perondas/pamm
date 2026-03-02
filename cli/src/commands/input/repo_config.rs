@@ -1,7 +1,7 @@
 use crate::commands::input::from_cli_input::FromCliInput;
 use anyhow::Result;
 use dialoguer::theme::ColorfulTheme;
-use pamm_lib::repo::repo_config::RepoConfig;
+use pamm_lib::models::repo::repo_config::RepoConfig;
 use std::collections::HashSet;
 use std::path::PathBuf;
 

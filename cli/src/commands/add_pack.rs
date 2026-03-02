@@ -1,27 +1,21 @@
 use crate::commands::input::from_cli_input::FromCliInputWithContext;
-use anyhow::Context;
 use clap::Args;
-use pamm_lib::io::fs::fs_readable::KnownFSReadable;
-use pamm_lib::io::fs::fs_writable::KnownFSWritable;
-use pamm_lib::pack::pack_config::PackConfig;
-use pamm_lib::repo::repo_config::RepoConfig;
+use pamm_lib::handle::repo_handle::RepoHandle;
+use pamm_lib::models::pack::pack_config::PackConfig;
 
 #[derive(Debug, Args)]
-pub struct AddPackArgs {}
+pub struct AddPackArgs;
 
 pub fn add_pack_command(_args: AddPackArgs) -> anyhow::Result<()> {
-    let current_dir = std::env::current_dir()?;
+    let mut repo_handle = RepoHandle::open(&std::env::current_dir()?)?;
 
-    let mut repo_config =
-        RepoConfig::read_from_known(&current_dir).context("Could not find repo config")?;
+    let repo_config = repo_handle.get_config();
 
-    let pack_config = PackConfig::from_cli_input(&repo_config)?;
+    let pack_config = PackConfig::from_cli_input(repo_config)?;
 
-    repo_config.packs.insert(pack_config.name.clone());
+    repo_handle.add_pack(&pack_config)?;
 
-    repo_config.write_to(&current_dir)?;
-
-    pack_config.init_blank_on_fs(&current_dir)?;
+    println!("Pack added");
 
     Ok(())
 }

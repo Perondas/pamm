@@ -1,6 +1,6 @@
 use crate::io::fs::fs_readable::NamedFSReadable;
-use crate::pack::pack_config::PackConfig;
-use crate::pack::pack_user_settings::PackUserSettings;
+use crate::models::pack::pack_config::PackConfig;
+use crate::models::pack::pack_user_settings::PackUserSettings;
 use std::path::Path;
 
 pub fn launch_via_steam(repo_dir: &Path, pack_name: &str) -> anyhow::Result<()> {

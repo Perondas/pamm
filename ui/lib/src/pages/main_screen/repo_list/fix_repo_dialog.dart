@@ -16,7 +16,6 @@ class FixRepoDialog extends StatefulWidget {
 class _FixRepoDialogState extends State<FixRepoDialog> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _targetDirController.text = widget.repoPath;
   }

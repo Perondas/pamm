@@ -1,4 +1,4 @@
-use crate::index::index_node::{FileKind, IndexNode, NodeKind, PBOPart};
+use crate::models::index::index_node::{FileKind, IndexNode, NodeKind, PBOPart};
 use anyhow::{ensure, Result};
 use bi_fs_rs::pbo::handle::PBOHandle;
 use std::io::{Read, Seek, SeekFrom};

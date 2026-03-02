@@ -1,8 +1,10 @@
 use indicatif::DecimalBytes;
-use pamm_lib::index::get_size::GetSize;
-use pamm_lib::index::index_node::{IndexNode, NodeKind};
-use pamm_lib::index::node_diff::{FileModification, ModifiedNodeKind, NodeDiff, NodeModification};
-use pamm_lib::pack::pack_diff::PackDiff;
+use pamm_lib::models::index::get_size::GetSize;
+use pamm_lib::models::index::index_node::{IndexNode, NodeKind};
+use pamm_lib::models::index::node_diff::{
+    FileModification, ModifiedNodeKind, NodeDiff, NodeModification,
+};
+use pamm_lib::models::pack::pack_diff::PackDiff;
 
 pub trait ToPrettyString {
     fn to_pretty_string(&self) -> String;
@@ -12,7 +14,10 @@ impl ToPrettyString for PackDiff {
     fn to_pretty_string(&self) -> String {
         let mut result = String::new();
 
-        let PackDiff(changes) = self;
+        let PackDiff {
+            addon_diffs: changes,
+            ..
+        } = self;
 
         if !changes.is_empty() {
             result.push_str("Changes:\n");

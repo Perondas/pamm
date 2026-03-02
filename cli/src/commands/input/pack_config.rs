@@ -2,9 +2,9 @@ use crate::commands::input::from_cli_input::{FromCliInput, FromCliInputWithConte
 use anyhow::Result;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::io::named_file::NamedFile;
-use pamm_lib::pack::pack_config::PackConfig;
-use pamm_lib::pack::server_info::ServerInfo;
-use pamm_lib::repo::repo_config::RepoConfig;
+use pamm_lib::models::pack::pack_config::PackConfig;
+use pamm_lib::models::pack::server_info::ServerInfo;
+use pamm_lib::models::repo::repo_config::RepoConfig;
 use std::path::PathBuf;
 
 impl FromCliInputWithContext for PackConfig {

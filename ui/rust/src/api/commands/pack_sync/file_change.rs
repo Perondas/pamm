@@ -1,9 +1,8 @@
 use flutter_rust_bridge::frb;
-use index::node_diff;
+use pamm_lib::models::index::node_diff;
 use node_diff::{FileModification, ModifiedNodeKind};
-use pamm_lib::index;
-use pamm_lib::index::index_node::{IndexNode, NodeKind};
-use pamm_lib::index::node_diff::{NodeDiff, NodeModification};
+use pamm_lib::models::index::index_node::{IndexNode, NodeKind};
+use pamm_lib::models::index::node_diff::{NodeDiff, NodeModification};
 
 #[derive(Clone)]
 pub struct FileChange {

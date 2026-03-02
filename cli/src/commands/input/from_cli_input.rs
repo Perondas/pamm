@@ -1,5 +1,5 @@
 use anyhow::Result;
-use pamm_lib::repo::repo_config::RepoConfig;
+use pamm_lib::models::repo::repo_config::RepoConfig;
 
 pub trait FromCliInput {
     fn from_cli_input() -> Result<Self>

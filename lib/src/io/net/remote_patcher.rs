@@ -1,10 +1,10 @@
-use crate::index::index_node::PBOPart;
-use crate::index::node_diff::FileModification;
+use crate::models::index::index_node::PBOPart;
+use crate::models::index::node_diff::FileModification;
 use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::io::net::byte_range_response::{ByteRangeResponse, IntoByteRangeResponse};
 use crate::io::net::download_file::download_file;
 use crate::io::rel_path::RelPath;
-use crate::pack::pack_config::PackConfig;
+use crate::models::pack::pack_config::PackConfig;
 use anyhow::{Context, Result, ensure};
 use bi_fs_rs::pbo::handle::PBOHandle;
 use std::fs::File;
