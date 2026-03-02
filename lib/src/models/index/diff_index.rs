@@ -126,7 +126,7 @@ pub fn diff_folder_contents(old: &[IndexNode], new: &[IndexNode]) -> anyhow::Res
         added,
         removed,
         same,
-    } = diff_iterators(old, new, |node| node.name.clone());
+    } = diff_iterators(old, new, |node| &node.name);
 
     log::debug!(
         "Pack diff: {} added, {} removed, {} to check for modifications",
@@ -146,10 +146,10 @@ pub fn diff_folder_contents(old: &[IndexNode], new: &[IndexNode]) -> anyhow::Res
         .map(|node| NodeDiff::Deleted(node.name.to_string()))
         .collect::<Vec<_>>();
 
-    let changes: Result<Vec<_>, _> = same
+    let changes = same
         .into_par_iter()
         .map(|(old, new)| diff_index(old, new))
-        .collect();
+        .collect::<Result<Vec<_>, _>>();
 
     Ok(added.into_iter().chain(removed).chain(changes?).collect())
 }
