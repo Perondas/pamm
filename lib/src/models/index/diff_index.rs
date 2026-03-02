@@ -5,78 +5,71 @@ use crate::models::index::node_diff::{
 use crate::util::iterator_diff::{DiffResult, diff_iterators};
 use rayon::prelude::*;
 
-pub fn diff_index(left: &IndexNode, right: &IndexNode) -> anyhow::Result<NodeDiff> {
+pub fn diff_index(old: &IndexNode, new: &IndexNode) -> anyhow::Result<NodeDiff> {
     let IndexNode {
-        kind: l_kind,
-        checksum: l_checksum,
+        kind: old_kind,
+        checksum: old_checksum,
         ..
-    } = left;
+    } = old;
     let IndexNode {
-        kind: r_kind,
-        checksum: r_checksum,
-        name: r_name,
+        kind: new_kind,
+        checksum: new_checksum,
+        name: new_name,
         ..
-    } = right;
+    } = new;
 
-    if l_checksum == r_checksum {
-        return Ok(NodeDiff::None(r_name.clone()));
+    if old_checksum == new_checksum {
+        return Ok(NodeDiff::None(new_name.clone()));
     }
 
-    let diff = match (l_kind, r_kind) {
-        (
-            NodeKind::File {
-                kind: l_kind,
-                length: l_length,
-                ..
-            },
-            NodeKind::File {
-                kind: r_kind,
-                length: r_length,
-                ..
-            },
-        ) => diff_file(l_kind, r_kind, r_checksum, r_name, *l_length, *r_length),
-        (NodeKind::Folder(left_children), NodeKind::Folder(right_children)) => {
-            diff_folders(left_children, right_children, r_name)?
-        }
+    let diff = match (old_kind, new_kind) {
+        (NodeKind::File { .. }, NodeKind::File { .. }) => diff_file(old, new),
+        (NodeKind::Folder(_), NodeKind::Folder(_)) => diff_folders(old, new)?,
         // On type mismatch we re-create everything as new
-        (_, right_kind) => NodeDiff::Created(IndexNode {
-            name: r_name.to_string(),
-            checksum: r_checksum.clone(),
-            kind: right_kind.clone(),
+        (_, new_kind) => NodeDiff::Created(IndexNode {
+            name: new_name.to_string(),
+            checksum: new_checksum.clone(),
+            kind: new_kind.clone(),
         }),
     };
 
     Ok(diff)
 }
 
-fn diff_file(
-    l_kind: &FileKind,
-    r_kind: &FileKind,
-    r_checksum: &[u8],
-    r_name: &str,
-    l_length: u64,
-    r_length: u64,
-) -> NodeDiff {
-    match (l_kind, r_kind) {
+fn diff_file(old: &IndexNode, new: &IndexNode) -> NodeDiff {
+    let (old_kind, old_length) = match &old.kind {
+        NodeKind::File { kind, length } => (kind, *length),
+        _ => unreachable!("diff_file called with non-File NodeKind on left"),
+    };
+    let (new_kind, new_length) = match &new.kind {
+        NodeKind::File { kind, length } => (kind, *length),
+        _ => unreachable!("diff_file called with non-File NodeKind on right"),
+    };
+    let new_checksum = &new.checksum;
+    let new_name = &new.name;
+
+    match (old_kind, new_kind) {
         (
-            FileKind::Pbo { parts: l_parts, .. },
             FileKind::Pbo {
-                parts: r_parts,
+                parts: old_parts, ..
+            },
+            FileKind::Pbo {
+                parts: new_parts,
                 blob_start,
                 ..
             },
         ) => {
-            let (required_checksums, required_parts_size) = diff_pbo_parts(l_parts, r_parts);
+            let (required_checksums, required_parts_size) = diff_pbo_parts(old_parts, new_parts);
             NodeDiff::Modified(NodeModification {
-                name: r_name.to_string(),
+                name: new_name.to_string(),
                 kind: ModifiedNodeKind::File {
-                    old_length: l_length,
-                    target_checksum: r_checksum.to_owned(),
+                    old_length,
+                    target_checksum: new_checksum.to_owned(),
                     modification: FileModification::PBO {
-                        new_length: r_length,
+                        new_length,
                         dl_size: required_parts_size + blob_start + 20,
                         required_checksums,
-                        new_order: r_parts.clone(),
+                        new_order: new_parts.clone(),
                         new_blob_start: *blob_start,
                     },
                 },
@@ -84,22 +77,20 @@ fn diff_file(
         }
         // In all other cases treat as generic file diff
         _ => NodeDiff::Modified(NodeModification {
-            name: r_name.to_string(),
+            name: new_name.to_string(),
             kind: ModifiedNodeKind::File {
-                old_length: l_length,
-                target_checksum: r_checksum.to_owned(),
-                modification: FileModification::Generic {
-                    new_length: r_length,
-                },
+                old_length,
+                target_checksum: new_checksum.to_owned(),
+                modification: FileModification::Generic { new_length },
             },
         }),
     }
 }
 
-fn diff_pbo_parts(left_parts: &[PBOPart], right_parts: &[PBOPart]) -> (Vec<Vec<u8>>, u64) {
-    let (required_parts_checksums, lengths): (Vec<_>, Vec<_>) = right_parts
+fn diff_pbo_parts(old_parts: &[PBOPart], new_parts: &[PBOPart]) -> (Vec<Vec<u8>>, u64) {
+    let (required_parts_checksums, lengths): (Vec<_>, Vec<_>) = new_parts
         .iter()
-        .filter(|p| !left_parts.iter().any(|l| l.checksum == p.checksum))
+        .filter(|p| !old_parts.iter().any(|o| o.checksum == p.checksum))
         .map(|p| (p.checksum.clone(), p.length))
         .unzip();
 
@@ -107,12 +98,17 @@ fn diff_pbo_parts(left_parts: &[PBOPart], right_parts: &[PBOPart]) -> (Vec<Vec<u
     (required_parts_checksums, required_parts_size)
 }
 
-// Left is old right is new
-fn diff_folders(
-    old: &Vec<IndexNode>,
-    new: &Vec<IndexNode>,
-    r_name: &str,
-) -> anyhow::Result<NodeDiff> {
+fn diff_folders(old_node: &IndexNode, new_node: &IndexNode) -> anyhow::Result<NodeDiff> {
+    let old = match &old_node.kind {
+        NodeKind::Folder(children) => children,
+        _ => unreachable!("diff_folders called with non-Folder NodeKind on left"),
+    };
+    let new = match &new_node.kind {
+        NodeKind::Folder(children) => children,
+        _ => unreachable!("diff_folders called with non-Folder NodeKind on right"),
+    };
+    let new_name = &new_node.name;
+
     let DiffResult {
         added,
         removed,
@@ -132,16 +128,16 @@ fn diff_folders(
 
     let changes: Result<Vec<_>, _> = same
         .into_par_iter()
-        .map(|(left, right)| diff_index(left, right))
+        .map(|(old, new)| diff_index(old, new))
         .collect();
 
     let all: Vec<NodeDiff> = added.into_iter().chain(removed).chain(changes?).collect();
 
     if all.is_empty() {
-        Ok(NodeDiff::None(r_name.to_string()))
+        Ok(NodeDiff::None(new_name.to_string()))
     } else {
         Ok(NodeDiff::Modified(NodeModification {
-            name: r_name.to_string(),
+            name: new_name.to_string(),
             kind: ModifiedNodeKind::Folder(all),
         }))
     }
