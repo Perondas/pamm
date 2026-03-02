@@ -2,7 +2,7 @@ use crate::models::index::index_node::{FileKind, IndexNode, NodeKind, PBOPart};
 use crate::models::index::node_diff::{
     FileModification, ModifiedNodeKind, NodeDiff, NodeModification,
 };
-use crate::util::iterator_diff::{diff_iterators, DiffResult};
+use crate::util::iterator_diff::{DiffResult, diff_iterators};
 use rayon::prelude::*;
 
 pub fn diff_index(left: &IndexNode, right: &IndexNode) -> anyhow::Result<NodeDiff> {
@@ -52,7 +52,7 @@ pub fn diff_index(left: &IndexNode, right: &IndexNode) -> anyhow::Result<NodeDif
 fn diff_file(
     l_kind: &FileKind,
     r_kind: &FileKind,
-    r_checksum: &Vec<u8>,
+    r_checksum: &[u8],
     r_name: &str,
     l_length: u64,
     r_length: u64,
@@ -66,12 +66,12 @@ fn diff_file(
                 ..
             },
         ) => {
-            let (required_checksums, required_parts_size) = diff_pbo_parts(&l_parts, &r_parts);
+            let (required_checksums, required_parts_size) = diff_pbo_parts(l_parts, r_parts);
             NodeDiff::Modified(NodeModification {
                 name: r_name.to_string(),
                 kind: ModifiedNodeKind::File {
                     old_length: l_length,
-                    target_checksum: r_checksum.clone(),
+                    target_checksum: r_checksum.to_owned(),
                     modification: FileModification::PBO {
                         new_length: r_length,
                         dl_size: required_parts_size + blob_start + 20,
@@ -87,7 +87,7 @@ fn diff_file(
             name: r_name.to_string(),
             kind: ModifiedNodeKind::File {
                 old_length: l_length,
-                target_checksum: r_checksum.clone(),
+                target_checksum: r_checksum.to_owned(),
                 modification: FileModification::Generic {
                     new_length: r_length,
                 },
