@@ -4,7 +4,6 @@ use crate::utils::diff_to_string::ToPrettyString;
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::actions::sync::interactor::ConfigSyncInteractor;
-use pamm_lib::actions::sync::sync_pack::sync_pack_config;
 use pamm_lib::handle::repo_handle::RepoHandle;
 use pamm_lib::io::fs::pack::index_generator::IndexGenerator;
 use pamm_lib::io::net::downloadable::NamedDownloadable;
@@ -26,7 +25,7 @@ pub struct SyncPackArgs {
 pub fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow::Result<()> {
     let mut repo_handle = RepoHandle::open(&current_dir()?)?;
 
-    sync_pack_config(&mut repo_handle, &DialogerInteractor)?;
+    repo_handle.sync_pack_config(&DialogerInteractor)?;
 
     let repo_config = repo_handle.get_config();
 

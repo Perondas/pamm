@@ -1,5 +1,4 @@
 use pamm_lib::actions::sync::interactor::DummyConfigSyncInteractor;
-use pamm_lib::actions::sync::sync_pack::sync_pack_config;
 use pamm_lib::handle::repo_handle::RepoHandle;
 use pamm_lib::models::repo::repo_config::RepoConfig;
 use std::path::Path;
@@ -9,7 +8,7 @@ pub fn sync_config(repo_path: String) -> anyhow::Result<RepoConfig> {
 
     let mut handle = RepoHandle::open(repo_path)?;
 
-    sync_pack_config(&mut handle, &DummyConfigSyncInteractor)?;
+    handle.sync_pack_config(&DummyConfigSyncInteractor)?;
 
     Ok(handle.get_config().to_owned())
 }

@@ -71,6 +71,7 @@ impl RepoHandle {
         })
     }
 
+    #[allow(dead_code)]
     fn read<T: KnownFSReadable>(&self) -> anyhow::Result<T> {
         T::read_from_known(&self.repo_path)
     }
