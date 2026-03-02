@@ -109,11 +109,31 @@ fn diff_folders(old_node: &IndexNode, new_node: &IndexNode) -> anyhow::Result<No
     };
     let new_name = &new_node.name;
 
+    let all = diff_folder_contents(old, new)?;
+
+    if all.is_empty() {
+        Ok(NodeDiff::None(new_name.to_string()))
+    } else {
+        Ok(NodeDiff::Modified(NodeModification {
+            name: new_name.to_string(),
+            kind: ModifiedNodeKind::Folder(all),
+        }))
+    }
+}
+
+pub fn diff_folder_contents(old: &[IndexNode], new: &[IndexNode]) -> anyhow::Result<Vec<NodeDiff>> {
     let DiffResult {
         added,
         removed,
         same,
     } = diff_iterators(old, new, |node| node.name.clone());
+
+    log::debug!(
+        "Pack diff: {} added, {} removed, {} to check for modifications",
+        added.len(),
+        removed.len(),
+        same.len()
+    );
 
     let added = added
         .into_iter()
@@ -131,14 +151,5 @@ fn diff_folders(old_node: &IndexNode, new_node: &IndexNode) -> anyhow::Result<No
         .map(|(old, new)| diff_index(old, new))
         .collect();
 
-    let all: Vec<NodeDiff> = added.into_iter().chain(removed).chain(changes?).collect();
-
-    if all.is_empty() {
-        Ok(NodeDiff::None(new_name.to_string()))
-    } else {
-        Ok(NodeDiff::Modified(NodeModification {
-            name: new_name.to_string(),
-            kind: ModifiedNodeKind::Folder(all),
-        }))
-    }
+    Ok(added.into_iter().chain(removed).chain(changes?).collect())
 }
