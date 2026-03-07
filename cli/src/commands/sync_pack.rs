@@ -3,7 +3,7 @@ use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::ToPrettyString;
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
-use pamm_lib::actions::sync::interactor::ConfigSyncInteractor;
+use pamm_lib::handle::actions::sync::interactor::ConfigSyncInteractor;
 use pamm_lib::handle::repo_handle::RepoHandle;
 use pamm_lib::io::fs::pack::index_generator::IndexGenerator;
 use pamm_lib::io::net::downloadable::NamedDownloadable;

@@ -1,4 +1,4 @@
-use pamm_lib::actions::sync::interactor::DummyConfigSyncInteractor;
+use pamm_lib::handle::actions::sync::interactor::DummyConfigSyncInteractor;
 use pamm_lib::handle::repo_handle::RepoHandle;
 use pamm_lib::models::repo::repo_config::RepoConfig;
 use std::path::Path;

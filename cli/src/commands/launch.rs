@@ -1,5 +1,5 @@
 use clap::Args;
-use pamm_lib::actions::launch::steam::launch_via_steam;
+use pamm_lib::handle::repo_handle::RepoHandle;
 use std::env::current_dir;
 
 #[derive(Debug, Args)]
@@ -9,7 +9,7 @@ pub struct LaunchArgs {
 }
 
 pub fn launch_command(args: LaunchArgs) -> anyhow::Result<()> {
-    let current_dir = current_dir()?;
+    let handle = RepoHandle::open(&current_dir()?)?;
 
-    launch_via_steam(&current_dir, &args.name)
+    handle.launch_via_steam(&args.name)
 }

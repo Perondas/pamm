@@ -1,9 +1,9 @@
-use crate::actions::sync::interactor::ConfigSyncInteractor;
+use crate::handle::actions::sync::interactor::ConfigSyncInteractor;
 use crate::handle::repo_handle::RepoHandle;
 use crate::io::net::downloadable::{KnownDownloadable, NamedDownloadable};
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::repo::repo_config::RepoConfig;
-use anyhow::{anyhow, Context};
+use anyhow::{Context, anyhow};
 use log::debug;
 
 impl RepoHandle {

@@ -1,13 +1,14 @@
 use crate::handle::repo_handle::RepoHandle;
 use crate::io::fs::fs_readable::{KnownFSReadable, NamedFSReadable};
-use crate::io::name_consts::{get_pack_addon_directory_name, INDEX_DIR_NAME};
+use crate::io::fs::util::clean_path::clean_path;
+use crate::io::name_consts::{INDEX_DIR_NAME, get_pack_addon_directory_name};
 use crate::models::index::index_node::IndexNode;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_index::PackIndex;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_user_settings::RepoUserSettings;
-use anyhow::{anyhow, ensure, Context};
+use anyhow::{Context, anyhow, ensure};
 use rayon::iter::ParallelIterator;
 use rayon::prelude::IntoParallelRefIterator;
 
@@ -69,6 +70,43 @@ impl RepoHandle {
             addons: indexes,
             pack_name: pack_config.name.clone(),
         })
+    }
+
+    pub fn get_addon_paths(&self, pack_name: &str) -> anyhow::Result<Vec<String>> {
+        let (config, settings) = self.get_pack_with_settings(pack_name)?;
+
+        log::debug!("Resolving addon paths for pack '{}'", pack_name);
+
+        let addon_dir = self
+            .repo_path
+            .join(get_pack_addon_directory_name(pack_name));
+
+        let addons_to_load = config
+            .addons
+            .iter()
+            .filter(|(name, addon_settings)| {
+                !addon_settings.is_optional || settings.enabled_optionals.contains(*name)
+            })
+            .map(|addon| addon_dir.join(addon.0))
+            .map(|p| {
+                p.canonicalize()
+                    .with_context(|| format!("Failed to canonicalize {:#?}", p))
+            })
+            .map(|p| p.map(clean_path))
+            .collect::<anyhow::Result<Vec<_>>>()?;
+
+        let parent_addons = if let Some(parent_name) = &config.parent {
+            log::debug!(
+                "Pack '{}' has parent '{}', resolving parent addons",
+                config.name,
+                parent_name
+            );
+            self.get_addon_paths(parent_name)?
+        } else {
+            vec![]
+        };
+
+        Ok([addons_to_load, parent_addons].concat())
     }
 
     #[allow(dead_code)]
