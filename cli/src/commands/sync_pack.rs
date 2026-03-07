@@ -55,6 +55,7 @@ pub fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow:
 
     let repo_user_settings = repo_handle.get_repo_user_settings()?;
 
+    // TODO: move this logic into the handle, so that we can reuse it in
     let mut remote_pack_config =
         PackConfig::download_named(repo_user_settings.get_remote(), &args.name)?;
 
