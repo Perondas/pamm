@@ -9,7 +9,6 @@ import 'api/commands/init_from_remote.dart';
 import 'api/commands/launch.dart';
 import 'api/commands/load_repo.dart';
 import 'api/commands/optionals/load_optionals.dart';
-import 'api/commands/optionals/optional_addon.dart';
 import 'api/commands/optionals/save_optionals.dart';
 import 'api/commands/pack_sync/file_change.dart';
 import 'api/commands/pack_sync/get_diff.dart';

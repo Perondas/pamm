@@ -4,15 +4,15 @@
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
 import '../../../frb_generated.dart';
-import 'optional_addon.dart';
+import 'load_optionals.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 Future<void> saveOptionals({
-  required String repotPath,
+  required String repoPath,
   required String packName,
   required List<OptionalAddon> optionals,
 }) => RustLib.instance.api.crateApiCommandsOptionalsSaveOptionalsSaveOptionals(
-  repotPath: repotPath,
+  repoPath: repoPath,
   packName: packName,
   optionals: optionals,
 );

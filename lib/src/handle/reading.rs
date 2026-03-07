@@ -110,11 +110,11 @@ impl RepoHandle {
     }
 
     #[allow(dead_code)]
-    fn read<T: KnownFSReadable>(&self) -> anyhow::Result<T> {
+    pub(super) fn read<T: KnownFSReadable>(&self) -> anyhow::Result<T> {
         T::read_from_known(&self.repo_path)
     }
 
-    fn read_named<T: NamedFSReadable>(&self, identifier: &str) -> anyhow::Result<T> {
+    pub(super) fn read_named<T: NamedFSReadable>(&self, identifier: &str) -> anyhow::Result<T> {
         T::read_from_named(&self.repo_path, identifier)
     }
 }

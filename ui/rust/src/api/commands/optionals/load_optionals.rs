@@ -1,24 +1,17 @@
-use crate::api::commands::optionals::optional_addon::OptionalAddon;
-use anyhow::{anyhow, Context};
-use pamm_lib::io::fs::fs_readable::NamedFSReadable;
-use pamm_lib::models::pack::pack_config::PackConfig;
-use pamm_lib::models::pack::pack_user_settings::PackUserSettings;
+use flutter_rust_bridge::frb;
+pub use pamm_lib::handle::optionals::optional_addon::OptionalAddon;
+use pamm_lib::handle::repo_handle::RepoHandle;
 
 pub fn load_optionals(repot_path: String, pack_name: String) -> anyhow::Result<Vec<OptionalAddon>> {
     let repot_path = std::path::Path::new(&repot_path);
 
-    let pack_config = PackConfig::read_from_named(repot_path, &pack_name)
-        .context(anyhow!("Pack configuration not found"))?;
+    let handle = RepoHandle::open(repot_path)?;
 
-    let settings = PackUserSettings::read_from_named(repot_path, &pack_name)
-        .context(anyhow!("Pack user settings not found"))?;
+    handle.load_optionals(&pack_name)
+}
 
-    Ok(pack_config
-        .addons
-        .iter()
-        .filter(|(_, addon)| addon.is_optional)
-        .map(|(name, _)| {
-            OptionalAddon::new(name.clone(), settings.enabled_optionals.contains(name))
-        })
-        .collect())
+#[frb(mirror(OptionalAddon))]
+pub struct _OptionalAddon {
+    pub name: String,
+    pub enabled: bool,
 }

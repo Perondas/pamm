@@ -4,7 +4,6 @@
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
 import '../../../frb_generated.dart';
-import 'optional_addon.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 Future<List<OptionalAddon>> loadOptionals({
@@ -14,3 +13,21 @@ Future<List<OptionalAddon>> loadOptionals({
   repotPath: repotPath,
   packName: packName,
 );
+
+class OptionalAddon {
+  final String name;
+  final bool enabled;
+
+  const OptionalAddon({required this.name, required this.enabled});
+
+  @override
+  int get hashCode => name.hashCode ^ enabled.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is OptionalAddon &&
+          runtimeType == other.runtimeType &&
+          name == other.name &&
+          enabled == other.enabled;
+}

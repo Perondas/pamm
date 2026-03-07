@@ -406,10 +406,10 @@ fn wire__crate__api__commands__optionals__save_optionals__save_optionals_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_repot_path = <String>::sse_decode(&mut deserializer);
+            let api_repo_path = <String>::sse_decode(&mut deserializer);
             let api_pack_name = <String>::sse_decode(&mut deserializer);
             let api_optionals =
-                <Vec<crate::api::commands::optionals::optional_addon::OptionalAddon>>::sse_decode(
+                <Vec<crate::api::commands::optionals::load_optionals::OptionalAddon>>::sse_decode(
                     &mut deserializer,
                 );
             deserializer.end();
@@ -418,7 +418,7 @@ fn wire__crate__api__commands__optionals__save_optionals__save_optionals_impl(
                     (move || {
                         let output_ok =
                             crate::api::commands::optionals::save_optionals::save_optionals(
-                                api_repot_path,
+                                api_repo_path,
                                 api_pack_name,
                                 api_optionals,
                             )?;
@@ -513,10 +513,18 @@ fn wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(
 
 #[allow(clippy::unnecessary_literal_unwrap)]
 const _: fn() = || {
-    let RepoConfig = None::<crate::api::commands::init_from_remote::RepoConfig>.unwrap();
-    let _: String = RepoConfig.name;
-    let _: String = RepoConfig.description;
-    let _: std::collections::HashSet<String> = RepoConfig.packs;
+    {
+        let OptionalAddon =
+            None::<crate::api::commands::optionals::load_optionals::OptionalAddon>.unwrap();
+        let _: String = OptionalAddon.name;
+        let _: bool = OptionalAddon.enabled;
+    }
+    {
+        let RepoConfig = None::<crate::api::commands::init_from_remote::RepoConfig>.unwrap();
+        let _: String = RepoConfig.name;
+        let _: String = RepoConfig.description;
+        let _: std::collections::HashSet<String> = RepoConfig.packs;
+    }
 };
 
 // Section: related_funcs
@@ -741,14 +749,14 @@ impl SseDecode for Vec<crate::api::commands::pack_sync::file_change::FileChange>
     }
 }
 
-impl SseDecode for Vec<crate::api::commands::optionals::optional_addon::OptionalAddon> {
+impl SseDecode for Vec<crate::api::commands::optionals::load_optionals::OptionalAddon> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut len_ = <i32>::sse_decode(deserializer);
         let mut ans_ = vec![];
         for idx_ in 0..len_ {
             ans_.push(
-                <crate::api::commands::optionals::optional_addon::OptionalAddon>::sse_decode(
+                <crate::api::commands::optionals::load_optionals::OptionalAddon>::sse_decode(
                     deserializer,
                 ),
             );
@@ -789,12 +797,12 @@ impl SseDecode
     }
 }
 
-impl SseDecode for crate::api::commands::optionals::optional_addon::OptionalAddon {
+impl SseDecode for crate::api::commands::optionals::load_optionals::OptionalAddon {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_name = <String>::sse_decode(deserializer);
         let mut var_enabled = <bool>::sse_decode(deserializer);
-        return crate::api::commands::optionals::optional_addon::OptionalAddon {
+        return crate::api::commands::optionals::load_optionals::OptionalAddon {
             name: var_name,
             enabled: var_enabled,
         };
@@ -1060,27 +1068,29 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::pack_sync::file_cha
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart
-    for crate::api::commands::optionals::optional_addon::OptionalAddon
+    for FrbWrapper<crate::api::commands::optionals::load_optionals::OptionalAddon>
 {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
-            self.name.into_into_dart().into_dart(),
-            self.enabled.into_into_dart().into_dart(),
+            self.0.name.into_into_dart().into_dart(),
+            self.0.enabled.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
 }
 impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
-    for crate::api::commands::optionals::optional_addon::OptionalAddon
+    for FrbWrapper<crate::api::commands::optionals::load_optionals::OptionalAddon>
 {
 }
 impl
     flutter_rust_bridge::IntoIntoDart<
-        crate::api::commands::optionals::optional_addon::OptionalAddon,
-    > for crate::api::commands::optionals::optional_addon::OptionalAddon
+        FrbWrapper<crate::api::commands::optionals::load_optionals::OptionalAddon>,
+    > for crate::api::commands::optionals::load_optionals::OptionalAddon
 {
-    fn into_into_dart(self) -> crate::api::commands::optionals::optional_addon::OptionalAddon {
-        self
+    fn into_into_dart(
+        self,
+    ) -> FrbWrapper<crate::api::commands::optionals::load_optionals::OptionalAddon> {
+        self.into()
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
@@ -1295,12 +1305,12 @@ impl SseEncode for Vec<crate::api::commands::pack_sync::file_change::FileChange>
     }
 }
 
-impl SseEncode for Vec<crate::api::commands::optionals::optional_addon::OptionalAddon> {
+impl SseEncode for Vec<crate::api::commands::optionals::load_optionals::OptionalAddon> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <i32>::sse_encode(self.len() as _, serializer);
         for item in self {
-            <crate::api::commands::optionals::optional_addon::OptionalAddon>::sse_encode(
+            <crate::api::commands::optionals::load_optionals::OptionalAddon>::sse_encode(
                 item, serializer,
             );
         }
@@ -1335,7 +1345,7 @@ impl SseEncode
     }
 }
 
-impl SseEncode for crate::api::commands::optionals::optional_addon::OptionalAddon {
+impl SseEncode for crate::api::commands::optionals::load_optionals::OptionalAddon {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.name, serializer);

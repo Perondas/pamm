@@ -4,7 +4,7 @@ use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_diff::PackDiff;
 use crate::models::repo::repo_config::RepoConfig;
-use anyhow::{anyhow, ensure, Context};
+use anyhow::{Context, anyhow, ensure};
 
 impl RepoHandle {
     pub fn add_pack(&mut self, pack_config: &PackConfig) -> anyhow::Result<()> {
@@ -75,11 +75,15 @@ impl RepoHandle {
         self.update_pack(&config)
     }
 
-    fn write_named<T: NamedFSWritable>(&self, value: &T, identifier: &str) -> anyhow::Result<()> {
+    pub(super) fn write_named<T: NamedFSWritable>(
+        &self,
+        value: &T,
+        identifier: &str,
+    ) -> anyhow::Result<()> {
         value.write_to_named(&self.repo_path, identifier)
     }
 
-    fn write<T: KnownFSWritable>(&self, value: &T) -> anyhow::Result<()> {
+    pub(super) fn write<T: KnownFSWritable>(&self, value: &T) -> anyhow::Result<()> {
         value.write_to(&self.repo_path)
     }
 }

@@ -9,7 +9,6 @@ import 'api/commands/init_from_remote.dart';
 import 'api/commands/launch.dart';
 import 'api/commands/load_repo.dart';
 import 'api/commands/optionals/load_optionals.dart';
-import 'api/commands/optionals/optional_addon.dart';
 import 'api/commands/optionals/save_optionals.dart';
 import 'api/commands/pack_sync/file_change.dart';
 import 'api/commands/pack_sync/get_diff.dart';
@@ -128,7 +127,7 @@ abstract class RustLibApi extends BaseApi {
   });
 
   Future<void> crateApiCommandsOptionalsSaveOptionalsSaveOptionals({
-    required String repotPath,
+    required String repoPath,
     required String packName,
     required List<OptionalAddon> optionals,
   });
@@ -460,7 +459,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @override
   Future<void> crateApiCommandsOptionalsSaveOptionalsSaveOptionals({
-    required String repotPath,
+    required String repoPath,
     required String packName,
     required List<OptionalAddon> optionals,
   }) {
@@ -468,7 +467,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(repotPath, serializer);
+          sse_encode_String(repoPath, serializer);
           sse_encode_String(packName, serializer);
           sse_encode_list_optional_addon(optionals, serializer);
           pdeCallFfi(
@@ -484,7 +483,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         ),
         constMeta:
             kCrateApiCommandsOptionalsSaveOptionalsSaveOptionalsConstMeta,
-        argValues: [repotPath, packName, optionals],
+        argValues: [repoPath, packName, optionals],
         apiImpl: this,
       ),
     );
@@ -494,7 +493,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   get kCrateApiCommandsOptionalsSaveOptionalsSaveOptionalsConstMeta =>
       const TaskConstMeta(
         debugName: "save_optionals",
-        argNames: ["repotPath", "packName", "optionals"],
+        argNames: ["repoPath", "packName", "optionals"],
       );
 
   @override

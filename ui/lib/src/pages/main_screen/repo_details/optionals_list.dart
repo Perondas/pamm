@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:ui/src/rust/api/commands/optionals/load_optionals.dart';
-import 'package:ui/src/rust/api/commands/optionals/optional_addon.dart';
 import 'package:ui/src/rust/api/commands/optionals/save_optionals.dart';
 
 class OptionalsList extends StatefulWidget {
@@ -47,7 +46,7 @@ class _OptionalsListState extends State<OptionalsList> {
   Future<void> _saveOptionals() async {
     try {
       await saveOptionals(
-        repotPath: widget.repotPath,
+        repoPath: widget.repotPath,
         packName: widget.packName,
         optionals: optionals,
       );
