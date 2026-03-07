@@ -19,7 +19,10 @@ impl RepoHandle {
 
         let repo_config = RepoConfig::read_from_known(repo_path)?;
 
-        let settings = if Path::new(RepoUserSettings::file_name()).exists() {
+        let settings = if repo_path
+            .join(Path::new(RepoUserSettings::file_name()))
+            .exists()
+        {
             Some(RepoUserSettings::read_from_known(repo_path)?)
         } else {
             None
