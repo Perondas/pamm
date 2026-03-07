@@ -8,7 +8,7 @@ permissions:
 on:
   push:
     tags:
-      - v[0-9]+.*
+      - v[0-9].[0-9].[0-9]
 
 env:
   CARGO_TERM_COLOR: always
@@ -55,7 +55,11 @@ jobs:
         with:
           fetch-depth: '0'
           submodules: 'recursive'
-      - uses: taiki-e/upload-rust-binary-action@v1
+      - name: Set version
+        shell: bash
+        run: sed -i "s/^version = \".*\"/version = \"${GITHUB_REF_NAME#v}\"/" cli/Cargo.toml
+      - name: Build and upload binaries
+        uses: taiki-e/upload-rust-binary-action@v1
         with:
           # (required) Comma-separated list of binary names (non-extension portion of filename) to build and upload.
           # Note that glob pattern is not supported yet.
@@ -116,6 +120,10 @@ jobs:
       - name: Install build deps for Linux
         if: matrix.target == 'linux'
         run: sudo apt-get install -y build-essential libgtk-3-dev
+      - name: Set version
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: 'sed -i "s/^version: .*/version: ${GITHUB_REF_NAME#v}/" ui/pubspec.yaml'
       - name: Install project dependencies
         run: flutter pub get
       - name: Generate intermediates
