@@ -31,18 +31,10 @@ It is NOT compatible with other mod managers.
 - Cross-platform
     - Windows
     - Linux
+- GUI     
 
 ## Planned Features
-
-- Gui
-- Some sort of mod pack documentation system
-    - Markdown support?
-- Better delta patching (support for more file types, or just larger files in general)
-- Server lists
-- HTTP authentication support
-- Usage of locally installed mods outside the ones managed
-- macOS support (untested at the moment)
-- Launching the ARMA binary directly from pamm 
+Are tracked in the issues tab
 
 ## Notes
 
