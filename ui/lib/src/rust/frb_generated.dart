@@ -4,6 +4,8 @@
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
 import 'api.dart';
+import 'api/commands/externals/load_externals.dart';
+import 'api/commands/externals/save_externals.dart';
 import 'api/commands/get_remote_repo_info.dart';
 import 'api/commands/init_from_remote.dart';
 import 'api/commands/launch.dart';
@@ -75,7 +77,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => -1537298542;
+  int get rustContentHash => -1572386741;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -116,6 +118,12 @@ abstract class RustLibApi extends BaseApi {
     required String packName,
   });
 
+  Future<List<ExternalAddon>>
+  crateApiCommandsExternalsLoadExternalsLoadExternals({
+    required String repotPath,
+    required String packName,
+  });
+
   Future<List<OptionalAddon>>
   crateApiCommandsOptionalsLoadOptionalsLoadOptionals({
     required String repotPath,
@@ -124,6 +132,12 @@ abstract class RustLibApi extends BaseApi {
 
   Future<RepoConfig> crateApiCommandsLoadRepoLoadRepo({
     required String repoPath,
+  });
+
+  Future<void> crateApiCommandsExternalsSaveExternalsSaveExternals({
+    required String repoPath,
+    required String packName,
+    required List<ExternalAddon> externals,
   });
 
   Future<void> crateApiCommandsOptionalsSaveOptionalsSaveOptionals({
@@ -390,6 +404,44 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<List<ExternalAddon>>
+  crateApiCommandsExternalsLoadExternalsLoadExternals({
+    required String repotPath,
+    required String packName,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(repotPath, serializer);
+          sse_encode_String(packName, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 7,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_external_addon,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta:
+            kCrateApiCommandsExternalsLoadExternalsLoadExternalsConstMeta,
+        argValues: [repotPath, packName],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiCommandsExternalsLoadExternalsLoadExternalsConstMeta =>
+      const TaskConstMeta(
+        debugName: "load_externals",
+        argNames: ["repotPath", "packName"],
+      );
+
+  @override
   Future<List<OptionalAddon>>
   crateApiCommandsOptionalsLoadOptionalsLoadOptionals({
     required String repotPath,
@@ -404,7 +456,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 7,
+            funcId: 8,
             port: port_,
           );
         },
@@ -439,7 +491,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 8,
+            funcId: 9,
             port: port_,
           );
         },
@@ -458,6 +510,45 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "load_repo", argNames: ["repoPath"]);
 
   @override
+  Future<void> crateApiCommandsExternalsSaveExternalsSaveExternals({
+    required String repoPath,
+    required String packName,
+    required List<ExternalAddon> externals,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(repoPath, serializer);
+          sse_encode_String(packName, serializer);
+          sse_encode_list_external_addon(externals, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 10,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta:
+            kCrateApiCommandsExternalsSaveExternalsSaveExternalsConstMeta,
+        argValues: [repoPath, packName, externals],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiCommandsExternalsSaveExternalsSaveExternalsConstMeta =>
+      const TaskConstMeta(
+        debugName: "save_externals",
+        argNames: ["repoPath", "packName", "externals"],
+      );
+
+  @override
   Future<void> crateApiCommandsOptionalsSaveOptionalsSaveOptionals({
     required String repoPath,
     required String packName,
@@ -473,7 +564,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 9,
+            funcId: 11,
             port: port_,
           );
         },
@@ -508,7 +599,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 10,
+            funcId: 12,
             port: port_,
           );
         },
@@ -550,7 +641,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 11,
+            funcId: 13,
             port: port_,
           );
         },
@@ -728,6 +819,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  ExternalAddon dco_decode_external_addon(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 3)
+      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+    return ExternalAddon(
+      path: dco_decode_String(arr[0]),
+      name: dco_decode_opt_String(arr[1]),
+      enabled: dco_decode_bool(arr[2]),
+    );
+  }
+
+  @protected
   FileChange dco_decode_file_change(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
@@ -749,6 +853,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   List<String> dco_decode_list_String(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return (raw as List<dynamic>).map(dco_decode_String).toList();
+  }
+
+  @protected
+  List<ExternalAddon> dco_decode_list_external_addon(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_external_addon).toList();
   }
 
   @protected
@@ -776,6 +886,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     return (raw as List<dynamic>)
         .map(dco_decode_record_string_list_file_change)
         .toList();
+  }
+
+  @protected
+  String? dco_decode_opt_String(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_String(raw);
   }
 
   @protected
@@ -1010,6 +1126,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  ExternalAddon sse_decode_external_addon(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_path = sse_decode_String(deserializer);
+    var var_name = sse_decode_opt_String(deserializer);
+    var var_enabled = sse_decode_bool(deserializer);
+    return ExternalAddon(path: var_path, name: var_name, enabled: var_enabled);
+  }
+
+  @protected
   FileChange sse_decode_file_change(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_filePath = sse_decode_String(deserializer);
@@ -1031,6 +1156,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var ans_ = <String>[];
     for (var idx_ = 0; idx_ < len_; ++idx_) {
       ans_.add(sse_decode_String(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
+  List<ExternalAddon> sse_decode_list_external_addon(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <ExternalAddon>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_external_addon(deserializer));
     }
     return ans_;
   }
@@ -1079,6 +1218,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       ans_.add(sse_decode_record_string_list_file_change(deserializer));
     }
     return ans_;
+  }
+
+  @protected
+  String? sse_decode_opt_String(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_String(deserializer));
+    } else {
+      return null;
+    }
   }
 
   @protected
@@ -1325,6 +1475,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_external_addon(ExternalAddon self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.path, serializer);
+    sse_encode_opt_String(self.name, serializer);
+    sse_encode_bool(self.enabled, serializer);
+  }
+
+  @protected
   void sse_encode_file_change(FileChange self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.filePath, serializer);
@@ -1343,6 +1501,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_i_32(self.length, serializer);
     for (final item in self) {
       sse_encode_String(item, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_list_external_addon(
+    List<ExternalAddon> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_external_addon(item, serializer);
     }
   }
 
@@ -1389,6 +1559,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_i_32(self.length, serializer);
     for (final item in self) {
       sse_encode_record_string_list_file_change(item, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_opt_String(String? self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_String(self, serializer);
     }
   }
 
