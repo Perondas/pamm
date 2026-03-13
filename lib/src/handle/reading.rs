@@ -5,7 +5,7 @@ use crate::io::name_consts::{INDEX_DIR_NAME, get_pack_addon_directory_name};
 use crate::models::index::index_node::IndexNode;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_index::PackIndex;
-use crate::models::pack::pack_user_settings::PackUserSettings;
+use crate::models::pack::settings::pack_user_settings::PackUserSettings;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_user_settings::RepoUserSettings;
 use anyhow::{Context, anyhow, ensure};
