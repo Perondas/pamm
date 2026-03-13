@@ -1,4 +1,5 @@
 pub mod actions;
+pub mod externals;
 pub mod optionals;
 pub mod reading;
 pub mod repo_handle;

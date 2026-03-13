@@ -1,7 +1,7 @@
 use crate::io::fs::fs_writable::{IdentifiableFSWritable, NamedFSWritable};
 use crate::io::name_consts::{INDEX_DIR_NAME, get_pack_addon_directory_name};
 use crate::models::pack::pack_config::PackConfig;
-use crate::models::pack::settings::pack_user_settings::PackUserSettings;
+use crate::models::pack::pack_user_settings::PackUserSettings;
 use std::fs;
 use std::path::Path;
 

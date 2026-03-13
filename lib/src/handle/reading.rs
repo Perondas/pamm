@@ -5,7 +5,7 @@ use crate::io::name_consts::{INDEX_DIR_NAME, get_pack_addon_directory_name};
 use crate::models::index::index_node::IndexNode;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_index::PackIndex;
-use crate::models::pack::settings::pack_user_settings::PackUserSettings;
+use crate::models::pack::pack_user_settings::PackUserSettings;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_user_settings::RepoUserSettings;
 use anyhow::{Context, anyhow, ensure};
@@ -106,7 +106,11 @@ impl RepoHandle {
             vec![]
         };
 
-        Ok([addons_to_load, parent_addons].concat())
+        let externals = self
+            .get_external_addon_paths(pack_name)
+            .context(anyhow!("Failed to read external addons"))?;
+
+        Ok([addons_to_load, parent_addons, externals].concat())
     }
 
     #[allow(dead_code)]
