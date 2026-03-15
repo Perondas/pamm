@@ -1,5 +1,5 @@
 use indicatif::DecimalBytes;
-use pamm_lib::models::index::get_size::GetSize;
+use pamm_lib::models::index::get_dl_size::GetDlSize;
 use pamm_lib::models::index::index_node::{IndexNode, NodeKind};
 use pamm_lib::models::index::node_diff::{
     FileModification, ModifiedNodeKind, NodeDiff, NodeModification,
@@ -24,7 +24,7 @@ impl ToPrettyString for PackDiff {
             result.push_str(&diffs_to_string(changes, ""));
             result.push('\n');
             result
-                .push_str(format!("Total change size: {}", DecimalBytes(self.get_size())).as_str());
+                .push_str(format!("Total change size: {}", DecimalBytes(self.get_dl_size())).as_str());
         }
 
         result

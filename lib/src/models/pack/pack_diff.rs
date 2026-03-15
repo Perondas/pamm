@@ -1,5 +1,5 @@
 use crate::models::index::diff_index::diff_folder_contents;
-use crate::models::index::get_size::GetSize;
+use crate::models::index::get_dl_size::GetDlSize;
 use crate::models::index::node_diff::NodeDiff;
 use crate::models::pack::pack_index::PackIndex;
 use anyhow::{Result, ensure};
@@ -46,8 +46,8 @@ pub fn diff_packs(old_pack: PackIndex, new_pack: PackIndex) -> Result<PackDiff> 
     })
 }
 
-impl GetSize for PackDiff {
-    fn get_size(&self) -> u64 {
-        self.addon_diffs.iter().map(|diff| diff.get_size()).sum()
+impl GetDlSize for PackDiff {
+    fn get_dl_size(&self) -> u64 {
+        self.addon_diffs.iter().map(|diff| diff.get_dl_size()).sum()
     }
 }

@@ -3,7 +3,7 @@ use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::io::net::remote_patcher::RemotePatcher;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::io::rel_path::RelPath;
-use crate::models::index::get_size::GetSize;
+use crate::models::index::get_dl_size::GetDlSize;
 use crate::models::index::index_node::{IndexNode, NodeKind};
 use crate::models::index::node_diff::{ModifiedNodeKind, NodeDiff, NodeModification};
 use crate::models::pack::pack_config::PackConfig;
@@ -52,7 +52,7 @@ impl<P: ProgressReporter> DiffApplier<P> {
             ..
         } = diff;
 
-        let total_size: u64 = node_diffs.iter().map(|c| c.get_size()).sum();
+        let total_size: u64 = node_diffs.iter().map(|c| c.get_dl_size()).sum();
         log::info!(
             "Applying diff: {} change(s), {} bytes total",
             node_diffs.len(),
@@ -174,7 +174,7 @@ impl<P: ProgressReporter> DiffApplier<P> {
                 }
             }
             ModifiedNodeKind::File { modification, .. } => {
-                let size = modification.get_size();
+                let size = modification.get_dl_size();
                 log::debug!("Patching file {} ({} bytes)", path, size);
                 self.progress_reporter
                     .report_message(&format!("Modifying file {}", path));
