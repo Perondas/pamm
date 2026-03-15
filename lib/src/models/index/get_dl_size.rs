@@ -22,7 +22,7 @@ impl GetDlSize for NodeDiff {
                 ModifiedNodeKind::Folder(e) => e.iter().map(|child| child.get_dl_size()).sum(),
                 ModifiedNodeKind::File { modification, .. } => modification.get_dl_size(),
             },
-            NodeDiff::Deleted(_) | NodeDiff::None(_) => 0,
+            NodeDiff::Deleted { .. } | NodeDiff::None(_) => 0,
         }
     }
 }
@@ -30,10 +30,7 @@ impl GetDlSize for NodeDiff {
 impl GetDlSize for FileModification {
     fn get_dl_size(&self) -> u64 {
         match self {
-            FileModification::PBO {
-                dl_size,
-                ..
-            } => *dl_size,
+            FileModification::PBO { dl_size, .. } => *dl_size,
             FileModification::Generic { new_length } => *new_length,
         }
     }

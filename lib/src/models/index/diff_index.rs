@@ -4,6 +4,7 @@ use crate::models::index::node_diff::{
 };
 use crate::util::iterator_diff::{DiffResult, diff_iterators};
 use rayon::prelude::*;
+use crate::models::index::get_size_change::GetSizeChange;
 
 pub fn diff_index(old: &IndexNode, new: &IndexNode) -> anyhow::Result<NodeDiff> {
     let IndexNode {
@@ -143,7 +144,10 @@ pub fn diff_folder_contents(old: &[IndexNode], new: &[IndexNode]) -> anyhow::Res
 
     let removed = removed
         .into_iter()
-        .map(|node| NodeDiff::Deleted(node.name.to_string()))
+        .map(|node| NodeDiff::Deleted {
+            name: node.name.to_string(),
+            size: node.get_size_change() as u64,
+        })
         .collect::<Vec<_>>();
 
     let changes = same

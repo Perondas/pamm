@@ -31,7 +31,7 @@ impl GetChangeCount for NodeDiff {
     fn get_change_count(&self) -> u64 {
         match self {
             NodeDiff::Created(node) => node.get_change_count(),
-            NodeDiff::Deleted(_) => 1,
+            NodeDiff::Deleted { .. } => 1,
             NodeDiff::Modified(modification) => modification.get_change_count(),
             NodeDiff::None(_) => 0,
         }

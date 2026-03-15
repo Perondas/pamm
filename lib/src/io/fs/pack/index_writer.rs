@@ -1,6 +1,6 @@
 use crate::io::fs::fs_deletable::NamedFsDeletable;
 use crate::io::fs::fs_writable::IdentifiableFSWritable;
-use crate::io::name_consts::{get_pack_addon_directory_name, INDEX_DIR_NAME};
+use crate::io::name_consts::{INDEX_DIR_NAME, get_pack_addon_directory_name};
 use crate::models::index::index_node::IndexNode;
 use crate::models::index::node_diff::{NodeDiff, NodeModification};
 use crate::models::pack::pack_diff::PackDiff;
@@ -38,7 +38,7 @@ impl PackDiff {
                         new_node.write_to(&index_dir)?;
                     }
                 }
-                NodeDiff::Deleted(name) => {
+                NodeDiff::Deleted { name, .. } => {
                     IndexNode::delete_named(&index_dir, name)?;
                 }
                 NodeDiff::None(_) => (),

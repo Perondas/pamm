@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug)]
 pub enum NodeDiff {
     Created(IndexNode),
-    Deleted(String),
+    Deleted { name: String, size: u64 },
     Modified(NodeModification),
     None(String),
 }
@@ -40,11 +40,20 @@ pub enum FileModification {
     },
 }
 
+impl FileModification {
+    pub(crate) fn get_length(&self) -> u64 {
+        match self {
+            FileModification::PBO { new_length, .. } => *new_length,
+            FileModification::Generic { new_length } => *new_length,
+        }
+    }
+}
+
 impl Identifiable for NodeDiff {
     fn get_identifier(&self) -> &str {
         match self {
             NodeDiff::Created(node) => &node.name,
-            NodeDiff::Deleted(name) => name,
+            NodeDiff::Deleted { name, .. } => name,
             NodeDiff::Modified(modification) => &modification.name,
             NodeDiff::None(name) => name,
         }

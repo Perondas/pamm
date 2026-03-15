@@ -3,3 +3,4 @@ pub mod get_change_count;
 pub mod get_dl_size;
 pub mod index_node;
 pub mod node_diff;
+pub mod get_size_change;

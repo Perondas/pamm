@@ -131,6 +131,9 @@ class _SyncScreenState extends State<SyncScreen> {
       Text(
         'Total Download Size: ${format(diffResult?.totalDlSize.toInt() ?? 0)}',
       ),
+      Text(
+        'Total Size change: ${format(diffResult?.totalSizeChange.toInt() ?? 0)}',
+      ),
       Text('Changed addons: ${diffResult?.changeCount}'),
       Expanded(
         flex: 2,

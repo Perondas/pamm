@@ -7,6 +7,7 @@ use pamm_lib::io::fs::pack::index_generator::IndexGenerator;
 use pamm_lib::io::net::downloadable::NamedDownloadable;
 use pamm_lib::models::identifiable::Identifiable;
 use pamm_lib::models::index::get_dl_size::GetDlSize;
+use pamm_lib::models::index::get_size_change::GetSizeChange;
 use pamm_lib::models::pack::pack_config::PackConfig;
 use pamm_lib::models::pack::pack_diff::{diff_packs, PackDiff};
 use std::collections::HashMap;
@@ -58,6 +59,7 @@ pub fn get_diff(
         has_changes: diff.has_changes(),
         change_count: diff.change_count(),
         total_dl_size: diff.get_dl_size(),
+        total_size_change: diff.get_size_change(),
         diff: RustAutoOpaque::new(OpaqueDiff(diff)),
         file_changes,
     })
@@ -68,6 +70,7 @@ pub struct DiffResult {
     pub has_changes: bool,
     pub change_count: usize,
     pub total_dl_size: u64,
+    pub total_size_change: i64,
     pub file_changes: HashMap<String, Vec<FileChange>>,
 }
 

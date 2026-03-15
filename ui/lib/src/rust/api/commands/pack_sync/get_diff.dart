@@ -28,6 +28,7 @@ class DiffResult {
   final bool hasChanges;
   final BigInt changeCount;
   final BigInt totalDlSize;
+  final PlatformInt64 totalSizeChange;
   final Map<String, List<FileChange>> fileChanges;
 
   const DiffResult({
@@ -35,6 +36,7 @@ class DiffResult {
     required this.hasChanges,
     required this.changeCount,
     required this.totalDlSize,
+    required this.totalSizeChange,
     required this.fileChanges,
   });
 
@@ -44,6 +46,7 @@ class DiffResult {
       hasChanges.hashCode ^
       changeCount.hashCode ^
       totalDlSize.hashCode ^
+      totalSizeChange.hashCode ^
       fileChanges.hashCode;
 
   @override
@@ -55,5 +58,6 @@ class DiffResult {
           hasChanges == other.hasChanges &&
           changeCount == other.changeCount &&
           totalDlSize == other.totalDlSize &&
+          totalSizeChange == other.totalSizeChange &&
           fileChanges == other.fileChanges;
 }
