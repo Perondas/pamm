@@ -27,14 +27,14 @@ class DiffResult {
   final OpaqueDiff diff;
   final bool hasChanges;
   final BigInt changeCount;
-  final BigInt totalChangeSize;
+  final BigInt totalDlSize;
   final Map<String, List<FileChange>> fileChanges;
 
   const DiffResult({
     required this.diff,
     required this.hasChanges,
     required this.changeCount,
-    required this.totalChangeSize,
+    required this.totalDlSize,
     required this.fileChanges,
   });
 
@@ -43,7 +43,7 @@ class DiffResult {
       diff.hashCode ^
       hasChanges.hashCode ^
       changeCount.hashCode ^
-      totalChangeSize.hashCode ^
+      totalDlSize.hashCode ^
       fileChanges.hashCode;
 
   @override
@@ -54,6 +54,6 @@ class DiffResult {
           diff == other.diff &&
           hasChanges == other.hasChanges &&
           changeCount == other.changeCount &&
-          totalChangeSize == other.totalChangeSize &&
+          totalDlSize == other.totalDlSize &&
           fileChanges == other.fileChanges;
 }

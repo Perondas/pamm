@@ -24,7 +24,7 @@ impl ToPrettyString for PackDiff {
             result.push_str(&diffs_to_string(changes, ""));
             result.push('\n');
             result
-                .push_str(format!("Total change size: {}", DecimalBytes(self.get_dl_size())).as_str());
+                .push_str(format!("Total download size: {}", DecimalBytes(self.get_dl_size())).as_str());
         }
 
         result

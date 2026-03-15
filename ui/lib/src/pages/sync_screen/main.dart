@@ -129,7 +129,7 @@ class _SyncScreenState extends State<SyncScreen> {
   List<Widget> _buildDiffResult() {
     return [
       Text(
-        'Total Download Size: ${format(diffResult?.totalChangeSize.toInt() ?? 0)}',
+        'Total Download Size: ${format(diffResult?.totalDlSize.toInt() ?? 0)}',
       ),
       Text('Changed addons: ${diffResult?.changeCount}'),
       Expanded(

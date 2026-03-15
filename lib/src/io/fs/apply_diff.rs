@@ -52,14 +52,14 @@ impl<P: ProgressReporter> DiffApplier<P> {
             ..
         } = diff;
 
-        let total_size: u64 = node_diffs.iter().map(|c| c.get_dl_size()).sum();
+        let total_dl_size: u64 = node_diffs.iter().map(|c| c.get_dl_size()).sum();
         log::info!(
             "Applying diff: {} change(s), {} bytes total",
             node_diffs.len(),
-            total_size
+            total_dl_size
         );
 
-        self.progress_reporter.start_for_download(total_size);
+        self.progress_reporter.start_for_download(total_dl_size);
         self.progress_reporter.report_message("Applying diff...");
 
         let res = node_diffs
@@ -174,14 +174,14 @@ impl<P: ProgressReporter> DiffApplier<P> {
                 }
             }
             ModifiedNodeKind::File { modification, .. } => {
-                let size = modification.get_dl_size();
-                log::debug!("Patching file {} ({} bytes)", path, size);
+                let dl_size = modification.get_dl_size();
+                log::debug!("Patching file {} ({} bytes)", path, dl_size);
                 self.progress_reporter
                     .report_message(&format!("Modifying file {}", path));
                 self.remote_patcher
                     .patch_file(&path, &file_path, modification)
                     .context(format!("Failed to patch: {}", path))?;
-                self.progress_reporter.report_progress(size);
+                self.progress_reporter.report_progress(dl_size);
             }
         }
 

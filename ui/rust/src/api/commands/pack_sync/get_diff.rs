@@ -57,7 +57,7 @@ pub fn get_diff(
     Ok(DiffResult {
         has_changes: diff.has_changes(),
         change_count: diff.change_count(),
-        total_change_size: diff.get_dl_size(),
+        total_dl_size: diff.get_dl_size(),
         diff: RustAutoOpaque::new(OpaqueDiff(diff)),
         file_changes,
     })
@@ -67,7 +67,7 @@ pub struct DiffResult {
     pub diff: RustAutoOpaque<OpaqueDiff>,
     pub has_changes: bool,
     pub change_count: usize,
-    pub total_change_size: u64,
+    pub total_dl_size: u64,
     pub file_changes: HashMap<String, Vec<FileChange>>,
 }
 
