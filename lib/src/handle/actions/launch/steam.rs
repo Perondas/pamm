@@ -6,6 +6,7 @@ impl RepoHandle {
         info!("Launching pack '{}' via Steam", pack_name);
 
         let addons = self.get_addon_paths(pack_name)?;
+        
         debug!(
             "Resolved {} addon path(s) for pack '{}'",
             addons.len(),
