@@ -1,22 +1,10 @@
+use crate::handle::externals::external_addon::ExternalAddon;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct PackUserSettings {
-    // TODO: add fields as needed
     pub enabled_optionals: HashSet<String>,
-}
-
-impl Default for PackUserSettings {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl PackUserSettings {
-    pub fn new() -> Self {
-        Self {
-            enabled_optionals: HashSet::new(),
-        }
-    }
+    #[serde(default)]
+    pub external_addons: HashSet<ExternalAddon>,
 }

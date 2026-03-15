@@ -106,7 +106,11 @@ impl RepoHandle {
             vec![]
         };
 
-        Ok([addons_to_load, parent_addons].concat())
+        let externals = self
+            .get_external_addon_paths(pack_name)
+            .context(anyhow!("Failed to read external addons"))?;
+
+        Ok([addons_to_load, parent_addons, externals].concat())
     }
 
     #[allow(dead_code)]

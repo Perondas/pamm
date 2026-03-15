@@ -1,14 +1,14 @@
-use pamm_lib::handle::optionals::optional_addon::OptionalAddon;
+use pamm_lib::handle::externals::external_addon::ExternalAddon;
 use pamm_lib::handle::repo_handle::RepoHandle;
 
-pub fn save_optionals(
+pub fn save_externals(
     repo_path: String,
     pack_name: String,
-    optionals: Vec<OptionalAddon>,
+    externals: Vec<ExternalAddon>,
 ) -> anyhow::Result<()> {
     let repo_path = std::path::Path::new(&repo_path);
 
     let handle = RepoHandle::open(repo_path)?;
 
-    handle.save_optionals(&pack_name, &optionals)
+    handle.save_externals(&pack_name, &externals)
 }

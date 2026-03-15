@@ -1,4 +1,6 @@
 use crate::commands::add_pack::AddPackArgs;
+use crate::commands::externals::add_external::AddExternalArgs;
+use crate::commands::externals::toggle_externals::ToggleExternalsArgs;
 use crate::commands::init_remote::InitRemoteArgs;
 use crate::commands::launch::LaunchArgs;
 use crate::commands::sync_pack::SyncPackArgs;
@@ -25,4 +27,18 @@ pub enum AppSubcommand {
     Update(UpdatePackArgs),
     Sync(SyncPackArgs),
     Launch(LaunchArgs),
+    Externals(ExternalsArgs),
+}
+
+#[derive(Debug, clap::Args)]
+pub struct ExternalsArgs {
+    #[clap(subcommand)]
+    pub command: ExternalsSubcommand,
+}
+
+#[derive(Debug, Subcommand)]
+/// Manage external addons
+pub enum ExternalsSubcommand {
+    Toggle(ToggleExternalsArgs),
+    Add(AddExternalArgs),
 }

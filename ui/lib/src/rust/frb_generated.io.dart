@@ -4,6 +4,8 @@
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
 import 'api.dart';
+import 'api/commands/externals/load_externals.dart';
+import 'api/commands/externals/save_externals.dart';
 import 'api/commands/get_remote_repo_info.dart';
 import 'api/commands/init_from_remote.dart';
 import 'api/commands/launch.dart';
@@ -103,6 +105,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   DiffResult dco_decode_diff_result(dynamic raw);
 
   @protected
+  ExternalAddon dco_decode_external_addon(dynamic raw);
+
+  @protected
   FileChange dco_decode_file_change(dynamic raw);
 
   @protected
@@ -110,6 +115,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<String> dco_decode_list_String(dynamic raw);
+
+  @protected
+  List<ExternalAddon> dco_decode_list_external_addon(dynamic raw);
 
   @protected
   List<FileChange> dco_decode_list_file_change(dynamic raw);
@@ -123,6 +131,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   List<(String, List<FileChange>)>
   dco_decode_list_record_string_list_file_change(dynamic raw);
+
+  @protected
+  String? dco_decode_opt_String(dynamic raw);
 
   @protected
   OptionalAddon dco_decode_optional_addon(dynamic raw);
@@ -217,6 +228,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   DiffResult sse_decode_diff_result(SseDeserializer deserializer);
 
   @protected
+  ExternalAddon sse_decode_external_addon(SseDeserializer deserializer);
+
+  @protected
   FileChange sse_decode_file_change(SseDeserializer deserializer);
 
   @protected
@@ -224,6 +238,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<String> sse_decode_list_String(SseDeserializer deserializer);
+
+  @protected
+  List<ExternalAddon> sse_decode_list_external_addon(
+    SseDeserializer deserializer,
+  );
 
   @protected
   List<FileChange> sse_decode_list_file_change(SseDeserializer deserializer);
@@ -239,6 +258,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   List<(String, List<FileChange>)>
   sse_decode_list_record_string_list_file_change(SseDeserializer deserializer);
+
+  @protected
+  String? sse_decode_opt_String(SseDeserializer deserializer);
 
   @protected
   OptionalAddon sse_decode_optional_addon(SseDeserializer deserializer);
@@ -348,6 +370,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_diff_result(DiffResult self, SseSerializer serializer);
 
   @protected
+  void sse_encode_external_addon(ExternalAddon self, SseSerializer serializer);
+
+  @protected
   void sse_encode_file_change(FileChange self, SseSerializer serializer);
 
   @protected
@@ -355,6 +380,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_list_String(List<String> self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_external_addon(
+    List<ExternalAddon> self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_list_file_change(
@@ -379,6 +410,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     List<(String, List<FileChange>)> self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_opt_String(String? self, SseSerializer serializer);
 
   @protected
   void sse_encode_optional_addon(OptionalAddon self, SseSerializer serializer);
