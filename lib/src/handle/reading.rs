@@ -73,21 +73,12 @@ impl RepoHandle {
     }
 
     pub fn get_addon_paths(&self, pack_name: &str) -> anyhow::Result<Vec<String>> {
-        let (config, settings) = self.get_pack_with_settings(pack_name)?;
-
         log::debug!("Resolving addon paths for pack '{}'", pack_name);
 
-        let addon_dir = self
-            .repo_path
-            .join(get_pack_addon_directory_name(pack_name));
-
-        let addons_to_load = config
-            .addons
+        let addons = self
+            .resolve_addons(pack_name)?
             .iter()
-            .filter(|(name, addon_settings)| {
-                !addon_settings.is_optional || settings.enabled_optionals.contains(*name)
-            })
-            .map(|addon| addon_dir.join(addon.0))
+            .chain(&self.resolve_optionals(pack_name)?)
             .map(|p| {
                 p.canonicalize()
                     .with_context(|| format!("Failed to canonicalize {:#?}", p))
@@ -95,22 +86,11 @@ impl RepoHandle {
             .map(|p| p.map(clean_path))
             .collect::<anyhow::Result<Vec<_>>>()?;
 
-        let parent_addons = if let Some(parent_name) = &config.parent {
-            log::debug!(
-                "Pack '{}' has parent '{}', resolving parent addons",
-                config.name,
-                parent_name
-            );
-            self.get_addon_paths(parent_name)?
-        } else {
-            vec![]
-        };
-
         let externals = self
             .get_external_addon_paths(pack_name)
             .context(anyhow!("Failed to read external addons"))?;
 
-        Ok([addons_to_load, parent_addons, externals].concat())
+        Ok([addons, externals].concat())
     }
 
     #[allow(dead_code)]
