@@ -6,3 +6,4 @@ pub mod launch;
 pub mod sync_pack;
 pub mod update_pack;
 pub mod externals;
+pub mod optionals;

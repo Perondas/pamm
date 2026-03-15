@@ -1,10 +1,10 @@
 use crate::commands::add_pack::AddPackArgs;
-use crate::commands::externals::add_external::AddExternalArgs;
-use crate::commands::externals::toggle_externals::ToggleExternalsArgs;
 use crate::commands::init_remote::InitRemoteArgs;
 use crate::commands::launch::LaunchArgs;
 use crate::commands::sync_pack::SyncPackArgs;
 use crate::commands::update_pack::UpdatePackArgs;
+use crate::subcommands::externals::ExternalsArgs;
+use crate::subcommands::optionals::OptionalArgs;
 use clap::{Parser, Subcommand};
 
 /// Personal ARMA mod manager CLI
@@ -27,18 +27,6 @@ pub enum AppSubcommand {
     Update(UpdatePackArgs),
     Sync(SyncPackArgs),
     Launch(LaunchArgs),
+    Optionals(OptionalArgs),
     Externals(ExternalsArgs),
-}
-
-#[derive(Debug, clap::Args)]
-pub struct ExternalsArgs {
-    #[clap(subcommand)]
-    pub command: ExternalsSubcommand,
-}
-
-#[derive(Debug, Subcommand)]
-/// Manage external addons
-pub enum ExternalsSubcommand {
-    Toggle(ToggleExternalsArgs),
-    Add(AddExternalArgs),
 }
