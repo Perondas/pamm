@@ -778,7 +778,8 @@ impl SseDecode for crate::api::commands::pack_sync::get_diff::DiffResult {
         let mut var_diff = <RustAutoOpaqueMoi<OpaqueDiff>>::sse_decode(deserializer);
         let mut var_hasChanges = <bool>::sse_decode(deserializer);
         let mut var_changeCount = <usize>::sse_decode(deserializer);
-        let mut var_totalChangeSize = <u64>::sse_decode(deserializer);
+        let mut var_totalDlSize = <u64>::sse_decode(deserializer);
+        let mut var_totalSizeChange = <i64>::sse_decode(deserializer);
         let mut var_fileChanges = <std::collections::HashMap<
             String,
             Vec<crate::api::commands::pack_sync::file_change::FileChange>,
@@ -787,7 +788,8 @@ impl SseDecode for crate::api::commands::pack_sync::get_diff::DiffResult {
             diff: var_diff,
             has_changes: var_hasChanges,
             change_count: var_changeCount,
-            total_change_size: var_totalChangeSize,
+            total_dl_size: var_totalDlSize,
+            total_size_change: var_totalSizeChange,
             file_changes: var_fileChanges,
         };
     }
@@ -1173,7 +1175,8 @@ impl flutter_rust_bridge::IntoDart for crate::api::commands::pack_sync::get_diff
             self.diff.into_into_dart().into_dart(),
             self.has_changes.into_into_dart().into_dart(),
             self.change_count.into_into_dart().into_dart(),
-            self.total_change_size.into_into_dart().into_dart(),
+            self.total_dl_size.into_into_dart().into_dart(),
+            self.total_size_change.into_into_dart().into_dart(),
             self.file_changes.into_into_dart().into_dart(),
         ]
         .into_dart()
@@ -1430,7 +1433,8 @@ impl SseEncode for crate::api::commands::pack_sync::get_diff::DiffResult {
         <RustAutoOpaqueMoi<OpaqueDiff>>::sse_encode(self.diff, serializer);
         <bool>::sse_encode(self.has_changes, serializer);
         <usize>::sse_encode(self.change_count, serializer);
-        <u64>::sse_encode(self.total_change_size, serializer);
+        <u64>::sse_encode(self.total_dl_size, serializer);
+        <i64>::sse_encode(self.total_size_change, serializer);
         <std::collections::HashMap<
             String,
             Vec<crate::api::commands::pack_sync::file_change::FileChange>,

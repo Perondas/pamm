@@ -3,7 +3,7 @@ use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::io::net::remote_patcher::RemotePatcher;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::io::rel_path::RelPath;
-use crate::models::index::get_size::GetSize;
+use crate::models::index::get_dl_size::GetDlSize;
 use crate::models::index::index_node::{IndexNode, NodeKind};
 use crate::models::index::node_diff::{ModifiedNodeKind, NodeDiff, NodeModification};
 use crate::models::pack::pack_config::PackConfig;
@@ -52,14 +52,14 @@ impl<P: ProgressReporter> DiffApplier<P> {
             ..
         } = diff;
 
-        let total_size: u64 = node_diffs.iter().map(|c| c.get_size()).sum();
+        let total_dl_size: u64 = node_diffs.iter().map(|c| c.get_dl_size()).sum();
         log::info!(
             "Applying diff: {} change(s), {} bytes total",
             node_diffs.len(),
-            total_size
+            total_dl_size
         );
 
-        self.progress_reporter.start_for_download(total_size);
+        self.progress_reporter.start_for_download(total_dl_size);
         self.progress_reporter.report_message("Applying diff...");
 
         let res = node_diffs
@@ -98,7 +98,7 @@ impl<P: ProgressReporter> DiffApplier<P> {
 
         match node_diff {
             NodeDiff::Created(node) => self.create_node(node, parent_path),
-            NodeDiff::Deleted(name) => self.delete_node(name, parent_path),
+            NodeDiff::Deleted { name, .. } => self.delete_node(name, parent_path),
             NodeDiff::Modified(modification) => self.apply_modification(modification, parent_path),
             NodeDiff::None(_) => Ok(()),
         }
@@ -174,14 +174,14 @@ impl<P: ProgressReporter> DiffApplier<P> {
                 }
             }
             ModifiedNodeKind::File { modification, .. } => {
-                let size = modification.get_size();
-                log::debug!("Patching file {} ({} bytes)", path, size);
+                let dl_size = modification.get_dl_size();
+                log::debug!("Patching file {} ({} bytes)", path, dl_size);
                 self.progress_reporter
                     .report_message(&format!("Modifying file {}", path));
                 self.remote_patcher
                     .patch_file(&path, &file_path, modification)
                     .context(format!("Failed to patch: {}", path))?;
-                self.progress_reporter.report_progress(size);
+                self.progress_reporter.report_progress(dl_size);
             }
         }
 

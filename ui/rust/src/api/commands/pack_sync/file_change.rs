@@ -1,7 +1,7 @@
 use flutter_rust_bridge::frb;
-use pamm_lib::models::index::node_diff;
 use node_diff::{FileModification, ModifiedNodeKind};
 use pamm_lib::models::index::index_node::{IndexNode, NodeKind};
+use pamm_lib::models::index::node_diff;
 use pamm_lib::models::index::node_diff::{NodeDiff, NodeModification};
 
 #[derive(Clone)]
@@ -25,7 +25,7 @@ pub fn get_file_changes(diff: &NodeDiff) -> Vec<FileChange> {
         NodeDiff::Created(node) => {
             changes.extend(collect_created_files(node));
         }
-        NodeDiff::Deleted(path) => {
+        NodeDiff::Deleted { name: path, .. } => {
             changes.push(FileChange {
                 file_path: path.clone(),
                 change: ChangeType::Deleted,

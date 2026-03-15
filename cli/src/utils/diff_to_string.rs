@@ -1,5 +1,6 @@
 use indicatif::DecimalBytes;
-use pamm_lib::models::index::get_size::GetSize;
+use pamm_lib::models::index::get_dl_size::GetDlSize;
+use pamm_lib::models::index::get_size_change::GetSizeChange;
 use pamm_lib::models::index::index_node::{IndexNode, NodeKind};
 use pamm_lib::models::index::node_diff::{
     FileModification, ModifiedNodeKind, NodeDiff, NodeModification,
@@ -23,8 +24,20 @@ impl ToPrettyString for PackDiff {
             result.push_str("Changes:\n");
             result.push_str(&diffs_to_string(changes, ""));
             result.push('\n');
-            result
-                .push_str(format!("Total change size: {}", DecimalBytes(self.get_size())).as_str());
+            result.push_str(
+                format!("Total download size: {}", DecimalBytes(self.get_dl_size())).as_str(),
+            );
+            result.push('\n');
+            let size_change = self.get_size_change();
+
+            result.push_str(
+                format!(
+                    "Total size change: {}{}",
+                    if size_change.is_negative() { "-" } else { "+" },
+                    DecimalBytes(size_change.unsigned_abs()),
+                )
+                .as_str(),
+            );
         }
 
         result
@@ -36,7 +49,7 @@ fn diffs_to_string(diffs: &[NodeDiff], base_path: &str) -> String {
     for modification in diffs {
         let added = match modification {
             NodeDiff::Created(entry) => entry_creation_to_string(entry, base_path),
-            NodeDiff::Deleted(path) => {
+            NodeDiff::Deleted { name: path, .. } => {
                 format!("Deleted: {}/{}\n", base_path, path)
             }
             NodeDiff::Modified(modification) => {

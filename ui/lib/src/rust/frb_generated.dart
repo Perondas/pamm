@@ -804,8 +804,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   DiffResult dco_decode_diff_result(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 5)
-      throw Exception('unexpected arr length: expect 5 but see ${arr.length}');
+    if (arr.length != 6)
+      throw Exception('unexpected arr length: expect 6 but see ${arr.length}');
     return DiffResult(
       diff:
           dco_decode_AutoExplicit_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
@@ -813,8 +813,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           ),
       hasChanges: dco_decode_bool(arr[1]),
       changeCount: dco_decode_usize(arr[2]),
-      totalChangeSize: dco_decode_u_64(arr[3]),
-      fileChanges: dco_decode_Map_String_list_file_change_None(arr[4]),
+      totalDlSize: dco_decode_u_64(arr[3]),
+      totalSizeChange: dco_decode_i_64(arr[4]),
+      fileChanges: dco_decode_Map_String_list_file_change_None(arr[5]),
     );
   }
 
@@ -1112,7 +1113,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         );
     var var_hasChanges = sse_decode_bool(deserializer);
     var var_changeCount = sse_decode_usize(deserializer);
-    var var_totalChangeSize = sse_decode_u_64(deserializer);
+    var var_totalDlSize = sse_decode_u_64(deserializer);
+    var var_totalSizeChange = sse_decode_i_64(deserializer);
     var var_fileChanges = sse_decode_Map_String_list_file_change_None(
       deserializer,
     );
@@ -1120,7 +1122,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       diff: var_diff,
       hasChanges: var_hasChanges,
       changeCount: var_changeCount,
-      totalChangeSize: var_totalChangeSize,
+      totalDlSize: var_totalDlSize,
+      totalSizeChange: var_totalSizeChange,
       fileChanges: var_fileChanges,
     );
   }
@@ -1470,7 +1473,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     );
     sse_encode_bool(self.hasChanges, serializer);
     sse_encode_usize(self.changeCount, serializer);
-    sse_encode_u_64(self.totalChangeSize, serializer);
+    sse_encode_u_64(self.totalDlSize, serializer);
+    sse_encode_i_64(self.totalSizeChange, serializer);
     sse_encode_Map_String_list_file_change_None(self.fileChanges, serializer);
   }
 
