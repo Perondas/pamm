@@ -6,3 +6,13 @@ pub struct ExternalAddon {
     pub name: Option<String>,
     pub enabled: bool,
 }
+
+impl ExternalAddon {
+    pub fn new(path: String) -> Self {
+        ExternalAddon {
+            path,
+            name: None,
+            enabled: true,
+        }
+    }
+}
