@@ -87,7 +87,7 @@ jobs:
           subject-path: 'pamm_cli-*.tar.gz,pamm_cli-*.zip'
 
   package-linux:
-    needs: build-cli
+    needs: create-release
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
