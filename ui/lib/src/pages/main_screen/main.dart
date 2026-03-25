@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ui/src/models/repo_with_path.dart';
+import 'package:ui/src/pages/log_screen/main.dart';
 import 'package:ui/src/pages/main_screen/repo_details/main.dart';
 import 'package:ui/src/pages/main_screen/repo_list/main.dart';
 
@@ -32,7 +33,22 @@ class _MainScreenState extends State<MainScreen> {
                   right: BorderSide(color: Colors.grey.shade500, width: 2.5),
                 ),
               ),
-              child: RepoList(_onSelectRepo),
+              child: Column(
+                children: [
+                  Expanded(child: RepoList(_onSelectRepo)),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: IconButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => LogScreen()),
+                        );
+                      },
+                      icon: Icon(Icons.bug_report),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           Expanded(

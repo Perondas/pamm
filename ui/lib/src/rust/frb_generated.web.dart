@@ -19,6 +19,7 @@ import 'api/commands/pack_sync/file_change.dart';
 import 'api/commands/pack_sync/get_diff.dart';
 import 'api/commands/pack_sync/sync_pack.dart';
 import 'api/commands/sync_config.dart';
+import 'api/logging.dart';
 import 'api/progress_reporting.dart';
 import 'dart:async';
 import 'dart:convert';
