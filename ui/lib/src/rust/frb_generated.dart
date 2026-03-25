@@ -16,6 +16,7 @@ import 'api/commands/pack_sync/file_change.dart';
 import 'api/commands/pack_sync/get_diff.dart';
 import 'api/commands/pack_sync/sync_pack.dart';
 import 'api/commands/sync_config.dart';
+import 'api/logging.dart';
 import 'api/progress_reporting.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -77,7 +78,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => -1572386741;
+  int get rustContentHash => -1583293065;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -113,6 +114,8 @@ abstract class RustLibApi extends BaseApi {
     required String targetDir,
   });
 
+  Stream<String> crateApiLoggingInitRustLogger({required String level});
+
   Future<void> crateApiCommandsLaunchLaunch({
     required String repoDir,
     required String packName,
@@ -145,6 +148,8 @@ abstract class RustLibApi extends BaseApi {
     required String packName,
     required List<OptionalAddon> optionals,
   });
+
+  void crateApiLoggingSetRustLogLevel({required String level});
 
   Future<RepoConfig> crateApiCommandsSyncConfigSyncConfig({
     required String repoPath,
@@ -369,6 +374,35 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Stream<String> crateApiLoggingInitRustLogger({required String level}) {
+    final logSink = RustStreamSink<String>();
+    handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(level, serializer);
+          sse_encode_StreamSink_String_Sse(logSink, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 6)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiLoggingInitRustLoggerConstMeta,
+        argValues: [level, logSink],
+        apiImpl: this,
+      ),
+    );
+    return logSink.stream;
+  }
+
+  TaskConstMeta get kCrateApiLoggingInitRustLoggerConstMeta =>
+      const TaskConstMeta(
+        debugName: "init_rust_logger",
+        argNames: ["level", "logSink"],
+      );
+
+  @override
   Future<void> crateApiCommandsLaunchLaunch({
     required String repoDir,
     required String packName,
@@ -382,7 +416,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 6,
+            funcId: 7,
             port: port_,
           );
         },
@@ -418,7 +452,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 7,
+            funcId: 8,
             port: port_,
           );
         },
@@ -456,7 +490,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 8,
+            funcId: 9,
             port: port_,
           );
         },
@@ -491,7 +525,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 9,
+            funcId: 10,
             port: port_,
           );
         },
@@ -525,7 +559,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 10,
+            funcId: 11,
             port: port_,
           );
         },
@@ -564,7 +598,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 11,
+            funcId: 12,
             port: port_,
           );
         },
@@ -588,6 +622,29 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  void crateApiLoggingSetRustLogLevel({required String level}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(level, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 13)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiLoggingSetRustLogLevelConstMeta,
+        argValues: [level],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiLoggingSetRustLogLevelConstMeta =>
+      const TaskConstMeta(debugName: "set_rust_log_level", argNames: ["level"]);
+
+  @override
   Future<RepoConfig> crateApiCommandsSyncConfigSyncConfig({
     required String repoPath,
   }) {
@@ -599,7 +656,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 12,
+            funcId: 14,
             port: port_,
           );
         },
@@ -641,7 +698,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 13,
+            funcId: 15,
             port: port_,
           );
         },

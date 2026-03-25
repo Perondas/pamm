@@ -1,6 +1,7 @@
 use flutter_rust_bridge::frb;
 
 pub mod commands;
+pub mod logging;
 pub mod progress_reporting;
 
 #[frb(sync)]
