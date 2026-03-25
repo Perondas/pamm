@@ -100,6 +100,8 @@ jobs:
         run: sed -i "s/^version = \".*\"/version = \"${GITHUB_REF_NAME#v}\"/" cli/Cargo.toml
       - name: Install cargo-deb
         run: cargo install cargo-deb
+      - name: Install rpm-build
+        run: sudo apt-get install -y rpm
       - name: Install cargo-rpm
         run: cargo install cargo-rpm
       - name: Build cli
