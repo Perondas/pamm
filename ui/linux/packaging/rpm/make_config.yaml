@@ -1,0 +1,10 @@
+summary: A arma 3 mod manager
+group: Application/Emulator
+vendor: Perondas
+packager: Perondas
+packagerEmail: thomas@perondas.dev
+license: GPLv3
+url: https://github.com/Perondas/pamm
+display_name: Pamm
+startup_notify: true
+icon: logo.png
