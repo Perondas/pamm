@@ -28,3 +28,61 @@ impl PackConfig {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::util::test_utils::TestTempDir;
+    use std::fs;
+
+    #[test]
+    fn test_init_blank_on_fs() {
+        let temp_path = std::env::temp_dir().join("pamm_test_init_blank");
+        if temp_path.exists() {
+            fs::remove_dir_all(&temp_path).unwrap();
+        }
+        fs::create_dir_all(&temp_path).unwrap();
+        let _temp = TestTempDir::new(temp_path.clone());
+
+        let config = PackConfig {
+            name: "test_pack".to_string(),
+            description: "test pack".to_string(),
+            client_params: vec![],
+            servers: vec![],
+            parent: None,
+            addons: Default::default(),
+        };
+
+        config.init_blank_on_fs(&temp_path).unwrap();
+
+        let addon_dir_name = get_pack_addon_directory_name(&config.name);
+        let addon_dir = temp_path.join(&addon_dir_name);
+        assert!(addon_dir.is_dir());
+
+        let index_dir = addon_dir.join(INDEX_DIR_NAME);
+        assert!(index_dir.is_dir());
+    }
+
+    #[test]
+    fn test_init_blank_on_fs_not_dir() {
+        let temp_path = std::env::temp_dir().join("pamm_test_init_blank_not_dir.txt");
+        fs::write(&temp_path, "").unwrap();
+        let _temp = TestTempDir::new(temp_path.clone());
+
+        let config = PackConfig {
+            name: "test_pack".to_string(),
+            description: "test pack".to_string(),
+            client_params: vec![],
+            servers: vec![],
+            parent: None,
+            addons: Default::default(),
+        };
+
+        let result = config.init_blank_on_fs(&temp_path);
+        assert!(result.is_err());
+        assert_eq!(
+            result.unwrap_err().to_string(),
+            format!("{} is not a directory", temp_path.display())
+        );
+    }
+}

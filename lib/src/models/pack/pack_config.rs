@@ -77,3 +77,112 @@ impl PackConfig {
         });
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashSet;
+
+    #[test]
+    fn test_new_pack_config() {
+        let config = PackConfig::new(
+            "test_pack".to_string(),
+            "A test pack".to_string(),
+            vec!["-mod=1".to_string()],
+            vec![],
+            Some("parent_pack".to_string()),
+        );
+
+        assert_eq!(config.name, "test_pack");
+        assert_eq!(config.description, "A test pack");
+        assert_eq!(config.client_params, vec!["-mod=1".to_string()]);
+        assert_eq!(config.parent, Some("parent_pack".to_string()));
+        assert!(config.addons.is_empty());
+    }
+
+    #[test]
+    fn test_remove_disabled_optionals() {
+        let mut config = PackConfig::new(
+            "test_pack".to_string(),
+            "desc".to_string(),
+            vec![],
+            vec![],
+            None,
+        );
+
+        // Required addon
+        config.addons.insert(
+            "required_addon".to_string(),
+            AddonSettings { is_optional: false },
+        );
+
+        // Optional addon (enabled)
+        config.addons.insert(
+            "optional_enabled".to_string(),
+            AddonSettings { is_optional: true },
+        );
+
+        // Optional addon (disabled)
+        config.addons.insert(
+            "optional_disabled".to_string(),
+            AddonSettings { is_optional: true },
+        );
+
+        let mut user_settings = PackUserSettings {
+            enabled_optionals: HashSet::new(),
+            external_addons: HashSet::new(),
+        };
+        user_settings.enabled_optionals.insert("optional_enabled".to_string());
+
+        config.remove_disabled_optionals(&user_settings);
+
+        assert!(config.addons.contains_key("required_addon"));
+        assert!(config.addons.contains_key("optional_enabled"));
+        assert!(!config.addons.contains_key("optional_disabled"));
+    }
+
+    #[test]
+    fn test_get_addon_paths() {
+        use crate::util::test_utils::TestTempDir;
+
+        let mut config = PackConfig::new(
+            "test_pack_for_paths".to_string(),
+            "desc".to_string(),
+            vec![],
+            vec![],
+            None,
+        );
+
+        config.addons.insert(
+            "@addon1".to_string(),
+            AddonSettings { is_optional: false },
+        );
+        config.addons.insert(
+            "@addon2".to_string(),
+            AddonSettings { is_optional: true },
+        );
+
+        let temp_dir = std::env::temp_dir().join(format!("pamm_test_addon_paths_{}", std::process::id()));
+        let _cleanup = TestTempDir::new(temp_dir.clone());
+        let addon_dir = temp_dir.join("test_pack_for_paths_pack_addons");
+
+        std::fs::create_dir_all(addon_dir.join("@addon1")).unwrap();
+        std::fs::create_dir_all(addon_dir.join("@addon2")).unwrap();
+
+        let mut paths = config.get_addon_paths(&temp_dir);
+        paths.sort();
+
+        assert_eq!(paths.len(), 2);
+        assert!(paths.iter().any(|p| p.ends_with("@addon1") || p.ends_with("@addon1/")));
+        assert!(paths.iter().any(|p| p.ends_with("@addon2") || p.ends_with("@addon2/")));
+
+        let empty_config = PackConfig::new(
+            "test_empty_pack_paths".to_string(),
+            "desc".to_string(),
+            vec![],
+            vec![],
+            None,
+        );
+        assert!(empty_config.get_addon_paths(&temp_dir).is_empty());
+    }
+}

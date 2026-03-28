@@ -90,4 +90,11 @@ mod tests {
             "http://example.com/base/path/folder/file.txt"
         );
     }
+
+    #[test]
+    fn test_rel_path_as_str_and_display() {
+        let rel_path = RelPath::new().push("folder").push("file.txt");
+        assert_eq!(rel_path.as_str(), "folder/file.txt");
+        assert_eq!(rel_path.to_string(), "folder/file.txt");
+    }
 }
