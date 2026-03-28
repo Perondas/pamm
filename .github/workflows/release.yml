@@ -233,8 +233,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{github.ref_name}}
-          files: 'dist/**.deb,dist/**.rpm'
+          files: 'ui/dist/**.deb,ui/dist/**.rpm'
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v3
         with:
-          subject-path: 'dist/**.deb,dist/**.rpm'
+          subject-path: 'ui/dist/**.deb,ui/dist/**.rpm'
