@@ -86,7 +86,7 @@ jobs:
         with:
           subject-path: 'pamm_cli-*.tar.gz,pamm_cli-*.zip'
 
-  package-linux:
+  package-cli-linux:
     needs: create-release
     runs-on: ubuntu-22.04
     steps:
@@ -192,3 +192,49 @@ jobs:
         uses: actions/attest-build-provenance@v3
         with:
           subject-path: 'pamm_ui-${{github.ref_name}}-${{ matrix.target }}.${{ matrix.archive }}'
+
+  package-gui-linux:
+    needs: create-release
+    defaults:
+      run:
+        working-directory: ./ui
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@master
+        with:
+          fetch-depth: '0'
+          submodules: 'recursive'
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v1
+        with:
+          channel: 'stable'
+      - name: Install build deps for Linux
+        run: sudo apt-get install -y build-essential libgtk-3-dev rpm patchelf
+      - name: Install fastforge
+        run: dart pub global activate fastforge && echo 'export PATH="$PATH":"$HOME/.pub-cache/bin"' >> $GITHUB_ENV
+      - name: Set version
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: 'sed -i "s/^version: .*/version: ${GITHUB_REF_NAME#v}/" ui/pubspec.yaml'
+      - name: Install project dependencies
+        run: flutter pub get
+      - name: Generate intermediates
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+      - name: Enable build
+        run: flutter config --enable-linux-desktop
+      - name: Build packages
+        run: fastforge package --platform linux --targets deb,rpm
+      - name: Release to github
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{github.ref_name}}
+          files: dist/*/*.deb,dist/*/*.rpm
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: dist/*/*.deb,dist/*/*.rpm
