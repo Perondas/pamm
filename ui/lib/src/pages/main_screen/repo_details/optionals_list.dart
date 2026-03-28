@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ui/src/rust/api/commands/optionals/load_optionals.dart';
-import 'package:ui/src/rust/api/commands/optionals/save_optionals.dart';
+import 'package:pamm_ui/src/rust/api/commands/optionals/load_optionals.dart';
+import 'package:pamm_ui/src/rust/api/commands/optionals/save_optionals.dart';
 
 class OptionalsList extends StatefulWidget {
   const OptionalsList(this.repotPath, this.packName, {super.key});

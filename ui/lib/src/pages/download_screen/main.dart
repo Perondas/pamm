@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:ui/src/rust/api/commands/pack_sync/get_diff.dart';
-import 'package:ui/src/rust/api/commands/pack_sync/sync_pack.dart';
-import 'package:ui/src/services/progress_reporter_service.dart';
-import 'package:ui/src/widgets/progress_reporter.dart';
+import 'package:pamm_ui/src/rust/api/commands/pack_sync/get_diff.dart';
+import 'package:pamm_ui/src/rust/api/commands/pack_sync/sync_pack.dart';
+import 'package:pamm_ui/src/services/progress_reporter_service.dart';
+import 'package:pamm_ui/src/widgets/progress_reporter.dart';
 
 class DownloadScreen extends StatefulWidget {
   DownloadScreen(this.packName, this.repoPath, this.diffResult, {super.key});

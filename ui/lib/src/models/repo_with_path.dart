@@ -1,4 +1,4 @@
-import 'package:ui/src/rust/api/commands/init_from_remote.dart';
+import 'package:pamm_ui/src/rust/api/commands/init_from_remote.dart';
 
 class RepoWithPath {
   final RepoConfig repo;

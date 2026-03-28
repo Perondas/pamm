@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:ui/src/models/repo_with_path.dart';
-import 'package:ui/src/rust/api/commands/init_from_remote.dart';
-import 'package:ui/src/services/repo_path_store.dart';
-import 'package:ui/src/widgets/confirm_dialog.dart';
+import 'package:pamm_ui/src/models/repo_with_path.dart';
+import 'package:pamm_ui/src/rust/api/commands/init_from_remote.dart';
+import 'package:pamm_ui/src/services/repo_path_store.dart';
+import 'package:pamm_ui/src/widgets/confirm_dialog.dart';
 
 class EditRepoDialog extends StatefulWidget {
   const EditRepoDialog(this.selectedRepo, {super.key});

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:ui/src/models/repo_with_path.dart';
-import 'package:ui/src/pages/main_screen/repo_details/edit_pack_dialog.dart';
-import 'package:ui/src/pages/sync_screen/main.dart';
-import 'package:ui/src/rust/api/commands/launch.dart';
+import 'package:pamm_ui/src/models/repo_with_path.dart';
+import 'package:pamm_ui/src/pages/main_screen/repo_details/edit_pack_dialog.dart';
+import 'package:pamm_ui/src/pages/sync_screen/main.dart';
+import 'package:pamm_ui/src/rust/api/commands/launch.dart';
 
 class RepoDetails extends StatefulWidget {
   const RepoDetails(this.selectedRepo, {super.key});

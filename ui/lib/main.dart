@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:ui/src/pages/main_screen/main.dart';
-import 'package:ui/src/rust/frb_generated.dart';
-import 'package:ui/src/services/rust_log_service.dart';
+import 'package:pamm_ui/src/pages/main_screen/main.dart';
+import 'package:pamm_ui/src/rust/frb_generated.dart';
+import 'package:pamm_ui/src/services/rust_log_service.dart';
 
 final getIt = GetIt.instance;
 late final RustLogService rustLogService;

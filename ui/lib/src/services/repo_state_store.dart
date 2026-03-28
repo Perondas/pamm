@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
-import 'package:ui/src/models/repo_with_path.dart';
-import 'package:ui/src/rust/api/commands/load_repo.dart';
-import 'package:ui/src/rust/api/commands/sync_config.dart';
+import 'package:pamm_ui/src/models/repo_with_path.dart';
+import 'package:pamm_ui/src/rust/api/commands/load_repo.dart';
+import 'package:pamm_ui/src/rust/api/commands/sync_config.dart';
 
 class RepoStateManager with ChangeNotifier {
   final String repoPath;

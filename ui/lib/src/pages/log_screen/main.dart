@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ui/main.dart';
+import 'package:pamm_ui/main.dart';
 import 'package:flutter/services.dart';
 
 

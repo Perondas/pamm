@@ -1,6 +1,6 @@
 import 'package:dart_observable/dart_observable.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
-import 'package:ui/src/rust/api/progress_reporting.dart';
+import 'package:pamm_ui/src/rust/api/progress_reporting.dart';
 
 class ProgressReporterService {
   late DartProgressReporter _underlyingReporter;

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ui/src/pages/main_screen/repo_details/optionals_list.dart';
+import 'package:pamm_ui/src/pages/main_screen/repo_details/optionals_list.dart';
 
 import 'externals_list.dart';
 

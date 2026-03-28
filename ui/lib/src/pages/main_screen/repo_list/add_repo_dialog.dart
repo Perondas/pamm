@@ -2,10 +2,10 @@ import 'dart:io' show Platform;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:ui/src/models/repo_with_path.dart';
-import 'package:ui/src/rust/api/commands/get_remote_repo_info.dart';
-import 'package:ui/src/rust/api/commands/init_from_remote.dart';
-import 'package:ui/src/services/repo_path_store.dart';
+import 'package:pamm_ui/src/models/repo_with_path.dart';
+import 'package:pamm_ui/src/rust/api/commands/get_remote_repo_info.dart';
+import 'package:pamm_ui/src/rust/api/commands/init_from_remote.dart';
+import 'package:pamm_ui/src/services/repo_path_store.dart';
 
 class AddRepoDialog extends StatefulWidget {
   const AddRepoDialog({super.key});

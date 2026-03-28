@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:ui/src/rust/api/commands/load_repo.dart';
+import 'package:pamm_ui/src/rust/api/commands/load_repo.dart';
 
 class FixRepoDialog extends StatefulWidget {
   const FixRepoDialog(this.repoPath, {super.key});

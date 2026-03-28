@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:ui/src/rust/api/commands/externals/load_externals.dart';
-import 'package:ui/src/rust/api/commands/externals/save_externals.dart';
+import 'package:pamm_ui/src/rust/api/commands/externals/load_externals.dart';
+import 'package:pamm_ui/src/rust/api/commands/externals/save_externals.dart';
 
 class ExternalsList extends StatefulWidget {
   const ExternalsList(this.repotPath, this.packName, {super.key});

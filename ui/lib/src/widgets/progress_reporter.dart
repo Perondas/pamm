@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:format_bytes/format_bytes.dart';
-import 'package:ui/src/services/progress_reporter_service.dart';
+import 'package:pamm_ui/src/services/progress_reporter_service.dart';
 
 class ProgressReporter extends StatefulWidget {
   const ProgressReporter(this.service, {super.key});
