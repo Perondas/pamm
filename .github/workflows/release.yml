@@ -285,9 +285,9 @@ jobs:
         with:
           tag_name: ${{github.ref_name}}
           files: |
-            ui/dist/**.exe
+            ui/dist/**/*.exe
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v3
         with:
           subject-path: |
-            ui/dist/**.exe
+            ui/dist/**/*.exe
