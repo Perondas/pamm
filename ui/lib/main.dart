@@ -1,10 +1,9 @@
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pamm_ui/src/pages/main_screen/main.dart';
 import 'package:pamm_ui/src/rust/frb_generated.dart';
 import 'package:pamm_ui/src/services/rust_log_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 final getIt = GetIt.instance;
 late final RustLogService rustLogService;
@@ -18,13 +17,6 @@ Future<void> main() async {
   rustLogService = RustLogService();
 
   runApp(const MyApp());
-
-  doWhenWindowReady(() {
-    const initialSize = Size(600, 450);
-    appWindow.minSize = initialSize;
-    appWindow.alignment = Alignment.center;
-    appWindow.show();
-  });
 }
 
 class MyApp extends StatelessWidget {
