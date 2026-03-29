@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pamm_ui/main.dart';
 import 'package:flutter/services.dart';
-
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:pamm_ui/main.dart';
 
 class LogScreen extends StatefulWidget {
   const LogScreen({super.key});
@@ -45,7 +45,9 @@ class _LogScreenState extends State<LogScreen> {
             children: [
               DropdownMenu(
                 dropdownMenuEntries: ["error", "warn", "info", "debug", "trace"]
-                    .map((level) => DropdownMenuEntry(value: level, label: level))
+                    .map(
+                      (level) => DropdownMenuEntry(value: level, label: level),
+                    )
                     .toList(),
                 initialSelection: rustLogService.currentLogLevel,
                 label: Text('Log Level'),
@@ -57,14 +59,36 @@ class _LogScreenState extends State<LogScreen> {
                   });
                 },
               ),
-              TextButton(onPressed: () {
-                var logText = logs.join('\n');
-                Clipboard.setData(ClipboardData(text: logText));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Logs copied to clipboard")),
-                );
-              }
-                , child: Text('Copy to Clipboard')),
+              SizedBox(width: 16),
+              TextButton(
+                onPressed: () {
+                  var logText = logs.join('\n');
+                  Clipboard.setData(ClipboardData(text: logText));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Logs copied to clipboard")),
+                  );
+                },
+                child: Text('Copy to Clipboard'),
+              ),
+              SizedBox(width: 16),
+              FutureBuilder(
+                future: PackageInfo.fromPlatform(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return SizedBox.shrink();
+                  }
+                  if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  }
+                  var packageInfo = snapshot.data!;
+                  return Text(
+                    'Version: ${packageInfo.version}+${packageInfo.buildNumber}',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  );
+                },
+              ),
+
+
             ],
           ),
         ),
