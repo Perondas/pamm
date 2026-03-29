@@ -242,3 +242,52 @@ jobs:
           subject-path: |
             ui/dist/**/*.deb
             ui/dist/**/*.rpm
+
+
+  package-gui-windows:
+    needs: create-release
+    defaults:
+      run:
+        working-directory: ./ui
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@master
+        with:
+          fetch-depth: '0'
+          submodules: 'recursive'
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v1
+        with:
+          channel: 'stable'
+      - name: Install fastforge
+        run: dart pub global activate fastforge && echo 'export PATH="$PATH":"$HOME/.pub-cache/bin"' >> $GITHUB_ENV
+      - name: Install Inno Setup Compiler
+        run: choco install innosetup
+      - name: Set version
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: 'sed -i "s/^version: .*/version: ${GITHUB_REF_NAME#v}/" ui/pubspec.yaml'
+      - name: Install project dependencies
+        run: flutter pub get
+      - name: Generate intermediates
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+      - name: Enable build
+        run: flutter config --enable-windows-desktop
+      - name: Build packages
+        run: fastforge package --platform windows --targets exe
+      - name: Release to github
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{github.ref_name}}
+          files: |
+            ui/dist/**.exe
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: |
+            ui/dist/**.exe
