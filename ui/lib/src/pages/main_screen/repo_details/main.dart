@@ -80,7 +80,17 @@ ListTile _buildPackListTitle(
       children: [
         IconButton(
           onPressed: () async {
-            await launch(repoDir: repoPath, packName: packName);
+            try {
+              await launch(repoDir: repoPath, packName: packName);
+            } catch (e) {
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("Error launching pack: $e"),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
           },
           icon: Icon(Icons.play_arrow),
         ),
