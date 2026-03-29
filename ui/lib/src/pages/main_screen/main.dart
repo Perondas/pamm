@@ -23,36 +23,28 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //appBar: AppBar(title: Text("Pamm"), elevation: 1),
       body: Row(
         children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  right: BorderSide(color: Colors.grey.shade500, width: 2.5),
+          NavigationDrawer(
+            children: [
+              SizedBox(
+                height: MediaQuery.of(context).size.height - 70,
+                child: RepoList(_onSelectRepo),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => LogScreen()),
+                    );
+                  },
+                  icon: Icon(Icons.bug_report),
                 ),
               ),
-              child: Column(
-                children: [
-                  Expanded(child: RepoList(_onSelectRepo)),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: IconButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => LogScreen()),
-                        );
-                      },
-                      icon: Icon(Icons.bug_report),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            ],
           ),
           Expanded(
-            flex: 2,
             child: Container(
               child: _selectedRepo == null
                   ? Center(child: Text("Select a repository to view details"))

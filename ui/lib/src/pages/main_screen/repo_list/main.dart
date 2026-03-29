@@ -162,8 +162,15 @@ class _RepoListState extends State<RepoList> {
         final repo = repoStateManager.repoState!.repo;
         final path = repoStateManager.repoState!.path;
 
+        final String? imageUrl = null; // TODO: Implement image URL in RepoConfig
+        final Widget leadingWidget = imageUrl != null && imageUrl.isNotEmpty
+            ? CircleAvatar(backgroundImage: NetworkImage(imageUrl))
+            : CircleAvatar(
+                child: Text(repo.name.isNotEmpty ? repo.name[0].toUpperCase() : '?'),
+              );
+
         return ListTile(
-          leading: Icon(Icons.folder),
+          leading: leadingWidget,
           title: Text(repo.name),
           subtitle: Text(path),
           selected: _selectedRepo != null && path == _selectedRepo!.path,

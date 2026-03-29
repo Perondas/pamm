@@ -65,8 +65,15 @@ ListTile _buildPackListTitle(
   String packName,
   String repoPath,
 ) {
+  final String? imageUrl = null; // TODO: Implement image URL in PackConfig
+  final Widget leadingWidget = imageUrl != null && imageUrl.isNotEmpty
+      ? CircleAvatar(backgroundImage: NetworkImage(imageUrl))
+      : CircleAvatar(
+          child: Text(packName.isNotEmpty ? packName[0].toUpperCase() : '?'),
+        );
+
   return ListTile(
-    leading: Icon(Icons.videogame_asset),
+    leading: leadingWidget,
     title: Text(packName),
     trailing: Row(
       mainAxisSize: MainAxisSize.min,
