@@ -6,11 +6,15 @@
 #endif
 
 #include "flutter/generated_plugin_registrant.h"
+#include <bitsdojo_window_linux/bitsdojo_window_plugin.h>
 
 struct _MyApplication {
   GtkApplication parent_instance;
   char** dart_entrypoint_arguments;
 };
+
+auto bdw = bitsdojo_window_from(window);
+bdw->setCustomFrame(true);
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 
