@@ -15,30 +15,13 @@ class _LogScreenState extends State<LogScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Material(
-          elevation: 1,
-          child: SizedBox(
-            height: kToolbarHeight,
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-                Expanded(
-                  child: Text(
-                    "Logs",
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+    return Scaffold(
+      appBar: AppBar(title: Text("Logs"), elevation: 1),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
@@ -47,7 +30,7 @@ class _LogScreenState extends State<LogScreen> {
                 dropdownMenuEntries: ["error", "warn", "info", "debug", "trace"]
                     .map(
                       (level) => DropdownMenuEntry(value: level, label: level),
-                    )
+                      )
                     .toList(),
                 requestFocusOnTap: false,
                 initialSelection: rustLogService.currentLogLevel,
@@ -69,7 +52,7 @@ class _LogScreenState extends State<LogScreen> {
                     SnackBar(content: Text("Logs copied to clipboard")),
                   );
                 },
-                child: Text('Copy Logs to Clipboard'),
+                  child: Text('Copy Logs to Clipboard'),
               ),
               SizedBox(width: 16),
               FutureBuilder(
@@ -112,7 +95,7 @@ class _LogScreenState extends State<LogScreen> {
             ),
           ),
         ),
-      ],
+      ],),
     );
   }
 }

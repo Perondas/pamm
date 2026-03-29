@@ -58,58 +58,41 @@ class _DownloadScreenState extends State<DownloadScreen> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      child: Column(
-        children: [
-          Material(
-            elevation: 1,
-            child: SizedBox(
-              height: kToolbarHeight,
-              child: Row(
-                children: [
-                  const SizedBox(width: 16), // spacing instead of back button since canPop is false
-                  Expanded(
-                    child: Text(
-                      'Downloading ${widget.packName}',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Downloading ${widget.packName}'),
+          automaticallyImplyLeading: false,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              if (done)
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
                   ),
-                ],
-              ),
-            ),
+                  child: const Text("Done"),
+                ),
+              if (error != null)
+                IconButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Error downloading pack: $error")),
+                    );
+                  },
+                  icon: Icon(Icons.bug_report, color: Colors.red),
+                ),
+              Expanded(child: ProgressReporter(widget.progressReporterService)),
+            ],
           ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  if (done)
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text("Done"),
-                    ),
-                  if (error != null)
-                    IconButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Error downloading pack: $error")),
-                        );
-                      },
-                      icon: const Icon(Icons.bug_report, color: Colors.red),
-                    ),
-                  Expanded(child: ProgressReporter(widget.progressReporterService)),
-                ],
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
