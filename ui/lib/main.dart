@@ -30,12 +30,61 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      builder: (context, child) {
+        return Scaffold(
+          body: WindowBorder(
+            color: Theme.of(context).colorScheme.primary,
+            child: Column(
+              children: [
+                Material(
+                  color: Theme.of(context).navigationDrawerTheme.backgroundColor ?? Theme.of(context).colorScheme.surfaceContainerLow,
+                  child: WindowTitleBarBox(
+                    child: Row(
+                      children: [
+                        Expanded(child: MoveWindow()),
+                        const WindowButtons(),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(child: child ?? const SizedBox.shrink()),
+              ],
+            ),
+          ),
+        );
+      },
       home: MainScreen(),
       theme: ThemeData.from(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Color.fromARGB(255, 236, 214, 153),
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF415AD9))
       ),
+    );
+  }
+}
+
+final buttonColors = WindowButtonColors(
+    iconNormal: const Color(0xFF805306),
+    mouseOver: const Color(0xFFF6A00C),
+    mouseDown: const Color(0xFF805306),
+    iconMouseOver: const Color(0xFF805306),
+    iconMouseDown: const Color(0xFFFFD500));
+
+final closeButtonColors = WindowButtonColors(
+    mouseOver: const Color(0xFFD32F2F),
+    mouseDown: const Color(0xFFB71C1C),
+    iconNormal: const Color(0xFF805306),
+    iconMouseOver: Colors.white);
+
+class WindowButtons extends StatelessWidget {
+  const WindowButtons({super.key});
+  
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        MinimizeWindowButton(colors: buttonColors),
+        MaximizeWindowButton(colors: buttonColors),
+        CloseWindowButton(colors: closeButtonColors),
+      ],
     );
   }
 }

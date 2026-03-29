@@ -26,55 +26,78 @@ class _SyncScreenState extends State<SyncScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Updating ${widget.packName}')),
-      body: Padding(
-        padding: EdgeInsetsGeometry.all(8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: EdgeInsetsGeometry.directional(bottom: 8),
-              child: Center(
-                child: isDoneSyncing && (diffResult?.hasChanges ?? false)
-                    ? _buildDownloadButton(context)
-                    : _buildSyncButton(),
-              ),
-            ),
-            if (error != null) ...[
-              IconButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Error checking for updates: $error"),
-                    ),
-                  );
-                },
-                icon: Icon(Icons.bug_report),
-                color: Colors.red,
-              ),
-            ],
-            if (diffResult != null) ...[
-              if (diffResult!.hasChanges)
-                ..._buildDiffResult()
-              else
-                const Center(
+    return Column(
+      children: [
+        Material(
+          elevation: 1,
+          child: SizedBox(
+            height: kToolbarHeight,
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                Expanded(
                   child: Text(
-                    'No changes found',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
+                    'Updating ${widget.packName}',
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
-            ],
-            Expanded(
-              flex: 1,
-              child: Padding(
-                padding: EdgeInsetsGeometry.all(8),
-                child: ProgressReporter(widget.progressReporterService),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
+        Expanded(
+          child: Padding(
+            padding: EdgeInsetsGeometry.all(8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: EdgeInsetsGeometry.directional(bottom: 8),
+                  child: Center(
+                    child: isDoneSyncing && (diffResult?.hasChanges ?? false)
+                        ? _buildDownloadButton(context)
+                        : _buildSyncButton(),
+                  ),
+                ),
+                if (error != null) ...[
+                  IconButton(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Error checking for updates: $error"),
+                        ),
+                      );
+                    },
+                    icon: Icon(Icons.bug_report),
+                    color: Colors.red,
+                  ),
+                ],
+                if (diffResult != null) ...[
+                  if (diffResult!.hasChanges)
+                    ..._buildDiffResult()
+                  else
+                    const Center(
+                      child: Text(
+                        'No changes found',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
+                      ),
+                    ),
+                ],
+                Expanded(
+                  flex: 1,
+                  child: Padding(
+                    padding: EdgeInsetsGeometry.all(8),
+                    child: ProgressReporter(widget.progressReporterService),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
