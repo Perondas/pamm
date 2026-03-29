@@ -10,10 +10,13 @@ final getIt = GetIt.instance;
 late final RustLogService rustLogService;
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await RustLib.init();
+  configureDI();
+  await getIt.allReady();
+
   rustLogService = RustLogService();
 
-  configureDI();
   runApp(const MyApp());
 
   doWhenWindowReady(() {
@@ -90,7 +93,7 @@ class WindowButtons extends StatelessWidget {
 }
 
 void configureDI() {
-  getIt.registerLazySingletonAsync<SharedPreferencesWithCache>(() async {
+  getIt.registerSingletonAsync<SharedPreferencesWithCache>(() async {
     return await SharedPreferencesWithCache.create(
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );

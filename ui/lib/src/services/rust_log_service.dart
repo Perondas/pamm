@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../rust/api/logging.dart';
 
@@ -6,9 +8,15 @@ class RustLogService {
   late final Stream<String> _rustLogStream;
 
   final List<String> _logBuffer = [];
-  String _logLevel = 'debug';
+  String _logLevel = 'info';
 
   RustLogService() {
+    final prefs = GetIt.instance.get<SharedPreferencesWithCache>();
+    final storedLevel = prefs.getString('rust_log_level');
+    if (storedLevel != null) {
+      _logLevel = storedLevel;
+    }
+
     _rustLogStream = initRustLogger(level: _logLevel).asBroadcastStream();
     if (kDebugMode) {
       _rustLogStream.listen((log) {
@@ -31,6 +39,12 @@ class RustLogService {
   void setLogLevel(String level) {
     setRustLogLevel(level: level);
     _logLevel = level;
+    _saveLogLevel(level);
+  }
+
+  void _saveLogLevel(String level) {
+    final prefs = GetIt.instance.get<SharedPreferencesWithCache>();
+    prefs.setString('rust_log_level', level);
   }
 
   List<String> get logBuffer => List.unmodifiable(_logBuffer);

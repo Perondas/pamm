@@ -49,6 +49,7 @@ class _LogScreenState extends State<LogScreen> {
                       (level) => DropdownMenuEntry(value: level, label: level),
                     )
                     .toList(),
+                requestFocusOnTap: false,
                 initialSelection: rustLogService.currentLogLevel,
                 label: Text('Log Level'),
                 onSelected: (level) {
@@ -68,7 +69,7 @@ class _LogScreenState extends State<LogScreen> {
                     SnackBar(content: Text("Logs copied to clipboard")),
                   );
                 },
-                child: Text('Copy to Clipboard'),
+                child: Text('Copy Logs to Clipboard'),
               ),
               SizedBox(width: 16),
               FutureBuilder(
@@ -83,12 +84,10 @@ class _LogScreenState extends State<LogScreen> {
                   var packageInfo = snapshot.data!;
                   return Text(
                     'Version: ${packageInfo.version}+${packageInfo.buildNumber}',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    style: TextStyle(fontFamily: 'monospace'),
                   );
                 },
               ),
-
-
             ],
           ),
         ),
