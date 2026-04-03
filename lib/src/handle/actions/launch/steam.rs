@@ -6,7 +6,7 @@ impl RepoHandle {
         info!("Launching pack '{}' via Steam", pack_name);
 
         let addons = self.get_addon_paths(pack_name)?;
-        
+
         debug!(
             "Resolved {} addon path(s) for pack '{}'",
             addons.len(),
@@ -15,9 +15,14 @@ impl RepoHandle {
 
         let mut launch_url = String::from("steam://rungameid/107410// -nolauncher ");
 
-        let pack_config = self.get_pack(pack_name)?;
+        let (pack_config, settings) = self.get_pack_with_settings(pack_name)?;
 
         for param in pack_config.client_params {
+            launch_url.push_str(&param);
+            launch_url.push(' ');
+        }
+
+        for param in settings.launch_params {
             launch_url.push_str(&param);
             launch_url.push(' ');
         }

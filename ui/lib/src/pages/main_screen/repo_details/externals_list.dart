@@ -72,7 +72,6 @@ class _ExternalsListState extends State<ExternalsList> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          Text("Externals", style: Theme.of(context).textTheme.headlineSmall),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton.icon(

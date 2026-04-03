@@ -63,7 +63,6 @@ class _OptionalsListState extends State<OptionalsList> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          Text("Optionals", style: Theme.of(context).textTheme.headlineSmall),
           if (loading) CircularProgressIndicator(),
           for (int i = 0; i < optionals.length; i++)
             SwitchListTile(

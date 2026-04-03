@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pamm_ui/src/pages/main_screen/repo_details/optionals_list.dart';
 
 import 'externals_list.dart';
+import 'params.dart';
 
 class EditPackDialog extends StatefulWidget {
   const EditPackDialog(this.repoPath, this.packName, {super.key});
@@ -23,13 +24,27 @@ class _EditPackDialogState extends State<EditPackDialog> {
       ),
       content: SizedBox(
         width: 600,
-        child: SingleChildScrollView(
+        height: 600,
+        child: DefaultTabController(
+          length: 3,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              OptionalsList(widget.repoPath, widget.packName),
-              ExternalsList(widget.repoPath, widget.packName),
+              const TabBar(
+                tabs: [
+                  Tab(text: 'Optionals'),
+                  Tab(text: 'Externals'),
+                  Tab(text: 'Launch Params'),
+                ],
+              ),
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    OptionalsList(widget.repoPath, widget.packName),
+                    ExternalsList(widget.repoPath, widget.packName),
+                    ParamsForm(widget.repoPath, widget.packName),
+                  ],
+                ),
+              ),
             ],
           ),
         ),

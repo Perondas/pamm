@@ -5,3 +5,4 @@ pub mod reading;
 pub mod repo_handle;
 pub mod writing;
 pub mod addons;
+pub mod params;

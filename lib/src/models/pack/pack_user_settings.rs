@@ -7,4 +7,6 @@ pub struct PackUserSettings {
     pub enabled_optionals: HashSet<String>,
     #[serde(default)]
     pub external_addons: HashSet<ExternalAddon>,
+    #[serde(default)]
+    pub launch_params: Vec<String>,
 }

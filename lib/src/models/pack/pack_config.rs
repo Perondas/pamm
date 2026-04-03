@@ -128,10 +128,7 @@ mod tests {
             AddonSettings { is_optional: true },
         );
 
-        let mut user_settings = PackUserSettings {
-            enabled_optionals: HashSet::new(),
-            external_addons: HashSet::new(),
-        };
+        let mut user_settings = PackUserSettings::default();
         user_settings.enabled_optionals.insert("optional_enabled".to_string());
 
         config.remove_disabled_optionals(&user_settings);
