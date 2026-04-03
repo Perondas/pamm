@@ -1,6 +1,6 @@
 use crate::handle::externals::external_addon::ExternalAddon;
 use crate::io::serialization::versioning::versioned::VersionedWrapper;
-use crate::models::pack::pack_user_settings::{OptionalAddonSetting, PackUserSettings};
+use crate::models::pack::pack_user_settings::PackUserSettings;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
@@ -29,19 +29,6 @@ impl VersionedWrapper<PackUserSettings> for VersionedPackUserSettings {
     fn get(self) -> PackUserSettings {
         match self {
             VersionedPackUserSettings::V0(v0) => PackUserSettings {
-                enabled_optionals: v0
-                    .enabled_optionals
-                    .into_iter()
-                    .map(|s| {
-                        (
-                            s,
-                            OptionalAddonSetting {
-                                is_enabled: true,
-                                is_transitive_enabled: false,
-                            },
-                        )
-                    })
-                    .collect(),
                 external_addons: v0.external_addons,
             },
             VersionedPackUserSettings::V1(v1) => v1,
