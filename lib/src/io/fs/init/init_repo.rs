@@ -1,5 +1,6 @@
 use crate::io::fs::fs_writable::KnownFSWritable;
 use crate::io::net::downloadable::{KnownDownloadable, NamedDownloadable};
+use crate::migration::version_tag::VersionTag;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_user_settings::RepoUserSettings;
@@ -22,6 +23,8 @@ impl RepoConfig {
 
         fs::create_dir(&base_path)?;
         self.write_to(&base_path)?;
+
+        VersionTag::get_latest().write_to(&base_path)?;
 
         Ok(base_path)
     }
@@ -57,6 +60,8 @@ impl RepoConfig {
 
             pack_config.init_blank_on_fs(&base_path)?;
         }
+
+        VersionTag::get_latest().write_to(&base_path)?;
 
         Ok((repo, repo_user_settings))
     }

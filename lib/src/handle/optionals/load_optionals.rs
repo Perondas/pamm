@@ -16,7 +16,13 @@ impl RepoHandle {
             .iter()
             .filter(|(_, addon)| addon.is_optional)
             .map(|(name, _)| {
-                OptionalAddon::new(name.clone(), settings.enabled_optionals.contains(name))
+                OptionalAddon::new(
+                    name.clone(),
+                    settings
+                        .enabled_optionals
+                        .get(name)
+                        .is_some_and(|setting| setting.is_enabled),
+                )
             })
             .chain(parent_optionals)
             .collect())

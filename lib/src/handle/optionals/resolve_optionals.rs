@@ -1,7 +1,8 @@
 use crate::handle::repo_handle::RepoHandle;
 use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::models::pack::pack_config::PackConfig;
-use std::collections::HashSet;
+use crate::models::pack::pack_user_settings::OptionalAddonSetting;
+use std::collections::HashMap;
 use std::path::PathBuf;
 
 impl RepoHandle {
@@ -17,7 +18,7 @@ impl RepoHandle {
     fn resolve_optionals_recursive(
         &self,
         config: PackConfig,
-        optionals: HashSet<String>,
+        optionals: HashMap<String, OptionalAddonSetting>,
     ) -> anyhow::Result<Vec<PathBuf>> {
         let mut res = Vec::new();
 
@@ -25,7 +26,7 @@ impl RepoHandle {
             .repo_path
             .join(get_pack_addon_directory_name(&config.name));
 
-        for optional in &optionals {
+        for (optional, _) in &optionals {
             if config
                 .addons
                 .iter()

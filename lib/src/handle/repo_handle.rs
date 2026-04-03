@@ -1,5 +1,6 @@
 use crate::io::fs::fs_readable::KnownFSReadable;
 use crate::io::known_file::KnownFile;
+use crate::migration::migrator::migrate;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_user_settings::RepoUserSettings;
 use anyhow::ensure;
@@ -15,6 +16,8 @@ pub struct RepoHandle {
 
 impl RepoHandle {
     pub fn open(repo_path: &Path) -> anyhow::Result<Self> {
+        migrate(repo_path)?;
+
         check_repo(repo_path)?;
 
         let repo_config = RepoConfig::read_from_known(repo_path)?;

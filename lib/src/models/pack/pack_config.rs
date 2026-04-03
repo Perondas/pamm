@@ -70,7 +70,10 @@ impl PackConfig {
     pub fn remove_disabled_optionals(&mut self, user_settings: &PackUserSettings) {
         self.addons.retain(|name, settings| {
             if settings.is_optional {
-                user_settings.enabled_optionals.contains(name)
+                user_settings
+                    .enabled_optionals
+                    .get(name)
+                    .is_some_and(|opt_setting| opt_setting.should_be_loaded())
             } else {
                 true
             }
@@ -132,7 +135,9 @@ mod tests {
             enabled_optionals: HashSet::new(),
             external_addons: HashSet::new(),
         };
-        user_settings.enabled_optionals.insert("optional_enabled".to_string());
+        user_settings
+            .enabled_optionals
+            .insert("optional_enabled".to_string());
 
         config.remove_disabled_optionals(&user_settings);
 
@@ -153,16 +158,15 @@ mod tests {
             None,
         );
 
-        config.addons.insert(
-            "@addon1".to_string(),
-            AddonSettings { is_optional: false },
-        );
-        config.addons.insert(
-            "@addon2".to_string(),
-            AddonSettings { is_optional: true },
-        );
+        config
+            .addons
+            .insert("@addon1".to_string(), AddonSettings { is_optional: false });
+        config
+            .addons
+            .insert("@addon2".to_string(), AddonSettings { is_optional: true });
 
-        let temp_dir = std::env::temp_dir().join(format!("pamm_test_addon_paths_{}", std::process::id()));
+        let temp_dir =
+            std::env::temp_dir().join(format!("pamm_test_addon_paths_{}", std::process::id()));
         let _cleanup = TestTempDir::new(temp_dir.clone());
         let addon_dir = temp_dir.join("test_pack_for_paths_pack_addons");
 
@@ -173,8 +177,16 @@ mod tests {
         paths.sort();
 
         assert_eq!(paths.len(), 2);
-        assert!(paths.iter().any(|p| p.ends_with("@addon1") || p.ends_with("@addon1/")));
-        assert!(paths.iter().any(|p| p.ends_with("@addon2") || p.ends_with("@addon2/")));
+        assert!(
+            paths
+                .iter()
+                .any(|p| p.ends_with("@addon1") || p.ends_with("@addon1/"))
+        );
+        assert!(
+            paths
+                .iter()
+                .any(|p| p.ends_with("@addon2") || p.ends_with("@addon2/"))
+        );
 
         let empty_config = PackConfig::new(
             "test_empty_pack_paths".to_string(),
