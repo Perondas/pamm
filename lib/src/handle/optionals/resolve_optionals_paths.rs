@@ -5,16 +5,16 @@ use std::collections::HashSet;
 use std::path::PathBuf;
 
 impl RepoHandle {
-    pub(in crate::handle) fn resolve_optionals(
+    pub(in crate::handle) fn resolve_optionals_paths(
         &self,
         pack_name: &str,
     ) -> anyhow::Result<Vec<PathBuf>> {
         let (pack_config, settings) = self.get_pack_with_settings(pack_name)?;
 
-        self.resolve_optionals_recursive(pack_config, settings.enabled_optionals)
+        self.resolve_optionals_paths_recursive(pack_config, settings.enabled_optionals)
     }
 
-    fn resolve_optionals_recursive(
+    fn resolve_optionals_paths_recursive(
         &self,
         config: PackConfig,
         optionals: HashSet<String>,
@@ -28,8 +28,8 @@ impl RepoHandle {
         for optional in &optionals {
             if config
                 .addons
-                .iter()
-                .any(|(name, addon)| name == optional && addon.is_optional)
+                .get(optional)
+                .is_some_and(|addon| addon.is_optional)
             {
                 let optional_path = addon_dir.join(optional);
                 res.push(optional_path);
@@ -38,7 +38,7 @@ impl RepoHandle {
 
         let mut others = if let Some(parent) = config.parent {
             let (pack_config, _) = self.get_pack_with_settings(&parent)?;
-            self.resolve_optionals_recursive(pack_config, optionals)?
+            self.resolve_optionals_paths_recursive(pack_config, optionals)?
         } else {
             vec![]
         };

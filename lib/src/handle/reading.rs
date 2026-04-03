@@ -78,7 +78,7 @@ impl RepoHandle {
         let addons = self
             .resolve_addons(pack_name)?
             .iter()
-            .chain(&self.resolve_optionals(pack_name)?)
+            .chain(&self.resolve_optionals_paths(pack_name)?)
             .map(|p| {
                 p.canonicalize()
                     .with_context(|| format!("Failed to canonicalize {:#?}", p))
