@@ -158,15 +158,13 @@ mod tests {
             .addons
             .insert("@addon2".to_string(), AddonSettings { is_optional: true });
 
-        let temp_dir =
-            std::env::temp_dir().join(format!("pamm_test_addon_paths_{}", std::process::id()));
-        let _cleanup = TestTempDir::new(temp_dir.clone());
-        let addon_dir = temp_dir.join("test_pack_for_paths_pack_addons");
+        let temp_dir = TestTempDir::new("pamm_test_addon_paths_");
+        let addon_dir = temp_dir.path().join("test_pack_for_paths_pack_addons");
 
         std::fs::create_dir_all(addon_dir.join("@addon1")).unwrap();
         std::fs::create_dir_all(addon_dir.join("@addon2")).unwrap();
 
-        let mut paths = config.get_addon_paths(&temp_dir);
+        let mut paths = config.get_addon_paths(temp_dir.path());
         paths.sort();
 
         assert_eq!(paths.len(), 2);
@@ -188,6 +186,6 @@ mod tests {
             vec![],
             None,
         );
-        assert!(empty_config.get_addon_paths(&temp_dir).is_empty());
+        assert!(empty_config.get_addon_paths(temp_dir.path()).is_empty());
     }
 }

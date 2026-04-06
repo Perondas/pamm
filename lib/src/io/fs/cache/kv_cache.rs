@@ -54,7 +54,6 @@ mod tests {
     use super::*;
     use crate::util::test_utils::TestTempDir;
     use serde::{Deserialize, Serialize};
-    use std::fs;
 
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct TestData {
@@ -64,13 +63,9 @@ mod tests {
 
     #[test]
     fn test_kv_cache_operations() {
-        let temp_path = std::env::temp_dir().join("pamm_test_kv_cache");
-        if temp_path.exists() {
-            fs::remove_dir_all(&temp_path).ok();
-        }
-        let _temp = TestTempDir::new(temp_path.clone());
+        let temp = TestTempDir::new("pamm_test_kv_cache");
 
-        let cache = KVCache::new(&temp_path).unwrap();
+        let cache = KVCache::new(temp.path()).unwrap();
 
         // 1. Test get on empty
         let empty_val: Option<String> = cache.get("doesntexist").unwrap();
