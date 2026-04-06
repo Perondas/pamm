@@ -81,7 +81,6 @@ impl PackConfig {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::collections::HashSet;
 
     #[test]
     fn test_new_pack_config() {
@@ -129,7 +128,9 @@ mod tests {
         );
 
         let mut user_settings = PackUserSettings::default();
-        user_settings.enabled_optionals.insert("optional_enabled".to_string());
+        user_settings
+            .enabled_optionals
+            .insert("optional_enabled".to_string());
 
         config.remove_disabled_optionals(&user_settings);
 
@@ -150,16 +151,15 @@ mod tests {
             None,
         );
 
-        config.addons.insert(
-            "@addon1".to_string(),
-            AddonSettings { is_optional: false },
-        );
-        config.addons.insert(
-            "@addon2".to_string(),
-            AddonSettings { is_optional: true },
-        );
+        config
+            .addons
+            .insert("@addon1".to_string(), AddonSettings { is_optional: false });
+        config
+            .addons
+            .insert("@addon2".to_string(), AddonSettings { is_optional: true });
 
-        let temp_dir = std::env::temp_dir().join(format!("pamm_test_addon_paths_{}", std::process::id()));
+        let temp_dir =
+            std::env::temp_dir().join(format!("pamm_test_addon_paths_{}", std::process::id()));
         let _cleanup = TestTempDir::new(temp_dir.clone());
         let addon_dir = temp_dir.join("test_pack_for_paths_pack_addons");
 
@@ -170,8 +170,16 @@ mod tests {
         paths.sort();
 
         assert_eq!(paths.len(), 2);
-        assert!(paths.iter().any(|p| p.ends_with("@addon1") || p.ends_with("@addon1/")));
-        assert!(paths.iter().any(|p| p.ends_with("@addon2") || p.ends_with("@addon2/")));
+        assert!(
+            paths
+                .iter()
+                .any(|p| p.ends_with("@addon1") || p.ends_with("@addon1/"))
+        );
+        assert!(
+            paths
+                .iter()
+                .any(|p| p.ends_with("@addon2") || p.ends_with("@addon2/"))
+        );
 
         let empty_config = PackConfig::new(
             "test_empty_pack_paths".to_string(),
