@@ -1,6 +1,9 @@
-use crate::commands::externals::add_external::AddExternalArgs;
-use crate::commands::externals::toggle_externals::ToggleExternalsArgs;
+use add_external::AddExternalArgs;
+use toggle_externals::ToggleExternalsArgs;
 use clap::Subcommand;
+
+pub mod toggle_externals;
+pub mod add_external;
 
 #[derive(Debug, clap::Args)]
 pub struct ExternalsArgs {

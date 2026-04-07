@@ -7,18 +7,18 @@ pub mod utils;
 
 use crate::args::{AppSubcommand, Args};
 use crate::commands::add_pack::add_pack_command;
-use crate::commands::externals::add_external::add_external_command;
+use subcommands::externals::add_external::add_external_command;
 use crate::commands::init_remote::init_remote_command;
 use crate::commands::init_repo::init_repo_command;
 use crate::commands::launch::launch_command;
-use crate::commands::optionals::toggle_optionals::toggle_optionals_command;
+use subcommands::optionals::toggle_optionals::toggle_optionals_command;
 use crate::commands::sync_pack::sync_pack_command;
 use crate::commands::update_pack::update_pack_command;
 use crate::subcommands::externals::ExternalsSubcommand;
 use crate::subcommands::optionals::OptionalsSubcommand;
 use anyhow::Result;
 use clap::Parser;
-use commands::externals::toggle_externals::toggle_externals_command;
+use subcommands::externals::toggle_externals::toggle_externals_command;
 
 fn main() -> Result<()> {
     let args = Args::parse();

@@ -1,5 +1,7 @@
-use crate::commands::optionals::toggle_optionals::ToggleOptionalsArgs;
+use toggle_optionals::ToggleOptionalsArgs;
 use clap::Subcommand;
+
+pub mod toggle_optionals;
 
 #[derive(Debug, clap::Args)]
 pub struct OptionalArgs {
