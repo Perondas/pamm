@@ -6,3 +6,4 @@ pub mod repo_handle;
 pub mod writing;
 pub mod addons;
 pub mod params;
+pub mod downloading;

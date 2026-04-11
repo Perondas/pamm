@@ -19,32 +19,12 @@ pub fn get_diff(
     dart_progress_reporter: &DartProgressReporter,
     clear_cache: bool,
 ) -> anyhow::Result<DiffResult> {
-    let current_dir = Path::new(&repo_path);
+    let repo_dir = Path::new(&repo_path);
 
-    let handle = RepoHandle::open(current_dir)?;
+    let handle = RepoHandle::open(repo_dir)?;
 
-    let repo_user_settings = handle.get_repo_user_settings()?;
-
-    let (_, user_settings) = handle.get_pack_with_settings(&pack_name)?;
-
-    let index_generator =
-        IndexGenerator::from_handle(&handle, &pack_name, dart_progress_reporter.clone())?;
-
-    if clear_cache {
-        index_generator.clear_cache()?;
-    }
-
-    let actual_index = index_generator.index_addons()?;
-
-    let mut remote_pack_config =
-        PackConfig::download_named(repo_user_settings.get_remote(), &pack_name)?;
-
-    remote_pack_config.remove_disabled_optionals(&user_settings);
-
-    let remote_index = remote_pack_config.download_indexes(repo_user_settings.get_remote())?;
-
-    let diff = diff_packs(actual_index, remote_index.clone())?;
-
+    let diff = handle.get_pack_diff(&pack_name, dart_progress_reporter.clone(), clear_cache)?;
+    
     let file_changes = diff
         .addon_diffs
         .iter()
