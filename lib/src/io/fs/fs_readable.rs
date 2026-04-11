@@ -4,7 +4,7 @@ use crate::io::serialization::readable::Readable;
 use anyhow::{Context, anyhow};
 use std::path::Path;
 
-pub trait FsReadable: Sized {
+pub(crate) trait FsReadable: Sized {
     fn read_from_path<P: AsRef<Path>>(path: P) -> anyhow::Result<Self>;
 }
 
@@ -16,7 +16,7 @@ impl<T: Readable> FsReadable for T {
     }
 }
 
-pub trait KnownFSReadable: FsReadable + KnownFile {
+pub(crate) trait KnownFSReadable: FsReadable + KnownFile {
     fn read_from_known<P: AsRef<Path>>(path: P) -> anyhow::Result<Self>;
 }
 
@@ -27,7 +27,7 @@ impl<T: FsReadable + KnownFile> KnownFSReadable for T {
     }
 }
 
-pub trait NamedFSReadable: FsReadable + NamedFile {
+pub(crate) trait NamedFSReadable: FsReadable + NamedFile {
     fn read_from_named<P: AsRef<Path>>(path: P, identifier: &str) -> anyhow::Result<Self>;
 }
 

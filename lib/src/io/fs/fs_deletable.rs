@@ -3,7 +3,8 @@ use crate::io::named_file::NamedFile;
 use anyhow::{Context, anyhow};
 use std::path::Path;
 
-pub trait KnownFsDeletable: Sized + KnownFile {
+#[allow(dead_code)]
+pub(crate) trait KnownFsDeletable: Sized + KnownFile {
     fn delete_known<P: AsRef<Path>>(path: P) -> anyhow::Result<()>;
 }
 
@@ -18,7 +19,7 @@ impl<T: KnownFile + Sized> KnownFsDeletable for T {
     }
 }
 
-pub trait NamedFsDeletable: Sized + NamedFile {
+pub(crate) trait NamedFsDeletable: Sized + NamedFile {
     fn delete_named<P: AsRef<Path>>(path: P, identifier: &str) -> anyhow::Result<()>;
 }
 

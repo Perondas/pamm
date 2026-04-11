@@ -5,7 +5,7 @@ use crate::io::serialization::writable::Writable;
 use anyhow::{Context, anyhow};
 use std::path::Path;
 
-pub trait FsWritable: Sized {
+pub(crate) trait FsWritable: Sized {
     fn write_to_path<P: AsRef<Path>>(&self, path: P) -> anyhow::Result<()>;
 }
 
@@ -17,7 +17,7 @@ impl<T: Writable> FsWritable for T {
     }
 }
 
-pub trait KnownFSWritable: FsWritable + KnownFile {
+pub(crate) trait KnownFSWritable: FsWritable + KnownFile {
     fn write_to<P: AsRef<Path>>(&self, path: P) -> anyhow::Result<()>;
 }
 
@@ -29,7 +29,7 @@ impl<T: FsWritable + KnownFile> KnownFSWritable for T {
     }
 }
 
-pub trait NamedFSWritable: FsWritable + NamedFile {
+pub(crate) trait NamedFSWritable: FsWritable + NamedFile {
     fn write_to_named<P: AsRef<Path>>(&self, path: P, identifier: &str) -> anyhow::Result<()>;
 }
 
@@ -41,7 +41,7 @@ impl<T: FsWritable + NamedFile> NamedFSWritable for T {
     }
 }
 
-pub trait IdentifiableFSWritable: NamedFSWritable + Identifiable {
+pub(crate) trait IdentifiableFSWritable: NamedFSWritable + Identifiable {
     fn write_to<P: AsRef<Path>>(&self, base_path: P) -> anyhow::Result<()>;
 }
 
