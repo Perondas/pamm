@@ -3,13 +3,10 @@ use crate::api::frb;
 use crate::api::progress_reporting::DartProgressReporter;
 use crate::frb_generated::RustAutoOpaque;
 use pamm_lib::handle::repo_handle::RepoHandle;
-use pamm_lib::io::fs::pack::index_generator::IndexGenerator;
-use pamm_lib::io::net::downloadable::NamedDownloadable;
 use pamm_lib::models::identifiable::Identifiable;
 use pamm_lib::models::index::get_dl_size::GetDlSize;
 use pamm_lib::models::index::get_size_change::GetSizeChange;
-use pamm_lib::models::pack::pack_config::PackConfig;
-use pamm_lib::models::pack::pack_diff::{diff_packs, PackDiff};
+use pamm_lib::models::pack::pack_diff::PackDiff;
 use std::collections::HashMap;
 use std::path::Path;
 
