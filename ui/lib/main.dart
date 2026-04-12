@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pamm_ui/src/pages/main_screen/main.dart';
 import 'package:pamm_ui/src/rust/frb_generated.dart';
 import 'package:pamm_ui/src/services/rust_log_service.dart';
+import 'package:pamm_ui/src/services/update_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final getIt = GetIt.instance;
 late final RustLogService rustLogService;
@@ -16,6 +17,10 @@ Future<void> main() async {
 
   rustLogService = RustLogService();
 
+  Future.delayed(Duration(seconds: 2), () {
+    checkForUpdates();
+  });
+
   runApp(const MyApp());
 }
 
@@ -25,6 +30,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: NavigationService.navigatorKey,
       home: MainScreen(),
       theme: ThemeData.from(
         colorScheme: ColorScheme.fromSeed(
@@ -41,4 +47,9 @@ void configureDI() {
       cacheOptions: SharedPreferencesWithCacheOptions(),
     );
   });
+}
+
+
+class NavigationService {
+  static final navigatorKey = GlobalKey<NavigatorState>();
 }
