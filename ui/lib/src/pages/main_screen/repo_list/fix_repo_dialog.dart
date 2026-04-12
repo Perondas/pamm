@@ -122,7 +122,7 @@ class _FixRepoDialogState extends State<FixRepoDialog> {
   // New: open a native folder picker and write the chosen path to the controller.
   Future<void> _pickTargetDir() async {
     try {
-      final selected = await FilePicker.platform.getDirectoryPath();
+      final selected = await FilePicker.getDirectoryPath();
       if (selected != null) {
         _targetDirController.text = selected;
         setState(() {});

@@ -76,7 +76,7 @@ class _ExternalsListState extends State<ExternalsList> {
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton.icon(
               onPressed: () async {
-                final selected = await FilePicker.platform.getDirectoryPath();
+                final selected = await FilePicker.getDirectoryPath();
                 if (selected != null) {
                   var newExternal = ExternalAddon(
                     name: null,
