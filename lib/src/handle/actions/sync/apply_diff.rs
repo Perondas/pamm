@@ -11,7 +11,7 @@ impl RepoHandle {
         diff: PackDiff,
     ) -> anyhow::Result<()> {
         ensure!(
-            diff.target_index.pack_name != pack_name,
+            diff.target_index.pack_name == pack_name,
             "Diff pack name '{}' does not match target pack name '{}'",
             diff.target_index.pack_name,
             pack_name
