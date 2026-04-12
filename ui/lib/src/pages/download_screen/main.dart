@@ -33,7 +33,7 @@ class _DownloadScreenState extends State<DownloadScreen> {
           repoPath: widget.repoPath,
           dartProgressReporter:
               widget.progressReporterService.underlyingReporter,
-          packDiff: widget.diffResult.diff,
+          diff: widget.diffResult.diff,
         );
 
         if (!mounted) return;

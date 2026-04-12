@@ -723,7 +723,7 @@ fn wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(
             let api_pack_name = <String>::sse_decode(&mut deserializer);
             let api_repo_path = <String>::sse_decode(&mut deserializer);
             let api_dart_progress_reporter = <DartProgressReporter>::sse_decode(&mut deserializer);
-            let api_pack_diff = <OpaqueDiff>::sse_decode(&mut deserializer);
+            let api_diff = <OpaqueDiff>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
@@ -732,7 +732,7 @@ fn wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(
                             api_pack_name,
                             api_repo_path,
                             api_dart_progress_reporter,
-                            api_pack_diff,
+                            api_diff,
                         )?;
                         Ok(output_ok)
                     })(),

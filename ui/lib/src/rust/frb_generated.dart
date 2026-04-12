@@ -171,7 +171,7 @@ abstract class RustLibApi extends BaseApi {
     required String packName,
     required String repoPath,
     required DartProgressReporter dartProgressReporter,
-    required OpaqueDiff packDiff,
+    required OpaqueDiff diff,
   });
 
   RustArcIncrementStrongCountFnType
@@ -763,7 +763,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     required String packName,
     required String repoPath,
     required DartProgressReporter dartProgressReporter,
-    required OpaqueDiff packDiff,
+    required OpaqueDiff diff,
   }) {
     return handler.executeNormal(
       NormalTask(
@@ -776,7 +776,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             serializer,
           );
           sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
-            packDiff,
+            diff,
             serializer,
           );
           pdeCallFfi(
@@ -791,7 +791,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: sse_decode_AnyhowException,
         ),
         constMeta: kCrateApiCommandsPackSyncSyncPackSyncPackConstMeta,
-        argValues: [packName, repoPath, dartProgressReporter, packDiff],
+        argValues: [packName, repoPath, dartProgressReporter, diff],
         apiImpl: this,
       ),
     );
@@ -800,7 +800,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiCommandsPackSyncSyncPackSyncPackConstMeta =>
       const TaskConstMeta(
         debugName: "sync_pack",
-        argNames: ["packName", "repoPath", "dartProgressReporter", "packDiff"],
+        argNames: ["packName", "repoPath", "dartProgressReporter", "diff"],
       );
 
   RustArcIncrementStrongCountFnType
