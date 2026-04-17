@@ -1,7 +1,6 @@
 use crate::handle::repo_handle::RepoHandle;
 use crate::io::name_consts::get_pack_addon_directory_name;
-use crate::models::pack::pack_config::PackConfig;
-use std::collections::HashSet;
+use log::{debug, trace};
 use std::path::PathBuf;
 
 impl RepoHandle {
@@ -9,39 +8,44 @@ impl RepoHandle {
         &self,
         pack_name: &str,
     ) -> anyhow::Result<Vec<PathBuf>> {
-        let (pack_config, settings) = self.get_pack_with_settings(pack_name)?;
+        let (config, settings) = self.get_pack_with_settings(pack_name)?;
 
-        self.resolve_optionals_paths_recursive(pack_config, settings.enabled_optionals)
-    }
-
-    fn resolve_optionals_paths_recursive(
-        &self,
-        config: PackConfig,
-        optionals: HashSet<String>,
-    ) -> anyhow::Result<Vec<PathBuf>> {
         let mut res = Vec::new();
 
         let addon_dir = self
             .repo_path
             .join(get_pack_addon_directory_name(&config.name));
 
-        for optional in &optionals {
+        for optional in &settings.enabled_optionals {
             if config
                 .addons
                 .get(optional)
                 .is_some_and(|addon| addon.is_optional)
             {
+                trace!(
+                    "Optional addon '{}' is enabled for pack '{}'",
+                    optional, config.name
+                );
                 let optional_path = addon_dir.join(optional);
                 res.push(optional_path);
             }
         }
 
+        debug!(
+            "Optional addon paths for pack '{}': {:#?}",
+            config.name, res
+        );
+
         let mut others = if let Some(parent) = config.parent {
-            let (pack_config, _) = self.get_pack_with_settings(&parent)?;
-            self.resolve_optionals_paths_recursive(pack_config, optionals)?
+            self.resolve_optionals_paths(&parent)?
         } else {
             vec![]
         };
+
+        debug!(
+            "Parent optional addon paths for pack '{}': {:#?}",
+            config.name, others
+        );
 
         res.append(&mut others);
 
