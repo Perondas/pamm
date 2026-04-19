@@ -1,6 +1,5 @@
 use crate::handle::reading::get_pack::GetPack;
-use crate::io::fs::util::clean_path::clean_path;
-use anyhow::Context;
+use crate::io::fs::util::clean_path::canonicalize_and_clean_path;
 use std::path::PathBuf;
 
 impl<T> GetExternalAddonsPaths for T
@@ -15,11 +14,7 @@ where
             .iter()
             .filter(|addon| addon.enabled)
             .map(|addon| PathBuf::from(addon.path.to_owned()))
-            .map(|p| {
-                p.canonicalize()
-                    .with_context(|| format!("Failed to canonicalize {:#?}", p))
-            })
-            .map(|p| p.map(clean_path))
+            .map(canonicalize_and_clean_path)
             .collect::<anyhow::Result<Vec<_>>>()
     }
 }
@@ -33,6 +28,7 @@ mod tests {
     use super::*;
     use crate::handle::externals::external_addon::ExternalAddon;
     use crate::handle::mock_handle::MockHandle;
+    use crate::io::fs::util::clean_path::canonicalize_and_clean_path;
     use crate::models::pack::pack_config::PackConfig;
     use crate::models::pack::pack_user_settings::PackUserSettings;
 
@@ -74,6 +70,6 @@ mod tests {
         let valid_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .canonicalize()
             .unwrap();
-        assert_eq!(paths[0], clean_path(valid_path));
+        assert_eq!(paths[0], canonicalize_and_clean_path(valid_path).unwrap());
     }
 }

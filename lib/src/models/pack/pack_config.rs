@@ -1,11 +1,10 @@
-use crate::io::fs::util::clean_path::clean_path;
+use crate::io::fs::util::clean_path::canonicalize_and_clean_path;
 use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::models::pack::addon::AddonSettings;
 use crate::models::pack::pack_diff::PackDiff;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use crate::models::pack::server_info::ServerInfo;
 use crate::named;
-use anyhow::Context;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::Path;
@@ -58,12 +57,7 @@ impl PackConfig {
         self.addons
             .iter()
             .map(|addon| addon_dir.join(addon.0))
-            .map(|p| {
-                p.canonicalize()
-                    .with_context(|| format!("Failed to canonicalize {}", p.display()))
-                    .unwrap()
-            })
-            .map(clean_path)
+            .map(|p| canonicalize_and_clean_path(&p).unwrap())
             .collect()
     }
 

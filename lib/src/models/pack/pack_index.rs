@@ -1,4 +1,4 @@
-use crate::io::fs::util::clean_path::clean_path;
+use crate::io::fs::util::clean_path::canonicalize_and_clean_path;
 use crate::models::index::index_node::IndexNode;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
@@ -19,12 +19,9 @@ impl PackIndex {
         self.addons
             .iter()
             .map(|node| {
-                base_path
-                    .join(&node.name)
-                    .canonicalize()
+                canonicalize_and_clean_path(base_path.join(&node.name))
                     .expect("Failed to canonicalize path")
             })
-            .map(clean_path)
             .collect()
     }
 }

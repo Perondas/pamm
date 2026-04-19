@@ -3,7 +3,7 @@ use crate::handle::externals::get_external_addons_paths::GetExternalAddonsPaths;
 use crate::handle::optionals::get_optionals_paths::GetOptionalsPaths;
 use crate::handle::reading::get_pack::GetPack;
 use crate::handle::reading::get_repo_info::GetRepoInfo;
-use crate::io::fs::util::clean_path::clean_path;
+use crate::io::fs::util::clean_path::canonicalize_and_clean_path;
 use anyhow::{Context, anyhow};
 
 pub trait GetAddonPaths {
@@ -21,11 +21,7 @@ where
             .resolve_addons(pack_name)?
             .iter()
             .chain(&self.get_optional_paths(pack_name)?)
-            .map(|p| {
-                p.canonicalize()
-                    .with_context(|| format!("Failed to canonicalize {:#?}", p))
-            })
-            .map(|p| p.map(clean_path))
+            .map(canonicalize_and_clean_path)
             .collect::<anyhow::Result<Vec<_>>>()?;
 
         let externals = self
