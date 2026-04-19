@@ -1,6 +1,6 @@
 use crate::handle::addons::ResolveAddons;
 use crate::handle::externals::get_external_addons_paths::GetExternalAddonsPaths;
-use crate::handle::optionals::get_optionals_pahts::GetOptionalsPaths;
+use crate::handle::optionals::get_optionals_paths::GetOptionalsPaths;
 use crate::handle::reading::get_pack::GetPack;
 use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::io::fs::util::clean_path::clean_path;
