@@ -3,6 +3,7 @@ use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use anyhow::{Context, anyhow, ensure};
 
+#[cfg_attr(test, mockall::automock)]
 pub trait GetPack {
     fn get_pack(&self, pack_name: &str) -> anyhow::Result<PackConfig>;
     fn get_pack_with_settings(

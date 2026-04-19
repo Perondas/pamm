@@ -1,9 +1,12 @@
 pub mod actions;
+pub mod addons;
+pub mod downloading;
 pub mod externals;
 pub mod optionals;
+pub mod params;
 pub mod reading;
 pub mod repo_handle;
 pub mod writing;
-pub mod addons;
-pub mod params;
-pub mod downloading;
+
+#[cfg(test)]
+pub mod mock_handle;

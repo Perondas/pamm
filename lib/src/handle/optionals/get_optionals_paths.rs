@@ -54,6 +54,76 @@ where
     }
 }
 
-pub(in crate::handle) trait GetOptionalsPaths {
+pub trait GetOptionalsPaths {
     fn get_optional_paths(&self, pack_name: &str) -> anyhow::Result<Vec<PathBuf>>;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::handle::mock_handle::{MockHandle, MockHandleExt};
+    use std::path::PathBuf;
+
+    #[test]
+    fn test_get_optional_paths() {
+        let mut mock = MockHandle::new();
+
+        mock.mock_pack(
+            "test_pack",
+            None,
+            &["@opt_addon"],
+            &["@req_addon"],
+            &["@opt_addon", "@req_addon"],
+        );
+
+        mock.expect_get_repo_path()
+            .return_const(PathBuf::from("/repo"));
+
+        let paths = mock.get_optional_paths("test_pack").unwrap();
+
+        assert_eq!(paths.len(), 1);
+        assert_eq!(
+            paths[0],
+            PathBuf::from("/repo")
+                .join(get_pack_addon_directory_name("test_pack"))
+                .join("@opt_addon")
+        );
+    }
+
+    #[test]
+    fn test_get_optional_paths_with_parent() {
+        let mut mock = MockHandle::new();
+
+        mock.mock_pack(
+            "child_pack",
+            Some("parent_pack"),
+            &["@child_opt"],
+            &[],
+            &["@child_opt"],
+        );
+
+        mock.mock_pack("parent_pack", None, &["@parent_opt"], &[], &["@parent_opt"]);
+
+        mock.expect_get_repo_path()
+            .return_const(PathBuf::from("/repo"));
+
+        let mut paths = mock.get_optional_paths("child_pack").unwrap();
+
+        // Sort to ensure consistent order for assertions
+        paths.sort();
+
+        assert_eq!(paths.len(), 2);
+
+        let mut expected_paths = vec![
+            PathBuf::from("/repo")
+                .join(get_pack_addon_directory_name("child_pack"))
+                .join("@child_opt"),
+            PathBuf::from("/repo")
+                .join(get_pack_addon_directory_name("parent_pack"))
+                .join("@parent_opt"),
+        ];
+        expected_paths.sort();
+
+        assert_eq!(paths, expected_paths);
+    }
 }

@@ -1,5 +1,7 @@
 use clap::Args;
 use pamm_lib::handle::externals::external_addon::ExternalAddon;
+use pamm_lib::handle::externals::load_externals::LoadExternals;
+use pamm_lib::handle::externals::save_externals::SaveExternals;
 use pamm_lib::handle::repo_handle::RepoHandle;
 use std::path::Path;
 
@@ -14,7 +16,7 @@ pub fn toggle_externals_command(args: ToggleExternalsArgs) -> anyhow::Result<()>
     let handle = RepoHandle::open(&std::env::current_dir()?)?;
 
     let mut externals = handle.load_externals(&args.name)?;
-    
+
     let selection = dialoguer::MultiSelect::new()
         .with_prompt("What externals to enable?")
         .items(externals_to_name(&externals))

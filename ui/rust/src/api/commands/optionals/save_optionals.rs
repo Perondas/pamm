@@ -1,4 +1,5 @@
 use pamm_lib::handle::optionals::optional_addon::OptionalAddon;
+use pamm_lib::handle::optionals::SaveOptionals;
 use pamm_lib::handle::repo_handle::RepoHandle;
 
 pub fn save_optionals(

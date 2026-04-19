@@ -1,4 +1,5 @@
 use pamm_lib::handle::externals::external_addon::ExternalAddon;
+use pamm_lib::handle::externals::save_externals::SaveExternals;
 use pamm_lib::handle::repo_handle::RepoHandle;
 
 pub fn save_externals(

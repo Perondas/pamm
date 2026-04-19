@@ -1,6 +1,8 @@
 pub mod add_pack;
 pub mod apply_diff;
 pub mod delete_pack;
+pub mod save_pack_settings;
+
 pub mod update_pack;
 pub mod update_repo_config;
 

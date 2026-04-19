@@ -1,5 +1,6 @@
 use flutter_rust_bridge::frb;
 pub use pamm_lib::handle::externals::external_addon::ExternalAddon;
+use pamm_lib::handle::externals::load_externals::LoadExternals;
 use pamm_lib::handle::repo_handle::RepoHandle;
 
 pub fn load_externals(repot_path: String, pack_name: String) -> anyhow::Result<Vec<ExternalAddon>> {
