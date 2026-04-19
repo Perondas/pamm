@@ -1,4 +1,5 @@
 use clap::Args;
+use pamm_lib::handle::optionals::load_optionals::LoadOptionals;
 use pamm_lib::handle::repo_handle::RepoHandle;
 
 #[derive(Debug, Args)]

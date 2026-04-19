@@ -1,4 +1,5 @@
 use crate::handle::optionals::optional_addon::OptionalAddon;
+use crate::handle::reading::get_pack::GetPack;
 use crate::handle::repo_handle::RepoHandle;
 
 impl RepoHandle {
@@ -24,7 +25,7 @@ impl RepoHandle {
         settings.enabled_optionals = enabled;
 
         self.write_named(&settings, pack_name)?;
-        
+
         if let Some(parent) = &config.parent {
             self.save_optionals(parent, optionals)?;
         }

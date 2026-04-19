@@ -1,4 +1,5 @@
 use flutter_rust_bridge::frb;
+use pamm_lib::handle::optionals::load_optionals::LoadOptionals;
 pub use pamm_lib::handle::optionals::optional_addon::OptionalAddon;
 use pamm_lib::handle::repo_handle::RepoHandle;
 

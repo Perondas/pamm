@@ -1,4 +1,5 @@
 use clap::Args;
+use pamm_lib::handle::reading::get_repo_info::GetRepoInfo;
 use pamm_lib::handle::repo_handle::RepoHandle;
 use url::Url;
 

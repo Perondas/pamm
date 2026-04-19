@@ -1,3 +1,4 @@
+use crate::handle::reading::get_pack::GetPack;
 use crate::handle::repo_handle::RepoHandle;
 use log::debug;
 
@@ -20,7 +21,6 @@ impl RepoHandle {
     ) -> anyhow::Result<()> {
         let (_, mut settings) = self.get_pack_with_settings(pack_name)?;
 
-        
         debug!(
             "Setting launch parameters for pack '{}': {:?}",
             pack_name, launch_params

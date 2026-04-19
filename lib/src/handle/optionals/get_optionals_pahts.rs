@@ -1,19 +1,20 @@
-use crate::handle::repo_handle::RepoHandle;
+use crate::handle::reading::get_pack::GetPack;
+use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::io::name_consts::get_pack_addon_directory_name;
 use log::{debug, trace};
 use std::path::PathBuf;
 
-impl RepoHandle {
-    pub(in crate::handle) fn resolve_optionals_paths(
-        &self,
-        pack_name: &str,
-    ) -> anyhow::Result<Vec<PathBuf>> {
+impl<T> GetOptionalsPaths for T
+where
+    T: GetPack + GetRepoInfo,
+{
+    fn get_optional_paths(&self, pack_name: &str) -> anyhow::Result<Vec<PathBuf>> {
         let (config, settings) = self.get_pack_with_settings(pack_name)?;
 
         let mut res = Vec::new();
 
         let addon_dir = self
-            .repo_path
+            .get_repo_path()
             .join(get_pack_addon_directory_name(&config.name));
 
         for optional in &settings.enabled_optionals {
@@ -37,7 +38,7 @@ impl RepoHandle {
         );
 
         let mut others = if let Some(parent) = config.parent {
-            self.resolve_optionals_paths(&parent)?
+            self.get_optional_paths(&parent)?
         } else {
             vec![]
         };
@@ -51,4 +52,8 @@ impl RepoHandle {
 
         Ok(res)
     }
+}
+
+pub(in crate::handle) trait GetOptionalsPaths {
+    fn get_optional_paths(&self, pack_name: &str) -> anyhow::Result<Vec<PathBuf>>;
 }

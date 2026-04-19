@@ -3,6 +3,7 @@ use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::ToPrettyString;
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
+use pamm_lib::handle::reading::get_pack_index::GetPackIndex;
 use pamm_lib::handle::repo_handle::RepoHandle;
 use pamm_lib::io::fs::pack::index_generator::IndexGenerator;
 use pamm_lib::models::pack::pack_diff::diff_packs;

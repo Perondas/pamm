@@ -1,8 +1,11 @@
 use crate::handle::optionals::optional_addon::OptionalAddon;
-use crate::handle::repo_handle::RepoHandle;
+use crate::handle::reading::get_pack::GetPack;
 
-impl RepoHandle {
-    pub fn load_optionals(&self, pack_name: &str) -> anyhow::Result<Vec<OptionalAddon>> {
+impl<T> LoadOptionals for T
+where
+    T: GetPack,
+{
+    fn load_optionals(&self, pack_name: &str) -> anyhow::Result<Vec<OptionalAddon>> {
         let (pack_config, settings) = self.get_pack_with_settings(pack_name)?;
 
         let parent_optionals = if let Some(parent) = &pack_config.parent {
@@ -21,4 +24,8 @@ impl RepoHandle {
             .chain(parent_optionals)
             .collect())
     }
+}
+
+pub trait LoadOptionals {
+    fn load_optionals(&self, pack_name: &str) -> anyhow::Result<Vec<OptionalAddon>>;
 }
