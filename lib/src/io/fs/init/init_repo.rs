@@ -61,3 +61,37 @@ impl RepoConfig {
         Ok((repo, repo_user_settings))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::io::known_file::KnownFile;
+    use crate::util::test_utils::TestTempDir;
+    use std::collections::HashSet;
+
+    #[test]
+    fn test_init_blank_on_fs() {
+        let temp_dir = TestTempDir::new("test_repo_init_blank");
+        let base_path = temp_dir.path();
+
+        let mut packs = HashSet::new();
+        packs.insert("my_pack".to_string());
+
+        let config = RepoConfig::new("my_repo".to_string(), "A test repo".to_string(), packs);
+
+        // This should succeed
+        let created_path = config.init_blank_on_fs(base_path).unwrap();
+
+        assert!(created_path.exists());
+        assert!(created_path.is_dir());
+        assert_eq!(created_path.file_name().unwrap(), "my_repo");
+
+        // Check if config was written
+        let config_file = created_path.join(RepoConfig::file_name());
+        assert!(config_file.exists());
+
+        // Calling it again should fail since it already exists
+        let result = config.init_blank_on_fs(base_path);
+        assert!(result.is_err());
+    }
+}

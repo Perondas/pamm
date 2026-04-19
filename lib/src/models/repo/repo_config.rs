@@ -29,3 +29,32 @@ impl RepoConfig {
         result
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_repo_config_new() {
+        let mut packs = HashSet::new();
+        packs.insert("main_pack".to_string());
+
+        let config = RepoConfig::new("RepoName".to_string(), "Description".to_string(), packs);
+        assert_eq!(config.name, "RepoName");
+        assert_eq!(config.description, "Description");
+        assert!(config.packs.contains("main_pack"));
+    }
+
+    #[test]
+    fn test_repo_config_to_pretty_string() {
+        let mut packs = HashSet::new();
+        packs.insert("main_pack".to_string());
+
+        let config = RepoConfig::new("RepoName".to_string(), "Description".to_string(), packs);
+        let pretty = config.to_pretty_string();
+
+        assert!(pretty.contains("Repository: RepoName"));
+        assert!(pretty.contains("Description: Description"));
+        assert!(pretty.contains("- main_pack"));
+    }
+}
