@@ -5,6 +5,7 @@ use clap::Args;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::handle::reading::get_pack_index::GetPackIndex;
 use pamm_lib::handle::repo_handle::RepoHandle;
+use pamm_lib::handle::writing::apply_diff::ApplyDiff;
 use pamm_lib::io::fs::pack::index_generator::IndexGenerator;
 use pamm_lib::models::pack::pack_diff::diff_packs;
 use std::env::current_dir;

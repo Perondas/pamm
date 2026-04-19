@@ -2,6 +2,7 @@ use crate::commands::input::from_cli_input::FromCliInputWithContext;
 use clap::Args;
 use pamm_lib::handle::reading::get_repo_info::GetRepoInfo;
 use pamm_lib::handle::repo_handle::RepoHandle;
+use pamm_lib::handle::writing::add_pack::AddPack;
 use pamm_lib::models::pack::pack_config::PackConfig;
 
 #[derive(Debug, Args)]
