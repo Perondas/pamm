@@ -20,6 +20,8 @@ impl RepoHandle {
 
         let (config, _) = self.get_pack_with_settings(pack_name)?;
 
+        diff.write_checksum_index_to_fs(&self.repo_path)?;
+
         let diff_applier = config.diff_applier(self, self.get_remote_url()?, progress_reporter);
 
         diff_applier.apply(diff)

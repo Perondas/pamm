@@ -1,5 +1,4 @@
 use crate::io::fs::fs_deletable::NamedFsDeletable;
-use crate::io::fs::fs_readable::KnownFSReadable;
 use crate::io::fs::fs_writable::{IdentifiableFSWritable, KnownFSWritable};
 use crate::io::name_consts::{INDEX_DIR_NAME, get_pack_addon_directory_name};
 use crate::models::index::checksum_index::ChecksumIndex;
@@ -13,8 +12,6 @@ impl PackDiff {
         let addon_dir = base_path.join(get_pack_addon_directory_name(self.get_pack_name()));
         let index_dir = addon_dir.join(INDEX_DIR_NAME);
 
-        let mut checksum_index = ChecksumIndex::read_from_known(&index_dir).unwrap_or_default();
-
         for diff in &self.addon_diffs {
             match diff {
                 NodeDiff::Created(IndexNode { name, .. })
@@ -26,18 +23,34 @@ impl PackDiff {
                         .find(|node| &node.name == name)
                     {
                         new_node.write_to(&index_dir)?;
-                        checksum_index
-                            .checksums
-                            .insert(name.clone(), new_node.checksum.clone());
                     }
                 }
                 NodeDiff::Deleted { name, .. } => {
                     IndexNode::delete_named(&index_dir, name)?;
-                    checksum_index.checksums.remove(name);
                 }
                 NodeDiff::None(_) => (),
             }
         }
+
+        self.write_checksum_index_to_fs(base_path)?;
+
+        Ok(())
+    }
+
+    pub fn write_checksum_index_to_fs(&self, base_path: &Path) -> anyhow::Result<()> {
+        let index_dir = base_path
+            .join(get_pack_addon_directory_name(self.get_pack_name()))
+            .join(INDEX_DIR_NAME);
+
+        std::fs::create_dir_all(&index_dir)?;
+
+        let mut checksum_index = ChecksumIndex::default();
+        checksum_index.checksums = self
+            .target_index
+            .addons
+            .iter()
+            .map(|node| (node.name.clone(), node.checksum.clone()))
+            .collect();
 
         checksum_index.write_to(&index_dir)?;
 
