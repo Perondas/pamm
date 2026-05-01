@@ -1,3 +1,4 @@
+use crate::models::index::checksum_index::ChecksumIndex;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_user_settings::RepoUserSettings;
 
@@ -18,3 +19,5 @@ macro_rules! known_file_name {
 
 known_file_name!(RepoConfig, "repo.config.json");
 known_file_name!(RepoUserSettings, "user.repo.settings.json");
+
+known_file_name!(ChecksumIndex, "checksum_index.pamm");

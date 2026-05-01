@@ -4,3 +4,4 @@ pub mod get_dl_size;
 pub mod index_node;
 pub mod node_diff;
 pub mod get_size_change;
+pub mod checksum_index;
