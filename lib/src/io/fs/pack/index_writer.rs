@@ -4,21 +4,7 @@ use crate::io::name_consts::{INDEX_DIR_NAME, get_pack_addon_directory_name};
 use crate::models::index::index_node::IndexNode;
 use crate::models::index::node_diff::{NodeDiff, NodeModification};
 use crate::models::pack::pack_diff::PackDiff;
-use crate::models::pack::pack_index::PackIndex;
 use std::path::Path;
-
-impl PackIndex {
-    pub fn write_to_fs(&self, base_path: &Path) -> anyhow::Result<()> {
-        let addon_dir = base_path.join(get_pack_addon_directory_name(&self.pack_name));
-        let index_dir = addon_dir.join(INDEX_DIR_NAME);
-
-        for addon in &self.addons {
-            addon.write_to(&index_dir)?;
-        }
-
-        Ok(())
-    }
-}
 
 impl PackDiff {
     pub fn write_index_to_fs(&self, base_path: &Path) -> anyhow::Result<()> {
