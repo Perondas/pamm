@@ -44,13 +44,14 @@ impl PackDiff {
 
         std::fs::create_dir_all(&index_dir)?;
 
-        let mut checksum_index = ChecksumIndex::default();
-        checksum_index.checksums = self
-            .target_index
-            .addons
-            .iter()
-            .map(|node| (node.name.clone(), node.checksum.clone()))
-            .collect();
+        let checksum_index = ChecksumIndex {
+            checksums: self
+                .target_index
+                .addons
+                .iter()
+                .map(|node| (node.name.clone(), node.checksum.clone()))
+                .collect(),
+        };
 
         checksum_index.write_to(&index_dir)?;
 
