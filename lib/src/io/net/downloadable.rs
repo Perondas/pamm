@@ -2,6 +2,7 @@ use crate::io::known_file::KnownFile;
 use crate::io::named_file::NamedFile;
 use crate::io::serialization::readable::Readable;
 use anyhow::Context;
+use log::debug;
 use url::Url;
 
 pub trait Downloadable: Sized {
@@ -27,7 +28,14 @@ pub trait KnownDownloadable: Downloadable + KnownFile {
 
 impl<T: Downloadable + KnownFile> KnownDownloadable for T {
     fn download_known(url: &Url) -> anyhow::Result<Self> {
-        let full_url = url.join(Self::file_name())?;
+        let mut full_url = url.clone();
+
+        full_url
+            .path_segments_mut()
+            .unwrap_or_else(|_| panic!("Bad base url: {:?}", url))
+            .pop_if_empty()
+            .push(Self::file_name());
+        debug!("Downloading known file from URL: {}", full_url);
         Self::download(&full_url)
     }
 }

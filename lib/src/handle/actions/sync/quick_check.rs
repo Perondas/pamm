@@ -1,13 +1,14 @@
 use crate::handle::repo_handle::RepoHandle;
-use crate::io::name_consts::{INDEX_DIR_NAME, get_pack_addon_directory_name};
+use crate::io::fs::fs_readable::KnownFSReadable;
+use crate::io::name_consts::{get_pack_addon_directory_name, INDEX_DIR_NAME};
 use crate::io::net::downloadable::KnownDownloadable;
 use crate::io::rel_path::RelPath;
 use crate::models::index::checksum_index::ChecksumIndex;
-use crate::io::fs::fs_readable::KnownFSReadable;
-use anyhow::{Context, anyhow};
+use anyhow::{anyhow, Context};
+use log::debug;
 
 impl RepoHandle {
-    pub fn quick_check_pack(&mut self, pack_name: &str) -> anyhow::Result<bool> {
+    pub fn quick_check_pack_up_to_date(&mut self, pack_name: &str) -> anyhow::Result<bool> {
         let repo_user_settings = self
             .repo_user_settings
             .as_ref()
@@ -22,10 +23,13 @@ impl RepoHandle {
             .push(INDEX_DIR_NAME)
             .with_base_url(&remote_url);
 
-        let remote_repo_config = ChecksumIndex::download_known(&index_url).context(anyhow!(
-            "Failed to download checksum index from {}",
-            index_url
-        ))?;
+        debug!(
+            "Performing quick check for pack '{}'. Remote index URL: {}",
+            pack_name, index_url
+        );
+
+        let remote_repo_config = ChecksumIndex::download_known(&index_url)
+            .context(anyhow!("Failed to download checksum index"))?;
 
         let index_dir = addon_path
             .clone()
