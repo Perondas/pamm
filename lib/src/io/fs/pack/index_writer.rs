@@ -5,6 +5,7 @@ use crate::models::index::checksum_index::ChecksumIndex;
 use crate::models::index::index_node::IndexNode;
 use crate::models::index::node_diff::{NodeDiff, NodeModification};
 use crate::models::pack::pack_diff::PackDiff;
+use crate::models::pack::pack_index::PackIndex;
 use std::path::Path;
 
 impl PackDiff {
@@ -38,15 +39,20 @@ impl PackDiff {
     }
 
     pub fn write_checksum_index_to_fs(&self, base_path: &Path) -> anyhow::Result<()> {
+        self.target_index.write_checksum_index_to_fs(base_path)
+    }
+}
+
+impl PackIndex {
+    pub fn write_checksum_index_to_fs(&self, base_path: &Path) -> anyhow::Result<()> {
         let index_dir = base_path
-            .join(get_pack_addon_directory_name(self.get_pack_name()))
+            .join(get_pack_addon_directory_name(&self.pack_name))
             .join(INDEX_DIR_NAME);
 
         std::fs::create_dir_all(&index_dir)?;
 
         let checksum_index = ChecksumIndex {
             checksums: self
-                .target_index
                 .addons
                 .iter()
                 .map(|node| (node.name.clone(), node.checksum.clone()))

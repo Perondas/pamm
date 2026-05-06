@@ -101,6 +101,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool dco_decode_bool(dynamic raw);
 
   @protected
+  DiffResult dco_decode_box_autoadd_diff_result(dynamic raw);
+
+  @protected
   ChangeType dco_decode_change_type(dynamic raw);
 
   @protected
@@ -136,6 +139,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   String? dco_decode_opt_String(dynamic raw);
+
+  @protected
+  DiffResult? dco_decode_opt_box_autoadd_diff_result(dynamic raw);
 
   @protected
   OptionalAddon dco_decode_optional_addon(dynamic raw);
@@ -224,6 +230,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool sse_decode_bool(SseDeserializer deserializer);
 
   @protected
+  DiffResult sse_decode_box_autoadd_diff_result(SseDeserializer deserializer);
+
+  @protected
   ChangeType sse_decode_change_type(SseDeserializer deserializer);
 
   @protected
@@ -263,6 +272,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   String? sse_decode_opt_String(SseDeserializer deserializer);
+
+  @protected
+  DiffResult? sse_decode_opt_box_autoadd_diff_result(
+    SseDeserializer deserializer,
+  );
 
   @protected
   OptionalAddon sse_decode_optional_addon(SseDeserializer deserializer);
@@ -366,6 +380,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_bool(bool self, SseSerializer serializer);
 
   @protected
+  void sse_encode_box_autoadd_diff_result(
+    DiffResult self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_change_type(ChangeType self, SseSerializer serializer);
 
   @protected
@@ -415,6 +435,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_opt_String(String? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_opt_box_autoadd_diff_result(
+    DiffResult? self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_optional_addon(OptionalAddon self, SseSerializer serializer);

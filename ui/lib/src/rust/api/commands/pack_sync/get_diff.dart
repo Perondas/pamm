@@ -8,7 +8,7 @@ import '../../progress_reporting.dart';
 import 'file_change.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-Future<DiffResult> getDiff({
+Future<DiffResult?> getDiff({
   required String packName,
   required String repoPath,
   required DartProgressReporter dartProgressReporter,

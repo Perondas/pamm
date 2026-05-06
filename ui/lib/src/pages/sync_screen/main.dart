@@ -25,6 +25,47 @@ class _SyncScreenState extends State<SyncScreen> {
   DiffResult? diffResult;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _startSync();
+    });
+  }
+
+  Future<void> _startSync() async {
+    if (isSyncing) return;
+    setState(() {
+      isSyncing = true;
+    });
+    try {
+      var diff = await getDiff(
+        packName: widget.packName,
+        repoPath: widget.repoPath,
+        dartProgressReporter:
+            widget.progressReporterService.underlyingReporter,
+        clearCache: false,
+      );
+      if (!mounted) return;
+      setState(() {
+        diffResult = diff;
+        isSyncing = false;
+        isDoneSyncing = true;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        isSyncing = false;
+        error = e.toString();
+        isDoneSyncing = true;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error checking for updates: $e")),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Updating ${widget.packName}')),
@@ -38,7 +79,7 @@ class _SyncScreenState extends State<SyncScreen> {
               child: Center(
                 child: isDoneSyncing && (diffResult?.hasChanges ?? false)
                     ? _buildDownloadButton(context)
-                    : _buildSyncButton(),
+                    : const SizedBox.shrink(),
               ),
             ),
             if (error != null) ...[
@@ -54,8 +95,8 @@ class _SyncScreenState extends State<SyncScreen> {
                 color: Colors.red,
               ),
             ],
-            if (diffResult != null) ...[
-              if (diffResult!.hasChanges)
+            if (isDoneSyncing) ...[
+              if (diffResult?.hasChanges ?? false)
                 ..._buildDiffResult()
               else
                 const Center(
@@ -89,42 +130,6 @@ class _SyncScreenState extends State<SyncScreen> {
     },
     child: Text("Download"),
   );
-
-  Widget _buildSyncButton() {
-    return ElevatedButton(
-      onPressed: () async {
-        if (isSyncing) return;
-        setState(() {
-          isSyncing = true;
-        });
-        try {
-          var diff = await getDiff(
-            packName: widget.packName,
-            repoPath: widget.repoPath,
-            dartProgressReporter:
-                widget.progressReporterService.underlyingReporter,
-            clearCache: false,
-          );
-          if (!mounted) return;
-          setState(() {
-            diffResult = diff;
-            isSyncing = false;
-            isDoneSyncing = true;
-          });
-        } catch (e) {
-          setState(() {
-            isSyncing = false;
-            error = e.toString();
-          });
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Error checking for updates: $e")),
-          );
-        }
-      },
-      child: const Text('Check for updates'),
-    );
-  }
 
   List<Widget> _buildDiffResult() {
     return [

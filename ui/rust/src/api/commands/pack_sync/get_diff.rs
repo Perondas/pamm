@@ -15,13 +15,20 @@ pub fn get_diff(
     repo_path: String,
     dart_progress_reporter: &DartProgressReporter,
     clear_cache: bool,
-) -> anyhow::Result<DiffResult> {
+) -> anyhow::Result<Option<DiffResult>> {
     let repo_dir = Path::new(&repo_path);
 
     let handle = RepoHandle::open(repo_dir)?;
 
     let diff = handle.get_pack_diff(&pack_name, dart_progress_reporter.clone(), clear_cache)?;
-    
+
+    let diff = match diff {
+        Some(diff) if { diff.has_changes() } => diff,
+        _ => {
+            return Ok(None);
+        }
+    };
+
     let file_changes = diff
         .addon_diffs
         .iter()
@@ -32,14 +39,14 @@ pub fn get_diff(
         })
         .collect();
 
-    Ok(DiffResult {
+    Ok(Some(DiffResult {
         has_changes: diff.has_changes(),
         change_count: diff.change_count(),
         total_dl_size: diff.get_dl_size(),
         total_size_change: diff.get_size_change(),
         diff: RustAutoOpaque::new(OpaqueDiff(diff)),
         file_changes,
-    })
+    }))
 }
 
 pub struct DiffResult {

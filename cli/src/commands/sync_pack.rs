@@ -1,7 +1,6 @@
 use crate::log_wrapper::LogWrapper;
 use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::ToPrettyString;
-use anyhow::Context;
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::handle::actions::sync::config_sync_interactor::ConfigSyncInteractor;
@@ -24,15 +23,6 @@ pub fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow:
 
     repo_handle.sync_repo_config(&DialogerInteractor)?;
 
-    let qc_res = repo_handle
-        .quick_check_pack_up_to_date(&args.name)
-        .context("Failed to perform quick check")?;
-
-    if qc_res && !args.force_refresh {
-        println!("Pack is already up to date.");
-        return Ok(());
-    }
-
     let progress_reporter = if args.silent {
         IndicatifProgressReporter::disabled(log_wrapper)
     } else {
@@ -42,10 +32,13 @@ pub fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow:
     let diff =
         repo_handle.get_pack_diff(&args.name, progress_reporter.clone(), args.force_refresh)?;
 
-    if !diff.has_changes() {
-        println!("Pack is already up to date.");
-        return Ok(());
-    }
+    let diff = match diff {
+        Some(diff) if { diff.has_changes() } => diff,
+        _ => {
+            println!("Pack is already up to date.");
+            return Ok(());
+        }
+    };
 
     println!("{}", diff.to_pretty_string());
 

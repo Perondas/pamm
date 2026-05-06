@@ -1,15 +1,15 @@
 use crate::handle::repo_handle::RepoHandle;
 use crate::io::fs::cache::file_cache_entry::FileCacheEntry;
 use crate::io::fs::cache::kv_cache::KVCache;
-use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::io::name_consts::CACHE_DB_DIR_NAME;
+use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::io::rel_path::RelPath;
 use crate::models::index::index_node::FileKind;
 use crate::models::index::index_node::IndexNode;
 use crate::models::index::index_node::NodeKind;
 use crate::models::pack::pack_index::PackIndex;
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use bi_fs_rs::pbo::handle::PBOHandle;
 use rayon::iter::ParallelIterator;
 use rayon::prelude::IntoParallelIterator;
@@ -229,9 +229,10 @@ fn index_generic_file(fs_path: &PathBuf) -> Result<IndexNode> {
 
     let file_name = file_name_to_string(fs_path);
 
-    let mut file = std::fs::File::open(fs_path)?;
+    let file = std::fs::File::open(fs_path)?;
+    let mut buf_reader = std::io::BufReader::new(file);
     let mut hasher = blake3::Hasher::new();
-    let length = std::io::copy(&mut file, &mut hasher)?;
+    let length = std::io::copy(&mut buf_reader, &mut hasher)?;
     hasher.update(file_name.as_bytes());
     let checksum = hasher.finalize().as_bytes().to_vec();
 

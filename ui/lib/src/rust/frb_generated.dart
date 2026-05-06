@@ -97,7 +97,7 @@ abstract class RustLibApi extends BaseApi {
     required RustStreamSink<bool> finishSink,
   });
 
-  Future<DiffResult> crateApiCommandsPackSyncGetDiffGetDiff({
+  Future<DiffResult?> crateApiCommandsPackSyncGetDiffGetDiff({
     required String packName,
     required String repoPath,
     required DartProgressReporter dartProgressReporter,
@@ -248,7 +248,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<DiffResult> crateApiCommandsPackSyncGetDiffGetDiff({
+  Future<DiffResult?> crateApiCommandsPackSyncGetDiffGetDiff({
     required String packName,
     required String repoPath,
     required DartProgressReporter dartProgressReporter,
@@ -273,7 +273,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
         },
         codec: SseCodec(
-          decodeSuccessData: sse_decode_diff_result,
+          decodeSuccessData: sse_decode_opt_box_autoadd_diff_result,
           decodeErrorData: sse_decode_AnyhowException,
         ),
         constMeta: kCrateApiCommandsPackSyncGetDiffGetDiffConstMeta,
@@ -924,6 +924,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  DiffResult dco_decode_box_autoadd_diff_result(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_diff_result(raw);
+  }
+
+  @protected
   ChangeType dco_decode_change_type(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     switch (raw[0]) {
@@ -1034,6 +1040,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   String? dco_decode_opt_String(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw == null ? null : dco_decode_String(raw);
+  }
+
+  @protected
+  DiffResult? dco_decode_opt_box_autoadd_diff_result(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_diff_result(raw);
   }
 
   @protected
@@ -1223,6 +1235,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  DiffResult sse_decode_box_autoadd_diff_result(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_diff_result(deserializer));
+  }
+
+  @protected
   ChangeType sse_decode_change_type(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
@@ -1370,6 +1388,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
     if (sse_decode_bool(deserializer)) {
       return (sse_decode_String(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
+  DiffResult? sse_decode_opt_box_autoadd_diff_result(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_diff_result(deserializer));
     } else {
       return null;
     }
@@ -1587,6 +1618,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_box_autoadd_diff_result(
+    DiffResult self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_diff_result(self, serializer);
+  }
+
+  @protected
   void sse_encode_change_type(ChangeType self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     switch (self) {
@@ -1714,6 +1754,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_bool(self != null, serializer);
     if (self != null) {
       sse_encode_String(self, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_opt_box_autoadd_diff_result(
+    DiffResult? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_diff_result(self, serializer);
     }
   }
 

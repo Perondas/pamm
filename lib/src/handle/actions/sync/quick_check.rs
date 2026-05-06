@@ -1,3 +1,4 @@
+use crate::handle::reading::get_pack::GetPack;
 use crate::handle::repo_handle::RepoHandle;
 use crate::io::fs::fs_readable::KnownFSReadable;
 use crate::io::name_consts::{INDEX_DIR_NAME, get_pack_addon_directory_name};
@@ -6,9 +7,10 @@ use crate::io::rel_path::RelPath;
 use crate::models::index::checksum_index::ChecksumIndex;
 use anyhow::{Context, anyhow};
 use log::{debug, trace};
+use std::collections::HashSet;
 
 impl RepoHandle {
-    pub fn quick_check_pack_up_to_date(&mut self, pack_name: &str) -> anyhow::Result<bool> {
+    pub fn quick_check_pack_up_to_date(&self, pack_name: &str) -> anyhow::Result<bool> {
         let repo_user_settings = self
             .repo_user_settings
             .as_ref()
@@ -36,7 +38,31 @@ impl RepoHandle {
             .push(INDEX_DIR_NAME)
             .with_base_path(&self.repo_path);
 
-        let local_checksum_index = ChecksumIndex::read_from_known(&index_dir).unwrap_or_default();
+        let local_checksum_index = match ChecksumIndex::read_from_known(&index_dir) {
+            Ok(index) => index,
+            Err(_) => {
+                debug!(
+                    "Local checksum index for pack '{}' not found or unreadable. Assuming not up to date.",
+                    pack_name
+                );
+                return Ok(false);
+            }
+        };
+
+        let (mut local_config, settings) = self.get_pack_with_settings(pack_name)?;
+
+        local_config.remove_disabled_optionals(&settings);
+
+        let expected_addons: HashSet<_> = local_config.addons.keys().collect();
+        let actual_addons: HashSet<_> = local_checksum_index.checksums.keys().collect();
+
+        if expected_addons != actual_addons {
+            debug!(
+                "Local addons for pack '{}' do not match expected addons based on config/settings. Assuming not up to date.",
+                pack_name
+            );
+            return Ok(false);
+        }
 
         trace!(
             "Local checksum index for pack '{}': {:?}",
