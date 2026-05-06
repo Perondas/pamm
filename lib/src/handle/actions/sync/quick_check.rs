@@ -1,11 +1,11 @@
 use crate::handle::repo_handle::RepoHandle;
 use crate::io::fs::fs_readable::KnownFSReadable;
-use crate::io::name_consts::{get_pack_addon_directory_name, INDEX_DIR_NAME};
+use crate::io::name_consts::{INDEX_DIR_NAME, get_pack_addon_directory_name};
 use crate::io::net::downloadable::KnownDownloadable;
 use crate::io::rel_path::RelPath;
 use crate::models::index::checksum_index::ChecksumIndex;
-use anyhow::{anyhow, Context};
-use log::debug;
+use anyhow::{Context, anyhow};
+use log::{debug, trace};
 
 impl RepoHandle {
     pub fn quick_check_pack_up_to_date(&mut self, pack_name: &str) -> anyhow::Result<bool> {
@@ -38,6 +38,20 @@ impl RepoHandle {
 
         let local_checksum_index = ChecksumIndex::read_from_known(&index_dir).unwrap_or_default();
 
-        Ok(remote_repo_config.checksums == local_checksum_index.checksums)
+        trace!(
+            "Local checksum index for pack '{}': {:?}",
+            pack_name, local_checksum_index
+        );
+        trace!(
+            "Remote checksum index for pack '{}': {:?}",
+            pack_name, remote_repo_config
+        );
+
+        let local_all_up_to_date = local_checksum_index
+            .checksums
+            .iter()
+            .all(|(name, checksum)| remote_repo_config.checksums.get(name) == Some(checksum));
+
+        Ok(local_all_up_to_date)
     }
 }
