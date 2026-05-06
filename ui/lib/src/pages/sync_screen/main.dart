@@ -3,6 +3,7 @@ import 'package:format_bytes/format_bytes.dart';
 import 'package:pamm_ui/src/pages/download_screen/main.dart';
 import 'package:pamm_ui/src/rust/api/commands/pack_sync/file_change.dart';
 import 'package:pamm_ui/src/rust/api/commands/pack_sync/get_diff.dart';
+import 'package:pamm_ui/src/services/debug_settings_service.dart';
 import 'package:pamm_ui/src/services/progress_reporter_service.dart';
 import 'package:pamm_ui/src/widgets/progress_reporter.dart';
 
@@ -43,7 +44,7 @@ class _SyncScreenState extends State<SyncScreen> {
         repoPath: widget.repoPath,
         dartProgressReporter:
             widget.progressReporterService.underlyingReporter,
-        clearCache: false,
+        clearCache: debugSettingsService.alwaysForceRefresh,
       );
       if (!mounted) return;
       setState(() {
