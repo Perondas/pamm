@@ -32,14 +32,6 @@ pub fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow:
     let diff =
         repo_handle.get_pack_diff(&args.name, progress_reporter.clone(), args.force_refresh)?;
 
-    let diff = match diff {
-        Some(diff) if { diff.has_changes() } => diff,
-        _ => {
-            println!("Pack is already up to date.");
-            return Ok(());
-        }
-    };
-
     println!("{}", diff.to_pretty_string());
 
     let outcome = dialoguer::Confirm::with_theme(&ColorfulTheme::default())
