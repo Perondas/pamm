@@ -1,11 +1,10 @@
-use anyhow::{anyhow, Context};
+use anyhow::{Context, anyhow};
 use std::env::home_dir;
 use std::fs::read_to_string;
 use std::path::PathBuf;
-use steam_vdf_parser::{parse_text, Value};
+use steam_vdf_parser::{Value, parse_text};
 
 static LIBRARYFOLDERS_PATH: &str = ".steam/root/steamapps/libraryfolders.vdf";
-static APPMANIFEST_PATH: &str = ".steam/root/steamapps/appmanifest_107410.acf";
 
 pub fn get_arma_install_dir() -> anyhow::Result<PathBuf> {
     log::debug!("Attempting to find Arma install directory");
@@ -13,20 +12,13 @@ pub fn get_arma_install_dir() -> anyhow::Result<PathBuf> {
     log::trace!("Found home directory: {:?}", home_dir);
 
     let libfolders_path = home_dir.join(LIBRARYFOLDERS_PATH);
-    let appmanifest_path = home_dir.join(APPMANIFEST_PATH);
 
     log::trace!("Reading libraryfolders from {:?}", libfolders_path);
     let libfolders_file = read_to_string(&libfolders_path)
         .context(anyhow!("Unable to read libraryfolders from path"))?;
 
-    log::trace!("Reading appmanifest from {:?}", appmanifest_path);
-    let appmanifest_file = read_to_string(&appmanifest_path)
-        .context(anyhow!("Unable to read appmanifest from path"))?;
-
     let libfolders =
         parse_text(&libfolders_file).context(anyhow!("Failed to parse libraryfolders"))?;
-    let appmanifest =
-        parse_text(&appmanifest_file).context(anyhow!("Failed to parse appmanifest"))?;
 
     let install_location = libfolders
         .as_obj()
@@ -47,7 +39,17 @@ pub fn get_arma_install_dir() -> anyhow::Result<PathBuf> {
         .as_str()
         .context(anyhow!("libraryfolders path is not a string"))?;
 
-    log::debug!("Found Steam library path containing Arma: {:?}", library_path);
+    log::debug!(
+        "Found Steam library path containing Arma: {:?}",
+        library_path
+    );
+
+    let appmanifest_path = library_path.join("steamapps/appmanifest_107410.acf");
+    log::trace!("Reading appmanifest from {:?}", appmanifest_path);
+    let appmanifest_file = read_to_string(&appmanifest_path)
+        .context(anyhow!("Unable to read appmanifest from path"))?;
+    let appmanifest =
+        parse_text(&appmanifest_file).context(anyhow!("Failed to parse appmanifest"))?;
 
     let arma_dir_name = appmanifest
         .as_obj()
@@ -57,7 +59,10 @@ pub fn get_arma_install_dir() -> anyhow::Result<PathBuf> {
         .as_str()
         .context(anyhow!("installdir is not a string"))?;
 
-    log::debug!("Found Arma directory name in appmanifest: {:?}", arma_dir_name);
+    log::debug!(
+        "Found Arma directory name in appmanifest: {:?}",
+        arma_dir_name
+    );
 
     let full_path = PathBuf::from(format!(
         "{}/steamapps/common/{}",
@@ -73,7 +78,5 @@ fn arma_in_location(value: &Value) -> anyhow::Result<bool> {
     let apps = value
         .get("apps")
         .context(anyhow!("libraryfolders entry does not contain 'apps'"))?;
-    apps.get("107410")
-        .map(|_| true)
-        .ok_or_else(|| anyhow!("Arma 3 not found in this library folder"))
+    Ok(apps.get("107410").map(|_| true).unwrap_or_default())
 }
