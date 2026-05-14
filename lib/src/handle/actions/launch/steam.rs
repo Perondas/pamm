@@ -1,4 +1,5 @@
-use crate::handle::reading::get_addon_paths::GetAddonPaths;
+use crate::handle::reading::get_canonical_addon_paths::GetAddonPaths;
+use crate::handle::reading::get_linux_addon_paths::GetLinuxAddonPaths;
 use crate::handle::reading::get_pack::GetPack;
 use crate::handle::repo_handle::RepoHandle;
 use log::{debug, info};
@@ -7,11 +8,15 @@ impl RepoHandle {
     pub fn launch_via_steam(&self, pack_name: &str) -> anyhow::Result<()> {
         info!("Launching pack '{}' via Steam", pack_name);
 
-        let addons = self.get_addon_paths(pack_name)?;
+        // On linux we need to have the load path be in the Arma directory.
+        let addon_paths = cfg_select! {
+            target_os = "linux" => self.get_linux_addon_paths(pack_name),
+            _ => self.get_canonical_addon_paths(pack_name)
+        }?;
 
         debug!(
             "Resolved {} addon path(s) for pack '{}'",
-            addons.len(),
+            addon_paths.len(),
             pack_name
         );
 
@@ -29,7 +34,7 @@ impl RepoHandle {
             launch_url.push(' ');
         }
 
-        let addons_combined = format!("\"-mod={}\"", addons.join(";"));
+        let addons_combined = format!("\"-mod={}\"", addon_paths.join(";"));
 
         launch_url.push_str(&format!("{}", urlencoding::encode(&addons_combined)));
 

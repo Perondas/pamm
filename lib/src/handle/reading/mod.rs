@@ -1,4 +1,6 @@
-pub mod get_addon_paths;
+pub mod get_canonical_addon_paths;
+#[cfg(target_os = "linux")]
+pub mod get_linux_addon_paths;
 pub mod get_pack;
 pub mod get_pack_index;
 pub mod get_repo_info;

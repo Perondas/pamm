@@ -6,16 +6,14 @@ use std::path::PathBuf;
 
 impl<T> GetOptionalsPaths for T
 where
-    T: GetPack + GetRepoInfo,
+    T: GetPack,
 {
     fn get_optional_paths(&self, pack_name: &str) -> anyhow::Result<Vec<PathBuf>> {
         let (config, settings) = self.get_pack_with_settings(pack_name)?;
 
         let mut res = Vec::new();
 
-        let addon_dir = self
-            .get_repo_path()
-            .join(get_pack_addon_directory_name(&config.name));
+        let addon_dir = PathBuf::from(get_pack_addon_directory_name(&config.name));
 
         for optional in &settings.enabled_optionals {
             if config
@@ -55,6 +53,7 @@ where
 }
 
 pub trait GetOptionalsPaths {
+    /// Gets the paths to the enabled optionals relative to the repo root
     fn get_optional_paths(&self, pack_name: &str) -> anyhow::Result<Vec<PathBuf>>;
 }
 
