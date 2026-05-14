@@ -1,4 +1,3 @@
-use crate::handle::reading::get_canonical_addon_paths::GetAddonPaths;
 use crate::handle::reading::get_linux_addon_paths::GetLinuxAddonPaths;
 use crate::handle::reading::get_pack::GetPack;
 use crate::handle::repo_handle::RepoHandle;

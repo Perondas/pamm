@@ -1,9 +1,7 @@
 use crate::handle::addons::ResolveAddons;
-use crate::handle::externals::get_external_addons_paths::GetExternalAddonsPaths;
 use crate::handle::optionals::GetOptionalsPaths;
 use crate::handle::reading::get_pack::GetPack;
 use crate::handle::reading::get_repo_info::GetRepoInfo;
-use crate::io::fs::util::clean_path::canonicalize_and_clean_path;
 use crate::util::linux::get_arma_install_dir::get_arma_install_dir;
 use anyhow::{anyhow, Context};
 use std::fs::{create_dir_all, symlink_metadata};
