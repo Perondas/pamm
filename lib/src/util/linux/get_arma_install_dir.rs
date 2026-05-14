@@ -1,8 +1,8 @@
-use anyhow::{Context, anyhow};
+use anyhow::{anyhow, Context};
 use std::env::home_dir;
 use std::fs::read_to_string;
-use std::path::PathBuf;
-use steam_vdf_parser::{Value, parse_text};
+use std::path::{PathBuf};
+use steam_vdf_parser::{parse_text, Value};
 
 static LIBRARYFOLDERS_PATH: &str = ".steam/root/steamapps/libraryfolders.vdf";
 
@@ -44,7 +44,7 @@ pub fn get_arma_install_dir() -> anyhow::Result<PathBuf> {
         library_path
     );
 
-    let appmanifest_path = library_path.join("steamapps/appmanifest_107410.acf");
+    let appmanifest_path = PathBuf::from(&library_path).join("steamapps/appmanifest_107410.acf");
     log::trace!("Reading appmanifest from {:?}", appmanifest_path);
     let appmanifest_file = read_to_string(&appmanifest_path)
         .context(anyhow!("Unable to read appmanifest from path"))?;
