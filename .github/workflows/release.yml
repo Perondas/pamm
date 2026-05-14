@@ -22,6 +22,8 @@ jobs:
         with:
           fetch-depth: '0'
           submodules: 'recursive'
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Build
         run: cargo build --verbose
       - name: Run tests
@@ -55,6 +57,8 @@ jobs:
         with:
           fetch-depth: '0'
           submodules: 'recursive'
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Set version
         shell: bash
         run: sed -i "s/^version = \".*\"/version = \"${GITHUB_REF_NAME#v}\"/" cli/Cargo.toml
@@ -95,6 +99,8 @@ jobs:
         with:
           fetch-depth: '0'
           submodules: 'recursive'
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Set version
         shell: bash
         run: sed -i "s/^version = \".*\"/version = \"${GITHUB_REF_NAME#v}\"/" cli/Cargo.toml
