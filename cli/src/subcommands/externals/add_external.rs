@@ -25,7 +25,5 @@ pub fn add_external_command(args: AddExternalArgs) -> anyhow::Result<()> {
 
     externals.push(new);
 
-    handle.save_externals(&args.name, &externals)?;
-
-    Ok(())
+    handle.save_externals(&args.name, &externals)
 }

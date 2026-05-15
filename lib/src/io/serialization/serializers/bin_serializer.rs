@@ -10,8 +10,7 @@ pub(crate) fn to_writer<E: Serialize, W: std::io::Write>(
 ) -> anyhow::Result<()> {
     let mut buf_writer = std::io::BufWriter::new(writer);
     bincode::serde::encode_into_std_write(content, &mut buf_writer, bincode::config::standard())?;
-    std::io::Write::flush(&mut buf_writer)?;
-    Ok(())
+    std::io::Write::flush(&mut buf_writer).context("Failed to flush binary data")
 }
 
 pub(crate) fn from_reader<D: DeserializeOwned, R: std::io::Read>(

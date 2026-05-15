@@ -27,9 +27,7 @@ pub fn toggle_externals_command(args: ToggleExternalsArgs) -> anyhow::Result<()>
         e.enabled = selection.contains(&i);
     });
 
-    handle.save_externals(&args.name, &externals)?;
-
-    Ok(())
+    handle.save_externals(&args.name, &externals)
 }
 
 fn externals_to_name(externals: &[ExternalAddon]) -> Vec<String> {

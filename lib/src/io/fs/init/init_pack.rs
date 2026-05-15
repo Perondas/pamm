@@ -23,9 +23,7 @@ impl PackConfig {
 
         settings.write_to_named(parent_dir, &self.name)?;
 
-        self.write_to(parent_dir)?;
-
-        Ok(())
+        self.write_to(parent_dir)
     }
 }
 

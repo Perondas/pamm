@@ -25,7 +25,5 @@ pub fn toggle_optionals_command(args: ToggleOptionalsArgs) -> anyhow::Result<()>
         e.enabled = selection.contains(&i);
     });
 
-    handle.save_optionals(&args.name, &optionals)?;
-
-    Ok(())
+    handle.save_optionals(&args.name, &optionals)
 }

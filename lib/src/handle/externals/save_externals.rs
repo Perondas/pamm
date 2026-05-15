@@ -23,9 +23,7 @@ where
             })
             .collect::<anyhow::Result<HashSet<_>>>()?;
 
-        self.save_pack_settings(pack_name, &settings)?;
-
-        Ok(())
+        self.save_pack_settings(pack_name, &settings)
     }
 }
 

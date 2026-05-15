@@ -4,6 +4,7 @@ use crate::handle::reading::get_canonical_addon_paths::GetAddonPaths;
 use crate::handle::reading::get_linux_addon_paths::GetLinuxAddonPaths;
 use crate::handle::reading::get_pack::GetPack;
 use crate::handle::repo_handle::RepoHandle;
+use anyhow::Context;
 use log::{debug, info};
 
 impl RepoHandle {
@@ -41,8 +42,6 @@ impl RepoHandle {
         launch_url.push_str(&format!("{}", urlencoding::encode(&addons_combined)));
 
         debug!("Steam launch URL: {}", launch_url);
-        open::that(launch_url)?;
-
-        Ok(())
+        open::that(launch_url).context("Failed to launch pack via Steam")
     }
 }

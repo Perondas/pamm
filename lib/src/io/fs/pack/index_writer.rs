@@ -33,9 +33,7 @@ impl PackDiff {
             }
         }
 
-        self.write_checksum_index_to_fs(base_path)?;
-
-        Ok(())
+        self.write_checksum_index_to_fs(base_path)
     }
 
     pub fn write_checksum_index_to_fs(&self, base_path: &Path) -> anyhow::Result<()> {
@@ -59,8 +57,6 @@ impl PackIndex {
                 .collect(),
         };
 
-        checksum_index.write_to(&index_dir)?;
-
-        Ok(())
+        checksum_index.write_to(&index_dir)
     }
 }

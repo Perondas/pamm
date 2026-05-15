@@ -10,8 +10,7 @@ pub(crate) fn to_writer<E: Serialize, W: std::io::Write>(
 ) -> anyhow::Result<()> {
     let mut buf_writer = std::io::BufWriter::new(writer);
     serde_json::to_writer_pretty(&mut buf_writer, content)?;
-    std::io::Write::flush(&mut buf_writer)?;
-    Ok(())
+    std::io::Write::flush(&mut buf_writer).context("Failed to flush writer after serialization")
 }
 
 pub(crate) fn from_reader<D: DeserializeOwned, R: std::io::Read>(

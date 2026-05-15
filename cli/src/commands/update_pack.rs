@@ -62,7 +62,5 @@ pub fn update_pack_command(args: UpdatePackArgs, log_wrapper: LogWrapper) -> any
         return Ok(());
     }
 
-    handle.apply_diff(&diff)?;
-
-    Ok(())
+    handle.apply_diff(&diff)
 }

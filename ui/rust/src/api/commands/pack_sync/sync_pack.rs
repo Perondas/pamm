@@ -19,7 +19,5 @@ pub fn sync_pack(
 
     let handle = RepoHandle::open(repo_dir)?;
 
-    handle.apply_pack_diff(&pack_name, dart_progress_reporter, diff)?;
-
-    Ok(())
+    handle.apply_pack_diff(&pack_name, dart_progress_reporter, diff)
 }

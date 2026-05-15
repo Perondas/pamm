@@ -25,8 +25,7 @@ fn create_or_recreate_symlink(target: &Path, link: &Path) -> anyhow::Result<()> 
             ));
         }
     }
-    symlink(target, link)?;
-    Ok(())
+    symlink(target, link)
 }
 
 pub trait GetLinuxAddonPaths {

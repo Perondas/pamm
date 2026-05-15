@@ -69,8 +69,6 @@ impl RepoHandle {
             self.update_pack(&remote_pack_config)?;
         }
 
-        self.update_repo_config(remote_repo_config)?;
-
-        Ok(())
+        self.update_repo_config(remote_repo_config)
     }
 }

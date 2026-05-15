@@ -19,8 +19,6 @@ impl AddPack for RepoHandle {
 
         self.write_named(pack_config, &pack_config.name)?;
 
-        pack_config.init_blank_on_fs(&self.repo_path)?;
-
-        Ok(())
+        pack_config.init_blank_on_fs(&self.repo_path)
     }
 }
