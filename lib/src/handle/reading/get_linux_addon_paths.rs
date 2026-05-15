@@ -25,7 +25,7 @@ fn create_or_recreate_symlink(target: &Path, link: &Path) -> anyhow::Result<()> 
             ));
         }
     }
-    symlink(target, link).context("Failed to create symlink")?;
+    symlink(target, link).context("Failed to create symlink")
 }
 
 pub trait GetLinuxAddonPaths {
