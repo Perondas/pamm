@@ -39,7 +39,7 @@ impl RepoHandle {
 
         let addons_combined = format!("\"-mod={}\"", addon_paths.join(";"));
 
-        launch_url.push_str(&format!("{}", urlencoding::encode(&addons_combined)));
+        launch_url.push_str(&urlencoding::encode(&addons_combined));
 
         debug!("Steam launch URL: {}", launch_url);
         open::that(launch_url).context("Failed to launch pack via Steam")
