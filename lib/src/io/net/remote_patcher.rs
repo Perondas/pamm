@@ -1,14 +1,14 @@
-use crate::models::index::index_node::PBOPart;
-use crate::models::index::node_diff::FileModification;
 use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::io::net::byte_range_response::{ByteRangeResponse, IntoByteRangeResponse};
 use crate::io::net::download_file::download_file;
 use crate::io::rel_path::RelPath;
+use crate::models::index::index_node::PBOPart;
+use crate::models::index::node_diff::FileModification;
 use crate::models::pack::pack_config::PackConfig;
 use anyhow::{Context, Result, ensure};
 use bi_fs_rs::pbo::handle::PBOHandle;
-use std::fs::File;
-use std::io::Write;
+use fs::File;
+use std::io::{BufWriter, Write};
 use std::path::Path;
 use std::{fs, iter};
 use ureq::BodyReader;
@@ -54,7 +54,7 @@ impl RemotePatcher {
 
                 let temp_file_path = file_path.with_added_extension("pamm.temp");
 
-                let mut temp_file = File::create(&temp_file_path)?;
+                let mut temp_file = BufWriter::new(File::create(&temp_file_path)?);
 
                 let mut parts = get_required_pbo_parts(
                     &file_url,
@@ -69,12 +69,13 @@ impl RemotePatcher {
                     .ok_or_else(|| anyhow::anyhow!("No response for PBO header"))??;
 
                 temp_file.write_all(&new_headers)?;
+                temp_file.flush()?;
 
                 ensure!(
-                    temp_file.metadata()?.len() == new_blob_start,
+                    temp_file.get_ref().metadata()?.len() == new_blob_start,
                     "Patched PBO blob start does not match expected blob start. Expected blob start: {}. Actual blob start: {}",
                     new_blob_start,
-                    temp_file.metadata()?.len()
+                    temp_file.get_ref().metadata()?.len()
                 );
 
                 for part in new_order {
@@ -117,11 +118,12 @@ impl RemotePatcher {
                     return Err(anyhow::anyhow!("Received more entries than expected"));
                 }
 
-                if temp_file.metadata()?.len() != new_length {
+                temp_file.flush()?;
+                if temp_file.get_ref().metadata()?.len() != new_length {
                     return Err(anyhow::anyhow!(
                         "Patched PBO length does not match expected length. Expected length: {}. Actual length: {}",
                         new_length,
-                        temp_file.metadata()?.len()
+                        temp_file.get_ref().metadata()?.len()
                     ));
                 }
 
