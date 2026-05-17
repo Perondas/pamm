@@ -1,16 +1,38 @@
-# ui
 
-A new Flutter project.
+# pamm UI
+
+Flutter-based user interface for **pamm** (Personal ARMA Mod Manager).
+
+## Overview
+
+This directory contains the desktop application UI for `pamm`. It allows users to browse, install, update, and manage their ARMA 3 mod packs within their community mod repositories. The UI communicates with the core Rust library via `flutter_rust_bridge`.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+To develop or build the UI, you will need [Flutter](https://docs.flutter.dev/get-started/install) installed on your system.
 
-A few resources to get you started if this is your first Flutter project:
+### Dependencies
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- Flutter SDK (latest stable recommended)
+- Rust toolchain (for building the core library)
+- `flutter_rust_bridge_codegen` (for generating Dart/Rust bindings)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Running
+
+To run the application locally for development:
+
+```bash
+cd ui
+flutter run
+```
+
+### Building
+
+To build a release version of the UI:
+
+```bash
+cd ui
+flutter build windows # or linux
+```
+
+For more detailed information on Flutter development, see the [online documentation](https://docs.flutter.dev/).
