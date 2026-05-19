@@ -6,64 +6,57 @@
 import '../../../frb_generated.dart';
 import '../../progress_reporting.dart';
 import 'file_change.dart';
+import 'get_diff.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These functions are ignored (category: IgnoreBecauseExplicitAttribute): `diff_to_result`
-
-Future<DiffResult> getDiff({
+Future<MultiDiffResult> getDiffWithParents({
   required String packName,
   required String repoPath,
   required DartProgressReporter dartProgressReporter,
   required bool clearCache,
-}) => RustLib.instance.api.crateApiCommandsPackSyncGetDiffGetDiff(
-  packName: packName,
-  repoPath: repoPath,
-  dartProgressReporter: dartProgressReporter,
-  clearCache: clearCache,
-);
+}) => RustLib.instance.api
+    .crateApiCommandsPackSyncGetDiffsWithParentsGetDiffWithParents(
+      packName: packName,
+      repoPath: repoPath,
+      dartProgressReporter: dartProgressReporter,
+      clearCache: clearCache,
+    );
 
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<OpaqueDiff>>
-abstract class OpaqueDiff implements RustOpaqueInterface {}
-
-class DiffResult {
-  final String packName;
-  final OpaqueDiff diff;
+class MultiDiffResult {
+  final List<DiffResult> results;
   final bool hasChanges;
-  final BigInt changeCount;
   final BigInt totalDlSize;
   final PlatformInt64 totalSizeChange;
-  final Map<String, List<FileChange>> fileChanges;
+  final BigInt totalChangeCount;
+  final BigInt changedPacks;
 
-  const DiffResult({
-    required this.packName,
-    required this.diff,
+  const MultiDiffResult({
+    required this.results,
     required this.hasChanges,
-    required this.changeCount,
     required this.totalDlSize,
     required this.totalSizeChange,
-    required this.fileChanges,
+    required this.totalChangeCount,
+    required this.changedPacks,
   });
 
   @override
   int get hashCode =>
-      packName.hashCode ^
-      diff.hashCode ^
+      results.hashCode ^
       hasChanges.hashCode ^
-      changeCount.hashCode ^
       totalDlSize.hashCode ^
       totalSizeChange.hashCode ^
-      fileChanges.hashCode;
+      totalChangeCount.hashCode ^
+      changedPacks.hashCode;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is DiffResult &&
+      other is MultiDiffResult &&
           runtimeType == other.runtimeType &&
-          packName == other.packName &&
-          diff == other.diff &&
+          results == other.results &&
           hasChanges == other.hasChanges &&
-          changeCount == other.changeCount &&
           totalDlSize == other.totalDlSize &&
           totalSizeChange == other.totalSizeChange &&
-          fileChanges == other.fileChanges;
+          totalChangeCount == other.totalChangeCount &&
+          changedPacks == other.changedPacks;
 }

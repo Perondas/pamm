@@ -14,8 +14,10 @@ import 'api/commands/optionals/load_optionals.dart';
 import 'api/commands/optionals/save_optionals.dart';
 import 'api/commands/pack_sync/file_change.dart';
 import 'api/commands/pack_sync/get_diff.dart';
+import 'api/commands/pack_sync/get_diffs_with_parents.dart';
 import 'api/commands/pack_sync/quick_check.dart';
 import 'api/commands/pack_sync/sync_pack.dart';
+import 'api/commands/pack_sync/sync_pack_with_parents.dart';
 import 'api/commands/params.dart';
 import 'api/commands/sync_config.dart';
 import 'api/logging.dart';
@@ -80,7 +82,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.12.0';
 
   @override
-  int get rustContentHash => 822492048;
+  int get rustContentHash => -976279708;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -100,6 +102,14 @@ abstract class RustLibApi extends BaseApi {
   });
 
   Future<DiffResult> crateApiCommandsPackSyncGetDiffGetDiff({
+    required String packName,
+    required String repoPath,
+    required DartProgressReporter dartProgressReporter,
+    required bool clearCache,
+  });
+
+  Future<MultiDiffResult>
+  crateApiCommandsPackSyncGetDiffsWithParentsGetDiffWithParents({
     required String packName,
     required String repoPath,
     required DartProgressReporter dartProgressReporter,
@@ -179,6 +189,12 @@ abstract class RustLibApi extends BaseApi {
     required String repoPath,
     required DartProgressReporter dartProgressReporter,
     required OpaqueDiff diff,
+  });
+
+  Future<void> crateApiCommandsPackSyncSyncPackWithParentsSyncPackWithParents({
+    required String repoPath,
+    required DartProgressReporter dartProgressReporter,
+    required List<OpaqueDiff> diffs,
   });
 
   RustArcIncrementStrongCountFnType
@@ -302,6 +318,56 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<MultiDiffResult>
+  crateApiCommandsPackSyncGetDiffsWithParentsGetDiffWithParents({
+    required String packName,
+    required String repoPath,
+    required DartProgressReporter dartProgressReporter,
+    required bool clearCache,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(packName, serializer);
+          sse_encode_String(repoPath, serializer);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartProgressReporter(
+            dartProgressReporter,
+            serializer,
+          );
+          sse_encode_bool(clearCache, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 3,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_multi_diff_result,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta:
+            kCrateApiCommandsPackSyncGetDiffsWithParentsGetDiffWithParentsConstMeta,
+        argValues: [packName, repoPath, dartProgressReporter, clearCache],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiCommandsPackSyncGetDiffsWithParentsGetDiffWithParentsConstMeta =>
+      const TaskConstMeta(
+        debugName: "get_diff_with_parents",
+        argNames: [
+          "packName",
+          "repoPath",
+          "dartProgressReporter",
+          "clearCache",
+        ],
+      );
+
+  @override
   Future<List<String>> crateApiCommandsParamsGetLaunchParams({
     required String repotPath,
     required String packName,
@@ -315,7 +381,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 3,
+            funcId: 4,
             port: port_,
           );
         },
@@ -348,7 +414,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 4,
+            funcId: 5,
             port: port_,
           );
         },
@@ -376,7 +442,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 5)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 6)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -406,7 +472,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 6,
+            funcId: 7,
             port: port_,
           );
         },
@@ -436,7 +502,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(level, serializer);
           sse_encode_StreamSink_String_Sse(logSink, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 7)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 8)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -470,7 +536,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 8,
+            funcId: 9,
             port: port_,
           );
         },
@@ -506,7 +572,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 9,
+            funcId: 10,
             port: port_,
           );
         },
@@ -544,7 +610,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 10,
+            funcId: 11,
             port: port_,
           );
         },
@@ -579,7 +645,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 11,
+            funcId: 12,
             port: port_,
           );
         },
@@ -611,7 +677,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 12,
+            funcId: 13,
             port: port_,
           );
         },
@@ -648,7 +714,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 13,
+            funcId: 14,
             port: port_,
           );
         },
@@ -687,7 +753,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 14,
+            funcId: 15,
             port: port_,
           );
         },
@@ -726,7 +792,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 15,
+            funcId: 16,
             port: port_,
           );
         },
@@ -754,7 +820,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(level, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 16)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 17)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -782,7 +848,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 17,
+            funcId: 18,
             port: port_,
           );
         },
@@ -824,7 +890,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 18,
+            funcId: 19,
             port: port_,
           );
         },
@@ -843,6 +909,51 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(
         debugName: "sync_pack",
         argNames: ["packName", "repoPath", "dartProgressReporter", "diff"],
+      );
+
+  @override
+  Future<void> crateApiCommandsPackSyncSyncPackWithParentsSyncPackWithParents({
+    required String repoPath,
+    required DartProgressReporter dartProgressReporter,
+    required List<OpaqueDiff> diffs,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(repoPath, serializer);
+          sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartProgressReporter(
+            dartProgressReporter,
+            serializer,
+          );
+          sse_encode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
+            diffs,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 20,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta:
+            kCrateApiCommandsPackSyncSyncPackWithParentsSyncPackWithParentsConstMeta,
+        argValues: [repoPath, dartProgressReporter, diffs],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiCommandsPackSyncSyncPackWithParentsSyncPackWithParentsConstMeta =>
+      const TaskConstMeta(
+        debugName: "sync_pack_with_parents",
+        argNames: ["repoPath", "dartProgressReporter", "diffs"],
       );
 
   RustArcIncrementStrongCountFnType
@@ -987,18 +1098,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   DiffResult dco_decode_diff_result(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 6)
-      throw Exception('unexpected arr length: expect 6 but see ${arr.length}');
+    if (arr.length != 7)
+      throw Exception('unexpected arr length: expect 7 but see ${arr.length}');
     return DiffResult(
+      packName: dco_decode_String(arr[0]),
       diff:
           dco_decode_AutoExplicit_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
-            arr[0],
+            arr[1],
           ),
-      hasChanges: dco_decode_bool(arr[1]),
-      changeCount: dco_decode_usize(arr[2]),
-      totalDlSize: dco_decode_u_64(arr[3]),
-      totalSizeChange: dco_decode_i_64(arr[4]),
-      fileChanges: dco_decode_Map_String_list_file_change_None(arr[5]),
+      hasChanges: dco_decode_bool(arr[2]),
+      changeCount: dco_decode_usize(arr[3]),
+      totalDlSize: dco_decode_u_64(arr[4]),
+      totalSizeChange: dco_decode_i_64(arr[5]),
+      fileChanges: dco_decode_Map_String_list_file_change_None(arr[6]),
     );
   }
 
@@ -1034,9 +1146,28 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<OpaqueDiff>
+  dco_decode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>)
+        .map(
+          dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff,
+        )
+        .toList();
+  }
+
+  @protected
   List<String> dco_decode_list_String(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return (raw as List<dynamic>).map(dco_decode_String).toList();
+  }
+
+  @protected
+  List<DiffResult> dco_decode_list_diff_result(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_diff_result).toList();
   }
 
   @protected
@@ -1070,6 +1201,22 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     return (raw as List<dynamic>)
         .map(dco_decode_record_string_list_file_change)
         .toList();
+  }
+
+  @protected
+  MultiDiffResult dco_decode_multi_diff_result(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 6)
+      throw Exception('unexpected arr length: expect 6 but see ${arr.length}');
+    return MultiDiffResult(
+      results: dco_decode_list_diff_result(arr[0]),
+      hasChanges: dco_decode_bool(arr[1]),
+      totalDlSize: dco_decode_u_64(arr[2]),
+      totalSizeChange: dco_decode_i_64(arr[3]),
+      totalChangeCount: dco_decode_usize(arr[4]),
+      changedPacks: dco_decode_usize(arr[5]),
+    );
   }
 
   @protected
@@ -1290,6 +1437,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   DiffResult sse_decode_diff_result(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_packName = sse_decode_String(deserializer);
     var var_diff =
         sse_decode_AutoExplicit_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
           deserializer,
@@ -1302,6 +1450,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       deserializer,
     );
     return DiffResult(
+      packName: var_packName,
       diff: var_diff,
       hasChanges: var_hasChanges,
       changeCount: var_changeCount,
@@ -1335,6 +1484,25 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<OpaqueDiff>
+  sse_decode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <OpaqueDiff>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(
+        sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
+          deserializer,
+        ),
+      );
+    }
+    return ans_;
+  }
+
+  @protected
   List<String> sse_decode_list_String(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
@@ -1342,6 +1510,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var ans_ = <String>[];
     for (var idx_ = 0; idx_ < len_; ++idx_) {
       ans_.add(sse_decode_String(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
+  List<DiffResult> sse_decode_list_diff_result(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <DiffResult>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_diff_result(deserializer));
     }
     return ans_;
   }
@@ -1404,6 +1584,25 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       ans_.add(sse_decode_record_string_list_file_change(deserializer));
     }
     return ans_;
+  }
+
+  @protected
+  MultiDiffResult sse_decode_multi_diff_result(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_results = sse_decode_list_diff_result(deserializer);
+    var var_hasChanges = sse_decode_bool(deserializer);
+    var var_totalDlSize = sse_decode_u_64(deserializer);
+    var var_totalSizeChange = sse_decode_i_64(deserializer);
+    var var_totalChangeCount = sse_decode_usize(deserializer);
+    var var_changedPacks = sse_decode_usize(deserializer);
+    return MultiDiffResult(
+      results: var_results,
+      hasChanges: var_hasChanges,
+      totalDlSize: var_totalDlSize,
+      totalSizeChange: var_totalSizeChange,
+      totalChangeCount: var_totalChangeCount,
+      changedPacks: var_changedPacks,
+    );
   }
 
   @protected
@@ -1650,6 +1849,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   void sse_encode_diff_result(DiffResult self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.packName, serializer);
     sse_encode_AutoExplicit_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
       self.diff,
       serializer,
@@ -1683,11 +1883,39 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void
+  sse_encode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
+    List<OpaqueDiff> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
+        item,
+        serializer,
+      );
+    }
+  }
+
+  @protected
   void sse_encode_list_String(List<String> self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     for (final item in self) {
       sse_encode_String(item, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_list_diff_result(
+    List<DiffResult> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_diff_result(item, serializer);
     }
   }
 
@@ -1747,6 +1975,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     for (final item in self) {
       sse_encode_record_string_list_file_change(item, serializer);
     }
+  }
+
+  @protected
+  void sse_encode_multi_diff_result(
+    MultiDiffResult self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_list_diff_result(self.results, serializer);
+    sse_encode_bool(self.hasChanges, serializer);
+    sse_encode_u_64(self.totalDlSize, serializer);
+    sse_encode_i_64(self.totalSizeChange, serializer);
+    sse_encode_usize(self.totalChangeCount, serializer);
+    sse_encode_usize(self.changedPacks, serializer);
   }
 
   @protected

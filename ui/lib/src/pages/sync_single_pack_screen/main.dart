@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:format_bytes/format_bytes.dart';
-import 'package:pamm_ui/src/pages/download_screen/main.dart';
+import 'package:pamm_ui/src/pages/download_single_pack_screen/main.dart';
+import 'package:pamm_ui/src/rust/api/commands/pack_sync/file_change.dart';
 import 'package:pamm_ui/src/rust/api/commands/pack_sync/get_diff.dart';
-import 'package:pamm_ui/src/rust/api/commands/pack_sync/get_diffs_with_parents.dart';
 import 'package:pamm_ui/src/services/debug_settings_service.dart';
 import 'package:pamm_ui/src/services/progress_reporter_service.dart';
 import 'package:pamm_ui/src/widgets/diff_addon_tile.dart';
 import 'package:pamm_ui/src/widgets/progress_reporter.dart';
 
-class SyncScreen extends StatefulWidget {
-  SyncScreen(this.packName, this.repoPath, {super.key});
+class SyncSinglePackScreen extends StatefulWidget {
+  SyncSinglePackScreen(this.packName, this.repoPath, {super.key});
 
   final String packName;
   final String repoPath;
@@ -17,14 +17,14 @@ class SyncScreen extends StatefulWidget {
       ProgressReporterService();
 
   @override
-  State<SyncScreen> createState() => _SyncScreenState();
+  State<SyncSinglePackScreen> createState() => _SyncSinglePackScreenState();
 }
 
-class _SyncScreenState extends State<SyncScreen> {
+class _SyncSinglePackScreenState extends State<SyncSinglePackScreen> {
   bool isSyncing = false;
   bool isDoneSyncing = false;
   String? error;
-  MultiDiffResult? multiDiffResult;
+  DiffResult? diffResult;
 
   @override
   void initState() {
@@ -40,7 +40,7 @@ class _SyncScreenState extends State<SyncScreen> {
       isSyncing = true;
     });
     try {
-      var diff = await getDiffWithParents(
+      var diff = await getDiff(
         packName: widget.packName,
         repoPath: widget.repoPath,
         dartProgressReporter:
@@ -49,7 +49,7 @@ class _SyncScreenState extends State<SyncScreen> {
       );
       if (!mounted) return;
       setState(() {
-        multiDiffResult = diff;
+        diffResult = diff;
         isSyncing = false;
         isDoneSyncing = true;
       });
@@ -70,7 +70,7 @@ class _SyncScreenState extends State<SyncScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Updating ${widget.packName}')),
+      appBar: AppBar(title: Text('Updating ${widget.packName} (single)')),
       body: Padding(
         padding: EdgeInsetsGeometry.all(8),
         child: Column(
@@ -79,7 +79,7 @@ class _SyncScreenState extends State<SyncScreen> {
             Padding(
               padding: EdgeInsetsGeometry.directional(bottom: 8),
               child: Center(
-                child: isDoneSyncing && (multiDiffResult?.hasChanges ?? false)
+                child: isDoneSyncing && (diffResult?.hasChanges ?? false)
                     ? _buildDownloadButton(context)
                     : const SizedBox.shrink(),
               ),
@@ -98,7 +98,7 @@ class _SyncScreenState extends State<SyncScreen> {
               ),
             ],
             if (isDoneSyncing) ...[
-              if (multiDiffResult?.hasChanges ?? false)
+              if (diffResult?.hasChanges ?? false)
                 ..._buildDiffResult()
               else
                 const Center(
@@ -125,10 +125,10 @@ class _SyncScreenState extends State<SyncScreen> {
     onPressed: () {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => DownloadScreen(
+          builder: (context) => DownloadSinglePackScreen(
             widget.packName,
             widget.repoPath,
-            multiDiffResult!,
+            diffResult!,
           ),
         ),
       );
@@ -137,48 +137,28 @@ class _SyncScreenState extends State<SyncScreen> {
   );
 
   List<Widget> _buildDiffResult() {
-    final multi = multiDiffResult!;
+    final diff = diffResult!;
     return [
-      Text('Total Download Size: ${format(multi.totalDlSize.toInt())}'),
-      Text('Total Size change: ${format(multi.totalSizeChange.toInt())}'),
-      Text('Changed packs: ${multi.changedPacks} / ${multi.results.length}'),
+      Text('Total Download Size: ${format(diff.totalDlSize.toInt())}'),
+      Text('Total Size change: ${format(diff.totalSizeChange.toInt())}'),
+      Text('Changed addons: ${diff.changeCount}'),
       Expanded(
         flex: 2,
         child: ListView(
-          children: multi.results
-              .map((result) => _buildPackTile(result))
+          children: diff.fileChanges.entries
+              .where((element) => element.value.isNotEmpty)
+              .map((entry) => DiffAddonTile(addonName: entry.key, changes: entry.value))
               .toList(),
         ),
       ),
     ];
   }
+}
 
-  Widget _buildPackTile(DiffResult result) {
-    if (!result.hasChanges) {
-      return ListTile(
-        leading: const Icon(Icons.check_circle_outline),
-        title: Text(result.packName),
-        subtitle: const Text('No changes'),
-      );
-    }
-
-    final addonEntries = result.fileChanges.entries
-        .where((entry) => entry.value.isNotEmpty)
-        .toList();
-
-    return ExpansionTile(
-      leading: const Icon(Icons.inventory_2_outlined),
-      title: Text(result.packName),
-      subtitle: Row(
-        children: [
-          Text('${result.changeCount} changes'),
-          const SizedBox(width: 16),
-          Text('Download size: ${format(result.totalDlSize.toInt())}'),
-        ],
-      ),
-      children: addonEntries
-          .map((entry) => DiffAddonTile(addonName: entry.key, changes: entry.value))
-          .toList(),
-    );
-  }
+int sizeChangeToDlSize(ChangeType change) {
+  return switch (change) {
+    ChangeType_Created(:final size) => size.toInt(),
+    ChangeType_Deleted() => 0,
+    ChangeType_Modified(:final dlSize) => dlSize.toInt(),
+  };
 }

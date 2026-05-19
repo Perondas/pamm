@@ -22,6 +22,11 @@ pub fn get_diff(
 
     let diff = handle.get_pack_diff(&pack_name, dart_progress_reporter.clone(), clear_cache)?;
 
+    Ok(diff_to_result(diff))
+}
+
+#[frb(ignore)]
+pub fn diff_to_result(diff: PackDiff) -> DiffResult {
     let file_changes = diff
         .addon_diffs
         .iter()
@@ -32,17 +37,19 @@ pub fn get_diff(
         })
         .collect();
 
-    Ok(DiffResult {
+    DiffResult {
+        pack_name: diff.get_pack_name().to_owned(),
         has_changes: diff.has_changes(),
         change_count: diff.change_count(),
         total_dl_size: diff.get_dl_size(),
         total_size_change: diff.get_size_change(),
         diff: RustAutoOpaque::new(OpaqueDiff(diff)),
         file_changes,
-    })
+    }
 }
 
 pub struct DiffResult {
+    pub pack_name: String,
     pub diff: RustAutoOpaque<OpaqueDiff>,
     pub has_changes: bool,
     pub change_count: usize,

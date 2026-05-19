@@ -1,24 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:pamm_ui/src/rust/api/commands/pack_sync/get_diffs_with_parents.dart';
-import 'package:pamm_ui/src/rust/api/commands/pack_sync/sync_pack_with_parents.dart';
+import 'package:pamm_ui/src/rust/api/commands/pack_sync/get_diff.dart';
+import 'package:pamm_ui/src/rust/api/commands/pack_sync/sync_pack.dart';
 import 'package:pamm_ui/src/services/progress_reporter_service.dart';
 import 'package:pamm_ui/src/widgets/progress_reporter.dart';
 
-class DownloadScreen extends StatefulWidget {
-  DownloadScreen(this.packName, this.repoPath, this.multiDiffResult, {super.key});
+class DownloadSinglePackScreen extends StatefulWidget {
+  DownloadSinglePackScreen(
+    this.packName,
+    this.repoPath,
+    this.diffResult, {
+    super.key,
+  });
 
   final String packName;
   final String repoPath;
-  final MultiDiffResult multiDiffResult;
+  final DiffResult diffResult;
 
   final ProgressReporterService progressReporterService =
       ProgressReporterService();
 
   @override
-  State<DownloadScreen> createState() => _DownloadScreenState();
+  State<DownloadSinglePackScreen> createState() =>
+      _DownloadSinglePackScreenState();
 }
 
-class _DownloadScreenState extends State<DownloadScreen> {
+class _DownloadSinglePackScreenState extends State<DownloadSinglePackScreen> {
   bool done = false;
   String? error;
 
@@ -28,19 +34,17 @@ class _DownloadScreenState extends State<DownloadScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
-        await syncPackWithParents(
+        await syncPack(
+          packName: widget.packName,
           repoPath: widget.repoPath,
           dartProgressReporter:
               widget.progressReporterService.underlyingReporter,
-          diffs: widget.multiDiffResult.results
-              .map((r) => r.diff)
-              .toList(),
+          diff: widget.diffResult.diff,
         );
 
         if (!mounted) return;
-        setState(() {
-          done = true;
-        });
+        setState(() {});
+        done = true;
       } catch (e) {
         if (!mounted) return;
 
@@ -62,7 +66,7 @@ class _DownloadScreenState extends State<DownloadScreen> {
       canPop: false,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Downloading ${widget.packName}'),
+          title: Text('Downloading ${widget.packName} (single)'),
           automaticallyImplyLeading: false,
         ),
         body: Padding(

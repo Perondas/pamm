@@ -40,7 +40,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.12.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 822492048;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -976279708;
 
 // Section: executor
 
@@ -164,6 +164,33 @@ fn wire__crate__api__commands__pack_sync__get_diff__get_diff_impl(
             }
         },
     )
+}
+fn wire__crate__api__commands__pack_sync__get_diffs_with_parents__get_diff_with_parents_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec,_,_>(flutter_rust_bridge::for_generated::TaskInfo{ debug_name: "get_diff_with_parents", port: Some(port_), mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal }, move || { 
+            let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
+            let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_pack_name = <String>::sse_decode(&mut deserializer);
+let api_repo_path = <String>::sse_decode(&mut deserializer);
+let api_dart_progress_reporter = <RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DartProgressReporter>>>::sse_decode(&mut deserializer);
+let api_clear_cache = <bool>::sse_decode(&mut deserializer);deserializer.end(); move |context|  {
+                    transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move ||  {
+                        let mut api_dart_progress_reporter_guard = None;
+let decode_indices_ = flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(&api_dart_progress_reporter, 0, false)]);
+        for i in decode_indices_ {
+            match i {
+                0 => api_dart_progress_reporter_guard = Some(api_dart_progress_reporter.lockable_decode_sync_ref()),
+                _ => unreachable!(),
+            }
+        }
+        let api_dart_progress_reporter_guard = api_dart_progress_reporter_guard.unwrap();
+ let output_ok = crate::api::commands::pack_sync::get_diffs_with_parents::get_diff_with_parents(api_pack_name, api_repo_path, &*api_dart_progress_reporter_guard, api_clear_cache)?;   Ok(output_ok)
+                    })())
+                } })
 }
 fn wire__crate__api__commands__params__get_launch_params_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
@@ -781,6 +808,23 @@ fn wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(
         },
     )
 }
+fn wire__crate__api__commands__pack_sync__sync_pack_with_parents__sync_pack_with_parents_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec,_,_>(flutter_rust_bridge::for_generated::TaskInfo{ debug_name: "sync_pack_with_parents", port: Some(port_), mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal }, move || { 
+            let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
+            let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_repo_path = <String>::sse_decode(&mut deserializer);
+let api_dart_progress_reporter = <DartProgressReporter>::sse_decode(&mut deserializer);
+let api_diffs = <Vec<OpaqueDiff>>::sse_decode(&mut deserializer);deserializer.end(); move |context|  {
+                    transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move ||  {
+                         let output_ok = crate::api::commands::pack_sync::sync_pack_with_parents::sync_pack_with_parents(api_repo_path, api_dart_progress_reporter, api_diffs)?;   Ok(output_ok)
+                    })())
+                } })
+}
 
 // Section: static_checks
 
@@ -963,6 +1007,7 @@ impl SseDecode for crate::api::commands::pack_sync::file_change::ChangeType {
 impl SseDecode for crate::api::commands::pack_sync::get_diff::DiffResult {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_packName = <String>::sse_decode(deserializer);
         let mut var_diff = <RustAutoOpaqueMoi<OpaqueDiff>>::sse_decode(deserializer);
         let mut var_hasChanges = <bool>::sse_decode(deserializer);
         let mut var_changeCount = <usize>::sse_decode(deserializer);
@@ -973,6 +1018,7 @@ impl SseDecode for crate::api::commands::pack_sync::get_diff::DiffResult {
             Vec<crate::api::commands::pack_sync::file_change::FileChange>,
         >>::sse_decode(deserializer);
         return crate::api::commands::pack_sync::get_diff::DiffResult {
+            pack_name: var_packName,
             diff: var_diff,
             has_changes: var_hasChanges,
             change_count: var_changeCount,
@@ -1017,6 +1063,18 @@ impl SseDecode for i64 {
     }
 }
 
+impl SseDecode for Vec<OpaqueDiff> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = Vec::with_capacity(len_ as usize);
+        for idx_ in 0..len_ {
+            ans_.push(<OpaqueDiff>::sse_decode(deserializer));
+        }
+        return ans_;
+    }
+}
+
 impl SseDecode for Vec<String> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1024,6 +1082,20 @@ impl SseDecode for Vec<String> {
         let mut ans_ = Vec::with_capacity(len_ as usize);
         for idx_ in 0..len_ {
             ans_.push(<String>::sse_decode(deserializer));
+        }
+        return ans_;
+    }
+}
+
+impl SseDecode for Vec<crate::api::commands::pack_sync::get_diff::DiffResult> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = Vec::with_capacity(len_ as usize);
+        for idx_ in 0..len_ {
+            ans_.push(
+                <crate::api::commands::pack_sync::get_diff::DiffResult>::sse_decode(deserializer),
+            );
         }
         return ans_;
     }
@@ -1106,6 +1178,27 @@ impl SseDecode
             )>::sse_decode(deserializer));
         }
         return ans_;
+    }
+}
+
+impl SseDecode for crate::api::commands::pack_sync::get_diffs_with_parents::MultiDiffResult {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_results =
+            <Vec<crate::api::commands::pack_sync::get_diff::DiffResult>>::sse_decode(deserializer);
+        let mut var_hasChanges = <bool>::sse_decode(deserializer);
+        let mut var_totalDlSize = <u64>::sse_decode(deserializer);
+        let mut var_totalSizeChange = <i64>::sse_decode(deserializer);
+        let mut var_totalChangeCount = <usize>::sse_decode(deserializer);
+        let mut var_changedPacks = <usize>::sse_decode(deserializer);
+        return crate::api::commands::pack_sync::get_diffs_with_parents::MultiDiffResult {
+            results: var_results,
+            has_changes: var_hasChanges,
+            total_dl_size: var_totalDlSize,
+            total_size_change: var_totalSizeChange,
+            total_change_count: var_totalChangeCount,
+            changed_packs: var_changedPacks,
+        };
     }
 }
 
@@ -1205,84 +1298,24 @@ fn pde_ffi_dispatcher_primary_impl(
 ) {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        2 => wire__crate__api__commands__pack_sync__get_diff__get_diff_impl(
-            port,
-            ptr,
-            rust_vec_len,
-            data_len,
-        ),
-        3 => wire__crate__api__commands__params__get_launch_params_impl(
-            port,
-            ptr,
-            rust_vec_len,
-            data_len,
-        ),
-        4 => wire__crate__api__commands__get_remote_repo_info__get_remote_repo_info_impl(
-            port,
-            ptr,
-            rust_vec_len,
-            data_len,
-        ),
-        6 => wire__crate__api__commands__init_from_remote__init_from_remote_impl(
-            port,
-            ptr,
-            rust_vec_len,
-            data_len,
-        ),
-        8 => wire__crate__api__commands__launch__launch_impl(port, ptr, rust_vec_len, data_len),
-        9 => wire__crate__api__commands__externals__load_externals__load_externals_impl(
-            port,
-            ptr,
-            rust_vec_len,
-            data_len,
-        ),
-        10 => wire__crate__api__commands__optionals__load_optionals__load_optionals_impl(
-            port,
-            ptr,
-            rust_vec_len,
-            data_len,
-        ),
-        11 => {
-            wire__crate__api__commands__load_repo__load_repo_impl(port, ptr, rust_vec_len, data_len)
-        }
-        12 => wire__crate__api__commands__pack_sync__quick_check__quick_check_impl(
-            port,
-            ptr,
-            rust_vec_len,
-            data_len,
-        ),
-        13 => wire__crate__api__commands__externals__save_externals__save_externals_impl(
-            port,
-            ptr,
-            rust_vec_len,
-            data_len,
-        ),
-        14 => wire__crate__api__commands__optionals__save_optionals__save_optionals_impl(
-            port,
-            ptr,
-            rust_vec_len,
-            data_len,
-        ),
-        15 => wire__crate__api__commands__params__set_launch_params_impl(
-            port,
-            ptr,
-            rust_vec_len,
-            data_len,
-        ),
-        17 => wire__crate__api__commands__sync_config__sync_config_impl(
-            port,
-            ptr,
-            rust_vec_len,
-            data_len,
-        ),
-        18 => wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(
-            port,
-            ptr,
-            rust_vec_len,
-            data_len,
-        ),
-        _ => unreachable!(),
-    }
+                        2 => wire__crate__api__commands__pack_sync__get_diff__get_diff_impl(port, ptr, rust_vec_len, data_len),
+3 => wire__crate__api__commands__pack_sync__get_diffs_with_parents__get_diff_with_parents_impl(port, ptr, rust_vec_len, data_len),
+4 => wire__crate__api__commands__params__get_launch_params_impl(port, ptr, rust_vec_len, data_len),
+5 => wire__crate__api__commands__get_remote_repo_info__get_remote_repo_info_impl(port, ptr, rust_vec_len, data_len),
+7 => wire__crate__api__commands__init_from_remote__init_from_remote_impl(port, ptr, rust_vec_len, data_len),
+9 => wire__crate__api__commands__launch__launch_impl(port, ptr, rust_vec_len, data_len),
+10 => wire__crate__api__commands__externals__load_externals__load_externals_impl(port, ptr, rust_vec_len, data_len),
+11 => wire__crate__api__commands__optionals__load_optionals__load_optionals_impl(port, ptr, rust_vec_len, data_len),
+12 => wire__crate__api__commands__load_repo__load_repo_impl(port, ptr, rust_vec_len, data_len),
+13 => wire__crate__api__commands__pack_sync__quick_check__quick_check_impl(port, ptr, rust_vec_len, data_len),
+14 => wire__crate__api__commands__externals__save_externals__save_externals_impl(port, ptr, rust_vec_len, data_len),
+15 => wire__crate__api__commands__optionals__save_optionals__save_optionals_impl(port, ptr, rust_vec_len, data_len),
+16 => wire__crate__api__commands__params__set_launch_params_impl(port, ptr, rust_vec_len, data_len),
+18 => wire__crate__api__commands__sync_config__sync_config_impl(port, ptr, rust_vec_len, data_len),
+19 => wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(port, ptr, rust_vec_len, data_len),
+20 => wire__crate__api__commands__pack_sync__sync_pack_with_parents__sync_pack_with_parents_impl(port, ptr, rust_vec_len, data_len),
+                        _ => unreachable!(),
+                    }
 }
 
 fn pde_ffi_dispatcher_sync_impl(
@@ -1298,9 +1331,9 @@ fn pde_ffi_dispatcher_sync_impl(
             rust_vec_len,
             data_len,
         ),
-        5 => wire__crate__api__init_app_impl(ptr, rust_vec_len, data_len),
-        7 => wire__crate__api__logging__init_rust_logger_impl(ptr, rust_vec_len, data_len),
-        16 => wire__crate__api__logging__set_rust_log_level_impl(ptr, rust_vec_len, data_len),
+        6 => wire__crate__api__init_app_impl(ptr, rust_vec_len, data_len),
+        8 => wire__crate__api__logging__init_rust_logger_impl(ptr, rust_vec_len, data_len),
+        17 => wire__crate__api__logging__set_rust_log_level_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -1380,6 +1413,7 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::pack_sync::file_cha
 impl flutter_rust_bridge::IntoDart for crate::api::commands::pack_sync::get_diff::DiffResult {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
+            self.pack_name.into_into_dart().into_dart(),
             self.diff.into_into_dart().into_dart(),
             self.has_changes.into_into_dart().into_dart(),
             self.change_count.into_into_dart().into_dart(),
@@ -1447,6 +1481,37 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::pack_sync::file_cha
     for crate::api::commands::pack_sync::file_change::FileChange
 {
     fn into_into_dart(self) -> crate::api::commands::pack_sync::file_change::FileChange {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart
+    for crate::api::commands::pack_sync::get_diffs_with_parents::MultiDiffResult
+{
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.results.into_into_dart().into_dart(),
+            self.has_changes.into_into_dart().into_dart(),
+            self.total_dl_size.into_into_dart().into_dart(),
+            self.total_size_change.into_into_dart().into_dart(),
+            self.total_change_count.into_into_dart().into_dart(),
+            self.changed_packs.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::commands::pack_sync::get_diffs_with_parents::MultiDiffResult
+{
+}
+impl
+    flutter_rust_bridge::IntoIntoDart<
+        crate::api::commands::pack_sync::get_diffs_with_parents::MultiDiffResult,
+    > for crate::api::commands::pack_sync::get_diffs_with_parents::MultiDiffResult
+{
+    fn into_into_dart(
+        self,
+    ) -> crate::api::commands::pack_sync::get_diffs_with_parents::MultiDiffResult {
         self
     }
 }
@@ -1638,6 +1703,7 @@ impl SseEncode for crate::api::commands::pack_sync::file_change::ChangeType {
 impl SseEncode for crate::api::commands::pack_sync::get_diff::DiffResult {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.pack_name, serializer);
         <RustAutoOpaqueMoi<OpaqueDiff>>::sse_encode(self.diff, serializer);
         <bool>::sse_encode(self.has_changes, serializer);
         <usize>::sse_encode(self.change_count, serializer);
@@ -1677,12 +1743,32 @@ impl SseEncode for i64 {
     }
 }
 
+impl SseEncode for Vec<OpaqueDiff> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <OpaqueDiff>::sse_encode(item, serializer);
+        }
+    }
+}
+
 impl SseEncode for Vec<String> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <i32>::sse_encode(self.len() as _, serializer);
         for item in self {
             <String>::sse_encode(item, serializer);
+        }
+    }
+}
+
+impl SseEncode for Vec<crate::api::commands::pack_sync::get_diff::DiffResult> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <crate::api::commands::pack_sync::get_diff::DiffResult>::sse_encode(item, serializer);
         }
     }
 }
@@ -1748,6 +1834,21 @@ impl SseEncode
                 Vec<crate::api::commands::pack_sync::file_change::FileChange>,
             )>::sse_encode(item, serializer);
         }
+    }
+}
+
+impl SseEncode for crate::api::commands::pack_sync::get_diffs_with_parents::MultiDiffResult {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <Vec<crate::api::commands::pack_sync::get_diff::DiffResult>>::sse_encode(
+            self.results,
+            serializer,
+        );
+        <bool>::sse_encode(self.has_changes, serializer);
+        <u64>::sse_encode(self.total_dl_size, serializer);
+        <i64>::sse_encode(self.total_size_change, serializer);
+        <usize>::sse_encode(self.total_change_count, serializer);
+        <usize>::sse_encode(self.changed_packs, serializer);
     }
 }
 

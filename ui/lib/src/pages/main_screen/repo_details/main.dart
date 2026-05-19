@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:pamm_ui/src/models/repo_with_path.dart';
 import 'package:pamm_ui/src/pages/main_screen/repo_details/edit_pack_dialog.dart';
 import 'package:pamm_ui/src/pages/sync_screen/main.dart';
+import 'package:pamm_ui/src/pages/sync_single_pack_screen/main.dart';
 import 'package:pamm_ui/src/rust/api/commands/launch.dart';
 import 'package:pamm_ui/src/rust/api/commands/pack_sync/quick_check.dart';
+import 'package:pamm_ui/src/services/debug_settings_service.dart';
 
 class RepoDetails extends StatefulWidget {
   const RepoDetails(this.selectedRepo, {super.key});
@@ -142,7 +144,12 @@ class _PackListTileState extends State<PackListTile> {
               await Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) =>
-                      SyncScreen(widget.packName, widget.repoPath),
+                      debugSettingsService.useLegacySinglePackSync
+                          ? SyncSinglePackScreen(
+                              widget.packName,
+                              widget.repoPath,
+                            )
+                          : SyncScreen(widget.packName, widget.repoPath),
                 ),
               );
               // Re-check status after returning from sync

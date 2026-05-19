@@ -17,8 +17,10 @@ import 'api/commands/optionals/load_optionals.dart';
 import 'api/commands/optionals/save_optionals.dart';
 import 'api/commands/pack_sync/file_change.dart';
 import 'api/commands/pack_sync/get_diff.dart';
+import 'api/commands/pack_sync/get_diffs_with_parents.dart';
 import 'api/commands/pack_sync/quick_check.dart';
 import 'api/commands/pack_sync/sync_pack.dart';
+import 'api/commands/pack_sync/sync_pack_with_parents.dart';
 import 'api/commands/params.dart';
 import 'api/commands/sync_config.dart';
 import 'api/logging.dart';
@@ -119,7 +121,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   PlatformInt64 dco_decode_i_64(dynamic raw);
 
   @protected
+  List<OpaqueDiff>
+  dco_decode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
+    dynamic raw,
+  );
+
+  @protected
   List<String> dco_decode_list_String(dynamic raw);
+
+  @protected
+  List<DiffResult> dco_decode_list_diff_result(dynamic raw);
 
   @protected
   List<ExternalAddon> dco_decode_list_external_addon(dynamic raw);
@@ -136,6 +147,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   List<(String, List<FileChange>)>
   dco_decode_list_record_string_list_file_change(dynamic raw);
+
+  @protected
+  MultiDiffResult dco_decode_multi_diff_result(dynamic raw);
 
   @protected
   String? dco_decode_opt_String(dynamic raw);
@@ -242,7 +256,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   PlatformInt64 sse_decode_i_64(SseDeserializer deserializer);
 
   @protected
+  List<OpaqueDiff>
+  sse_decode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   List<String> sse_decode_list_String(SseDeserializer deserializer);
+
+  @protected
+  List<DiffResult> sse_decode_list_diff_result(SseDeserializer deserializer);
 
   @protected
   List<ExternalAddon> sse_decode_list_external_addon(
@@ -263,6 +286,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   List<(String, List<FileChange>)>
   sse_decode_list_record_string_list_file_change(SseDeserializer deserializer);
+
+  @protected
+  MultiDiffResult sse_decode_multi_diff_result(SseDeserializer deserializer);
 
   @protected
   String? sse_decode_opt_String(SseDeserializer deserializer);
@@ -384,7 +410,20 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_i_64(PlatformInt64 self, SseSerializer serializer);
 
   @protected
+  void
+  sse_encode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
+    List<OpaqueDiff> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_list_String(List<String> self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_diff_result(
+    List<DiffResult> self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_list_external_addon(
@@ -413,6 +452,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_list_record_string_list_file_change(
     List<(String, List<FileChange>)> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_multi_diff_result(
+    MultiDiffResult self,
     SseSerializer serializer,
   );
 
