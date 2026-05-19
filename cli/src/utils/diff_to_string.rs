@@ -24,24 +24,79 @@ impl ToPrettyString for PackDiff {
             result.push_str("Changes:\n");
             result.push_str(&diffs_to_string(changes, ""));
             result.push('\n');
-            result.push_str(
-                format!("Total download size: {}", DecimalBytes(self.get_dl_size())).as_str(),
-            );
-            result.push('\n');
-            let size_change = self.get_size_change();
-
-            result.push_str(
-                format!(
-                    "Total size change: {}{}",
-                    if size_change.is_negative() { "-" } else { "+" },
-                    DecimalBytes(size_change.unsigned_abs()),
-                )
-                .as_str(),
-            );
+            result.push_str(&totals_to_string(self.get_dl_size(), self.get_size_change()));
         }
 
         result
     }
+}
+
+impl ToPrettyString for Vec<PackDiff> {
+    fn to_pretty_string(&self) -> String {
+        let mut result = String::new();
+
+        let name_width = self
+            .iter()
+            .map(|d| d.get_pack_name().len())
+            .max()
+            .unwrap_or(0);
+
+        result.push_str("Pack summary:\n");
+        for diff in self {
+            let name = diff.get_pack_name();
+            if diff.has_changes() {
+                let size_change = diff.get_size_change();
+                result.push_str(&format!(
+                    "  {:<width$}  {} change(s), {} to download, {}{} size change\n",
+                    name,
+                    diff.change_count(),
+                    DecimalBytes(diff.get_dl_size()),
+                    if size_change.is_negative() { "-" } else { "+" },
+                    DecimalBytes(size_change.unsigned_abs()),
+                    width = name_width,
+                ));
+            } else {
+                result.push_str(&format!(
+                    "  {:<width$}  no changes\n",
+                    name,
+                    width = name_width,
+                ));
+            }
+        }
+
+        let total_dl: u64 = self.iter().map(|d| d.get_dl_size()).sum();
+        let total_change: i64 = self.iter().map(|d| d.get_size_change()).sum();
+
+        result.push('\n');
+        result.push_str(&totals_to_string(total_dl, total_change));
+
+        result
+    }
+}
+
+pub fn multi_pack_details_string(diffs: &[PackDiff]) -> String {
+    let mut result = String::new();
+
+    for diff in diffs {
+        result.push_str(&format!("=== Pack: {} ===\n", diff.get_pack_name()));
+        if diff.has_changes() {
+            result.push_str(&diffs_to_string(&diff.addon_diffs, ""));
+        } else {
+            result.push_str("No changes.\n");
+        }
+        result.push('\n');
+    }
+
+    result
+}
+
+fn totals_to_string(dl_size: u64, size_change: i64) -> String {
+    format!(
+        "Total download size: {}\nTotal size change: {}{}",
+        DecimalBytes(dl_size),
+        if size_change.is_negative() { "-" } else { "+" },
+        DecimalBytes(size_change.unsigned_abs()),
+    )
 }
 
 fn diffs_to_string(diffs: &[NodeDiff], base_path: &str) -> String {

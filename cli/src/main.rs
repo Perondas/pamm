@@ -13,6 +13,7 @@ use crate::commands::init_repo::init_repo_command;
 use crate::commands::launch::launch_command;
 use subcommands::optionals::toggle_optionals::toggle_optionals_command;
 use crate::commands::sync_pack::sync_pack_command;
+use crate::commands::sync_this_only_pack::sync_this_only_pack_command;
 use crate::commands::update_pack::update_pack_command;
 use crate::subcommands::externals::ExternalsSubcommand;
 use crate::subcommands::optionals::OptionalsSubcommand;
@@ -38,6 +39,7 @@ fn main() -> Result<()> {
         AppSubcommand::Update(args) => update_pack_command(args, log_wrapper),
         AppSubcommand::InitRemote(args) => init_remote_command(args),
         AppSubcommand::Sync(args) => sync_pack_command(args, log_wrapper),
+        AppSubcommand::SyncThisOnly(args) => sync_this_only_pack_command(args, log_wrapper),
         AppSubcommand::Launch(args) => launch_command(args),
         AppSubcommand::Externals(args) => match args.command {
             ExternalsSubcommand::Toggle(args) => toggle_externals_command(args),

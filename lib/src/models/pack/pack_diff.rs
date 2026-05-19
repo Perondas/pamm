@@ -24,7 +24,7 @@ impl PackDiff {
             .count()
     }
 
-    pub(crate) fn get_pack_name(&self) -> &str {
+    pub fn get_pack_name(&self) -> &str {
         &self.target_index.pack_name
     }
 }
