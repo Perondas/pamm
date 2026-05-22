@@ -40,7 +40,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.12.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -976279708;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1234091837;
 
 // Section: executor
 
@@ -262,6 +262,45 @@ fn wire__crate__api__commands__get_remote_repo_info__get_remote_repo_info_impl(
                             crate::api::commands::get_remote_repo_info::get_remote_repo_info(
                                 &api_remote,
                             )?;
+                        Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__commands__params__get_server_launch_params_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "get_server_launch_params",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_repot_path = <String>::sse_decode(&mut deserializer);
+            let api_pack_name = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::api::commands::params::get_server_launch_params(
+                            api_repot_path,
+                            api_pack_name,
+                        )?;
                         Ok(output_ok)
                     })(),
                 )
@@ -1302,18 +1341,19 @@ fn pde_ffi_dispatcher_primary_impl(
 3 => wire__crate__api__commands__pack_sync__get_diffs_with_parents__get_diff_with_parents_impl(port, ptr, rust_vec_len, data_len),
 4 => wire__crate__api__commands__params__get_launch_params_impl(port, ptr, rust_vec_len, data_len),
 5 => wire__crate__api__commands__get_remote_repo_info__get_remote_repo_info_impl(port, ptr, rust_vec_len, data_len),
-7 => wire__crate__api__commands__init_from_remote__init_from_remote_impl(port, ptr, rust_vec_len, data_len),
-9 => wire__crate__api__commands__launch__launch_impl(port, ptr, rust_vec_len, data_len),
-10 => wire__crate__api__commands__externals__load_externals__load_externals_impl(port, ptr, rust_vec_len, data_len),
-11 => wire__crate__api__commands__optionals__load_optionals__load_optionals_impl(port, ptr, rust_vec_len, data_len),
-12 => wire__crate__api__commands__load_repo__load_repo_impl(port, ptr, rust_vec_len, data_len),
-13 => wire__crate__api__commands__pack_sync__quick_check__quick_check_impl(port, ptr, rust_vec_len, data_len),
-14 => wire__crate__api__commands__externals__save_externals__save_externals_impl(port, ptr, rust_vec_len, data_len),
-15 => wire__crate__api__commands__optionals__save_optionals__save_optionals_impl(port, ptr, rust_vec_len, data_len),
-16 => wire__crate__api__commands__params__set_launch_params_impl(port, ptr, rust_vec_len, data_len),
-18 => wire__crate__api__commands__sync_config__sync_config_impl(port, ptr, rust_vec_len, data_len),
-19 => wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(port, ptr, rust_vec_len, data_len),
-20 => wire__crate__api__commands__pack_sync__sync_pack_with_parents__sync_pack_with_parents_impl(port, ptr, rust_vec_len, data_len),
+6 => wire__crate__api__commands__params__get_server_launch_params_impl(port, ptr, rust_vec_len, data_len),
+8 => wire__crate__api__commands__init_from_remote__init_from_remote_impl(port, ptr, rust_vec_len, data_len),
+10 => wire__crate__api__commands__launch__launch_impl(port, ptr, rust_vec_len, data_len),
+11 => wire__crate__api__commands__externals__load_externals__load_externals_impl(port, ptr, rust_vec_len, data_len),
+12 => wire__crate__api__commands__optionals__load_optionals__load_optionals_impl(port, ptr, rust_vec_len, data_len),
+13 => wire__crate__api__commands__load_repo__load_repo_impl(port, ptr, rust_vec_len, data_len),
+14 => wire__crate__api__commands__pack_sync__quick_check__quick_check_impl(port, ptr, rust_vec_len, data_len),
+15 => wire__crate__api__commands__externals__save_externals__save_externals_impl(port, ptr, rust_vec_len, data_len),
+16 => wire__crate__api__commands__optionals__save_optionals__save_optionals_impl(port, ptr, rust_vec_len, data_len),
+17 => wire__crate__api__commands__params__set_launch_params_impl(port, ptr, rust_vec_len, data_len),
+19 => wire__crate__api__commands__sync_config__sync_config_impl(port, ptr, rust_vec_len, data_len),
+20 => wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(port, ptr, rust_vec_len, data_len),
+21 => wire__crate__api__commands__pack_sync__sync_pack_with_parents__sync_pack_with_parents_impl(port, ptr, rust_vec_len, data_len),
                         _ => unreachable!(),
                     }
 }
@@ -1331,9 +1371,9 @@ fn pde_ffi_dispatcher_sync_impl(
             rust_vec_len,
             data_len,
         ),
-        6 => wire__crate__api__init_app_impl(ptr, rust_vec_len, data_len),
-        8 => wire__crate__api__logging__init_rust_logger_impl(ptr, rust_vec_len, data_len),
-        17 => wire__crate__api__logging__set_rust_log_level_impl(ptr, rust_vec_len, data_len),
+        7 => wire__crate__api__init_app_impl(ptr, rust_vec_len, data_len),
+        9 => wire__crate__api__logging__init_rust_logger_impl(ptr, rust_vec_len, data_len),
+        18 => wire__crate__api__logging__set_rust_log_level_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }

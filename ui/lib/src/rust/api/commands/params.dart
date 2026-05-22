@@ -14,6 +14,14 @@ Future<List<String>> getLaunchParams({
   packName: packName,
 );
 
+Future<List<String>> getServerLaunchParams({
+  required String repotPath,
+  required String packName,
+}) => RustLib.instance.api.crateApiCommandsParamsGetServerLaunchParams(
+  repotPath: repotPath,
+  packName: packName,
+);
+
 Future<void> setLaunchParams({
   required String repotPath,
   required String packName,
