@@ -1,6 +1,6 @@
-use pamm_lib::handle::externals::external_addon::ExternalAddon;
-use pamm_lib::handle::externals::save_externals::SaveExternals;
-use pamm_lib::handle::repo_handle::RepoHandle;
+use pamm_lib::handle::client::externals::external_addon::ExternalAddon;
+use pamm_lib::handle::client::externals::save_externals::SaveExternals;
+use pamm_lib::handle::client::client_repo_handle::ClientRepoHandle;
 
 pub fn save_externals(
     repo_path: String,
@@ -9,7 +9,7 @@ pub fn save_externals(
 ) -> anyhow::Result<()> {
     let repo_path = std::path::Path::new(&repo_path);
 
-    let handle = RepoHandle::open(repo_path)?;
+    let handle = ClientRepoHandle::open(repo_path)?;
 
     handle.save_externals(&pack_name, &externals)
 }

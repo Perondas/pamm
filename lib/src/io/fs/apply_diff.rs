@@ -1,4 +1,4 @@
-use crate::handle::repo_handle::RepoHandle;
+use crate::handle::client::client_repo_handle::ClientRepoHandle;
 use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::io::net::remote_patcher::RemotePatcher;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
@@ -24,7 +24,7 @@ pub struct DiffApplier<P: ProgressReporter> {
 impl PackConfig {
     pub fn diff_applier<P: ProgressReporter>(
         &self,
-        repo_handle: &RepoHandle,
+        repo_handle: &ClientRepoHandle,
         base_url: &Url,
         progress_reporter: P,
     ) -> DiffApplier<P> {

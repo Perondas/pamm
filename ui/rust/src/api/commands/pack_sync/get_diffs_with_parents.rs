@@ -1,6 +1,6 @@
 use crate::api::commands::pack_sync::get_diff::{DiffResult, diff_to_result};
 use crate::api::progress_reporting::DartProgressReporter;
-use pamm_lib::handle::repo_handle::RepoHandle;
+use pamm_lib::handle::client::client_repo_handle::ClientRepoHandle;
 use std::path::Path;
 
 pub fn get_diff_with_parents(
@@ -11,7 +11,7 @@ pub fn get_diff_with_parents(
 ) -> anyhow::Result<MultiDiffResult> {
     let repo_dir = Path::new(&repo_path);
 
-    let handle = RepoHandle::open(repo_dir)?;
+    let handle = ClientRepoHandle::open(repo_dir)?;
 
     let diffs = handle.get_pack_and_parents_diffs(
         &pack_name,

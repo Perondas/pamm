@@ -3,8 +3,8 @@ use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::{ToPrettyString, multi_pack_details_string};
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
-use pamm_lib::handle::actions::sync::config_sync_interactor::ConfigSyncInteractor;
-use pamm_lib::handle::repo_handle::RepoHandle;
+use pamm_lib::handle::client::actions::sync::config_sync_interactor::ConfigSyncInteractor;
+use pamm_lib::handle::client::client_repo_handle::ClientRepoHandle;
 use std::env::current_dir;
 
 #[derive(Debug, Args)]
@@ -19,7 +19,7 @@ pub struct SyncPackArgs {
 }
 
 pub fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow::Result<()> {
-    let mut repo_handle = RepoHandle::open(&current_dir()?)?;
+    let mut repo_handle = ClientRepoHandle::open(&current_dir()?)?;
 
     repo_handle.sync_repo_config(&DialogerInteractor)?;
 

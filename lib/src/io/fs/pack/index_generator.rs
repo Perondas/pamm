@@ -1,4 +1,4 @@
-use crate::handle::repo_handle::RepoHandle;
+use crate::handle::client::client_repo_handle::ClientRepoHandle;
 use crate::io::fs::cache::file_cache_entry::FileCacheEntry;
 use crate::io::fs::cache::kv_cache::KVCache;
 use crate::io::name_consts::CACHE_DB_DIR_NAME;
@@ -30,7 +30,7 @@ pub struct IndexGenerator<P: ProgressReporter> {
 }
 
 impl<P: ProgressReporter> IndexGenerator<P> {
-    pub fn from_handle(handle: &RepoHandle, pack_name: &str, progress_reporter: P) -> Result<Self> {
+    pub fn from_handle(handle: &ClientRepoHandle, pack_name: &str, progress_reporter: P) -> Result<Self> {
         let addon_dir = handle
             .repo_path
             .join(get_pack_addon_directory_name(pack_name));

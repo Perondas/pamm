@@ -3,9 +3,9 @@ use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::ToPrettyString;
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
-use pamm_lib::handle::reading::get_pack_index::GetPackIndex;
-use pamm_lib::handle::repo_handle::RepoHandle;
-use pamm_lib::handle::writing::apply_diff::ApplyDiff;
+use pamm_lib::handle::client::reading::get_pack_index::GetPackIndex;
+use pamm_lib::handle::client::client_repo_handle::ClientRepoHandle;
+use pamm_lib::handle::client::writing::apply_diff::ApplyDiff;
 use pamm_lib::io::fs::pack::index_generator::IndexGenerator;
 use pamm_lib::models::pack::pack_diff::diff_packs;
 use std::env::current_dir;
@@ -25,7 +25,7 @@ pub struct UpdatePackArgs {
 }
 
 pub fn update_pack_command(args: UpdatePackArgs, log_wrapper: LogWrapper) -> anyhow::Result<()> {
-    let handle = RepoHandle::open(&current_dir()?)?;
+    let handle = ClientRepoHandle::open(&current_dir()?)?;
 
     let stored_index = handle.get_pack_index(&args.name)?;
 

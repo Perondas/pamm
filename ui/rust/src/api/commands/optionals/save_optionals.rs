@@ -1,6 +1,6 @@
-use pamm_lib::handle::optionals::optional_addon::OptionalAddon;
-use pamm_lib::handle::optionals::SaveOptionals;
-use pamm_lib::handle::repo_handle::RepoHandle;
+use pamm_lib::handle::client::optionals::optional_addon::OptionalAddon;
+use pamm_lib::handle::client::optionals::SaveOptionals;
+use pamm_lib::handle::client::client_repo_handle::ClientRepoHandle;
 
 pub fn save_optionals(
     repo_path: String,
@@ -9,7 +9,7 @@ pub fn save_optionals(
 ) -> anyhow::Result<()> {
     let repo_path = std::path::Path::new(&repo_path);
 
-    let handle = RepoHandle::open(repo_path)?;
+    let handle = ClientRepoHandle::open(repo_path)?;
 
     handle.save_optionals(&pack_name, &optionals)
 }

@@ -1,4 +1,4 @@
-use crate::handle::externals::external_addon::ExternalAddon;
+use crate::handle::client::externals::external_addon::ExternalAddon;
 use regex::Regex;
 use std::path::Path;
 use std::sync::LazyLock;
