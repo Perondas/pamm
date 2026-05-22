@@ -3,30 +3,11 @@ use crate::handle::externals::get_external_addons_paths::GetExternalAddonsPaths;
 use crate::handle::optionals::GetOptionalsPaths;
 use crate::handle::reading::get_pack::GetPack;
 use crate::handle::reading::get_repo_info::GetRepoInfo;
+use crate::io::fs::util::symlink::create_or_recreate_symlink;
 use crate::util::linux::get_arma_install_dir::get_arma_install_dir;
 use anyhow::{anyhow, Context};
-use std::fs::{create_dir_all, symlink_metadata};
-use std::os::unix::fs::symlink;
+use std::fs::create_dir_all;
 use std::path::Path;
-
-fn create_or_recreate_symlink(target: &Path, link: &Path) -> anyhow::Result<()> {
-    log::trace!("Creating symlink: {:?} -> {:?}", link, target);
-    if link.exists() || symlink_metadata(link).is_ok() {
-        if symlink_metadata(link)?.file_type().is_symlink() {
-            log::trace!("Removing existing symlink at {:?}", link);
-            std::fs::remove_file(link).context(anyhow!(
-                "Failed to remove existing symlink at {:?}",
-                link
-            ))?;
-        } else {
-            return Err(anyhow!(
-                "Path {:?} already exists and is not a symlink",
-                link
-            ));
-        }
-    }
-    symlink(target, link).context("Failed to create symlink")
-}
 
 pub trait GetLinuxAddonPaths {
     fn get_linux_addon_paths(&self, pack_name: &str) -> anyhow::Result<Vec<String>>;

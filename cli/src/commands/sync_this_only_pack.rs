@@ -4,7 +4,7 @@ use crate::utils::diff_to_string::ToPrettyString;
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::handle::actions::sync::config_sync_interactor::ConfigSyncInteractor;
-use pamm_lib::handle::repo_handle::RepoHandle;
+use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use std::env::current_dir;
 
 #[derive(Debug, Args)]
@@ -22,7 +22,7 @@ pub fn sync_this_only_pack_command(
     args: SyncThisOnlyPackArgs,
     log_wrapper: LogWrapper,
 ) -> anyhow::Result<()> {
-    let mut repo_handle = RepoHandle::open(&current_dir()?)?;
+    let mut repo_handle = ClientRepoHandle::open(&current_dir()?)?;
 
     repo_handle.sync_repo_config(&DialogerInteractor)?;
 

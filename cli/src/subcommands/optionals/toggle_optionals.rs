@@ -1,7 +1,7 @@
 use clap::Args;
 use pamm_lib::handle::optionals::SaveOptionals;
 use pamm_lib::handle::optionals::load_optionals::LoadOptionals;
-use pamm_lib::handle::repo_handle::RepoHandle;
+use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 
 #[derive(Debug, Args)]
 pub struct ToggleOptionalsArgs {
@@ -11,7 +11,7 @@ pub struct ToggleOptionalsArgs {
 }
 
 pub fn toggle_optionals_command(args: ToggleOptionalsArgs) -> anyhow::Result<()> {
-    let handle = RepoHandle::open(&std::env::current_dir()?)?;
+    let handle = ClientRepoHandle::open(&std::env::current_dir()?)?;
 
     let mut optionals = handle.load_optionals(&args.name)?;
 

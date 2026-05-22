@@ -59,4 +59,18 @@ impl PackIndex {
 
         checksum_index.write_to(&index_dir)
     }
+
+    pub fn write_full_index_to_fs(&self, base_path: &Path) -> anyhow::Result<()> {
+        let index_dir = base_path
+            .join(get_pack_addon_directory_name(&self.pack_name))
+            .join(INDEX_DIR_NAME);
+
+        std::fs::create_dir_all(&index_dir)?;
+
+        for addon in &self.addons {
+            addon.write_to(&index_dir)?;
+        }
+
+        self.write_checksum_index_to_fs(base_path)
+    }
 }

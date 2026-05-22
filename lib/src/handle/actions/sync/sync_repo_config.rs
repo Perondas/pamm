@@ -1,6 +1,6 @@
 use crate::handle::actions::sync::config_sync_interactor::ConfigSyncInteractor;
+use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::reading::get_repo_info::GetRepoInfo;
-use crate::handle::repo_handle::RepoHandle;
 use crate::handle::writing::add_pack::AddPack;
 use crate::handle::writing::delete_pack::DeletePack;
 use crate::handle::writing::update_pack::UpdatePack;
@@ -11,17 +11,12 @@ use crate::models::repo::repo_config::RepoConfig;
 use anyhow::{Context, anyhow};
 use log::debug;
 
-impl RepoHandle {
+impl ClientRepoHandle {
     pub fn sync_repo_config(
         &mut self,
         interactor: &impl ConfigSyncInteractor,
     ) -> anyhow::Result<()> {
-        let repo_user_settings = self
-            .repo_user_settings
-            .as_ref()
-            .ok_or_else(|| anyhow!("Repo user settings not found"))?;
-
-        let remote_url = repo_user_settings.get_remote().clone();
+        let remote_url = self.remote().clone();
 
         let remote_repo_config = RepoConfig::download_known(&remote_url).context(anyhow!(
             "Failed to download remote config from {}",

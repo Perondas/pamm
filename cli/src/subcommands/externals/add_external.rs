@@ -2,7 +2,7 @@ use clap::Args;
 use pamm_lib::handle::externals::external_addon::ExternalAddon;
 use pamm_lib::handle::externals::load_externals::LoadExternals;
 use pamm_lib::handle::externals::save_externals::SaveExternals;
-use pamm_lib::handle::repo_handle::RepoHandle;
+use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 
 #[derive(Debug, Args)]
 pub struct AddExternalArgs {
@@ -15,7 +15,7 @@ pub struct AddExternalArgs {
 }
 
 pub fn add_external_command(args: AddExternalArgs) -> anyhow::Result<()> {
-    let handle = RepoHandle::open(&std::env::current_dir()?)?;
+    let handle = ClientRepoHandle::open(&std::env::current_dir()?)?;
 
     let mut externals = handle.load_externals(&args.name)?;
 

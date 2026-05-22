@@ -1,7 +1,7 @@
 use crate::commands::input::from_cli_input::FromCliInputWithContext;
 use clap::Args;
 use pamm_lib::handle::reading::get_repo_info::GetRepoInfo;
-use pamm_lib::handle::repo_handle::RepoHandle;
+use pamm_lib::handle::server_repo_handle::ServerRepoHandle;
 use pamm_lib::handle::writing::add_pack::AddPack;
 use pamm_lib::models::pack::pack_config::PackConfig;
 
@@ -9,7 +9,7 @@ use pamm_lib::models::pack::pack_config::PackConfig;
 pub struct AddPackArgs;
 
 pub fn add_pack_command(_args: AddPackArgs) -> anyhow::Result<()> {
-    let mut repo_handle = RepoHandle::open(&std::env::current_dir()?)?;
+    let mut repo_handle = ServerRepoHandle::open(&std::env::current_dir()?)?;
 
     let repo_config = repo_handle.get_config();
 

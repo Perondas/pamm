@@ -1,9 +1,9 @@
 use crate::commands::add_pack::AddPackArgs;
+use crate::commands::build::BuildArgs;
 use crate::commands::init_remote::InitRemoteArgs;
 use crate::commands::launch::LaunchArgs;
 use crate::commands::sync_pack::SyncPackArgs;
 use crate::commands::sync_this_only_pack::SyncThisOnlyPackArgs;
-use crate::commands::update_pack::UpdatePackArgs;
 use crate::subcommands::externals::ExternalsArgs;
 use crate::subcommands::optionals::OptionalArgs;
 use clap::{Parser, Subcommand};
@@ -25,7 +25,7 @@ pub enum AppSubcommand {
     Init,
     InitRemote(InitRemoteArgs),
     AddPack(AddPackArgs),
-    Update(UpdatePackArgs),
+    Build(BuildArgs),
     Sync(SyncPackArgs),
     SyncThisOnly(SyncThisOnlyPackArgs),
     Launch(LaunchArgs),

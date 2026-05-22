@@ -1,10 +1,10 @@
+use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::reading::get_pack::GetPack;
-use crate::handle::repo_handle::RepoHandle;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::models::pack::pack_diff::PackDiff;
 use anyhow::ensure;
 
-impl RepoHandle {
+impl ClientRepoHandle {
     pub fn apply_pack_diff<P: ProgressReporter>(
         &self,
         pack_name: &str,
@@ -22,7 +22,7 @@ impl RepoHandle {
 
         diff.write_checksum_index_to_fs(&self.repo_path)?;
 
-        let diff_applier = config.diff_applier(self, self.get_remote_url()?, progress_reporter);
+        let diff_applier = config.diff_applier(self, self.get_remote_url(), progress_reporter);
 
         diff_applier.apply(diff)
     }

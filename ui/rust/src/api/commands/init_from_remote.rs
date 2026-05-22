@@ -1,7 +1,7 @@
 use flutter_rust_bridge::for_generated::anyhow;
 use flutter_rust_bridge::frb;
+use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use pamm_lib::handle::reading::get_repo_info::GetRepoInfo;
-use pamm_lib::handle::repo_handle::RepoHandle;
 pub use pamm_lib::models::repo::repo_config::RepoConfig;
 use std::collections::HashSet;
 use std::path::Path;
@@ -11,7 +11,7 @@ pub fn init_from_remote(remote: &str, target_dir: &str) -> anyhow::Result<RepoCo
     let current_dir = Path::new(target_dir);
     let remote = Url::parse(remote)?;
 
-    let handle = RepoHandle::init_from_remote(current_dir, &remote)?;
+    let handle = ClientRepoHandle::init_from_remote(current_dir, &remote)?;
 
     Ok(handle.get_config().to_owned())
 }

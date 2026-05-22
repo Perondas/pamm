@@ -36,6 +36,26 @@ It is NOT compatible with other mod managers.
 ## Planned Features
 Are tracked in the issues tab
 
+## Hosting a repo
+
+A pamm repository is split into **source** (what you edit on the server) and **build output** (what clients fetch
+over HTTP). The build output lives in a dedicated `www/` subdirectory of the repo and is the only thing the HTTP
+server should expose.
+
+```
+pamm init                       # create a new empty repo
+pamm add-pack                   # register a new pack interactively
+# drop addon files into <pack>_pack_addons/@addon_name/ ...
+pamm build                      # populate www/ with symlinks + indexes
+pamm build <pack>               # rebuild a single pack's subtree
+pamm build --copy               # use copies instead of symlinks (Windows / cross-fs)
+pamm build --force-refresh      # ignore the on-disk index cache and re-scan everything
+```
+
+Point your HTTP server's document root at `<repo>/www/`. Stop the HTTP server during a build — the build
+overwrites entries in place. Symlink mode is fastest; copy mode is needed when the HTTP server can't follow
+symlinks or when running on Windows without Developer Mode.
+
 ## Notes
 
 Has only been tested using caddy as a web server. It should work with any web server that supports multiple range

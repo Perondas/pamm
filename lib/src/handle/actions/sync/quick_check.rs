@@ -1,5 +1,5 @@
+use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::reading::get_pack::GetPack;
-use crate::handle::repo_handle::RepoHandle;
 use crate::io::fs::fs_readable::KnownFSReadable;
 use crate::io::name_consts::{INDEX_DIR_NAME, get_pack_addon_directory_name};
 use crate::io::net::downloadable::KnownDownloadable;
@@ -9,16 +9,11 @@ use anyhow::{Context, anyhow};
 use log::{debug, trace};
 use std::collections::HashSet;
 
-impl RepoHandle {
+impl ClientRepoHandle {
     pub fn quick_check_pack_up_to_date(&self, pack_name: &str) -> anyhow::Result<bool> {
-        let repo_user_settings = self
-            .repo_user_settings
-            .as_ref()
-            .ok_or_else(|| anyhow!("Repo user settings not found"))?;
-
         let addon_path = RelPath::new().push(&get_pack_addon_directory_name(pack_name));
 
-        let remote_url = repo_user_settings.get_remote().clone();
+        let remote_url = self.remote().clone();
 
         let index_url = addon_path
             .clone()

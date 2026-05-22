@@ -2,7 +2,7 @@ use crate::api::commands::pack_sync::file_change::{get_file_changes, FileChange}
 use crate::api::frb;
 use crate::api::progress_reporting::DartProgressReporter;
 use crate::frb_generated::RustAutoOpaque;
-use pamm_lib::handle::repo_handle::RepoHandle;
+use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use pamm_lib::models::identifiable::Identifiable;
 use pamm_lib::models::index::get_dl_size::GetDlSize;
 use pamm_lib::models::index::get_size_change::GetSizeChange;
@@ -18,7 +18,7 @@ pub fn get_diff(
 ) -> anyhow::Result<DiffResult> {
     let repo_dir = Path::new(&repo_path);
 
-    let handle = RepoHandle::open(repo_dir)?;
+    let handle = ClientRepoHandle::open(repo_dir)?;
 
     let diff = handle.get_pack_diff(&pack_name, dart_progress_reporter.clone(), clear_cache)?;
 

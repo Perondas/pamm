@@ -1,9 +1,9 @@
+use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::reading::get_pack::GetPack;
-use crate::handle::repo_handle::RepoHandle;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::models::pack::pack_diff::PackDiff;
 
-impl RepoHandle {
+impl ClientRepoHandle {
     pub fn get_pack_and_parents_diffs<P: ProgressReporter>(
         &self,
         pack_name: &str,
@@ -19,7 +19,7 @@ impl RepoHandle {
     }
 }
 
-fn collect_pack_chain(handle: &RepoHandle, pack_name: &str) -> anyhow::Result<Vec<String>> {
+fn collect_pack_chain(handle: &ClientRepoHandle, pack_name: &str) -> anyhow::Result<Vec<String>> {
     let mut chain = Vec::new();
     let mut current = pack_name.to_string();
 

@@ -4,7 +4,6 @@ use crate::handle::writing::save_pack_settings::SavePackSettings;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use crate::models::repo::repo_config::RepoConfig;
-use crate::models::repo::repo_user_settings::RepoUserSettings;
 use std::path::Path;
 
 mockall::mock! {
@@ -22,7 +21,6 @@ mockall::mock! {
     impl GetRepoInfo for Handle {
         fn get_repo_path(&self) -> &Path;
         fn get_config(&self) -> &RepoConfig;
-        fn get_repo_user_settings<'a>(&'a self) -> anyhow::Result<&'a RepoUserSettings>;
     }
 }
 

@@ -1,6 +1,6 @@
 use crate::api::commands::pack_sync::get_diff::OpaqueDiff;
 use crate::api::progress_reporting::DartProgressReporter;
-use pamm_lib::handle::repo_handle::RepoHandle;
+use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use std::path::Path;
 
 pub fn sync_pack_with_parents(
@@ -16,7 +16,7 @@ pub fn sync_pack_with_parents(
 
     let repo_dir = Path::new(&repo_path);
 
-    let handle = RepoHandle::open(repo_dir)?;
+    let handle = ClientRepoHandle::open(repo_dir)?;
 
     handle.apply_pack_and_parents_diffs(dart_progress_reporter, inner)
 }

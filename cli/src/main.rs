@@ -7,6 +7,7 @@ pub mod utils;
 
 use crate::args::{AppSubcommand, Args};
 use crate::commands::add_pack::add_pack_command;
+use crate::commands::build::build_command;
 use subcommands::externals::add_external::add_external_command;
 use crate::commands::init_remote::init_remote_command;
 use crate::commands::init_repo::init_repo_command;
@@ -14,7 +15,6 @@ use crate::commands::launch::launch_command;
 use subcommands::optionals::toggle_optionals::toggle_optionals_command;
 use crate::commands::sync_pack::sync_pack_command;
 use crate::commands::sync_this_only_pack::sync_this_only_pack_command;
-use crate::commands::update_pack::update_pack_command;
 use crate::subcommands::externals::ExternalsSubcommand;
 use crate::subcommands::optionals::OptionalsSubcommand;
 use anyhow::Result;
@@ -36,7 +36,7 @@ fn main() -> Result<()> {
     match args.command {
         AppSubcommand::Init => init_repo_command(),
         AppSubcommand::AddPack(args) => add_pack_command(args),
-        AppSubcommand::Update(args) => update_pack_command(args, log_wrapper),
+        AppSubcommand::Build(args) => build_command(args, log_wrapper),
         AppSubcommand::InitRemote(args) => init_remote_command(args),
         AppSubcommand::Sync(args) => sync_pack_command(args, log_wrapper),
         AppSubcommand::SyncThisOnly(args) => sync_this_only_pack_command(args, log_wrapper),

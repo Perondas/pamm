@@ -1,8 +1,8 @@
+use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::reading::get_pack::GetPack;
-use crate::handle::repo_handle::RepoHandle;
 use log::debug;
 
-impl RepoHandle {
+impl ClientRepoHandle {
     pub fn get_pack_launch_params(&self, pack_name: &str) -> anyhow::Result<Vec<String>> {
         let (_, settings) = self.get_pack_with_settings(pack_name)?;
 

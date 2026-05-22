@@ -1,11 +1,11 @@
+use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::reading::get_pack::GetPack;
-use crate::handle::repo_handle::RepoHandle;
 use crate::io::fs::pack::index_generator::IndexGenerator;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_diff::{PackDiff, diff_packs};
 
-impl RepoHandle {
+impl ClientRepoHandle {
     pub fn get_pack_diff<P: ProgressReporter>(
         &self,
         pack_name: &str,
@@ -26,7 +26,7 @@ impl RepoHandle {
 
         remote_pack_config.remove_disabled_optionals(&settings);
 
-        let remote_index = remote_pack_config.download_indexes(self.get_remote_url()?)?;
+        let remote_index = remote_pack_config.download_indexes(self.get_remote_url())?;
 
         actual_index.write_checksum_index_to_fs(&self.repo_path)?;
 
