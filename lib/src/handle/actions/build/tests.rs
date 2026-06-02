@@ -12,7 +12,7 @@ use crate::models::repo::repo_config::RepoConfig;
 use crate::util::test_utils::TestTempDir;
 use std::collections::HashSet;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 #[derive(Clone, Default)]
 struct NoopProgress;
@@ -257,8 +257,3 @@ fn build_pack_symlink_target_is_relative() {
     );
     assert!(!target.is_absolute(), "{:?} must be relative", target);
 }
-
-// Silence an `unused_imports` warning when running on non-unix platforms — the
-// `Path` import is consumed only by the cfg(unix) test above otherwise.
-#[allow(dead_code)]
-fn _path_kept(_p: &Path) {}

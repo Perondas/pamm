@@ -1,10 +1,8 @@
 use crate::handle::reading::get_pack::GetPack;
-use crate::handle::reading::get_pack_index::GetPackIndex;
 use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::repo_handle::RepoHandle;
 use crate::io::name_consts::WWW_DIR_NAME;
 use crate::models::pack::pack_config::PackConfig;
-use crate::models::pack::pack_index::PackIndex;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use crate::models::repo::repo_config::RepoConfig;
 use std::ops::{Deref, DerefMut};
@@ -24,7 +22,7 @@ impl ServerRepoHandle {
     }
 
     pub fn create(parent_path: &Path, repo_config: RepoConfig) -> anyhow::Result<Self> {
-        let base = RepoHandle::create_repo(parent_path, repo_config)?;
+        let base = RepoHandle::create_repo_folder(parent_path, repo_config)?;
         let www_path = base.repo_path.join(WWW_DIR_NAME);
         Ok(Self { base, www_path })
     }
@@ -67,11 +65,5 @@ impl GetRepoInfo for ServerRepoHandle {
 
     fn get_config(&self) -> &RepoConfig {
         self.base.get_config()
-    }
-}
-
-impl GetPackIndex for ServerRepoHandle {
-    fn get_pack_index(&self, pack_name: &str) -> anyhow::Result<PackIndex> {
-        self.base.get_pack_index(pack_name)
     }
 }

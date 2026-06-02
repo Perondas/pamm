@@ -22,7 +22,7 @@ impl RepoHandle {
         })
     }
 
-    pub fn create_repo(parent_path: &Path, repo_config: RepoConfig) -> anyhow::Result<Self> {
+    pub fn create_repo_folder(parent_path: &Path, repo_config: RepoConfig) -> anyhow::Result<Self> {
         let repo_path = repo_config.init_blank_on_fs(parent_path)?;
 
         Ok(Self {

@@ -55,7 +55,7 @@ impl RepoConfig {
             let pack_config = PackConfig::download_named(remote_url, pack)
                 .context(format!("Failed to download pack {} configuration", &pack))?;
 
-            pack_config.init_blank_on_fs(&base_path)?;
+            pack_config.init_client_on_fs(&base_path)?;
         }
 
         Ok((repo, repo_user_settings))

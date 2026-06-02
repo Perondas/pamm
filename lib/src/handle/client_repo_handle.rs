@@ -1,12 +1,10 @@
 use crate::handle::reading::get_pack::GetPack;
-use crate::handle::reading::get_pack_index::GetPackIndex;
 use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::repo_handle::RepoHandle;
 use crate::handle::writing::save_pack_settings::SavePackSettings;
 use crate::io::fs::fs_readable::KnownFSReadable;
 use crate::io::known_file::KnownFile;
 use crate::models::pack::pack_config::PackConfig;
-use crate::models::pack::pack_index::PackIndex;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_user_settings::RepoUserSettings;
@@ -93,12 +91,6 @@ impl GetRepoInfo for ClientRepoHandle {
 
     fn get_config(&self) -> &RepoConfig {
         self.base.get_config()
-    }
-}
-
-impl GetPackIndex for ClientRepoHandle {
-    fn get_pack_index(&self, pack_name: &str) -> anyhow::Result<PackIndex> {
-        self.base.get_pack_index(pack_name)
     }
 }
 
