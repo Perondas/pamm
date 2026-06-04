@@ -26,6 +26,12 @@ impl RelPath {
         }
     }
 
+    pub fn from_name(name: &str) -> Self {
+        Self {
+            components: vec![name.to_string()],
+        }
+    }
+
     pub fn push(&self, component: &str) -> Self {
         let mut new_components = self.components.clone();
         new_components.push(component.to_string());

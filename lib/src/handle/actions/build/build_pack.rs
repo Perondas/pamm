@@ -7,6 +7,7 @@ use crate::io::known_file::KnownFile;
 use crate::io::name_consts::{CACHE_DB_DIR_NAME, INDEX_DIR_NAME, get_pack_addon_directory_name};
 use crate::io::named_file::NamedFile;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
+use crate::io::rel_path::RelPath;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::repo::repo_config::RepoConfig;
 use anyhow::{Context, anyhow, ensure};
@@ -29,22 +30,16 @@ impl ServerRepoHandle {
             pack_name
         );
 
-        let mut materializer = Materializer::new(opts.mode);
+        let www_path = self.get_www_path();
+
+        fs::create_dir_all(&www_path)?;
+
+        let mut materializer = Materializer::new(opts.mode, &self.repo_path, &www_path);
         let report = build_pack_inner(self, pack_name, opts, &mut materializer, progress_reporter)?;
 
         // Top-level files: repo.config.json and this pack's config.
-        materialize_top_level(
-            self.get_repo_path(),
-            self.www_path(),
-            RepoConfig::file_name(),
-            &mut materializer,
-        )?;
-        materialize_top_level(
-            self.get_repo_path(),
-            self.www_path(),
-            &PackConfig::get_file_name(pack_name),
-            &mut materializer,
-        )?;
+        materializer.place_file(&RelPath::from_name(RepoConfig::file_name()))?;
+        materializer.place_file(&RelPath::from_name(&PackConfig::get_file_name(pack_name)))?;
 
         Ok(report)
     }
@@ -59,6 +54,7 @@ pub(super) fn build_pack_inner(
     materializer: &mut Materializer,
     progress_reporter: &impl ProgressReporter,
 ) -> anyhow::Result<PackBuildReport> {
+    let www_path = handle.get_www_path();
     let addons_dir_name = get_pack_addon_directory_name(pack_name);
     let source_pack_dir = handle.get_repo_path().join(&addons_dir_name);
     ensure!(
@@ -67,7 +63,7 @@ pub(super) fn build_pack_inner(
         source_pack_dir
     );
 
-    let www_pack_dir = handle.www_path().join(&addons_dir_name);
+    let www_pack_dir = www_path.join(&addons_dir_name);
 
     // Wipe the target pack subtree before each build. This handles stale entries
     // in both symlink and copy modes uniformly and keeps the implementation simple.
@@ -103,6 +99,7 @@ pub(super) fn build_pack_inner(
         mode: opts.mode,
     };
 
+    // For each addon
     for entry in fs::read_dir(&source_pack_dir)
         .with_context(|| format!("Failed to read source pack dir {:?}", source_pack_dir))?
     {
@@ -127,7 +124,7 @@ pub(super) fn build_pack_inner(
 
     // Write indexes into www (not next to source).
     pack_index
-        .write_full_index_to_fs(handle.www_path())
+        .write_full_index_to_fs(&www_path)
         .context("Failed to write pack index into www")?;
 
     report.mode = opts.mode;
@@ -161,22 +158,4 @@ fn materialize_dir(
     }
 
     Ok(())
-}
-
-pub(super) fn materialize_top_level(
-    repo_path: &Path,
-    www_path: &Path,
-    file_name: &str,
-    materializer: &mut Materializer,
-) -> anyhow::Result<()> {
-    let src = repo_path.join(file_name);
-    let dst = www_path.join(file_name);
-    ensure!(
-        src.is_file(),
-        "Expected top-level file {:?} to exist before build",
-        src
-    );
-    fs::create_dir_all(www_path)
-        .with_context(|| format!("Failed to create www directory {:?}", www_path))?;
-    materializer.place_file(&src, &dst)
 }

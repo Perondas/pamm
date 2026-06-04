@@ -1,39 +1,45 @@
 use crate::handle::actions::build::BuildMode;
 use crate::io::fs::util::symlink::create_or_recreate_symlink;
+use crate::io::rel_path::RelPath;
 use anyhow::{Context, anyhow};
 use std::fs;
 use std::path::{Component, Path, PathBuf};
 
 /// Per-build helper that places source files into the `www/` build output, either
 /// as relative symlinks (default) or as copies.
-pub struct Materializer {
+pub struct Materializer<'a> {
     mode: BuildMode,
+    src: &'a Path,
+    dest: &'a Path,
 }
 
-impl Materializer {
-    pub fn new(mode: BuildMode) -> Self {
-        Self { mode }
+impl<'a> Materializer<'a> {
+    pub fn new(mode: BuildMode, src: &'a Path, dest: &'a Path) -> Self {
+        Self { mode, src, dest }
     }
 
     /// Materialize a single file. `source` must exist and be a file; `dest` is the
     /// path in www/ to create. Parent directories are created as needed.
-    pub fn place_file(&mut self, source: &Path, dest: &Path) -> anyhow::Result<()> {
-        if let Some(parent) = dest.parent() {
+    pub fn place_file(&self, rel_path: &RelPath) -> anyhow::Result<()> {
+        if let Some(parent) = self.dest.parent() {
             fs::create_dir_all(parent)
                 .with_context(|| format!("Failed to create destination directory {:?}", parent))?;
         }
 
         match self.mode {
-            BuildMode::Symlink => self.place_symlink(source, dest),
-            BuildMode::Copy => self.place_copy(source, dest),
+            BuildMode::Symlink => self.place_symlink(rel_path),
+            BuildMode::Copy => self.place_copy(rel_path),
         }
     }
 
-    fn place_symlink(&self, source: &Path, dest: &Path) -> anyhow::Result<()> {
+    fn place_symlink(&self, rel_path: &RelPath) -> anyhow::Result<()> {
+        let dest = rel_path.with_base_path(self.dest);
+        let source = rel_path.with_base_path(self.src);
+
         let link_parent = dest
             .parent()
             .ok_or_else(|| anyhow!("symlink destination {:?} has no parent directory", dest))?;
-        let target = relative_path(link_parent, source).ok_or_else(|| {
+        let target = relative_path(link_parent, &source).ok_or_else(|| {
             anyhow!(
                 "Could not compute relative path from {:?} to {:?}",
                 link_parent,
@@ -44,15 +50,15 @@ impl Materializer {
         // If dest exists as a regular file/dir from a prior copy-mode build, clear
         // it so create_or_recreate_symlink (which refuses to clobber non-symlinks)
         // can place a fresh symlink. We own the entire www subtree, so this is safe.
-        if let Ok(md) = fs::symlink_metadata(dest)
+        if let Ok(md) = fs::symlink_metadata(&dest)
             && !md.file_type().is_symlink()
         {
             if md.is_dir() {
-                fs::remove_dir_all(dest).with_context(|| {
+                fs::remove_dir_all(&dest).with_context(|| {
                     format!("Failed to remove existing dir at {:?} before symlink", dest)
                 })?;
             } else {
-                fs::remove_file(dest).with_context(|| {
+                fs::remove_file(&dest).with_context(|| {
                     format!(
                         "Failed to remove existing file at {:?} before symlink",
                         dest
@@ -61,7 +67,7 @@ impl Materializer {
             }
         }
 
-        create_or_recreate_symlink(&target, dest).with_context(|| {
+        create_or_recreate_symlink(&target, &dest).with_context(|| {
             format!(
                 "Failed to create symlink at {:?} pointing to {:?}",
                 dest, target
@@ -69,18 +75,22 @@ impl Materializer {
         })
     }
 
-    fn place_copy(&self, source: &Path, dest: &Path) -> anyhow::Result<()> {
+    fn place_copy(&self, rel_path: &RelPath) -> anyhow::Result<()> {
         // If dest is an existing symlink (e.g. from an earlier symlink-mode build),
         // remove it before copying so we get a real file.
-        if fs::symlink_metadata(dest)
+
+        let dest = rel_path.with_base_path(self.dest);
+        let source = rel_path.with_base_path(self.src);
+
+        if fs::symlink_metadata(&dest)
             .map(|m| m.file_type().is_symlink())
             .unwrap_or(false)
         {
-            fs::remove_file(dest).with_context(|| {
+            fs::remove_file(&dest).with_context(|| {
                 format!("Failed to remove existing symlink {:?} before copy", dest)
             })?;
         }
-        fs::copy(source, dest)
+        fs::copy(&source, &dest)
             .with_context(|| format!("Failed to copy {:?} -> {:?}", source, dest))?;
         Ok(())
     }

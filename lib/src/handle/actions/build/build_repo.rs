@@ -7,6 +7,7 @@ use crate::io::known_file::KnownFile;
 use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::io::named_file::NamedFile;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
+use crate::io::rel_path::RelPath;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::repo::repo_config::RepoConfig;
 use anyhow::Context;
@@ -23,11 +24,12 @@ impl ServerRepoHandle {
         opts: BuildOptions,
         progress_reporter: impl ProgressReporter,
     ) -> anyhow::Result<BuildReport> {
-        fs::create_dir_all(self.www_path())
-            .with_context(|| format!("Failed to create www directory {:?}", self.www_path()))?;
+        let www_path = self.get_www_path();
+        fs::create_dir_all(&www_path)
+            .with_context(|| format!("Failed to create www directory {:?}", &www_path))?;
 
         let pack_names = self.get_config().packs.iter().collect::<Vec<_>>();
-        let mut materializer = Materializer::new(opts.mode);
+        let mut materializer = Materializer::new(opts.mode, &self.repo_path, &www_path);
         let mut reports = Vec::with_capacity(pack_names.len());
 
         for pack_name in &pack_names {
@@ -36,20 +38,12 @@ impl ServerRepoHandle {
             reports.push(report);
         }
 
+        materializer.place_file(&RelPath::new().push(RepoConfig::file_name()))?;
+
         // Top-level files.
-        materialize_top_level(
-            self.get_repo_path(),
-            self.www_path(),
-            RepoConfig::file_name(),
-            &mut materializer,
-        )?;
+        materialize_top_level(RepoConfig::file_name(), &mut materializer)?;
         for pack_name in &pack_names {
-            materialize_top_level(
-                self.get_repo_path(),
-                self.www_path(),
-                &PackConfig::get_file_name(pack_name),
-                &mut materializer,
-            )?;
+            materialize_top_level(&PackConfig::get_file_name(pack_name), &mut materializer)?;
         }
 
         // Prune stale entries in www/ that aren't part of the current repo config.
@@ -63,7 +57,7 @@ impl ServerRepoHandle {
             .collect();
 
         let mut stale_removed = 0_usize;
-        for entry in fs::read_dir(self.www_path())? {
+        for entry in fs::read_dir(&www_path)? {
             let entry = entry?;
             let name = entry.file_name();
             let name_str = name.to_string_lossy();

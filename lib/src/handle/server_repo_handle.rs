@@ -11,24 +11,21 @@ use std::path::{Path, PathBuf};
 #[derive(Debug)]
 pub struct ServerRepoHandle {
     base: RepoHandle,
-    www_path: PathBuf,
 }
 
 impl ServerRepoHandle {
     pub fn open(repo_path: &Path) -> anyhow::Result<Self> {
         let base = RepoHandle::open(repo_path)?;
-        let www_path = base.repo_path.join(WWW_DIR_NAME);
-        Ok(Self { base, www_path })
+        Ok(Self { base })
     }
 
     pub fn create(parent_path: &Path, repo_config: RepoConfig) -> anyhow::Result<Self> {
         let base = RepoHandle::create_repo_folder(parent_path, repo_config)?;
-        let www_path = base.repo_path.join(WWW_DIR_NAME);
-        Ok(Self { base, www_path })
+        Ok(Self { base })
     }
 
-    pub fn www_path(&self) -> &Path {
-        &self.www_path
+    pub fn get_www_path(&self) -> PathBuf {
+        self.base.repo_path.join(WWW_DIR_NAME)
     }
 }
 
