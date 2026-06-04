@@ -5,10 +5,13 @@ pub mod materializer;
 #[cfg(test)]
 mod tests;
 
+use crate::handle::actions::build::materializer::Materializer;
 use serde::{Deserialize, Serialize};
+use std::ops::Add;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub enum BuildMode {
+    #[default]
     Symlink,
     Copy,
 }
@@ -28,9 +31,8 @@ impl Default for BuildOptions {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct PackBuildReport {
-    pub pack_name: String,
     pub addons_materialized: usize,
     pub files_materialized: usize,
     pub stale_removed: usize,
@@ -40,4 +42,30 @@ pub struct PackBuildReport {
 #[derive(Debug)]
 pub struct BuildReport {
     pub packs: Vec<PackBuildReport>,
+}
+
+impl<'a> From<&Materializer<'a>> for PackBuildReport {
+    fn from(m: &Materializer) -> Self {
+        Self {
+            mode: m.mode,
+            ..Self::default()
+        }
+    }
+}
+
+impl Add for PackBuildReport {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        if self.mode != rhs.mode {
+            panic!("Can only add PackBuildReports with the same pack name and mode");
+        }
+
+        Self {
+            addons_materialized: self.addons_materialized + rhs.addons_materialized,
+            files_materialized: self.files_materialized + rhs.files_materialized,
+            stale_removed: self.stale_removed + rhs.stale_removed,
+            mode: self.mode,
+        }
+    }
 }

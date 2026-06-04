@@ -1,4 +1,4 @@
-use crate::handle::actions::build::BuildMode;
+use crate::handle::actions::build::{BuildMode, PackBuildReport};
 use crate::io::fs::util::symlink::create_or_recreate_symlink;
 use crate::io::rel_path::RelPath;
 use anyhow::{Context, anyhow};
@@ -8,7 +8,7 @@ use std::path::{Component, Path, PathBuf};
 /// Per-build helper that places source files into the `www/` build output, either
 /// as relative symlinks (default) or as copies.
 pub struct Materializer<'a> {
-    mode: BuildMode,
+    pub(crate) mode: BuildMode,
     src: &'a Path,
     dest: &'a Path,
 }
@@ -16,6 +16,23 @@ pub struct Materializer<'a> {
 impl<'a> Materializer<'a> {
     pub fn new(mode: BuildMode, src: &'a Path, dest: &'a Path) -> Self {
         Self { mode, src, dest }
+    }
+
+    pub fn materialize(&self, rel_path: &RelPath) -> anyhow::Result<PackBuildReport> {
+        let src_path = rel_path.with_base_path(self.src);
+
+        if src_path.is_file() {
+            self.place_file(rel_path)
+                .with_context(|| format!("Failed to materialize file at {:?}", src_path))?;
+
+            let mut report = PackBuildReport::from(self);
+            report.files_materialized = 1;
+            Ok(report)
+        } else if src_path.is_dir() {
+            self.materialize_dir(rel_path)
+        } else {
+            unreachable!("Source path {:?} is neither file nor directory", src_path);
+        }
     }
 
     /// Materialize a single file. `source` must exist and be a file; `dest` is the
@@ -30,6 +47,38 @@ impl<'a> Materializer<'a> {
             BuildMode::Symlink => self.place_symlink(rel_path),
             BuildMode::Copy => self.place_copy(rel_path),
         }
+    }
+
+    fn materialize_dir(&self, rel_path: &RelPath) -> anyhow::Result<PackBuildReport> {
+        let src = rel_path.with_base_path(self.src);
+        let dst = rel_path.with_base_path(self.dest);
+
+        fs::create_dir_all(&dst)
+            .with_context(|| format!("Failed to create directory {:?}", dst))?;
+
+        let mut report = PackBuildReport::default();
+
+        for entry in fs::read_dir(&src).with_context(|| format!("Failed to read dir {:?}", src))? {
+            let entry = entry?;
+            let entry_path = entry.path();
+
+            let rel_path = rel_path.push(&entry.file_name().to_string_lossy());
+
+            if entry_path.is_dir() {
+                let res = self.materialize_dir(&rel_path)?;
+                report = report + res;
+            } else if entry_path.is_file() {
+                self.place_file(&rel_path)?;
+                report.files_materialized += 1;
+            } else {
+                return Err(anyhow!(
+                    "Unexpected non-file, non-directory entry at {:?}",
+                    entry_path
+                ));
+            }
+        }
+
+        Ok(report)
     }
 
     fn place_symlink(&self, rel_path: &RelPath) -> anyhow::Result<()> {
