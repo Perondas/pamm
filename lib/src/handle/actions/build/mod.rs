@@ -34,7 +34,7 @@ pub struct PackBuildReport {
     pub addons_materialized: usize,
     pub files_materialized: usize,
     pub stale_removed: usize,
-    pub mode_used: BuildMode,
+    pub mode: BuildMode,
 }
 
 #[derive(Debug)]

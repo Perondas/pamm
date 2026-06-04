@@ -34,17 +34,7 @@ fn do_symlink(target: &Path, link: &Path) -> std::io::Result<()> {
 
 #[cfg(windows)]
 fn do_symlink(target: &Path, link: &Path) -> std::io::Result<()> {
-    // For Windows we need to know whether the target is a dir or file.
-    // Resolve the target relative to the link's parent if it's relative.
-    let resolved = if target.is_absolute() {
-        target.to_path_buf()
-    } else if let Some(parent) = link.parent() {
-        parent.join(target)
-    } else {
-        target.to_path_buf()
-    };
-
-    if resolved.is_dir() {
+    if target.is_dir() {
         std::os::windows::fs::symlink_dir(target, link)
     } else {
         std::os::windows::fs::symlink_file(target, link)

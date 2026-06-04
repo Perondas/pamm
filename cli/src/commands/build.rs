@@ -19,7 +19,7 @@ pub struct BuildArgs {
     #[arg(long, action)]
     pub symlink: bool,
 
-    /// Re-index everything from scratch, ignoring the sled cache.
+    /// Re-index everything from scratch, ignoring the cache.
     #[arg(short, long, action)]
     pub force_refresh: bool,
 
@@ -50,13 +50,13 @@ pub fn build_command(args: BuildArgs, log_wrapper: LogWrapper) -> anyhow::Result
 
     match args.name {
         Some(pack) => {
-            let report = handle.build_pack(&pack, opts, progress_reporter)?;
+            let report = handle.build_pack(&pack, opts, &progress_reporter)?;
             println!(
                 "Built pack '{}' ({} addons, {} files, mode {:?}).",
                 report.pack_name,
                 report.addons_materialized,
                 report.files_materialized,
-                report.mode_used,
+                report.mode,
             );
         }
         None => {
@@ -67,7 +67,7 @@ pub fn build_command(args: BuildArgs, log_wrapper: LogWrapper) -> anyhow::Result
             let mode_used = report
                 .packs
                 .first()
-                .map(|p| p.mode_used)
+                .map(|p| p.mode)
                 .unwrap_or(BuildMode::Symlink);
             println!(
                 "Built {} pack(s): {} addons, {} files, {} stale entries removed, mode {:?}.",

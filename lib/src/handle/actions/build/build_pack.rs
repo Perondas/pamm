@@ -17,11 +17,11 @@ impl ServerRepoHandle {
     /// Build a single pack's `www/<pack>_pack_addons/` subtree. Also materializes
     /// `www/repo.config.json` and `www/<pack>.pack.config.json` so the published
     /// view stays in sync with the source's top-level configuration files.
-    pub fn build_pack<P: ProgressReporter>(
+    pub fn build_pack(
         &self,
         pack_name: &str,
         opts: BuildOptions,
-        progress_reporter: P,
+        progress_reporter: &impl ProgressReporter,
     ) -> anyhow::Result<PackBuildReport> {
         ensure!(
             self.get_config().packs.contains(pack_name),
@@ -30,7 +30,7 @@ impl ServerRepoHandle {
         );
 
         let mut materializer = Materializer::new(opts.mode);
-        let report = build_pack_inner(self, pack_name, opts, &mut materializer, &progress_reporter)?;
+        let report = build_pack_inner(self, pack_name, opts, &mut materializer, progress_reporter)?;
 
         // Top-level files: repo.config.json and this pack's config.
         materialize_top_level(
@@ -46,21 +46,18 @@ impl ServerRepoHandle {
             &mut materializer,
         )?;
 
-        Ok(PackBuildReport {
-            mode_used: materializer.actual_mode(),
-            ..report
-        })
+        Ok(report)
     }
 }
 
 /// Core per-pack build routine, factored out so the whole-repo builder can call
 /// it for each pack without re-materializing top-level files every time.
-pub(super) fn build_pack_inner<P: ProgressReporter>(
+pub(super) fn build_pack_inner(
     handle: &ServerRepoHandle,
     pack_name: &str,
     opts: BuildOptions,
     materializer: &mut Materializer,
-    progress_reporter: &P,
+    progress_reporter: &impl ProgressReporter,
 ) -> anyhow::Result<PackBuildReport> {
     let addons_dir_name = get_pack_addon_directory_name(pack_name);
     let source_pack_dir = handle.get_repo_path().join(&addons_dir_name);
@@ -76,12 +73,14 @@ pub(super) fn build_pack_inner<P: ProgressReporter>(
     // in both symlink and copy modes uniformly and keeps the implementation simple.
     if www_pack_dir.exists() {
         fs::remove_dir_all(&www_pack_dir).with_context(|| {
-            format!("Failed to clear stale www pack directory {:?}", www_pack_dir)
+            format!(
+                "Failed to clear stale www pack directory {:?}",
+                www_pack_dir
+            )
         })?;
     }
-    fs::create_dir_all(&www_pack_dir).with_context(|| {
-        format!("Failed to create www pack directory {:?}", www_pack_dir)
-    })?;
+    fs::create_dir_all(&www_pack_dir)
+        .with_context(|| format!("Failed to create www pack directory {:?}", www_pack_dir))?;
 
     // Index from source (uses the sled cache at <pack>_pack_addons/.cache/).
     let index_generator =
@@ -101,12 +100,12 @@ pub(super) fn build_pack_inner<P: ProgressReporter>(
         addons_materialized: 0,
         files_materialized: 0,
         stale_removed: 0,
-        mode_used: materializer.actual_mode(),
+        mode: opts.mode,
     };
 
-    for entry in fs::read_dir(&source_pack_dir).with_context(|| {
-        format!("Failed to read source pack dir {:?}", source_pack_dir)
-    })? {
+    for entry in fs::read_dir(&source_pack_dir)
+        .with_context(|| format!("Failed to read source pack dir {:?}", source_pack_dir))?
+    {
         let entry = entry?;
         let name = entry.file_name();
         let name_str = name.to_string_lossy();
@@ -131,7 +130,7 @@ pub(super) fn build_pack_inner<P: ProgressReporter>(
         .write_full_index_to_fs(handle.www_path())
         .context("Failed to write pack index into www")?;
 
-    report.mode_used = materializer.actual_mode();
+    report.mode = opts.mode;
     Ok(report)
 }
 
@@ -141,8 +140,7 @@ fn materialize_dir(
     materializer: &mut Materializer,
     report: &mut PackBuildReport,
 ) -> anyhow::Result<()> {
-    fs::create_dir_all(dst)
-        .with_context(|| format!("Failed to create directory {:?}", dst))?;
+    fs::create_dir_all(dst).with_context(|| format!("Failed to create directory {:?}", dst))?;
 
     for entry in fs::read_dir(src).with_context(|| format!("Failed to read dir {:?}", src))? {
         let entry = entry?;
@@ -182,4 +180,3 @@ pub(super) fn materialize_top_level(
         .with_context(|| format!("Failed to create www directory {:?}", www_path))?;
     materializer.place_file(&src, &dst)
 }
-

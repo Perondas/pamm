@@ -18,18 +18,17 @@ impl ServerRepoHandle {
     /// top-level `repo.config.json` and per-pack `<pack>.pack.config.json` files.
     /// Removes any stale pack subtrees or pack configs from `www/` whose names
     /// are no longer in the repo config.
-    pub fn build<P: ProgressReporter>(
+    pub fn build(
         &self,
         opts: BuildOptions,
-        progress_reporter: P,
+        progress_reporter: impl ProgressReporter,
     ) -> anyhow::Result<BuildReport> {
-        fs::create_dir_all(self.www_path()).with_context(|| {
-            format!("Failed to create www directory {:?}", self.www_path())
-        })?;
+        fs::create_dir_all(self.www_path())
+            .with_context(|| format!("Failed to create www directory {:?}", self.www_path()))?;
 
-        let pack_names: Vec<String> = self.get_config().packs.iter().cloned().collect();
+        let pack_names = self.get_config().packs.iter().collect::<Vec<_>>();
         let mut materializer = Materializer::new(opts.mode);
-        let mut reports: Vec<PackBuildReport> = Vec::with_capacity(pack_names.len());
+        let mut reports = Vec::with_capacity(pack_names.len());
 
         for pack_name in &pack_names {
             let report =
@@ -63,7 +62,7 @@ impl ServerRepoHandle {
             .map(|p| PackConfig::get_file_name(p))
             .collect();
 
-        let mut stale_removed = 0usize;
+        let mut stale_removed = 0_usize;
         for entry in fs::read_dir(self.www_path())? {
             let entry = entry?;
             let name = entry.file_name();
@@ -93,9 +92,9 @@ impl ServerRepoHandle {
         if let Some(last) = reports.last_mut() {
             last.stale_removed += stale_removed;
         }
-        let mode_used = materializer.actual_mode();
+
         for r in &mut reports {
-            r.mode_used = mode_used;
+            r.mode = opts.mode;
         }
 
         Ok(BuildReport { packs: reports })
