@@ -52,30 +52,16 @@ pub fn build_command(args: BuildArgs, log_wrapper: LogWrapper) -> anyhow::Result
         Some(pack) => {
             let report = handle.build_pack(&pack, opts, &progress_reporter)?;
             println!(
-                "Built pack '{}' ({} addons, {} files, mode {:?}).",
-                report.pack_name,
-                report.addons_materialized,
-                report.files_materialized,
-                report.mode,
+                "Built pack '{}' ({} files, mode {:?}).",
+                pack, report.files_materialized, report.mode,
             );
         }
         None => {
             let report = handle.build(opts, progress_reporter)?;
-            let total_files: usize = report.packs.iter().map(|p| p.files_materialized).sum();
-            let total_addons: usize = report.packs.iter().map(|p| p.addons_materialized).sum();
-            let total_stale: usize = report.packs.iter().map(|p| p.stale_removed).sum();
-            let mode_used = report
-                .packs
-                .first()
-                .map(|p| p.mode)
-                .unwrap_or(BuildMode::Symlink);
+
             println!(
-                "Built {} pack(s): {} addons, {} files, {} stale entries removed, mode {:?}.",
-                report.packs.len(),
-                total_addons,
-                total_files,
-                total_stale,
-                mode_used,
+                "Built {} files, {} stale entries removed, mode {:?}.",
+                report.files_materialized, report.stale_removed, report.mode,
             );
         }
     }

@@ -1,4 +1,4 @@
-use crate::handle::actions::build::{BuildMode, PackBuildReport};
+use crate::handle::actions::build::{BuildMode, BuildReport};
 use crate::io::fs::util::symlink::create_or_recreate_symlink;
 use crate::io::rel_path::RelPath;
 use anyhow::{Context, anyhow};
@@ -7,8 +7,8 @@ use std::path::{Component, Path, PathBuf};
 
 /// Per-build helper that places source files into the `www/` build output, either
 /// as relative symlinks (default) or as copies.
-pub struct Materializer<'a> {
-    pub(crate) mode: BuildMode,
+pub(crate) struct Materializer<'a> {
+    pub mode: BuildMode,
     src: &'a Path,
     dest: &'a Path,
 }
@@ -18,14 +18,14 @@ impl<'a> Materializer<'a> {
         Self { mode, src, dest }
     }
 
-    pub fn materialize(&self, rel_path: &RelPath) -> anyhow::Result<PackBuildReport> {
+    pub fn materialize(&self, rel_path: &RelPath) -> anyhow::Result<BuildReport> {
         let src_path = rel_path.with_base_path(self.src);
 
         if src_path.is_file() {
             self.place_file(rel_path)
                 .with_context(|| format!("Failed to materialize file at {:?}", src_path))?;
 
-            let mut report = PackBuildReport::from(self);
+            let mut report = BuildReport::from(self);
             report.files_materialized = 1;
             Ok(report)
         } else if src_path.is_dir() {
@@ -37,7 +37,7 @@ impl<'a> Materializer<'a> {
 
     /// Materialize a single file. `source` must exist and be a file; `dest` is the
     /// path in www/ to create. Parent directories are created as needed.
-    pub fn place_file(&self, rel_path: &RelPath) -> anyhow::Result<()> {
+    fn place_file(&self, rel_path: &RelPath) -> anyhow::Result<()> {
         if let Some(parent) = self.dest.parent() {
             fs::create_dir_all(parent)
                 .with_context(|| format!("Failed to create destination directory {:?}", parent))?;
@@ -49,14 +49,14 @@ impl<'a> Materializer<'a> {
         }
     }
 
-    fn materialize_dir(&self, rel_path: &RelPath) -> anyhow::Result<PackBuildReport> {
+    fn materialize_dir(&self, rel_path: &RelPath) -> anyhow::Result<BuildReport> {
         let src = rel_path.with_base_path(self.src);
         let dst = rel_path.with_base_path(self.dest);
 
         fs::create_dir_all(&dst)
             .with_context(|| format!("Failed to create directory {:?}", dst))?;
 
-        let mut report = PackBuildReport::default();
+        let mut report = BuildReport::default();
 
         for entry in fs::read_dir(&src).with_context(|| format!("Failed to read dir {:?}", src))? {
             let entry = entry?;

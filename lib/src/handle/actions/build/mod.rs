@@ -32,19 +32,13 @@ impl Default for BuildOptions {
 }
 
 #[derive(Debug, Default)]
-pub struct PackBuildReport {
-    pub addons_materialized: usize,
+pub struct BuildReport {
     pub files_materialized: usize,
     pub stale_removed: usize,
     pub mode: BuildMode,
 }
 
-#[derive(Debug)]
-pub struct BuildReport {
-    pub packs: Vec<PackBuildReport>,
-}
-
-impl<'a> From<&Materializer<'a>> for PackBuildReport {
+impl<'a> From<&Materializer<'a>> for BuildReport {
     fn from(m: &Materializer) -> Self {
         Self {
             mode: m.mode,
@@ -53,7 +47,7 @@ impl<'a> From<&Materializer<'a>> for PackBuildReport {
     }
 }
 
-impl Add for PackBuildReport {
+impl Add for BuildReport {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
@@ -62,7 +56,6 @@ impl Add for PackBuildReport {
         }
 
         Self {
-            addons_materialized: self.addons_materialized + rhs.addons_materialized,
             files_materialized: self.files_materialized + rhs.files_materialized,
             stale_removed: self.stale_removed + rhs.stale_removed,
             mode: self.mode,

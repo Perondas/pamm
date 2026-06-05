@@ -1,6 +1,6 @@
-use crate::handle::actions::build::build_pack::{build_pack_inner, materialize_top_level};
+use crate::handle::actions::build::build_pack::build_pack_inner;
 use crate::handle::actions::build::materializer::Materializer;
-use crate::handle::actions::build::{BuildOptions, BuildReport, PackBuildReport};
+use crate::handle::actions::build::{BuildOptions, BuildReport};
 use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::server_repo_handle::ServerRepoHandle;
 use crate::io::known_file::KnownFile;
@@ -30,20 +30,19 @@ impl ServerRepoHandle {
 
         let pack_names = self.get_config().packs.iter().collect::<Vec<_>>();
         let mut materializer = Materializer::new(opts.mode, &self.repo_path, &www_path);
-        let mut reports = Vec::with_capacity(pack_names.len());
+        let mut report = BuildReport::from(&materializer);
 
         for pack_name in &pack_names {
-            let report =
+            let inner_report =
                 build_pack_inner(self, pack_name, opts, &mut materializer, &progress_reporter)?;
-            reports.push(report);
+            report = report + inner_report;
         }
 
-        materializer.place_file(&RelPath::new().push(RepoConfig::file_name()))?;
+        materializer.materialize(&RelPath::from_name(RepoConfig::file_name()))?;
 
         // Top-level files.
-        materialize_top_level(RepoConfig::file_name(), &mut materializer)?;
         for pack_name in &pack_names {
-            materialize_top_level(&PackConfig::get_file_name(pack_name), &mut materializer)?;
+            materializer.materialize(&RelPath::from_name(&PackConfig::get_file_name(pack_name)))?;
         }
 
         // Prune stale entries in www/ that aren't part of the current repo config.
@@ -83,14 +82,8 @@ impl ServerRepoHandle {
             }
         }
 
-        if let Some(last) = reports.last_mut() {
-            last.stale_removed += stale_removed;
-        }
+        report.stale_removed = stale_removed;
 
-        for r in &mut reports {
-            r.mode = opts.mode;
-        }
-
-        Ok(BuildReport { packs: reports })
+        Ok(report)
     }
 }
