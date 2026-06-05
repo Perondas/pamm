@@ -58,6 +58,31 @@ impl<'a> Materializer<'a> {
 
         let mut report = BuildReport::default();
 
+        // Remove stale entries in dst that are not present in src
+        if dst.is_dir() {
+            use std::collections::HashSet;
+
+            let src_entries = fs::read_dir(&src)
+                .with_context(|| format!("Failed to read dir {:?}", src))?
+                .filter_map(Result::ok)
+                .map(|e| e.file_name())
+                .collect::<HashSet<_>>();
+
+            for entry in fs::read_dir(&dst).with_context(|| format!("Failed to read dir {:?}", dst))? {
+                let entry = entry?;
+                if !src_entries.contains(&entry.file_name()) {
+                    let path = entry.path();
+                    if path.is_dir() {
+                        fs::remove_dir_all(&path).with_context(|| format!("Failed to remove stale dir {:?}", path))?;
+                    } else {
+                        fs::remove_file(&path).with_context(|| format!("Failed to remove stale file {:?}", path))?;
+                    }
+                    report.stale_removed += 1;
+                }
+            }
+        }
+
+
         for entry in fs::read_dir(&src).with_context(|| format!("Failed to read dir {:?}", src))? {
             let entry = entry?;
             let entry_path = entry.path();

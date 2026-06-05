@@ -1,4 +1,4 @@
-/*use crate::handle::actions::build::{BuildMode, BuildOptions};
+use crate::handle::actions::build::{BuildMode, BuildOptions};
 use crate::handle::server_repo_handle::ServerRepoHandle;
 use crate::io::fs::fs_readable::KnownFSReadable;
 use crate::io::fs::fs_writable::{KnownFSWritable, NamedFSWritable};
@@ -85,7 +85,7 @@ fn build_pack_symlink_creates_links() {
     let server = fx.open();
 
     server
-        .build_pack("core", opts(BuildMode::Symlink), NoopProgress)
+        .build_pack("core", opts(BuildMode::Symlink), &NoopProgress)
         .unwrap();
 
     let www_file = fx.www().join("core_pack_addons/@addon1/file.txt");
@@ -103,7 +103,7 @@ fn build_pack_copy_creates_files() {
     let server = fx.open();
 
     server
-        .build_pack("core", opts(BuildMode::Copy), NoopProgress)
+        .build_pack("core", opts(BuildMode::Copy), &NoopProgress)
         .unwrap();
 
     let www_file = fx.www().join("core_pack_addons/@addon1/file.txt");
@@ -118,7 +118,7 @@ fn build_pack_writes_indexes_to_www_only() {
     let fx = Fixture::new("pamm_build_indexes_to_www_only");
     let server = fx.open();
     server
-        .build_pack("core", opts(BuildMode::Symlink), NoopProgress)
+        .build_pack("core", opts(BuildMode::Symlink), &NoopProgress)
         .unwrap();
 
     let www_indexes = fx
@@ -156,7 +156,7 @@ fn build_pack_removes_stale_addon_subtree() {
     fs::write(&stale, b"old").unwrap();
 
     server
-        .build_pack("core", opts(BuildMode::Symlink), NoopProgress)
+        .build_pack("core", opts(BuildMode::Symlink), &NoopProgress)
         .unwrap();
 
     assert!(!stale.exists(), "phantom addon should be removed");
@@ -172,7 +172,7 @@ fn build_pack_force_refresh_clears_cache() {
     let fx = Fixture::new("pamm_build_force_refresh_clears_cache");
     let server = fx.open();
     server
-        .build_pack("core", opts(BuildMode::Symlink), NoopProgress)
+        .build_pack("core", opts(BuildMode::Symlink), &NoopProgress)
         .unwrap();
 
     // The cache dir should exist after the first build.
@@ -190,7 +190,7 @@ fn build_pack_force_refresh_clears_cache() {
                 mode: BuildMode::Symlink,
                 force_refresh: true,
             },
-            NoopProgress,
+            &NoopProgress,
         )
         .unwrap();
 
@@ -218,7 +218,7 @@ fn build_pack_skips_dotcache_in_source() {
     let fx = Fixture::new("pamm_build_skips_dotcache");
     let server = fx.open();
     server
-        .build_pack("core", opts(BuildMode::Symlink), NoopProgress)
+        .build_pack("core", opts(BuildMode::Symlink), &NoopProgress)
         .unwrap();
 
     // The sled cache dir should be at the source.
@@ -245,7 +245,7 @@ fn build_pack_symlink_target_is_relative() {
     let fx = Fixture::new("pamm_build_symlink_target_relative");
     let server = fx.open();
     server
-        .build_pack("core", opts(BuildMode::Symlink), NoopProgress)
+        .build_pack("core", opts(BuildMode::Symlink), &NoopProgress)
         .unwrap();
 
     let link = fx.www().join("core_pack_addons/@addon1/file.txt");
@@ -256,4 +256,4 @@ fn build_pack_symlink_target_is_relative() {
         target
     );
     assert!(!target.is_absolute(), "{:?} must be relative", target);
-}*/
+}
