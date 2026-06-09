@@ -2,6 +2,7 @@ use crate::api::commands::pack_sync::get_diff::{DiffResult, diff_to_result};
 use crate::api::progress_reporting::DartProgressReporter;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use std::path::Path;
+use pamm_lib::io::progress_reporting::progress_reporter::ProgressReporter;
 
 pub fn get_diff_with_parents(
     pack_name: String,
@@ -26,6 +27,8 @@ pub fn get_diff_with_parents(
     let total_size_change = results.iter().map(|r| r.total_size_change).sum();
     let total_change_count = results.iter().map(|r| r.change_count).sum();
     let changed_packs = results.iter().filter(|r| r.has_changes).count();
+
+    dart_progress_reporter.finish();
 
     Ok(MultiDiffResult {
         results,

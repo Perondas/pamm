@@ -1,13 +1,11 @@
 import 'package:dart_observable/dart_observable.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
 import 'package:pamm_ui/src/rust/api/progress_reporting.dart';
+import 'package:pamm_ui/src/rust/progress_reporting.dart' as pr;
 
 class ProgressReporterService {
   late DartProgressReporter _underlyingReporter;
-  late RustStreamSink<String> _totalSink;
-  late RustStreamSink<String> _progressSink;
-  late RustStreamSink<String> _messageSink;
-  late RustStreamSink<bool> _finishSink;
+  late RustStreamSink<String> _sink;
 
   late Observable<BigInt?> _total;
   late Stream<BigInt> _progressStream;
@@ -15,31 +13,37 @@ class ProgressReporterService {
   late Observable<bool> _finished;
 
   ProgressReporterService() {
-    _totalSink = RustStreamSink<String>();
-    _progressSink = RustStreamSink<String>();
-    _messageSink = RustStreamSink<String>();
-    _finishSink = RustStreamSink<bool>();
+    _sink = RustStreamSink<String>();
 
     _underlyingReporter = createDartProgressReporter(
-      reportTotalSink: _totalSink,
-      reportProgressSink: _progressSink,
-      messageSink: _messageSink,
-      finishSink: _finishSink,
+      sink: _sink,
+      dummy: RustStreamSink(),
     );
+
+    // Convert the raw JSON string stream into typed events and then expose
+    // filtered streams for UI consumers.
+    final parsed = pr.progressEventStreamFromRaw(_sink.stream.asBroadcastStream());
 
     _total = Observable<BigInt?>.fromStream(
       initial: null,
-      stream: _totalSink.stream.map((value) => BigInt.parse(value)),
+      stream: parsed
+          .where((e) => e is pr.TotalEvent)
+          .map((e) => BigInt.from((e as pr.TotalEvent).total)),
     );
-    _progressStream = _progressSink.stream
-        .map((value) => BigInt.parse(value))
+
+    _progressStream = parsed
+        .where((e) => e is pr.ProgressUpdateEvent)
+        .map((e) => BigInt.from((e as pr.ProgressUpdateEvent).progress))
         .asBroadcastStream();
-    _messageStream = _messageSink.stream.map((s) {
-      return s;
-    }).asBroadcastStream();
+
+    _messageStream = parsed
+        .where((e) => e is pr.MessageEvent)
+        .map((e) => (e as pr.MessageEvent).message)
+        .asBroadcastStream();
+
     _finished = Observable<bool>.fromStream(
       initial: false,
-      stream: _finishSink.stream,
+      stream: parsed.where((e) => e is pr.FinishEvent).map((_) => true),
     );
   }
 

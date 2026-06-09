@@ -107,14 +107,15 @@ class _SyncScreenState extends State<SyncScreen> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
-            ],
-            Expanded(
-              flex: 1,
-              child: Padding(
-                padding: EdgeInsetsGeometry.all(8),
-                child: ProgressReporter(widget.progressReporterService),
+            ] else ...[
+              Expanded(
+                flex: 1,
+                child: Padding(
+                  padding: EdgeInsetsGeometry.all(8),
+                  child: ProgressReporter(widget.progressReporterService),
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),

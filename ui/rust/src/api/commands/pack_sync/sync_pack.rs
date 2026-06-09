@@ -2,6 +2,7 @@ use crate::api::commands::pack_sync::get_diff::OpaqueDiff;
 use crate::api::progress_reporting::DartProgressReporter;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use std::path::Path;
+use pamm_lib::io::progress_reporting::progress_reporter::ProgressReporter;
 
 pub fn sync_pack(
     pack_name: String,
@@ -19,5 +20,9 @@ pub fn sync_pack(
 
     let handle = ClientRepoHandle::open(repo_dir)?;
 
-    handle.apply_pack_diff(&pack_name, dart_progress_reporter, diff)
+    handle.apply_pack_diff(&pack_name, dart_progress_reporter.clone(), diff)?;
+
+    dart_progress_reporter.finish();
+
+    Ok(())
 }

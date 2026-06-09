@@ -69,30 +69,19 @@ fn wire__crate__api__progress_reporting__create_dart_progress_reporter_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_report_total_sink = <StreamSink<
-                String,
-                flutter_rust_bridge::for_generated::SseCodec,
-            >>::sse_decode(&mut deserializer);
-            let api_report_progress_sink = <StreamSink<
-                String,
-                flutter_rust_bridge::for_generated::SseCodec,
-            >>::sse_decode(&mut deserializer);
-            let api_message_sink =
+            let api_sink =
                 <StreamSink<String, flutter_rust_bridge::for_generated::SseCodec>>::sse_decode(
                     &mut deserializer,
                 );
-            let api_finish_sink =
-                <StreamSink<bool, flutter_rust_bridge::for_generated::SseCodec>>::sse_decode(
+            let api__dummy =
+                <StreamSink<(), flutter_rust_bridge::for_generated::SseCodec>>::sse_decode(
                     &mut deserializer,
                 );
             deserializer.end();
             transform_result_sse::<_, ()>((move || {
                 let output_ok = Result::<_, ()>::Ok(
                     crate::api::progress_reporting::create_dart_progress_reporter(
-                        api_report_total_sink,
-                        api_report_progress_sink,
-                        api_message_sink,
-                        api_finish_sink,
+                        api_sink, api__dummy,
                     ),
                 )?;
                 Ok(output_ok)
@@ -991,7 +980,7 @@ impl SseDecode for StreamSink<String, flutter_rust_bridge::for_generated::SseCod
     }
 }
 
-impl SseDecode for StreamSink<bool, flutter_rust_bridge::for_generated::SseCodec> {
+impl SseDecode for StreamSink<(), flutter_rust_bridge::for_generated::SseCodec> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut inner = <String>::sse_decode(deserializer);
@@ -1693,7 +1682,7 @@ impl SseEncode for StreamSink<String, flutter_rust_bridge::for_generated::SseCod
     }
 }
 
-impl SseEncode for StreamSink<bool, flutter_rust_bridge::for_generated::SseCodec> {
+impl SseEncode for StreamSink<(), flutter_rust_bridge::for_generated::SseCodec> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         unimplemented!("")

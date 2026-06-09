@@ -95,10 +95,8 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 
 abstract class RustLibApi extends BaseApi {
   DartProgressReporter crateApiProgressReportingCreateDartProgressReporter({
-    required RustStreamSink<String> reportTotalSink,
-    required RustStreamSink<String> reportProgressSink,
-    required RustStreamSink<String> messageSink,
-    required RustStreamSink<bool> finishSink,
+    required RustStreamSink<String> sink,
+    required RustStreamSink<void> dummy,
   });
 
   Future<DiffResult> crateApiCommandsPackSyncGetDiffGetDiff({
@@ -230,19 +228,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @override
   DartProgressReporter crateApiProgressReportingCreateDartProgressReporter({
-    required RustStreamSink<String> reportTotalSink,
-    required RustStreamSink<String> reportProgressSink,
-    required RustStreamSink<String> messageSink,
-    required RustStreamSink<bool> finishSink,
+    required RustStreamSink<String> sink,
+    required RustStreamSink<void> dummy,
   }) {
     return handler.executeSync(
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_StreamSink_String_Sse(reportTotalSink, serializer);
-          sse_encode_StreamSink_String_Sse(reportProgressSink, serializer);
-          sse_encode_StreamSink_String_Sse(messageSink, serializer);
-          sse_encode_StreamSink_bool_Sse(finishSink, serializer);
+          sse_encode_StreamSink_String_Sse(sink, serializer);
+          sse_encode_StreamSink_unit_Sse(dummy, serializer);
           return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 1)!;
         },
         codec: SseCodec(
@@ -252,12 +246,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         ),
         constMeta:
             kCrateApiProgressReportingCreateDartProgressReporterConstMeta,
-        argValues: [
-          reportTotalSink,
-          reportProgressSink,
-          messageSink,
-          finishSink,
-        ],
+        argValues: [sink, dummy],
         apiImpl: this,
       ),
     );
@@ -267,12 +256,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   get kCrateApiProgressReportingCreateDartProgressReporterConstMeta =>
       const TaskConstMeta(
         debugName: "create_dart_progress_reporter",
-        argNames: [
-          "reportTotalSink",
-          "reportProgressSink",
-          "messageSink",
-          "finishSink",
-        ],
+        argNames: ["sink", "dummy"],
       );
 
   @override
@@ -1099,7 +1083,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  RustStreamSink<bool> dco_decode_StreamSink_bool_Sse(dynamic raw) {
+  RustStreamSink<void> dco_decode_StreamSink_unit_Sse(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     throw UnimplementedError();
   }
@@ -1431,7 +1415,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  RustStreamSink<bool> sse_decode_StreamSink_bool_Sse(
+  RustStreamSink<void> sse_decode_StreamSink_unit_Sse(
     SseDeserializer deserializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -1839,15 +1823,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_StreamSink_bool_Sse(
-    RustStreamSink<bool> self,
+  void sse_encode_StreamSink_unit_Sse(
+    RustStreamSink<void> self,
     SseSerializer serializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(
       self.setupAndSerialize(
         codec: SseCodec(
-          decodeSuccessData: sse_decode_bool,
+          decodeSuccessData: sse_decode_unit,
           decodeErrorData: sse_decode_AnyhowException,
         ),
       ),

@@ -9,6 +9,7 @@ use pamm_lib::models::index::get_size_change::GetSizeChange;
 use pamm_lib::models::pack::pack_diff::PackDiff;
 use std::collections::HashMap;
 use std::path::Path;
+use pamm_lib::io::progress_reporting::progress_reporter::ProgressReporter;
 
 pub fn get_diff(
     pack_name: String,
@@ -21,6 +22,8 @@ pub fn get_diff(
     let handle = ClientRepoHandle::open(repo_dir)?;
 
     let diff = handle.get_pack_diff(&pack_name, dart_progress_reporter.clone(), clear_cache)?;
+
+    dart_progress_reporter.finish();
 
     Ok(diff_to_result(diff))
 }

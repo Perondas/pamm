@@ -40,6 +40,11 @@ class _ProgressReporterState extends State<ProgressReporter> {
     widget.service.progressStream.listen((progressValue) {
       if (!mounted) return;
       setState(() {
+        if (isFinished) {
+          isFinished = false;
+          progress = BigInt.zero;
+        }
+
         progress = progress + progressValue;
       });
     });

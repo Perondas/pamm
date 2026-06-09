@@ -9,15 +9,11 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `finish`, `report_message`, `report_progress`, `start_for_download`, `start_without_len`
 
 DartProgressReporter createDartProgressReporter({
-  required RustStreamSink<String> reportTotalSink,
-  required RustStreamSink<String> reportProgressSink,
-  required RustStreamSink<String> messageSink,
-  required RustStreamSink<bool> finishSink,
+  required RustStreamSink<String> sink,
+  required RustStreamSink<void> dummy,
 }) => RustLib.instance.api.crateApiProgressReportingCreateDartProgressReporter(
-  reportTotalSink: reportTotalSink,
-  reportProgressSink: reportProgressSink,
-  messageSink: messageSink,
-  finishSink: finishSink,
+  sink: sink,
+  dummy: dummy,
 );
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DartProgressReporter>>

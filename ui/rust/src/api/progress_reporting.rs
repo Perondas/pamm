@@ -1,50 +1,51 @@
 use crate::frb_generated::StreamSink;
 use flutter_rust_bridge::frb;
 use pamm_lib::io::progress_reporting::progress_reporter::ProgressReporter;
+use serde_json::json;
 use std::sync::Arc;
 
 #[derive(Clone)]
 #[frb(opaque)]
 pub struct DartProgressReporter {
-    report_total_sink: Arc<StreamSink<String>>,
-    report_progress_sink: Arc<StreamSink<String>>,
-    message_sink: Arc<StreamSink<String>>,
-    finish_sink: Arc<StreamSink<bool>>,
+    sink: Arc<StreamSink<String>>,
 }
 
 impl ProgressReporter for DartProgressReporter {
     fn start_for_download(&self, total_work: u64) {
-        let _ = self.report_total_sink.add(total_work.to_string());
+        let payload = json!({"type": "total", "total": total_work});
+        let _ = self.sink.add(payload.to_string());
     }
 
     fn start_without_len(&self) {
-        let _ = self.report_total_sink.add("0".to_string());
+        // Use total = 0 to indicate unknown length, as previous implementation used "0".
+        let payload = json!({"type": "total", "total": 0});
+        let _ = self.sink.add(payload.to_string());
     }
 
     fn report_progress(&self, progress: u64) {
-        let _ = self.report_progress_sink.add(progress.to_string());
+        let payload = json!({"type": "progress", "progress": progress});
+        let _ = self.sink.add(payload.to_string());
     }
 
     fn report_message(&self, message: &str) {
-        let _ = self.message_sink.add(message.to_string());
+        let payload = json!({"type": "message", "message": message});
+        let _ = self.sink.add(payload.to_string());
     }
 
     fn finish(&self) {
-        let _ = self.finish_sink.add(true);
+        let payload = json!({"type": "finish", "finished": true});
+        let _ = self.sink.add(payload.to_string());
     }
 }
 
 #[frb(sync)]
 pub fn create_dart_progress_reporter(
-    report_total_sink: StreamSink<String>,
-    report_progress_sink: StreamSink<String>,
-    message_sink: StreamSink<String>,
-    finish_sink: StreamSink<bool>,
+    sink: StreamSink<String>,
+    // We have to add this stupid dummy sink so that the bridge generator actually works.
+    // As otherwise it changes the return time to Strem<String> isntead of the opaque type
+    _dummy: StreamSink<()>,
 ) -> DartProgressReporter {
     DartProgressReporter {
-        report_total_sink: Arc::new(report_total_sink),
-        report_progress_sink: Arc::new(report_progress_sink),
-        message_sink: Arc::new(message_sink),
-        finish_sink: Arc::new(finish_sink),
+        sink: Arc::new(sink),
     }
 }
