@@ -15,13 +15,13 @@ use std::{fs, iter};
 use ureq::BodyReader;
 use url::Url;
 
-pub struct RemotePatcher<P: DownloadReporter> {
+pub(crate) struct RemotePatcher<P: DownloadReporter> {
     addon_dir_url: Url,
     reporter: P,
 }
 
 impl PackConfig {
-    pub fn remote_patcher<P: DownloadReporter>(
+    pub(crate) fn remote_patcher<P: DownloadReporter>(
         &self,
         base_url: &Url,
         reporter: P,

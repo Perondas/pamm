@@ -38,7 +38,7 @@ impl PackConfig {
 }
 
 impl<P: ProgressReporter> DiffApplier<P> {
-    pub fn new(addon_dir: PathBuf, remote_patcher: RemotePatcher<P>, progress_reporter: P) -> Self {
+    pub(crate) fn new(addon_dir: PathBuf, remote_patcher: RemotePatcher<P>, progress_reporter: P) -> Self {
         Self {
             addon_dir,
             remote_patcher,

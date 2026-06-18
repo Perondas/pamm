@@ -13,11 +13,3 @@ where
         self.report_progress(progress);
     }
 }
-
-#[derive(Clone, Default)]
-pub struct NoopDownloadReporter;
-
-impl DownloadReporter for NoopDownloadReporter {
-    #[inline]
-    fn report_progress(&self, _progress: u64) {}
-}
