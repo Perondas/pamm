@@ -1,6 +1,7 @@
 use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::io::net::byte_range_response::{ByteRangeResponse, IntoByteRangeResponse};
 use crate::io::net::download_file::download_file;
+use crate::io::progress_reporting::download_reporter::DownloadReporter;
 use crate::io::rel_path::RelPath;
 use crate::models::index::index_node::PBOPart;
 use crate::models::index::node_diff::FileModification;
@@ -14,23 +15,31 @@ use std::{fs, iter};
 use ureq::BodyReader;
 use url::Url;
 
-pub struct RemotePatcher {
+pub struct RemotePatcher<P: DownloadReporter> {
     addon_dir_url: Url,
+    reporter: P,
 }
 
 impl PackConfig {
-    pub fn remote_patcher(&self, base_url: &Url) -> RemotePatcher {
+    pub fn remote_patcher<P: DownloadReporter>(
+        &self,
+        base_url: &Url,
+        reporter: P,
+    ) -> RemotePatcher<P> {
         let addon_dir_url = base_url
             .join(&format!("{}/", get_pack_addon_directory_name(&self.name)))
             .expect("Failed to construct addon dir URL");
 
-        RemotePatcher::new(addon_dir_url)
+        RemotePatcher::new(addon_dir_url, reporter)
     }
 }
 
-impl RemotePatcher {
-    pub(crate) fn new(addon_dir_url: Url) -> Self {
-        Self { addon_dir_url }
+impl<P: DownloadReporter> RemotePatcher<P> {
+    pub(crate) fn new(addon_dir_url: Url, reporter: P) -> Self {
+        Self {
+            addon_dir_url,
+            reporter,
+        }
     }
 
     pub(crate) fn patch_file(
@@ -56,7 +65,7 @@ impl RemotePatcher {
 
                 let mut temp_file = BufWriter::new(File::create(&temp_file_path)?);
 
-                let mut parts = get_required_pbo_parts(
+                let mut parts = self.get_required_pbo_parts(
                     &file_url,
                     &new_order,
                     &required_checksums,
@@ -139,7 +148,7 @@ impl RemotePatcher {
                     "Downloading generic file replacement ({} bytes)",
                     new_length
                 );
-                download_file(file_path, file_url, new_length)
+                download_file(file_path, file_url, new_length, &self.reporter)
             }
         }
     }
@@ -157,50 +166,51 @@ impl RemotePatcher {
             file_url,
             expected_len
         );
-        download_file(file_path, file_url, expected_len)
+        download_file(file_path, file_url, expected_len, &self.reporter)
     }
-}
 
-fn get_required_pbo_parts(
-    url: &Url,
-    new_order: &[PBOPart],
-    required_checksums: &[Vec<u8>],
-    new_length: u64,
-    blob_start: u64,
-) -> Result<ByteRangeResponse<BodyReader<'static>>> {
-    let request_builder = ureq::get(url.to_string());
+    fn get_required_pbo_parts(
+        &self,
+        url: &Url,
+        new_order: &[PBOPart],
+        required_checksums: &[Vec<u8>],
+        new_length: u64,
+        blob_start: u64,
+    ) -> Result<ByteRangeResponse<BodyReader<'static>, P>> {
+        let request_builder = ureq::get(url.to_string());
 
-    // Ranges are inclusive
+        // Ranges are inclusive
 
-    // We always get the entire header + the padding bit
-    // TODO: can we only get part of it? Is that worth it?
-    let pbo_header_range = (0_u64, blob_start - 1);
-    let pbo_checksum_rage = (new_length - 20, new_length - 1);
+        // We always get the entire header + the padding bit
+        // TODO: can we only get part of it? Is that worth it?
+        let pbo_header_range = (0_u64, blob_start - 1);
+        let pbo_checksum_rage = (new_length - 20, new_length - 1);
 
-    let modified_ranges = new_order
-        .iter()
-        .filter(|p| required_checksums.contains(&p.checksum))
-        .map(|p| {
-            let start = p.start_offset + blob_start;
-            (start, start + p.length as u64 - 1)
-        });
+        let modified_ranges = new_order
+            .iter()
+            .filter(|p| required_checksums.contains(&p.checksum))
+            .map(|p| {
+                let start = p.start_offset + blob_start;
+                (start, start + p.length as u64 - 1)
+            });
 
-    let ranges = iter::once(pbo_header_range)
-        .chain(modified_ranges)
-        .chain(iter::once(pbo_checksum_rage))
-        .collect::<Vec<_>>();
+        let ranges = iter::once(pbo_header_range)
+            .chain(modified_ranges)
+            .chain(iter::once(pbo_checksum_rage))
+            .collect::<Vec<_>>();
 
-    let ranges_str = ranges
-        .iter()
-        .map(|(from, to)| format!("{}-{}", from, to))
-        .collect::<Vec<_>>()
-        .join(", ");
-    let resp = request_builder
-        .header("Range", format!("bytes={}", ranges_str))
-        .call()
-        .context(format!("Failed to fetch range for {}", url))?;
+        let ranges_str = ranges
+            .iter()
+            .map(|(from, to)| format!("{}-{}", from, to))
+            .collect::<Vec<_>>()
+            .join(", ");
+        let resp = request_builder
+            .header("Range", format!("bytes={}", ranges_str))
+            .call()
+            .context(format!("Failed to fetch range for {}", url))?;
 
-    let responses = resp.into_byte_range_response()?;
+        let responses = resp.into_byte_range_response(self.reporter.clone())?;
 
-    Ok(responses)
+        Ok(responses)
+    }
 }
