@@ -1,27 +1,32 @@
-use anyhow::anyhow;
+use crate::io::progress_reporting::download_reporter::DownloadReporter;
 use anyhow::Context;
+use anyhow::anyhow;
 use regex::Regex;
 use std::io::{BufRead, BufReader, Read};
 use std::sync::LazyLock;
-use ureq::http::header::CONTENT_TYPE;
 use ureq::http::Response;
+use ureq::http::header::CONTENT_TYPE;
 use ureq::{Body, BodyReader};
 
 static CONTENT_RANGE_HEADER: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^content-range: bytes (\d+)-(\d+)/(\d+)\r\n$").unwrap());
 
-pub struct ByteRangeResponse<R: Read> {
+pub struct ByteRangeResponse<R: Read, P: DownloadReporter> {
     reader: BufReader<R>,
+    reporter: P,
     boundary: Vec<u8>,
     errored: bool,
 }
 
-pub trait IntoByteRangeResponse<R: Read> {
-    fn into_byte_range_response(self) -> anyhow::Result<ByteRangeResponse<R>>;
+pub trait IntoByteRangeResponse<R: Read, P: DownloadReporter> {
+    fn into_byte_range_response(self, reporter: P) -> anyhow::Result<ByteRangeResponse<R, P>>;
 }
 
-impl IntoByteRangeResponse<BodyReader<'static>> for Response<Body> {
-    fn into_byte_range_response(self) -> anyhow::Result<ByteRangeResponse<BodyReader<'static>>> {
+impl<P: DownloadReporter> IntoByteRangeResponse<BodyReader<'static>, P> for Response<Body> {
+    fn into_byte_range_response(
+        self,
+        reporter: P,
+    ) -> anyhow::Result<ByteRangeResponse<BodyReader<'static>, P>> {
         let (p, b) = self.into_parts();
         let content_type = p.headers.get(CONTENT_TYPE).expect("Content-Type missing");
         let boundary = content_type
@@ -33,21 +38,23 @@ impl IntoByteRangeResponse<BodyReader<'static>> for Response<Body> {
         Ok(ByteRangeResponse::new(
             b.into_reader(),
             boundary.as_bytes().to_vec(),
+            reporter,
         ))
     }
 }
 
-impl<R: Read> ByteRangeResponse<R> {
-    pub fn new(reader: R, boundary: Vec<u8>) -> Self {
+impl<R: Read, P: DownloadReporter> ByteRangeResponse<R, P> {
+    pub fn new(reader: R, boundary: Vec<u8>, reporter: P) -> Self {
         Self {
             reader: BufReader::new(reader),
+            reporter,
             boundary,
             errored: false,
         }
     }
 }
 
-impl<R: Read> Iterator for ByteRangeResponse<R> {
+impl<R: Read, P: DownloadReporter> Iterator for ByteRangeResponse<R, P> {
     type Item = anyhow::Result<Vec<u8>>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -56,7 +63,10 @@ impl<R: Read> Iterator for ByteRangeResponse<R> {
         }
 
         match get_next_part(&mut self.reader, &self.boundary) {
-            Ok(Some(part)) => Some(Ok(part)),
+            Ok(Some(part)) => {
+                self.reporter.report_progress(part.len() as u64);
+                Some(Ok(part))
+            }
             Ok(None) => None,
             Err(e) => {
                 self.errored = true;

@@ -17,7 +17,7 @@ use url::Url;
 
 pub struct DiffApplier<P: ProgressReporter> {
     addon_dir: PathBuf,
-    remote_patcher: RemotePatcher,
+    remote_patcher: RemotePatcher<P>,
     progress_reporter: P,
 }
 
@@ -31,14 +31,14 @@ impl PackConfig {
         let addon_dir = repo_handle
             .repo_path
             .join(get_pack_addon_directory_name(&self.name));
-        let remote_patcher = self.remote_patcher(base_url);
+        let remote_patcher = self.remote_patcher(base_url, progress_reporter.clone());
 
         DiffApplier::new(addon_dir, remote_patcher, progress_reporter)
     }
 }
 
 impl<P: ProgressReporter> DiffApplier<P> {
-    pub fn new(addon_dir: PathBuf, remote_patcher: RemotePatcher, progress_reporter: P) -> Self {
+    pub(crate) fn new(addon_dir: PathBuf, remote_patcher: RemotePatcher<P>, progress_reporter: P) -> Self {
         Self {
             addon_dir,
             remote_patcher,
@@ -138,7 +138,6 @@ impl<P: ProgressReporter> DiffApplier<P> {
 
                 self.progress_reporter
                     .report_message(&format!("Downloaded file {}", path));
-                self.progress_reporter.report_progress(length);
 
                 Ok(())
             }
@@ -181,7 +180,6 @@ impl<P: ProgressReporter> DiffApplier<P> {
                 self.remote_patcher
                     .patch_file(&path, &file_path, modification)
                     .context(format!("Failed to patch: {}", path))?;
-                self.progress_reporter.report_progress(dl_size);
             }
         }
 
