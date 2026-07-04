@@ -1,5 +1,6 @@
 use crate::commands::add_pack::AddPackArgs;
 use crate::commands::build::BuildArgs;
+use crate::commands::deploy::DeployArgs;
 use crate::commands::init_remote::InitRemoteArgs;
 use crate::commands::launch::LaunchArgs;
 use crate::commands::sync_pack::SyncPackArgs;
@@ -31,4 +32,5 @@ pub enum AppSubcommand {
     Launch(LaunchArgs),
     Optionals(OptionalArgs),
     Externals(ExternalsArgs),
+    Deploy(DeployArgs),
 }

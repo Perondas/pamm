@@ -1,7 +1,7 @@
 use crate::models::index::checksum_index::ChecksumIndex;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_user_settings::RepoUserSettings;
-use crate::models::server::ServerConfig;
+use crate::models::server_config::ServerConfig;
 
 pub trait KnownFile {
     fn file_name() -> &'static str;

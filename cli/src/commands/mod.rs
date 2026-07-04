@@ -1,7 +1,8 @@
 pub mod add_pack;
 pub mod build;
-pub mod init_repo;
+pub mod deploy;
 pub mod init_remote;
+pub mod init_repo;
 pub mod input;
 pub mod launch;
 pub mod sync_pack;
