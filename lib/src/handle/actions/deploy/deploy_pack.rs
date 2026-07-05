@@ -228,6 +228,7 @@ mod tests {
             let tmp = TestTempDir::new(key);
             let server_dir = tmp.path().join("server");
             fs::create_dir_all(&server_dir).unwrap();
+            fs::create_dir_all(server_dir.join("keys")).unwrap();
 
             let mut packs = HashSet::new();
             packs.insert("core".to_string());
@@ -301,12 +302,12 @@ mod tests {
 
         let expected_mod_param = format!(
             "\"-mod={}\"",
-            format!(
-                "pamm/repo/{}",
-                PathBuf::from(get_pack_addon_directory_name("core"))
-                    .join("@addon1")
-                    .to_string_lossy()
-            )
+            PathBuf::new()
+                .join("pamm")
+                .join("repo")
+                .join(get_pack_addon_directory_name("core"))
+                .join("@addon1")
+                .to_string_lossy()
         );
 
         assert!(fx.server_dir.join("pamm").is_dir());
