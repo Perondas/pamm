@@ -85,11 +85,9 @@ pub(super) fn build_pack_inner(
             .or_insert(Default::default());
     }
 
-    config.addons = config
+    config
         .addons
-        .into_iter()
-        .filter(|(name, _)| pack_index.addons.iter().any(|i| i.name == *name))
-        .collect();
+        .retain(|name, _| pack_index.addons.iter().any(|i| i.name == *name));
 
     handle.write_identifiable(&config)?;
 
