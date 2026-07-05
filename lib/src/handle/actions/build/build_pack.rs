@@ -1,5 +1,6 @@
 use crate::handle::actions::build::materializer::Materializer;
 use crate::handle::actions::build::{BuildOptions, BuildReport};
+use crate::handle::reading::get_pack::GetPack;
 use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::server_repo_handle::ServerRepoHandle;
 use crate::io::fs::pack::index_generator::IndexGenerator;
@@ -53,6 +54,8 @@ pub(super) fn build_pack_inner(
     materializer: &mut Materializer,
     progress_reporter: &impl ProgressReporter,
 ) -> anyhow::Result<BuildReport> {
+    let mut config = handle.get_pack(pack_name)?;
+
     let www_path = handle.get_www_path();
 
     let addons_dir_name = get_pack_addon_directory_name(pack_name);
@@ -73,6 +76,22 @@ pub(super) fn build_pack_inner(
     pack_index
         .write_full_index_to_fs(&www_path)
         .context("Failed to write pack index into www")?;
+
+    // Update the pack config
+    for index in &pack_index.addons {
+        config
+            .addons
+            .entry(index.name.clone())
+            .or_insert(Default::default());
+    }
+
+    config.addons = config
+        .addons
+        .into_iter()
+        .filter(|(name, _)| pack_index.addons.iter().any(|i| i.name == *name))
+        .collect();
+
+    handle.write_identifiable(&config)?;
 
     Ok(report)
 }
