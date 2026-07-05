@@ -2,25 +2,25 @@ use crate::handle::addons::ResolveAddons;
 use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::server_repo_handle::ServerRepoHandle;
 use crate::io::fs::util::symlink::create_or_recreate_symlink;
+use crate::models::pack::pack_config::PackConfig;
 use anyhow::{Context, anyhow, ensure};
 use log::{debug, warn};
 use run_script::ScriptOptions;
 use std::fs;
+use std::fs::read_dir;
+use std::path::{Path, PathBuf};
 
 const MOD_LAUNCH_PARAM_PLACEHOLDER: &str = "{MOD_LAUNCH_PARAM}";
 
 impl ServerRepoHandle {
     pub fn deploy_pack(&self, pack_name: &str) -> anyhow::Result<()> {
-        let pamm_dir = self
-            .server_config
-            .server_dir
-            .as_ref()
-            .ok_or(anyhow!(
-                "Server directory is not set in the server configuration.",
-            ))?
-            .join("pamm");
+        let server_dir = self.server_config.server_dir.as_ref().ok_or(anyhow!(
+            "Server directory is not set in the server configuration.",
+        ))?;
 
-        fs::create_dir(&pamm_dir)
+        let pamm_dir = server_dir.join("pamm");
+
+        fs::create_dir_all(&pamm_dir)
             .context(anyhow!("Failed to create directory at {:?}", pamm_dir))?;
 
         let symlink_path = pamm_dir.join(&self.get_config().name);
@@ -36,8 +36,28 @@ impl ServerRepoHandle {
             symlink_path
         );
 
-        let addon_paths = self
-            .resolve_addons(pack_name)?
+        let resolved_addons = self.resolve_addons(pack_name)?;
+
+        debug!(
+            "Resolved addons for pack '{}': {:?}",
+            pack_name, resolved_addons
+        );
+
+        let keys = resolved_addons
+            .iter()
+            .map(|p| get_path_to_keys(p))
+            .collect::<anyhow::Result<Vec<_>>>()?
+            .into_iter()
+            .flatten();
+
+        symlink_keys(keys, server_dir)?;
+
+        debug!(
+            "Symlinked keys for pack '{}' to server directory at {:?}",
+            pack_name, server_dir
+        );
+
+        let addon_paths = resolved_addons
             .iter()
             .map(|p| {
                 p.to_str()
@@ -46,8 +66,18 @@ impl ServerRepoHandle {
             })
             .collect::<anyhow::Result<Vec<_>>>()?
             .into_iter()
-            .map(|rel| format!("pamm/{}/{}", self.get_config().name, rel))
-            .collect::<Vec<_>>();
+            .map(|rel| {
+                PathBuf::new()
+                    .join("pamm")
+                    .join(&self.get_config().name)
+                    .join(rel)
+            })
+            .map(|p| {
+                p.to_str()
+                    .map(|s| s.to_string())
+                    .context(anyhow!("Failed to convert path to string: {:?}", p))
+            })
+            .collect::<anyhow::Result<Vec<_>>>()?;
 
         let mod_launch_param = format!("\"-mod={}\"", addon_paths.join(";"));
 
@@ -57,8 +87,6 @@ impl ServerRepoHandle {
         );
 
         for (path, template) in &self.server_config.script_templates {
-            ensure!(path.is_file(), "Script path is not a file: {:?}", path);
-
             if !template.contains(MOD_LAUNCH_PARAM_PLACEHOLDER) {
                 warn!(
                     "Template for script {:?} does not contain the placeholder {}. Skipping.",
@@ -104,6 +132,74 @@ impl ServerRepoHandle {
 
         Ok(())
     }
+}
+
+// Looks in the keys folder for any key and returns their paths
+fn get_path_to_keys(addon_path: &Path) -> anyhow::Result<Vec<PathBuf>> {
+    let keys_dir = addon_path.join("keys");
+
+    if !keys_dir.exists() {
+        warn!(
+            "Keys directory does not exist at {:?}. Returning empty list.",
+            keys_dir
+        );
+        return Ok(vec![]);
+    }
+
+    let files =
+        read_dir(&keys_dir).context(anyhow!("Failed to read keys directory at {:?}", keys_dir))?;
+
+    let keys = files
+        .filter_map(|entry| entry.ok())
+        .filter(|entry| entry.path().is_file())
+        .filter(|entry| entry.path().extension().is_some_and(|ext| ext == "bikey"))
+        .map(|entry| entry.path())
+        .collect::<Vec<_>>();
+
+    if keys.is_empty() {
+        warn!(
+            "No .bikey files found in keys directory at {:?}. Returning empty list.",
+            keys_dir
+        );
+    }
+
+    debug!(
+        "Found {} .bikey files in keys directory at {:?}: {:?}",
+        keys.len(),
+        keys_dir,
+        keys
+    );
+
+    Ok(keys)
+}
+
+// Creates symlinks to the keys in the server folder
+fn symlink_keys(keys: impl Iterator<Item = PathBuf>, server_path: &Path) -> anyhow::Result<()> {
+    let key_dir = server_path.join("keys");
+
+    if !key_dir.exists() {
+        return Err(anyhow!(
+            "Keys directory does not exist at {:?}. Cannot create symlinks.",
+            key_dir
+        ));
+    }
+
+    for key in keys {
+        debug!(
+            "Creating symlink for key at {:?} in server keys directory at {:?}",
+            key, key_dir
+        );
+
+        let key_name = key.file_name().ok_or(anyhow!(
+            "Failed to get file name for key at {:?}. Cannot create symlink.",
+            key
+        ))?;
+        let dest_path = key_dir.join(key_name);
+
+        create_or_recreate_symlink(&key, &dest_path)?
+    }
+
+    Ok(())
 }
 
 #[cfg(test)]
