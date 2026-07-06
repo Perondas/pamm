@@ -1,6 +1,7 @@
 use crate::handle::addons::ResolveAddons;
 use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::server_repo_handle::ServerRepoHandle;
+use crate::io::fs::util::clean_path::canonicalize_and_clean_path;
 use crate::io::fs::util::symlink::create_or_recreate_symlink;
 use anyhow::{anyhow, ensure, Context};
 use log::{debug, warn};
@@ -118,10 +119,9 @@ impl ServerRepoHandle {
         for (path, template) in &self.server_config.script_templates {
             if !template.contains(MOD_LAUNCH_PARAM_PLACEHOLDER) {
                 warn!(
-                    "Template for script {:?} does not contain the placeholder {}. Skipping.",
+                    "Template for script {:?} does not contain the placeholder {}",
                     path, MOD_LAUNCH_PARAM_PLACEHOLDER
                 );
-                continue;
             }
 
             let script_content = template
@@ -179,7 +179,9 @@ fn get_path_to_keys(addon_path: &Path) -> anyhow::Result<Vec<PathBuf>> {
         .filter(|entry| entry.path().is_file())
         .filter(|entry| entry.path().extension().is_some_and(|ext| ext == "bikey"))
         .map(|entry| entry.path())
-        .collect::<Vec<_>>();
+        .map(canonicalize_and_clean_path)
+        .map(|p| p.map(PathBuf::from))
+        .collect::<anyhow::Result<Vec<_>>>()?;
 
     if keys.is_empty() {
         warn!(
