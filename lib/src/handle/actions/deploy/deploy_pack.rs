@@ -51,7 +51,7 @@ impl ServerRepoHandle {
             .into_iter()
             .flatten();
 
-        symlink_keys(keys, server_dir)?;
+        self.symlink_keys(keys, server_dir)?;
 
         debug!(
             "Symlinked keys for pack '{}' to server directory at {:?}",
@@ -148,6 +148,13 @@ impl ServerRepoHandle {
 
                 fs::set_permissions(path, perms)
                     .context(anyhow!("Failed to set mode for {:?}", path))?;
+
+                std::os::unix::fs::chown(
+                    path,
+                    self.server_config.file_owner_uid,
+                    self.server_config.file_group_gid,
+                )
+                .context(anyhow!("Failed to change ownership for {:?}", path))?;
             }
 
             debug!(
@@ -155,6 +162,49 @@ impl ServerRepoHandle {
                 pack_name, path, mod_launch_param
             );
         }
+        Ok(())
+    }
+
+    // Creates symlinks to the keys in the server folder
+    fn symlink_keys(
+        &self,
+        keys: impl Iterator<Item = PathBuf>,
+        server_path: &Path,
+    ) -> anyhow::Result<()> {
+        let key_dir = server_path.join("keys");
+
+        if !key_dir.exists() {
+            return Err(anyhow!(
+                "Keys directory does not exist at {:?}. Cannot create symlinks.",
+                key_dir
+            ));
+        }
+
+        for key in keys {
+            debug!(
+                "Creating symlink for key at {:?} in server keys directory at {:?}",
+                key, key_dir
+            );
+
+            let key_name = key.file_name().ok_or(anyhow!(
+                "Failed to get file name for key at {:?}. Cannot create symlink.",
+                key
+            ))?;
+            let dest_path = key_dir.join(key_name);
+
+            create_or_recreate_symlink(&key, &dest_path)?;
+
+            #[cfg(unix)]
+            {
+                std::os::unix::fs::chown(
+                    &key,
+                    self.server_config.file_owner_uid,
+                    self.server_config.file_group_gid,
+                )
+                .context(anyhow!("Failed to change ownership for {:?}", path))?;
+            }
+        }
+
         Ok(())
     }
 }
@@ -198,35 +248,6 @@ fn get_path_to_keys(addon_path: &Path) -> anyhow::Result<Vec<PathBuf>> {
     );
 
     Ok(keys)
-}
-
-// Creates symlinks to the keys in the server folder
-fn symlink_keys(keys: impl Iterator<Item = PathBuf>, server_path: &Path) -> anyhow::Result<()> {
-    let key_dir = server_path.join("keys");
-
-    if !key_dir.exists() {
-        return Err(anyhow!(
-            "Keys directory does not exist at {:?}. Cannot create symlinks.",
-            key_dir
-        ));
-    }
-
-    for key in keys {
-        debug!(
-            "Creating symlink for key at {:?} in server keys directory at {:?}",
-            key, key_dir
-        );
-
-        let key_name = key.file_name().ok_or(anyhow!(
-            "Failed to get file name for key at {:?}. Cannot create symlink.",
-            key
-        ))?;
-        let dest_path = key_dir.join(key_name);
-
-        create_or_recreate_symlink(&key, &dest_path)?
-    }
-
-    Ok(())
 }
 
 #[cfg(test)]

@@ -9,4 +9,8 @@ pub struct ServerConfig {
     pub script_templates: HashMap<PathBuf, String>,
     /// Will be run in order after deployment of any pack
     pub post_deploy_commands: Vec<String>,
+
+    pub file_owner_uid: Option<u32>,
+
+    pub file_group_gid: Option<u32>,
 }
