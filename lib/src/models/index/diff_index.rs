@@ -1,10 +1,11 @@
-use crate::models::index::index_node::{FileKind, IndexNode, NodeKind, PBOPart};
+use crate::models::index::index_node::{FileKind, IndexNode, NodeKind, PBO_CHECKSUM_LEN, PBOPart};
 use crate::models::index::node_diff::{
     FileModification, ModifiedNodeKind, NodeDiff, NodeModification,
 };
 use crate::util::iterator_diff::{DiffResult, diff_iterators};
-use rayon::prelude::*;
 use crate::models::index::get_size_change::GetSizeChange;
+use rayon::prelude::*;
+use std::collections::HashSet;
 
 pub fn diff_index(old: &IndexNode, new: &IndexNode) -> anyhow::Result<NodeDiff> {
     let IndexNode {
@@ -68,7 +69,7 @@ fn diff_file(old: &IndexNode, new: &IndexNode) -> NodeDiff {
                     target_checksum: new_checksum.to_owned(),
                     modification: FileModification::PBO {
                         new_length,
-                        dl_size: required_parts_size + blob_start + 20,
+                        dl_size: required_parts_size + blob_start + PBO_CHECKSUM_LEN,
                         required_checksums,
                         new_order: new_parts.clone(),
                         new_blob_start: *blob_start,
@@ -89,9 +90,14 @@ fn diff_file(old: &IndexNode, new: &IndexNode) -> NodeDiff {
 }
 
 fn diff_pbo_parts(old_parts: &[PBOPart], new_parts: &[PBOPart]) -> (Vec<Vec<u8>>, u64) {
+    let old_checksums = old_parts
+        .iter()
+        .map(|o| o.checksum.as_slice())
+        .collect::<HashSet<_>>();
+
     let (required_parts_checksums, lengths): (Vec<_>, Vec<_>) = new_parts
         .iter()
-        .filter(|p| !old_parts.iter().any(|o| o.checksum == p.checksum))
+        .filter(|p| !old_checksums.contains(p.checksum.as_slice()))
         .map(|p| (p.checksum.clone(), p.length))
         .unzip();
 

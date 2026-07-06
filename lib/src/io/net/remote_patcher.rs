@@ -3,12 +3,13 @@ use crate::io::net::byte_range_response::{ByteRangeResponse, IntoByteRangeRespon
 use crate::io::net::download_file::download_file;
 use crate::io::progress_reporting::download_reporter::DownloadReporter;
 use crate::io::rel_path::RelPath;
-use crate::models::index::index_node::PBOPart;
+use crate::models::index::index_node::{PBO_CHECKSUM_LEN, PBOPart};
 use crate::models::index::node_diff::FileModification;
 use crate::models::pack::pack_config::PackConfig;
 use anyhow::{Context, Result, ensure};
 use bi_fs_rs::pbo::handle::PBOHandle;
 use fs::File;
+use std::collections::HashSet;
 use std::io::{BufWriter, Write};
 use std::path::Path;
 use std::{fs, iter};
@@ -87,8 +88,13 @@ impl<P: DownloadReporter> RemotePatcher<P> {
                     temp_file.get_ref().metadata()?.len()
                 );
 
+                let required_checksums = required_checksums
+                    .iter()
+                    .map(Vec::as_slice)
+                    .collect::<HashSet<_>>();
+
                 for part in new_order {
-                    if required_checksums.contains(&part.checksum) {
+                    if required_checksums.contains(part.checksum.as_slice()) {
                         let part_data = parts
                             .next()
                             .ok_or_else(|| anyhow::anyhow!("No response for PBO part"))??;
@@ -116,8 +122,9 @@ impl<P: DownloadReporter> RemotePatcher<P> {
                     .ok_or_else(|| anyhow::anyhow!("No response for PBO checksum"))??;
 
                 ensure!(
-                    checksum_data.len() == 20,
-                    "Received PBO checksum length does not match expected length. Expected length: 20. Actual length: {}",
+                    checksum_data.len() as u64 == PBO_CHECKSUM_LEN,
+                    "Received PBO checksum length does not match expected length. Expected length: {}. Actual length: {}",
+                    PBO_CHECKSUM_LEN,
                     checksum_data.len()
                 );
 
@@ -184,11 +191,16 @@ impl<P: DownloadReporter> RemotePatcher<P> {
         // We always get the entire header + the padding bit
         // TODO: can we only get part of it? Is that worth it?
         let pbo_header_range = (0_u64, blob_start - 1);
-        let pbo_checksum_rage = (new_length - 20, new_length - 1);
+        let pbo_checksum_range = (new_length - PBO_CHECKSUM_LEN, new_length - 1);
+
+        let required_checksums = required_checksums
+            .iter()
+            .map(Vec::as_slice)
+            .collect::<HashSet<_>>();
 
         let modified_ranges = new_order
             .iter()
-            .filter(|p| required_checksums.contains(&p.checksum))
+            .filter(|p| required_checksums.contains(p.checksum.as_slice()))
             .map(|p| {
                 let start = p.start_offset + blob_start;
                 (start, start + p.length as u64 - 1)
@@ -196,7 +208,7 @@ impl<P: DownloadReporter> RemotePatcher<P> {
 
         let ranges = iter::once(pbo_header_range)
             .chain(modified_ranges)
-            .chain(iter::once(pbo_checksum_rage))
+            .chain(iter::once(pbo_checksum_range))
             .collect::<Vec<_>>();
 
         let ranges_str = ranges

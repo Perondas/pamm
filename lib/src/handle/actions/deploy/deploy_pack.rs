@@ -2,7 +2,7 @@ use crate::handle::addons::ResolveAddons;
 use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::server_repo_handle::ServerRepoHandle;
 use crate::io::fs::util::symlink::create_or_recreate_symlink;
-use anyhow::{Context, anyhow};
+use anyhow::{Context, anyhow, ensure};
 use log::{debug, warn};
 use run_script::ScriptOptions;
 use std::fs;
@@ -58,20 +58,8 @@ impl ServerRepoHandle {
 
         let addon_paths = resolved_addons
             .iter()
-            .map(|p| {
-                p.to_str()
-                    .map(|s| s.to_string())
-                    .context(anyhow!("Failed to convert path to string: {:?}", p))
-            })
-            .collect::<anyhow::Result<Vec<_>>>()?
-            .into_iter()
             .map(|rel| {
-                PathBuf::new()
-                    .join("pamm")
-                    .join(&self.get_config().name)
-                    .join(rel)
-            })
-            .map(|p| {
+                let p = Path::new("pamm").join(&self.get_config().name).join(rel);
                 p.to_str()
                     .map(|s| s.to_string())
                     .context(anyhow!("Failed to convert path to string: {:?}", p))
@@ -118,10 +106,17 @@ impl ServerRepoHandle {
             let mut child = run_script::spawn(script, &args, &options)
                 .context(anyhow!("Failed to spawn post-deploy script: {:?}", script))?;
 
-            child.wait().context(anyhow!(
+            let exit_status = child.wait().context(anyhow!(
                 "Failed to wait for post-deploy script to finish: {:?}",
                 script
             ))?;
+
+            ensure!(
+                exit_status.success(),
+                "Post-deploy script {:?} failed with {}",
+                script,
+                exit_status
+            );
 
             debug!(
                 "Post-deploy script for pack '{}' finished successfully: {:?}",

@@ -9,18 +9,13 @@ use crate::models::index::index_node::FileKind;
 use crate::models::index::index_node::IndexNode;
 use crate::models::index::index_node::NodeKind;
 use crate::models::pack::pack_index::PackIndex;
-use anyhow::{Result, anyhow};
+use anyhow::Result;
 use bi_fs_rs::pbo::handle::PBOHandle;
 use rayon::iter::ParallelIterator;
 use rayon::prelude::IntoParallelIterator;
-use regex::Regex;
 use std::fmt::Debug;
 use std::fs::{DirEntry, ReadDir};
 use std::path::{Path, PathBuf};
-use std::sync::LazyLock;
-
-static PBO_NAME_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^(.+)\.pbo$").unwrap());
-static ADDON_FOLDER_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^@.*$").unwrap());
 
 pub struct IndexGenerator<P: ProgressReporter> {
     addon_dir: PathBuf,
@@ -65,7 +60,7 @@ impl<P: ProgressReporter> IndexGenerator<P> {
         let rel_paths = addon_folders
             .filter_map(Result::ok)
             .map(|f| file_name_to_string(f.path()))
-            .filter(|f| ADDON_FOLDER_REGEX.is_match(f))
+            .filter(|f| f.starts_with('@'))
             .map(|folder_name| base_path.push(&folder_name))
             .collect::<Vec<_>>();
 
@@ -158,12 +153,7 @@ impl<P: ProgressReporter> IndexGenerator<P> {
             return Ok(node);
         }
 
-        let index = if PBO_NAME_REGEX.is_match(
-            fs_path
-                .file_name()
-                .and_then(|s| s.to_str())
-                .ok_or(anyhow!("Bad path: {:?}", fs_path))?,
-        ) {
+        let index = if fs_path.extension().is_some_and(|ext| ext == "pbo") {
             match index_pbo(&fs_path) {
                 Ok(part) => Ok(part),
                 Err(e) => {
