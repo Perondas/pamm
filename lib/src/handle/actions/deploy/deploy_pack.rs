@@ -3,7 +3,7 @@ use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::server_repo_handle::ServerRepoHandle;
 use crate::io::fs::util::clean_path::canonicalize_and_clean_path;
 use crate::io::fs::util::symlink::create_or_recreate_symlink;
-use anyhow::{anyhow, ensure, Context};
+use anyhow::{Context, anyhow, ensure};
 use log::{debug, warn};
 use run_script::ScriptOptions;
 use std::fs;
@@ -197,7 +197,7 @@ impl ServerRepoHandle {
             #[cfg(unix)]
             {
                 std::os::unix::fs::lchown(
-                    &key,
+                    &dest_path,
                     self.server_config.file_owner_uid,
                     self.server_config.file_group_gid,
                 )
