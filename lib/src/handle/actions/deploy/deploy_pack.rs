@@ -196,7 +196,7 @@ impl ServerRepoHandle {
 
             #[cfg(unix)]
             {
-                std::os::unix::fs::chown(
+                std::os::unix::fs::lchown(
                     &key,
                     self.server_config.file_owner_uid,
                     self.server_config.file_group_gid,
