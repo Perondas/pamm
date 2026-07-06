@@ -7,7 +7,6 @@ use log::{debug, warn};
 use run_script::ScriptOptions;
 use std::fs;
 use std::fs::read_dir;
-use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 
 const MOD_LAUNCH_PARAM_PLACEHOLDER: &str = "{MOD_LAUNCH_PARAM}";
@@ -134,6 +133,8 @@ impl ServerRepoHandle {
 
             #[cfg(unix)]
             {
+                use std::os::unix::fs::PermissionsExt;
+
                 debug!("Making script {} executable", path);
 
                 let mut perms = fs::metadata(path)
