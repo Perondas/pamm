@@ -1,6 +1,9 @@
 use crate::named;
 use serde::{Deserialize, Serialize};
 
+/// Length in bytes of the SHA-1 checksum that terminates every PBO file.
+pub const PBO_CHECKSUM_LEN: u64 = 20;
+
 named!(IndexNode);
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct IndexNode {

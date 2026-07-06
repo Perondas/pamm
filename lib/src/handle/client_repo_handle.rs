@@ -1,5 +1,4 @@
 use crate::handle::reading::get_pack::GetPack;
-use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::repo_handle::RepoHandle;
 use crate::handle::writing::save_pack_settings::SavePackSettings;
 use crate::io::fs::fs_readable::KnownFSReadable;
@@ -81,16 +80,6 @@ impl GetPack for ClientRepoHandle {
         pack_name: &str,
     ) -> anyhow::Result<(PackConfig, PackUserSettings)> {
         self.base.get_pack_with_settings(pack_name)
-    }
-}
-
-impl GetRepoInfo for ClientRepoHandle {
-    fn get_repo_path(&self) -> &Path {
-        self.base.get_repo_path()
-    }
-
-    fn get_config(&self) -> &RepoConfig {
-        self.base.get_config()
     }
 }
 

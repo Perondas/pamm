@@ -7,6 +7,7 @@ pub mod update_repo_config;
 
 use crate::handle::repo_handle::RepoHandle;
 use crate::io::fs::fs_writable::{KnownFSWritable, NamedFSWritable};
+use crate::models::identifiable::Identifiable;
 
 impl RepoHandle {
     pub(in crate::handle) fn write_named<T: NamedFSWritable>(
@@ -15,6 +16,13 @@ impl RepoHandle {
         identifier: &str,
     ) -> anyhow::Result<()> {
         value.write_to_named(&self.repo_path, identifier)
+    }
+
+    pub(in crate::handle) fn write_identifiable<T: NamedFSWritable + Identifiable>(
+        &self,
+        value: &T,
+    ) -> anyhow::Result<()> {
+        value.write_to_named(&self.repo_path, value.get_identifier())
     }
 
     pub(in crate::handle) fn write<T: KnownFSWritable>(&self, value: &T) -> anyhow::Result<()> {

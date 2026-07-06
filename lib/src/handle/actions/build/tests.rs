@@ -1,9 +1,11 @@
 use crate::handle::actions::build::{BuildMode, BuildOptions};
 use crate::handle::server_repo_handle::ServerRepoHandle;
 use crate::io::fs::fs_readable::KnownFSReadable;
-use crate::io::fs::fs_writable::{KnownFSWritable, NamedFSWritable};
+use crate::io::fs::fs_writable::NamedFSWritable;
 use crate::io::known_file::KnownFile;
-use crate::io::name_consts::{CACHE_DB_DIR_NAME, INDEX_DIR_NAME, WWW_DIR_NAME, get_pack_addon_directory_name};
+use crate::io::name_consts::{
+    CACHE_DB_DIR_NAME, INDEX_DIR_NAME, WWW_DIR_NAME, get_pack_addon_directory_name,
+};
 use crate::io::named_file::NamedFile;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::models::index::checksum_index::ChecksumIndex;
@@ -34,13 +36,12 @@ impl Fixture {
     fn new(key: &str) -> Self {
         let tmp = TestTempDir::new(key);
         let repo_path = tmp.path().join("repo");
-        fs::create_dir_all(&repo_path).unwrap();
 
         // Minimal repo config with one pack.
         let mut packs = HashSet::new();
         packs.insert("core".to_string());
         let repo_config = RepoConfig::new("repo".to_string(), "test".to_string(), packs);
-        repo_config.write_to(&repo_path).unwrap();
+        ServerRepoHandle::create(tmp.path(), repo_config).unwrap();
 
         // Minimal pack config, no required/optional addons declared.
         let pack_config = PackConfig::new(
@@ -60,7 +61,10 @@ impl Fixture {
         fs::write(addon_dir.join("file.txt"), b"hello").unwrap();
         fs::write(addon_dir.join("sub").join("nested.txt"), b"world").unwrap();
 
-        Self { _tmp: tmp, repo_path }
+        Self {
+            _tmp: tmp,
+            repo_path,
+        }
     }
 
     fn open(&self) -> ServerRepoHandle {
@@ -121,20 +125,14 @@ fn build_pack_writes_indexes_to_www_only() {
         .build_pack("core", opts(BuildMode::Symlink), &NoopProgress)
         .unwrap();
 
-    let www_indexes = fx
-        .www()
-        .join("core_pack_addons")
-        .join(INDEX_DIR_NAME);
+    let www_indexes = fx.www().join("core_pack_addons").join(INDEX_DIR_NAME);
     let www_checksum = www_indexes.join(ChecksumIndex::file_name());
     let www_addon_index = www_indexes.join("@addon1.index.pamm");
     assert!(www_checksum.is_file(), "checksum index should be in www");
     assert!(www_addon_index.is_file(), "addon index should be in www");
 
     // No indexes/ dir should appear next to the source.
-    let source_indexes = fx
-        .repo_path
-        .join("core_pack_addons")
-        .join(INDEX_DIR_NAME);
+    let source_indexes = fx.repo_path.join("core_pack_addons").join(INDEX_DIR_NAME);
     assert!(
         !source_indexes.exists(),
         "indexes/ should not exist next to the source files"
@@ -160,11 +158,7 @@ fn build_pack_removes_stale_addon_subtree() {
         .unwrap();
 
     assert!(!stale.exists(), "phantom addon should be removed");
-    assert!(
-        fx.www()
-            .join("core_pack_addons/@addon1/file.txt")
-            .exists()
-    );
+    assert!(fx.www().join("core_pack_addons/@addon1/file.txt").exists());
 }
 
 #[test]
@@ -207,10 +201,7 @@ fn build_repo_materializes_top_level_files() {
         .unwrap();
 
     assert!(fx.www().join(RepoConfig::file_name()).exists());
-    assert!(fx
-        .www()
-        .join(PackConfig::get_file_name("core"))
-        .exists());
+    assert!(fx.www().join(PackConfig::get_file_name("core")).exists());
 }
 
 #[test]
@@ -229,14 +220,8 @@ fn build_pack_skips_dotcache_in_source() {
     assert!(source_cache.exists(), "sled cache must remain at source");
 
     // It must NOT have been copied/linked into www.
-    let www_cache = fx
-        .www()
-        .join("core_pack_addons")
-        .join(CACHE_DB_DIR_NAME);
-    assert!(
-        !www_cache.exists(),
-        ".cache/ must not appear in www output"
-    );
+    let www_cache = fx.www().join("core_pack_addons").join(CACHE_DB_DIR_NAME);
+    assert!(!www_cache.exists(), ".cache/ must not appear in www output");
 }
 
 #[cfg(unix)]

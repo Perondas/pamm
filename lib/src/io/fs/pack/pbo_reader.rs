@@ -1,4 +1,4 @@
-use crate::models::index::index_node::{FileKind, IndexNode, NodeKind, PBOPart};
+use crate::models::index::index_node::{FileKind, IndexNode, NodeKind, PBO_CHECKSUM_LEN, PBOPart};
 use anyhow::{ensure, Result};
 use bi_fs_rs::pbo::handle::PBOHandle;
 use std::io::{Read, Seek, SeekFrom};
@@ -33,7 +33,7 @@ impl IndexNode {
         }
 
         // Skip past the checksum
-        handle.handle.seek_relative(20)?;
+        handle.handle.seek_relative(PBO_CHECKSUM_LEN as i64)?;
 
         // We should be at the end of the file
         ensure!(
@@ -51,8 +51,9 @@ impl IndexNode {
         let pbo_checksum = pbo_hasher.finalize().as_bytes().to_vec();
 
         // Header len + 1 + blob + checksum
-        let computed_len: u64 =
-            (handle.blob_start) + parts.iter().map(|p| p.length as u64).sum::<u64>() + 20;
+        let computed_len: u64 = (handle.blob_start)
+            + parts.iter().map(|p| p.length as u64).sum::<u64>()
+            + PBO_CHECKSUM_LEN;
 
         ensure!(
             computed_len == handle.length,
