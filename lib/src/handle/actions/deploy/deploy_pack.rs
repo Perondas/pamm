@@ -10,6 +10,7 @@ use std::fs::read_dir;
 use std::path::{Path, PathBuf};
 
 const MOD_LAUNCH_PARAM_PLACEHOLDER: &str = "{MOD_LAUNCH_PARAM}";
+const DEPLOYED_PACK_PARAM_PLACEHOLDER: &str = "{DEPLOYED_PACK}";
 
 impl ServerRepoHandle {
     pub fn deploy_pack(&self, pack_name: &str) -> anyhow::Result<()> {
@@ -73,25 +74,7 @@ impl ServerRepoHandle {
             pack_name, mod_launch_param
         );
 
-        for (path, template) in &self.server_config.script_templates {
-            if !template.contains(MOD_LAUNCH_PARAM_PLACEHOLDER) {
-                warn!(
-                    "Template for script {:?} does not contain the placeholder {}. Skipping.",
-                    path, MOD_LAUNCH_PARAM_PLACEHOLDER
-                );
-                continue;
-            }
-
-            let script_content = template.replace(MOD_LAUNCH_PARAM_PLACEHOLDER, &mod_launch_param);
-
-            fs::write(path, script_content)
-                .context(anyhow!("Failed to write script file at {:?}", path))?;
-
-            debug!(
-                "Deployed script for pack '{}' at {:?} with mod launch parameter: {}",
-                pack_name, path, mod_launch_param
-            );
-        }
+        self.process_script_templates(pack_name, &mod_launch_param)?;
 
         for script in &self.server_config.post_deploy_commands {
             debug!(
@@ -124,6 +107,35 @@ impl ServerRepoHandle {
             );
         }
 
+        Ok(())
+    }
+
+    fn process_script_templates(
+        &self,
+        pack_name: &str,
+        mod_launch_param: &String,
+    ) -> anyhow::Result<()> {
+        for (path, template) in &self.server_config.script_templates {
+            if !template.contains(MOD_LAUNCH_PARAM_PLACEHOLDER) {
+                warn!(
+                    "Template for script {:?} does not contain the placeholder {}. Skipping.",
+                    path, MOD_LAUNCH_PARAM_PLACEHOLDER
+                );
+                continue;
+            }
+
+            let script_content = template
+                .replace(MOD_LAUNCH_PARAM_PLACEHOLDER, mod_launch_param)
+                .replace(DEPLOYED_PACK_PARAM_PLACEHOLDER, pack_name);
+
+            fs::write(path, script_content)
+                .context(anyhow!("Failed to write script file at {:?}", path))?;
+
+            debug!(
+                "Deployed script for pack '{}' at {:?} with mod launch parameter: {}",
+                pack_name, path, mod_launch_param
+            );
+        }
         Ok(())
     }
 }
