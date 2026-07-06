@@ -2,11 +2,12 @@ use crate::handle::addons::ResolveAddons;
 use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::server_repo_handle::ServerRepoHandle;
 use crate::io::fs::util::symlink::create_or_recreate_symlink;
-use anyhow::{Context, anyhow, ensure};
+use anyhow::{anyhow, ensure, Context};
 use log::{debug, warn};
 use run_script::ScriptOptions;
 use std::fs;
 use std::fs::read_dir;
+use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 
 const MOD_LAUNCH_PARAM_PLACEHOLDER: &str = "{MOD_LAUNCH_PARAM}";
@@ -130,6 +131,23 @@ impl ServerRepoHandle {
 
             fs::write(path, script_content)
                 .context(anyhow!("Failed to write script file at {:?}", path))?;
+
+            #[cfg(unix)]
+            {
+                debug!("Making script {} executable", path);
+
+                let mut perms = fs::metadata(path)
+                    .context(anyhow!(
+                        "Failed to get metadata for script file at {:?}",
+                        path
+                    ))?
+                    .permissions();
+
+                perms.set_mode(perms.mode() | 0o111); // Add execute permissions for user, group, and others
+
+                fs::set_permissions(path, perms)
+                    .context(anyhow!("Failed to set mode for {:?}", path))?;
+            }
 
             debug!(
                 "Deployed script for pack '{}' at {:?} with mod launch parameter: {}",
