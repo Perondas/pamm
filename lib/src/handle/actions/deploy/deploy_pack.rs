@@ -135,7 +135,7 @@ impl ServerRepoHandle {
             {
                 use std::os::unix::fs::PermissionsExt;
 
-                debug!("Making script {} executable", path);
+                debug!("Making script {:#?} executable", path);
 
                 let mut perms = fs::metadata(path)
                     .context(anyhow!(
