@@ -2,8 +2,9 @@ use super::context::ScriptTemplateContext;
 use super::deployed_pack_name::DeployedPackNameReplacementStrategy;
 use super::mod_launch_param::ModLaunchParamReplacementStrategy;
 use super::strategy::ScriptTemplateReplacementStrategy;
+use crate::handle::actions::deploy::script_templating::datestamp::DatestampReplacementStrategy;
 use crate::handle::server_repo_handle::ServerRepoHandle;
-use anyhow::{anyhow, Context};
+use anyhow::{Context, anyhow};
 use log::debug;
 use std::fs;
 use std::path::Path;
@@ -14,9 +15,10 @@ impl ServerRepoHandle {
         pack_name: &str,
         mod_launch_param: &str,
     ) -> anyhow::Result<()> {
-        let strategies: [&dyn ScriptTemplateReplacementStrategy; 2] = [
+        let strategies: [&dyn ScriptTemplateReplacementStrategy; 3] = [
             &ModLaunchParamReplacementStrategy,
             &DeployedPackNameReplacementStrategy,
+            &DatestampReplacementStrategy,
         ];
 
         for (path, template) in &self.server_config.script_templates {
@@ -30,8 +32,10 @@ impl ServerRepoHandle {
             fs::write(path, &script_content)
                 .context(anyhow!("Failed to write script file at {:?}", path))?;
 
-            self.make_executable(path)
-                .context(anyhow!("Failed to make script file executable at {:?}", path))?;
+            self.make_executable(path).context(anyhow!(
+                "Failed to make script file executable at {:?}",
+                path
+            ))?;
 
             debug!(
                 "Deployed script for pack '{}' at {:?} with mod launch parameter: {}",
