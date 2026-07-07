@@ -3,15 +3,12 @@ use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::server_repo_handle::ServerRepoHandle;
 use crate::io::fs::util::clean_path::canonicalize_and_clean_path;
 use crate::io::fs::util::symlink::create_or_recreate_symlink;
-use anyhow::{Context, anyhow, ensure};
+use anyhow::{anyhow, ensure, Context};
 use log::{debug, warn};
 use run_script::ScriptOptions;
 use std::fs;
 use std::fs::read_dir;
 use std::path::{Path, PathBuf};
-
-const MOD_LAUNCH_PARAM_PLACEHOLDER: &str = "{MOD_LAUNCH_PARAM}";
-const DEPLOYED_PACK_PARAM_PLACEHOLDER: &str = "{DEPLOYED_PACK}";
 
 impl ServerRepoHandle {
     pub fn deploy_pack(&self, pack_name: &str) -> anyhow::Result<()> {
@@ -111,60 +108,6 @@ impl ServerRepoHandle {
         Ok(())
     }
 
-    fn process_script_templates(
-        &self,
-        pack_name: &str,
-        mod_launch_param: &String,
-    ) -> anyhow::Result<()> {
-        for (path, template) in &self.server_config.script_templates {
-            if !template.contains(MOD_LAUNCH_PARAM_PLACEHOLDER) {
-                warn!(
-                    "Template for script {:?} does not contain the placeholder {}",
-                    path, MOD_LAUNCH_PARAM_PLACEHOLDER
-                );
-            }
-
-            let script_content = template
-                .replace(MOD_LAUNCH_PARAM_PLACEHOLDER, mod_launch_param)
-                .replace(DEPLOYED_PACK_PARAM_PLACEHOLDER, pack_name);
-
-            fs::write(path, script_content)
-                .context(anyhow!("Failed to write script file at {:?}", path))?;
-
-            #[cfg(unix)]
-            {
-                use std::os::unix::fs::PermissionsExt;
-
-                debug!("Making script {:#?} executable", path);
-
-                let mut perms = fs::metadata(path)
-                    .context(anyhow!(
-                        "Failed to get metadata for script file at {:?}",
-                        path
-                    ))?
-                    .permissions();
-
-                perms.set_mode(perms.mode() | 0o111); // Add execute permissions for user, group, and others
-
-                fs::set_permissions(path, perms)
-                    .context(anyhow!("Failed to set mode for {:?}", path))?;
-
-                std::os::unix::fs::chown(
-                    path,
-                    self.server_config.file_owner_uid,
-                    self.server_config.file_group_gid,
-                )
-                .context(anyhow!("Failed to change ownership for {:?}", path))?;
-            }
-
-            debug!(
-                "Deployed script for pack '{}' at {:?} with mod launch parameter: {}",
-                pack_name, path, mod_launch_param
-            );
-        }
-        Ok(())
-    }
-
     // Creates symlinks to the keys in the server folder
     fn symlink_keys(
         &self,
@@ -252,7 +195,6 @@ fn get_path_to_keys(addon_path: &Path) -> anyhow::Result<Vec<PathBuf>> {
 
 #[cfg(test)]
 mod tests {
-    use super::MOD_LAUNCH_PARAM_PLACEHOLDER;
     use crate::handle::reading::get_repo_info::GetRepoInfo;
     use crate::handle::server_repo_handle::ServerRepoHandle;
     use crate::io::fs::fs_writable::NamedFSWritable;
@@ -330,7 +272,7 @@ mod tests {
         let template_path = fx.script_path("deploy-template.txt");
         fs::write(
             &template_path,
-            format!("start {MOD_LAUNCH_PARAM_PLACEHOLDER} end"),
+            "start {DEPLOYED_PACK}::{MOD_LAUNCH_PARAM} end",
         )
         .unwrap();
 
@@ -370,7 +312,7 @@ mod tests {
 
         assert_eq!(
             fs::read_to_string(&template_path).unwrap(),
-            format!("start {} end", expected_mod_param)
+            format!("start core::{} end", expected_mod_param)
         );
 
         let log_contents = fs::read_to_string(&command_log).unwrap();
