@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use super::context::ScriptTemplateContext;
 use super::deployed_pack_name::DeployedPackNameReplacementStrategy;
 use super::mod_launch_param::ModLaunchParamReplacementStrategy;
@@ -46,7 +47,7 @@ impl ServerRepoHandle {
     }
 
     #[cfg(unix)]
-    fn make_executable(&self, path: impl AsRef<Path>) -> anyhow::Result<()> {
+    fn make_executable(&self, path: impl AsRef<Path> + Debug) -> anyhow::Result<()> {
         use std::os::unix::fs::PermissionsExt;
 
         debug!("Making script {:#?} executable", path);
@@ -71,7 +72,7 @@ impl ServerRepoHandle {
     }
 
     #[cfg(windows)]
-    fn make_executable(&self, _path: impl AsRef<Path>) -> anyhow::Result<()> {
+    fn make_executable(&self, _path: impl AsRef<Path> + Debug) -> anyhow::Result<()> {
         // Do nothing
         Ok(())
     }
