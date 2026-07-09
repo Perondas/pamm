@@ -20,6 +20,9 @@ where
 }
 
 pub(in crate::handle) trait GetExternalAddonsPaths {
+    /// Gets the paths to the pack's enabled external addons as absolute,
+    /// canonicalized path strings (relative paths in the user settings are
+    /// resolved against the process working directory).
     fn get_external_addon_paths(&self, pack_name: &str) -> anyhow::Result<Vec<String>>;
 }
 

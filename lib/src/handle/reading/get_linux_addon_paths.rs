@@ -10,6 +10,10 @@ use std::fs::create_dir_all;
 use std::path::Path;
 
 pub trait GetLinuxAddonPaths {
+    /// Gets the paths to all enabled addons of the pack as relative path strings
+    /// of the form `pamm/<repo name>/<addon>` or `pamm/externals/<addon>`,
+    /// relative to the Arma install directory (where the `pamm` symlinks are
+    /// created), suitable for use as `-mod=` launch parameters.
     fn get_linux_addon_paths(&self, pack_name: &str) -> anyhow::Result<Vec<String>>;
 }
 

@@ -152,7 +152,12 @@ impl ServerRepoHandle {
     }
 }
 
-// Looks in the keys folder for any key and returns their paths
+// Looks in the keys folder for any key and returns their paths.
+//
+// The returned paths are always absolute: each found `.bikey` file is
+// canonicalized. Note that `addon_path` itself is repo-root-relative (as
+// produced by `resolve_addons`), so the lookup of `<addon_path>/keys` resolves
+// against the process working directory.
 fn get_path_to_keys(addon_path: &Path) -> anyhow::Result<Vec<PathBuf>> {
     let keys_dir = addon_path.join("keys");
 
@@ -256,10 +261,13 @@ mod tests {
             }
         }
 
+        // Absolute path to a file inside the fixture's server dir (which lives
+        // under the system temp directory).
         fn script_path(&self, name: &str) -> PathBuf {
             self.server_dir.join(name)
         }
 
+        // Absolute path to the `pamm/repo` symlink inside the fixture's server dir.
         fn pamm_symlink(&self) -> PathBuf {
             self.server_dir.join("pamm").join("repo")
         }

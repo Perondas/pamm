@@ -173,6 +173,10 @@ impl<'a> Materializer<'a> {
 /// Compute a relative path from `from_dir` to `to`. Both paths should refer to
 /// locations under a common ancestor (typically the repo root).
 ///
+/// The returned path is always relative — relative to `from_dir`, e.g.
+/// `../../foo_pack_addons/@addon/file.pbo` — regardless of whether the inputs
+/// were absolute or relative (they just have to be both one or the other).
+///
 /// We do not canonicalize: callers want the symlink target to remain relative so
 /// the whole repo directory stays portable.
 pub fn relative_path(from_dir: &Path, to: &Path) -> Option<PathBuf> {

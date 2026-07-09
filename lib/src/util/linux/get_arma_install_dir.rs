@@ -6,6 +6,10 @@ use steam_vdf_parser::{parse_text, Value};
 
 static LIBRARYFOLDERS_PATH: &str = ".steam/root/steamapps/libraryfolders.vdf";
 
+/// Returns the absolute path to the Arma 3 installation directory,
+/// `<steam library>/steamapps/common/<installdir>`. It is absolute because it
+/// is built from the Steam library path in `libraryfolders.vdf`, which Steam
+/// stores as an absolute path. The path is not canonicalized.
 pub fn get_arma_install_dir() -> anyhow::Result<PathBuf> {
     log::debug!("Attempting to find Arma install directory");
     let home_dir = home_dir().ok_or_else(|| anyhow!("Unable to find home directory"))?;

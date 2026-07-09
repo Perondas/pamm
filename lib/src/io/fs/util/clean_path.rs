@@ -1,6 +1,9 @@
 use anyhow::Context;
 use std::path::{Path, PathBuf};
 
+/// Returns the path as an absolute string: the input (relative paths are
+/// resolved against the process working directory) is canonicalized, then
+/// cleaned for Arma. Fails if the path does not exist.
 pub(crate) fn canonicalize_and_clean_path<P: AsRef<Path>>(path: P) -> anyhow::Result<String> {
     let p = path.as_ref();
     let canonicalized = p

@@ -7,7 +7,8 @@ use crate::io::fs::util::clean_path::canonicalize_and_clean_path;
 use anyhow::{anyhow, Context};
 
 pub trait GetAddonPaths {
-    /// Gets ass relative to the repo root
+    /// Gets the paths to all enabled addons of the pack (required, optional and
+    /// external) as absolute, canonicalized path strings.
     fn get_canonical_addon_paths(&self, pack_name: &str) -> anyhow::Result<Vec<String>>;
 }
 

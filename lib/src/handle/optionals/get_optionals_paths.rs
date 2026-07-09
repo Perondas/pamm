@@ -7,6 +7,8 @@ impl<T> GetOptionalsPaths for T
 where
     T: GetPack,
 {
+    /// Returns relative paths of the form `<pack>_pack_addons/<addon>`, relative
+    /// to the repo root (join with the repo path to get usable filesystem paths).
     fn get_optional_paths(&self, pack_name: &str) -> anyhow::Result<Vec<PathBuf>> {
         let (config, settings) = self.get_pack_with_settings(pack_name)?;
 
@@ -52,7 +54,9 @@ where
 }
 
 pub trait GetOptionalsPaths {
-    /// Gets the paths to the enabled optionals relative to the repo root
+    /// Gets the paths to the enabled optional addons (including inherited ones).
+    /// The returned paths are relative to the repo root, e.g.
+    /// `<pack>_pack_addons/<addon>`.
     fn get_optional_paths(&self, pack_name: &str) -> anyhow::Result<Vec<PathBuf>>;
 }
 

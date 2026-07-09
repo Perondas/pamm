@@ -6,6 +6,8 @@ impl<T> ResolveAddons for T
 where
     T: GetPack,
 {
+    /// Returns relative paths of the form `<pack>_pack_addons/<addon>`, relative
+    /// to the repo root (join with the repo path to get usable filesystem paths).
     fn resolve_addons(&self, pack_name: &str) -> anyhow::Result<Vec<PathBuf>> {
         let pack_config = self.get_pack(pack_name)?;
 
@@ -28,6 +30,8 @@ where
 }
 
 pub(in crate::handle) trait ResolveAddons {
-    /// Gets the paths to addons relative to the repo root
+    /// Gets the paths to the pack's non-optional addons (including inherited ones).
+    /// The returned paths are relative to the repo root, e.g.
+    /// `<pack>_pack_addons/<addon>`.
     fn resolve_addons(&self, pack_name: &str) -> anyhow::Result<Vec<PathBuf>>;
 }

@@ -71,6 +71,8 @@ impl Fixture {
         ServerRepoHandle::open(&self.repo_path).unwrap()
     }
 
+    // Absolute path to the fixture repo's `www` build-output dir (the fixture
+    // repo lives under the system temp directory).
     fn www(&self) -> PathBuf {
         self.repo_path.join(WWW_DIR_NAME)
     }

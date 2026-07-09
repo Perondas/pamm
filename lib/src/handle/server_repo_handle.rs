@@ -35,6 +35,11 @@ impl ServerRepoHandle {
         })
     }
 
+    /// Returns the path to the `www` build-output directory, i.e. `<repo_path>/www`.
+    /// The path is only absolute if the handle was opened/created from an absolute
+    /// path — `repo_path` is stored as given, without canonicalizing. Otherwise it
+    /// is relative to whatever `repo_path` itself is relative to (usually the
+    /// process working directory).
     pub fn get_www_path(&self) -> PathBuf {
         self.base.repo_path.join(WWW_DIR_NAME)
     }

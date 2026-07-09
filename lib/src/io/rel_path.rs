@@ -40,6 +40,9 @@ impl RelPath {
         }
     }
 
+    /// Returns `base_path` with this relative path's components appended. The
+    /// result is relative to whatever `base_path` is relative to — absolute if
+    /// `base_path` is absolute, relative otherwise.
     pub fn with_base_path(&self, base_path: &Path) -> PathBuf {
         let mut path = base_path.to_path_buf();
         path.extend(self.components.iter().cloned());

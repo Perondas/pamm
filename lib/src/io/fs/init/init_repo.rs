@@ -9,6 +9,10 @@ use std::path::{Path, PathBuf};
 use url::Url;
 
 impl RepoConfig {
+    /// Creates the repo directory and returns its path, `<dest_dir>/<repo name>`.
+    /// The result is relative to whatever `dest_dir` is relative to — absolute if
+    /// `dest_dir` is absolute, otherwise relative (usually to the process working
+    /// directory).
     pub fn init_blank_on_fs(&self, dest_dir: &Path) -> anyhow::Result<PathBuf> {
         if !dest_dir.is_dir() {
             anyhow::bail!("{} is not a directory", dest_dir.display());

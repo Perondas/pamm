@@ -15,6 +15,8 @@ impl TestTempDir {
         Self(temp_path)
     }
 
+    /// Returns the absolute path of the temp dir, `<system temp dir>/<key>`
+    /// (absolute because `std::env::temp_dir()` returns an absolute path).
     pub fn path(&self) -> &Path {
         &self.0
     }
