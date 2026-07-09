@@ -10,6 +10,9 @@ use std::path::{Path, PathBuf};
 #[derive(Debug)]
 pub struct ServerRepoHandle {
     base: RepoHandle,
+    // Only read by the deploy actions, but always populated so the server
+    // config file is created/validated on create/open.
+    #[cfg_attr(not(feature = "deploy"), allow(dead_code))]
     pub(crate) server_config: ServerConfig,
 }
 
