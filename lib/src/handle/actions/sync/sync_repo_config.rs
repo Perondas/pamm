@@ -44,7 +44,7 @@ impl ClientRepoHandle {
 
         for pack in added {
             let pack_config = PackConfig::download_named(&remote_url, pack)
-                .context(format!("Failed to download pack {} configuration", &pack))?;
+                .context(format!("Failed to download pack {} configuration", pack))?;
 
             self.add_pack(&pack_config)?;
 
@@ -59,7 +59,7 @@ impl ClientRepoHandle {
 
         for pack in existing {
             let remote_pack_config = PackConfig::download_named(&remote_url, pack)
-                .context(format!("Failed to download pack {} configuration", &pack))?;
+                .context(format!("Failed to download pack {} configuration", pack))?;
             self.update_pack(&remote_pack_config)?;
         }
 

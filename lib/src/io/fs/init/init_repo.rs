@@ -57,7 +57,7 @@ impl RepoConfig {
 
         for pack in &repo.packs {
             let pack_config = PackConfig::download_named(remote_url, pack)
-                .context(format!("Failed to download pack {} configuration", &pack))?;
+                .context(format!("Failed to download pack {} configuration", pack))?;
 
             pack_config.init_client_on_fs(&base_path)?;
         }

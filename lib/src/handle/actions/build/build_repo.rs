@@ -26,7 +26,7 @@ impl ServerRepoHandle {
     ) -> anyhow::Result<BuildReport> {
         let www_path = self.get_www_path();
         fs::create_dir_all(&www_path)
-            .with_context(|| format!("Failed to create www directory {:?}", &www_path))?;
+            .with_context(|| format!("Failed to create www directory {:?}", www_path))?;
 
         let pack_names = self.get_config().packs.iter().collect::<Vec<_>>();
         let mut materializer = Materializer::new(opts.mode, &self.repo_path, &www_path);
