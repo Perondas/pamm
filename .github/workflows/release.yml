@@ -86,7 +86,7 @@ jobs:
           # (required) GitHub token for uploading assets to GitHub Releases.
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: 'pamm_cli-*.tar.gz,pamm_cli-*.zip'
 
@@ -131,7 +131,7 @@ jobs:
           tag_name: ${{github.ref_name}}
           files: target/release/rpmbuild/RPMS/x86_64/*.rpm
       - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: 'target/debian/*.deb,target/release/rpmbuild/RPMS/x86_64/*.rpm'
 
@@ -195,7 +195,7 @@ jobs:
           tag_name: ${{github.ref_name}}
           files: pamm_ui-${{github.ref_name}}-${{ matrix.target }}.${{ matrix.archive }}
       - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: 'pamm_ui-${{github.ref_name}}-${{ matrix.target }}.${{ matrix.archive }}'
 
@@ -243,7 +243,7 @@ jobs:
             ui/dist/**/*.deb
             ui/dist/**/*.rpm
       - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             ui/dist/**/*.deb
@@ -293,7 +293,7 @@ jobs:
           files: |
             ui/dist/**/*.exe
       - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             ui/dist/**/*.exe
