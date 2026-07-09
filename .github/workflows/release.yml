@@ -117,14 +117,14 @@ jobs:
       - name: Build .rpm package
         run: cd cli && cargo rpm build
       - name: Release deb to github
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{github.ref_name}}
           files: target/debian/*.deb
       - name: Release rpm to github
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -188,7 +188,7 @@ jobs:
           output: 'pamm_ui-${{github.ref_name}}-${{ matrix.target }}.${{ matrix.archive }}'
           path: '${{ matrix.buildDir }}'
       - name: Release to github
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -234,7 +234,7 @@ jobs:
       - name: Build packages
         run: fastforge package --platform linux --targets deb,rpm
       - name: Release to github
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -285,7 +285,7 @@ jobs:
       - name: Build packages
         run: fastforge package --platform windows --targets exe
       - name: Release to github
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
