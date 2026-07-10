@@ -1,5 +1,5 @@
 use crate::models::index::index_node::IndexNode;
-use crate::io::name_consts::{INDEX_DIR_NAME, get_pack_addon_directory_name};
+use crate::io::name_consts::INDEX_DIR_NAME;
 use crate::io::net::downloadable::NamedDownloadable;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_index::PackIndex;
@@ -15,9 +15,8 @@ impl PackConfig {
             base_url
         );
 
-        let addon_dir =
-            base_url.join(&format!("{}/", get_pack_addon_directory_name(&self.name)))?;
-        let index_dir = addon_dir.join(&format!("{}/", INDEX_DIR_NAME))?;
+        let pack_dir = base_url.join(&format!("{}/", self.name))?;
+        let index_dir = pack_dir.join(&format!("{}/", INDEX_DIR_NAME))?;
 
         log::debug!("Index directory URL: {}", index_dir);
 

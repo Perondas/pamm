@@ -1,6 +1,7 @@
 use crate::models::index::checksum_index::ChecksumIndex;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_user_settings::RepoUserSettings;
+use crate::models::repo::repo_version::RepoVersion;
 use crate::models::server_config::ServerConfig;
 
 pub trait KnownFile {
@@ -23,3 +24,4 @@ known_file_name!(RepoUserSettings, "user.repo.settings.json");
 known_file_name!(ServerConfig, "server.config.json");
 
 known_file_name!(ChecksumIndex, "checksum_index.pamm");
+known_file_name!(RepoVersion, "version.pamm");

@@ -1,6 +1,7 @@
 use crate::handle::repo_handle::RepoHandle;
 use crate::io::fs::fs_readable::KnownFSReadable;
 use crate::io::fs::fs_writable::KnownFSWritable;
+use crate::io::fs::migrations::run_migrations;
 use crate::io::name_consts::WWW_DIR_NAME;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::server_config::ServerConfig;
@@ -20,6 +21,9 @@ impl ServerRepoHandle {
     pub fn open(repo_path: &Path) -> anyhow::Result<Self> {
         let base = RepoHandle::open(repo_path)?;
         let server_config = ServerConfig::read_from_known(repo_path)?;
+        // Only migrate once we know this really is a server repo (the server
+        // config read above fails otherwise).
+        run_migrations(repo_path, &base.repo_config)?;
 
         Ok(Self {
             base,

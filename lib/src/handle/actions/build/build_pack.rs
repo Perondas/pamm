@@ -3,20 +3,20 @@ use crate::handle::actions::build::{BuildOptions, BuildReport};
 use crate::handle::reading::get_pack::GetPack;
 use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::server_repo_handle::ServerRepoHandle;
+use crate::io::fs::fs_writable::KnownFSWritable;
 use crate::io::fs::pack::index_generator::IndexGenerator;
 use crate::io::known_file::KnownFile;
-use crate::io::name_consts::get_pack_addon_directory_name;
-use crate::io::named_file::NamedFile;
+use crate::io::name_consts::{ADDONS_DIR_NAME, CACHE_DB_DIR_NAME, PACK_CONFIG_FILE_NAME};
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::io::rel_path::RelPath;
-use crate::models::pack::pack_config::PackConfig;
 use crate::models::repo::repo_config::RepoConfig;
+use crate::models::repo::repo_version::RepoVersion;
 use anyhow::{Context, ensure};
 use std::fs;
 
 impl ServerRepoHandle {
-    /// Build a single pack's `www/<pack>_pack_addons/` subtree. Also materializes
-    /// `www/repo.config.json` and `www/<pack>.pack.config.json` so the published
+    /// Build a single pack's `www/<pack>/` subtree. Also materializes
+    /// `www/repo.config.json` and writes `www/version.pamm` so the published
     /// view stays in sync with the source's top-level configuration files.
     pub fn build_pack(
         &self,
@@ -37,12 +37,21 @@ impl ServerRepoHandle {
         let mut materializer = Materializer::new(opts.mode, &self.repo_path, &www_path);
         let report = build_pack_inner(self, pack_name, opts, &mut materializer, progress_reporter)?;
 
-        // Top-level files: repo.config.json and this pack's config.
+        // Top-level files: repo.config.json and the layout version marker.
         materializer.materialize(&RelPath::from_name(RepoConfig::file_name()))?;
-        materializer.materialize(&RelPath::from_name(&PackConfig::get_file_name(pack_name)))?;
+        RepoVersion::current().write_to(&www_path)?;
 
         Ok(report)
     }
+}
+
+/// Materialize `<pack>/pack.config.json` — source and `www/` share the
+/// per-pack layout, so the relative path is the same on both sides.
+pub(super) fn materialize_pack_config(
+    materializer: &Materializer,
+    pack_name: &str,
+) -> anyhow::Result<BuildReport> {
+    materializer.materialize(&RelPath::from_name(pack_name).push(PACK_CONFIG_FILE_NAME))
 }
 
 /// Core per-pack build routine, factored out so the whole-repo builder can call
@@ -58,11 +67,14 @@ pub(super) fn build_pack_inner(
 
     let www_path = handle.get_www_path();
 
-    let addons_dir_name = get_pack_addon_directory_name(pack_name);
+    // Source `<pack>/addons/` maps onto the same path in `www/`. The sled
+    // cache inside the source addons dir stays out of the published tree.
+    let addons_rel = RelPath::from_name(pack_name).push(ADDONS_DIR_NAME);
+    let report = materializer.materialize_from(&addons_rel, &addons_rel, &[CACHE_DB_DIR_NAME])?;
 
-    let report = materializer.materialize(&RelPath::from_name(&addons_dir_name))?;
+    materialize_pack_config(materializer, pack_name)?;
 
-    // Index from source (uses the sled cache at <pack>_pack_addons/.cache/).
+    // Index from source (uses the sled cache at <pack>/addons/.cache/).
     let index_generator =
         IndexGenerator::from_handle(handle, pack_name, progress_reporter.clone())?;
     if opts.force_refresh {

@@ -5,6 +5,7 @@ use crate::handle::writing::delete_pack::DeletePack;
 use crate::handle::writing::update_pack::UpdatePack;
 use crate::handle::writing::update_repo_config::UpdateRepoConfig;
 use crate::io::net::downloadable::{KnownDownloadable, NamedDownloadable};
+use crate::io::net::remote_version::verify_remote_version;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::repo::repo_config::RepoConfig;
 use anyhow::{Context, anyhow};
@@ -16,6 +17,8 @@ impl ClientRepoHandle {
         interactor: &impl ConfigSyncInteractor,
     ) -> anyhow::Result<()> {
         let remote_url = self.remote().clone();
+
+        verify_remote_version(&remote_url)?;
 
         let remote_repo_config = RepoConfig::download_known(&remote_url).context(anyhow!(
             "Failed to download remote config from {}",

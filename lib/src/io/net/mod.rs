@@ -3,3 +3,4 @@ pub mod download_file;
 pub mod downloadable;
 pub mod index_downloader;
 pub mod remote_patcher;
+pub(crate) mod remote_version;

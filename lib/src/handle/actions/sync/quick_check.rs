@@ -1,8 +1,9 @@
 use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::reading::get_pack::GetPack;
 use crate::io::fs::fs_readable::KnownFSReadable;
-use crate::io::name_consts::{INDEX_DIR_NAME, get_pack_addon_directory_name};
+use crate::io::name_consts::INDEX_DIR_NAME;
 use crate::io::net::downloadable::KnownDownloadable;
+use crate::io::net::remote_version::verify_remote_version;
 use crate::io::rel_path::RelPath;
 use crate::models::index::checksum_index::ChecksumIndex;
 use anyhow::{Context, anyhow};
@@ -11,14 +12,13 @@ use std::collections::HashSet;
 
 impl ClientRepoHandle {
     pub fn quick_check_pack_up_to_date(&self, pack_name: &str) -> anyhow::Result<bool> {
-        let addon_path = RelPath::new().push(&get_pack_addon_directory_name(pack_name));
+        let index_rel = RelPath::new().push(pack_name).push(INDEX_DIR_NAME);
 
         let remote_url = self.remote().clone();
 
-        let index_url = addon_path
-            .clone()
-            .push(INDEX_DIR_NAME)
-            .with_base_url(&remote_url);
+        verify_remote_version(&remote_url)?;
+
+        let index_url = index_rel.with_base_url(&remote_url);
 
         debug!(
             "Performing quick check for pack '{}'. Remote index URL: {}",
@@ -28,10 +28,7 @@ impl ClientRepoHandle {
         let remote_repo_config = ChecksumIndex::download_known(&index_url)
             .context(anyhow!("Failed to download checksum index"))?;
 
-        let index_dir = addon_path
-            .clone()
-            .push(INDEX_DIR_NAME)
-            .with_base_path(&self.repo_path);
+        let index_dir = index_rel.with_base_path(&self.repo_path);
 
         let local_checksum_index = match ChecksumIndex::read_from_known(&index_dir) {
             Ok(index) => index,

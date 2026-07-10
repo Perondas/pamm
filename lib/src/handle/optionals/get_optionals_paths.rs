@@ -1,5 +1,5 @@
 use crate::handle::reading::get_pack::GetPack;
-use crate::io::name_consts::get_pack_addon_directory_name;
+use crate::io::name_consts::pack_addons_rel;
 use log::{debug, trace};
 use std::path::PathBuf;
 
@@ -7,14 +7,14 @@ impl<T> GetOptionalsPaths for T
 where
     T: GetPack,
 {
-    /// Returns relative paths of the form `<pack>_pack_addons/<addon>`, relative
-    /// to the repo root (join with the repo path to get usable filesystem paths).
+    /// Returns relative paths of the form `<pack>/addons/<addon>`, relative to
+    /// the repo root (join with the repo path to get usable filesystem paths).
     fn get_optional_paths(&self, pack_name: &str) -> anyhow::Result<Vec<PathBuf>> {
         let (config, settings) = self.get_pack_with_settings(pack_name)?;
 
         let mut res = Vec::new();
 
-        let addon_dir = PathBuf::from(get_pack_addon_directory_name(&config.name));
+        let addon_dir = pack_addons_rel(&config.name);
 
         for optional in &settings.enabled_optionals {
             if config
@@ -56,7 +56,7 @@ where
 pub trait GetOptionalsPaths {
     /// Gets the paths to the enabled optional addons (including inherited ones).
     /// The returned paths are relative to the repo root, e.g.
-    /// `<pack>_pack_addons/<addon>`.
+    /// `<pack>/addons/<addon>`.
     fn get_optional_paths(&self, pack_name: &str) -> anyhow::Result<Vec<PathBuf>>;
 }
 
@@ -81,10 +81,7 @@ mod tests {
         let paths = mock.get_optional_paths("test_pack").unwrap();
 
         assert_eq!(paths.len(), 1);
-        assert_eq!(
-            paths[0],
-            PathBuf::from(get_pack_addon_directory_name("test_pack")).join("@opt_addon")
-        );
+        assert_eq!(paths[0], PathBuf::from("test_pack/addons").join("@opt_addon"));
     }
 
     #[test]
@@ -109,11 +106,11 @@ mod tests {
         assert_eq!(paths.len(), 2);
         assert_eq!(
             paths[0],
-            PathBuf::from(get_pack_addon_directory_name("child_pack")).join("@child_opt")
+            PathBuf::from("child_pack/addons").join("@child_opt")
         );
         assert_eq!(
             paths[1],
-            PathBuf::from(get_pack_addon_directory_name("parent_pack")).join("@parent_opt")
+            PathBuf::from("parent_pack/addons").join("@parent_opt")
         );
     }
 }

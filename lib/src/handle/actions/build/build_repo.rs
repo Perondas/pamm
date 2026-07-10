@@ -3,22 +3,22 @@ use crate::handle::actions::build::materializer::Materializer;
 use crate::handle::actions::build::{BuildOptions, BuildReport};
 use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::server_repo_handle::ServerRepoHandle;
+use crate::io::fs::fs_writable::KnownFSWritable;
 use crate::io::known_file::KnownFile;
-use crate::io::name_consts::get_pack_addon_directory_name;
-use crate::io::named_file::NamedFile;
+use crate::io::name_consts::PACK_CONFIG_FILE_NAME;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::io::rel_path::RelPath;
-use crate::models::pack::pack_config::PackConfig;
 use crate::models::repo::repo_config::RepoConfig;
+use crate::models::repo::repo_version::RepoVersion;
 use anyhow::Context;
-use std::collections::HashSet;
 use std::fs;
 
 impl ServerRepoHandle {
-    /// Build every pack listed in `repo.config.json` into `www/`, plus the
-    /// top-level `repo.config.json` and per-pack `<pack>.pack.config.json` files.
-    /// Removes any stale pack subtrees or pack configs from `www/` whose names
-    /// are no longer in the repo config.
+    /// Build every pack listed in `repo.config.json` into `www/` (one
+    /// `www/<pack>/` subtree each), plus the top-level `repo.config.json` and
+    /// `version.pamm`. Removes stale pack subtrees from `www/` whose names are
+    /// no longer in the repo config, as well as leftovers of the legacy (v1)
+    /// flat layout.
     pub fn build(
         &self,
         opts: BuildOptions,
@@ -39,30 +39,22 @@ impl ServerRepoHandle {
         }
 
         materializer.materialize(&RelPath::from_name(RepoConfig::file_name()))?;
-
-        // Top-level files.
-        for pack_name in &pack_names {
-            materializer.materialize(&RelPath::from_name(&PackConfig::get_file_name(pack_name)))?;
-        }
+        RepoVersion::current().write_to(&www_path)?;
 
         // Prune stale entries in www/ that aren't part of the current repo config.
-        let expected_pack_dirs: HashSet<String> = pack_names
-            .iter()
-            .map(|p| get_pack_addon_directory_name(p))
-            .collect();
-        let expected_pack_configs: HashSet<String> = pack_names
-            .iter()
-            .map(|p| PackConfig::get_file_name(p))
-            .collect();
-
         let mut stale_removed = 0_usize;
         for entry in fs::read_dir(&www_path)? {
             let entry = entry?;
             let name = entry.file_name();
             let name_str = name.to_string_lossy();
 
-            if entry.path().is_dir() && name_str.ends_with("_pack_addons") {
-                if !expected_pack_dirs.contains(name_str.as_ref()) {
+            if entry.path().is_dir() {
+                // Legacy v1 addon dirs are always stale; a pack dir (identified
+                // by its pack.config.json) is stale when the pack is gone.
+                let is_legacy = name_str.ends_with("_pack_addons");
+                let is_stale_pack_dir = entry.path().join(PACK_CONFIG_FILE_NAME).is_file()
+                    && !pack_names.iter().any(|p| name_str == p.as_str());
+                if is_legacy || is_stale_pack_dir {
                     fs::remove_dir_all(entry.path()).with_context(|| {
                         format!("Failed to remove stale www pack dir {:?}", entry.path())
                     })?;
@@ -71,10 +63,9 @@ impl ServerRepoHandle {
                 continue;
             }
 
-            if entry.path().is_file()
-                && name_str.ends_with(".pack.config.json")
-                && !expected_pack_configs.contains(name_str.as_ref())
-            {
+            // Legacy v1 root-level pack configs are always stale (v2 configs
+            // live inside the pack dirs).
+            if entry.path().is_file() && name_str.ends_with(".pack.config.json") {
                 fs::remove_file(entry.path()).with_context(|| {
                     format!("Failed to remove stale www pack config {:?}", entry.path())
                 })?;

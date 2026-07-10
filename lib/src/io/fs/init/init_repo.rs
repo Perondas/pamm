@@ -1,8 +1,10 @@
 use crate::io::fs::fs_writable::KnownFSWritable;
 use crate::io::net::downloadable::{KnownDownloadable, NamedDownloadable};
+use crate::io::net::remote_version::verify_remote_version;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_user_settings::RepoUserSettings;
+use crate::models::repo::repo_version::RepoVersion;
 use anyhow::Context;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -26,6 +28,7 @@ impl RepoConfig {
 
         fs::create_dir(&base_path)?;
         self.write_to(&base_path)?;
+        RepoVersion::current().write_to(&base_path)?;
 
         Ok(base_path)
     }
@@ -37,6 +40,8 @@ impl RepoConfig {
         if !parent_dir.is_dir() {
             anyhow::bail!("{} is not a directory", parent_dir.display());
         }
+
+        verify_remote_version(remote_url)?;
 
         let repo = RepoConfig::download_known(remote_url).context(format!(
             "Failed to download repo information from: {}",
@@ -51,6 +56,7 @@ impl RepoConfig {
 
         fs::create_dir(&base_path)?;
         repo.write_to(&base_path)?;
+        RepoVersion::current().write_to(&base_path)?;
 
         let repo_user_settings = RepoUserSettings::new(remote_url.clone());
         repo_user_settings.write_to(&base_path)?;
