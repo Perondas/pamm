@@ -202,8 +202,6 @@ fn get_path_to_keys(addon_path: &Path) -> anyhow::Result<Vec<PathBuf>> {
 mod tests {
     use crate::handle::reading::get_repo_info::GetRepoInfo;
     use crate::handle::server_repo_handle::ServerRepoHandle;
-    use crate::io::fs::fs_writable::NamedFSWritable;
-    use crate::io::name_consts::get_pack_addon_directory_name;
     use crate::models::pack::addon::AddonSettings;
     use crate::models::pack::pack_config::PackConfig;
     use crate::models::repo::repo_config::RepoConfig;
@@ -242,14 +240,9 @@ mod tests {
             );
             pack.addons
                 .insert("@addon1".to_string(), AddonSettings { is_optional: false });
-            pack.write_to_named(&repo_path, "core").unwrap();
+            pack.init_source_on_fs(&repo_path).unwrap();
 
-            fs::create_dir_all(
-                repo_path
-                    .join(get_pack_addon_directory_name("core"))
-                    .join("@addon1"),
-            )
-            .unwrap();
+            fs::create_dir_all(repo_path.join("core/addons/@addon1")).unwrap();
 
             server.server_config.server_dir = Some(server_dir.clone());
 
@@ -304,7 +297,8 @@ mod tests {
             PathBuf::new()
                 .join("pamm")
                 .join("repo")
-                .join(get_pack_addon_directory_name("core"))
+                .join("core")
+                .join("addons")
                 .join("@addon1")
                 .to_string_lossy()
         );
@@ -329,12 +323,7 @@ mod tests {
             vec!["first", "second"]
         );
 
-        assert!(
-            fx.repo_path
-                .join("core_pack_addons")
-                .join("@addon1")
-                .is_dir()
-        );
+        assert!(fx.repo_path.join("core/addons/@addon1").is_dir());
     }
 
     #[test]
@@ -374,14 +363,8 @@ mod tests {
         );
         pack.addons
             .insert("@addon1".to_string(), AddonSettings { is_optional: false });
-        pack.write_to_named(server.get_repo_path(), "core").unwrap();
-        fs::create_dir_all(
-            server
-                .get_repo_path()
-                .join(get_pack_addon_directory_name("core"))
-                .join("@addon1"),
-        )
-        .unwrap();
+        pack.init_source_on_fs(server.get_repo_path()).unwrap();
+        fs::create_dir_all(server.get_repo_path().join("core/addons/@addon1")).unwrap();
 
         let err = server.deploy_pack("core").unwrap_err().to_string();
         assert!(

@@ -2,6 +2,7 @@ use crate::handle::reading::get_pack::GetPack;
 use crate::handle::repo_handle::RepoHandle;
 use crate::handle::writing::save_pack_settings::SavePackSettings;
 use crate::io::fs::fs_readable::KnownFSReadable;
+use crate::io::fs::migrations::run_migrations;
 use crate::io::known_file::KnownFile;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_user_settings::PackUserSettings;
@@ -28,6 +29,7 @@ impl ClientRepoHandle {
             repo_path
         );
         let user_settings = RepoUserSettings::read_from_known(repo_path)?;
+        run_migrations(repo_path, &base.repo_config)?;
         Ok(Self {
             base,
             user_settings,
@@ -90,5 +92,53 @@ impl SavePackSettings for ClientRepoHandle {
         settings: &PackUserSettings,
     ) -> anyhow::Result<()> {
         self.write_named(settings, pack_name)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::models::repo::repo_version::RepoVersion;
+    use crate::util::test_utils::TestTempDir;
+    use std::collections::HashSet;
+    use std::fs;
+
+    // Opening a legacy flat (v1) client repo migrates it to the per-pack
+    // layout, including hoisting indexes/ out of the addon dir.
+    #[test]
+    fn open_migrates_v1_client_repo() {
+        let tmp = TestTempDir::new("pamm_client_open_migrates_v1");
+        let repo_path = tmp.path().join("repo");
+        fs::create_dir_all(&repo_path).unwrap();
+
+        let mut packs = HashSet::new();
+        packs.insert("core".to_string());
+        let repo_config = RepoConfig::new("repo".to_string(), "desc".to_string(), packs);
+        crate::io::fs::fs_writable::KnownFSWritable::write_to(&repo_config, &repo_path).unwrap();
+        let settings = RepoUserSettings::new(Url::parse("http://localhost/").unwrap());
+        crate::io::fs::fs_writable::KnownFSWritable::write_to(&settings, &repo_path).unwrap();
+
+        // Flat v1 client layout.
+        fs::write(repo_path.join("core.pack.config.json"), b"{}").unwrap();
+        fs::write(repo_path.join("core.pack.settings.json"), b"{}").unwrap();
+        fs::create_dir_all(repo_path.join("core_pack_addons/@addon1")).unwrap();
+        fs::create_dir_all(repo_path.join("core_pack_addons/indexes")).unwrap();
+        fs::write(
+            repo_path.join("core_pack_addons/indexes/checksum_index.pamm"),
+            b"idx",
+        )
+        .unwrap();
+
+        ClientRepoHandle::open(&repo_path).unwrap();
+
+        assert!(repo_path.join("core/pack.config.json").is_file());
+        assert!(repo_path.join("core/pack.settings.json").is_file());
+        assert!(repo_path.join("core/addons/@addon1").is_dir());
+        assert!(repo_path.join("core/indexes/checksum_index.pamm").is_file());
+        assert!(!repo_path.join("core_pack_addons").exists());
+        assert_eq!(
+            RepoVersion::read_or_v1(&repo_path).unwrap(),
+            RepoVersion::current()
+        );
     }
 }

@@ -27,13 +27,8 @@ impl<T: FsReadable + KnownFile> KnownFSReadable for T {
     }
 }
 
-pub(crate) trait NamedFSReadable: FsReadable + NamedFile {
-    fn read_from_named<P: AsRef<Path>>(path: P, identifier: &str) -> anyhow::Result<Self>;
-}
+/// Marker for named files readable from a repo root; path resolution happens in
+/// `RepoHandle::read_named`, which is layout-aware.
+pub(crate) trait NamedFSReadable: FsReadable + NamedFile {}
 
-impl<T: FsReadable + NamedFile> NamedFSReadable for T {
-    fn read_from_named<P: AsRef<Path>>(path: P, identifier: &str) -> anyhow::Result<Self> {
-        let full_path = path.as_ref().join(Self::get_file_name(identifier));
-        Self::read_from_path(full_path).context(anyhow!("reading {:?}", identifier))
-    }
-}
+impl<T: FsReadable + NamedFile> NamedFSReadable for T {}

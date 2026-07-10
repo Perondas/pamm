@@ -1,5 +1,3 @@
-use crate::io::fs::util::clean_path::canonicalize_and_clean_path;
-use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::models::pack::addon::AddonSettings;
 use crate::models::pack::pack_diff::PackDiff;
 use crate::models::pack::pack_user_settings::PackUserSettings;
@@ -7,7 +5,6 @@ use crate::models::pack::server_info::ServerInfo;
 use crate::named;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::path::Path;
 
 named!(PackConfig);
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -49,16 +46,6 @@ impl PackConfig {
             .collect();
 
         self
-    }
-
-    pub fn get_addon_paths(&self, base_path: &Path) -> Vec<String> {
-        let addon_dir = base_path.join(get_pack_addon_directory_name(&self.name));
-
-        self.addons
-            .iter()
-            .map(|addon| addon_dir.join(addon.0))
-            .map(|p| canonicalize_and_clean_path(&p).unwrap())
-            .collect()
     }
 
     pub fn remove_disabled_optionals(&mut self, user_settings: &PackUserSettings) {
@@ -133,53 +120,4 @@ mod tests {
         assert!(!config.addons.contains_key("optional_disabled"));
     }
 
-    #[test]
-    fn test_get_addon_paths() {
-        use crate::util::test_utils::TestTempDir;
-
-        let mut config = PackConfig::new(
-            "test_pack_for_paths".to_string(),
-            "desc".to_string(),
-            vec![],
-            vec![],
-            None,
-        );
-
-        config
-            .addons
-            .insert("@addon1".to_string(), AddonSettings { is_optional: false });
-        config
-            .addons
-            .insert("@addon2".to_string(), AddonSettings { is_optional: true });
-
-        let temp_dir = TestTempDir::new("pamm_test_addon_paths_");
-        let addon_dir = temp_dir.path().join("test_pack_for_paths_pack_addons");
-
-        std::fs::create_dir_all(addon_dir.join("@addon1")).unwrap();
-        std::fs::create_dir_all(addon_dir.join("@addon2")).unwrap();
-
-        let mut paths = config.get_addon_paths(temp_dir.path());
-        paths.sort();
-
-        assert_eq!(paths.len(), 2);
-        assert!(
-            paths
-                .iter()
-                .any(|p| p.ends_with("@addon1") || p.ends_with("@addon1/"))
-        );
-        assert!(
-            paths
-                .iter()
-                .any(|p| p.ends_with("@addon2") || p.ends_with("@addon2/"))
-        );
-
-        let empty_config = PackConfig::new(
-            "test_empty_pack_paths".to_string(),
-            "desc".to_string(),
-            vec![],
-            vec![],
-            None,
-        );
-        assert!(empty_config.get_addon_paths(temp_dir.path()).is_empty());
-    }
 }

@@ -45,12 +45,37 @@ server should expose.
 ```
 pamm init                       # create a new empty repo
 pamm add-pack                   # register a new pack interactively
-# drop addon files into <pack>_pack_addons/@addon_name/ ...
+# drop addon files into <pack>/addons/@addon_name/ ...
 pamm build                      # populate www/ with symlinks + indexes
 pamm build <pack>               # rebuild a single pack's subtree
 pamm build --copy               # use copies instead of symlinks (Windows / cross-fs)
 pamm build --force-refresh      # ignore the on-disk index cache and re-scan everything
 ```
+
+Each pack lives in its own folder, on the server source, in the build output, and in client repos:
+
+```
+<repo>/
+  repo.config.json
+  server.config.json
+  version.pamm                  # repo layout version
+  <pack>/
+    pack.config.json
+    addons/
+      @addon_name/...
+  www/                          # build output, serve this over HTTP
+    repo.config.json
+    version.pamm
+    <pack>/
+      pack.config.json
+      addons/@addon_name/...
+      indexes/
+```
+
+`version.pamm` stores the layout version (a repo without one is treated as version 1, the old flat layout).
+Repos with an outdated version are migrated automatically the next time they are opened — both server sources
+and client repos. After a server repo migrates, run `pamm build` to regenerate `www/` in the new layout;
+clients refuse to sync against a `www/` that has not been rebuilt yet and say so explicitly.
 
 Point your HTTP server's document root at `<repo>/www/`. Stop the HTTP server during a build — the build
 overwrites entries in place. Symlink mode is fastest; copy mode is needed when the HTTP server can't follow

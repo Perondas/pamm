@@ -46,14 +46,13 @@ impl ClientRepoHandle {
 mod tests {
     use crate::handle::reading::get_repo_info::GetRepoInfo;
     use crate::handle::server_repo_handle::ServerRepoHandle;
-    use crate::io::name_consts::get_pack_addon_directory_name;
     use crate::models::pack::pack_config::PackConfig;
     use crate::models::repo::repo_config::RepoConfig;
     use crate::util::test_utils::TestTempDir;
     use std::collections::HashSet;
 
     #[test]
-    fn server_add_pack_does_not_create_pack_settings() {
+    fn server_add_pack_lays_out_per_pack_folder_without_settings() {
         let tmp = TestTempDir::new("pamm_server_add_pack_no_settings");
         let repo_config =
             RepoConfig::new("repo".to_string(), "desc".to_string(), HashSet::new());
@@ -64,12 +63,12 @@ mod tests {
 
         let repo_path = server.get_repo_path().to_path_buf();
         assert!(server.get_config().packs.contains("core"));
-        assert!(repo_path.join("core.pack.config.json").is_file());
-        assert!(repo_path.join(get_pack_addon_directory_name("core")).is_dir());
+        assert!(repo_path.join("core/pack.config.json").is_file());
+        assert!(repo_path.join("core/addons").is_dir());
 
         // The crux: no client-only settings file on the server.
         assert!(
-            !repo_path.join("core.pack.settings.json").exists(),
+            !repo_path.join("core/pack.settings.json").exists(),
             "server add-pack must not create pack settings"
         );
     }

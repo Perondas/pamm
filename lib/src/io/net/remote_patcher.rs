@@ -1,4 +1,4 @@
-use crate::io::name_consts::get_pack_addon_directory_name;
+use crate::io::name_consts::ADDONS_DIR_NAME;
 use crate::io::net::byte_range_response::{ByteRangeResponse, IntoByteRangeResponse};
 use crate::io::net::download_file::download_file;
 use crate::io::progress_reporting::download_reporter::DownloadReporter;
@@ -28,7 +28,7 @@ impl PackConfig {
         reporter: P,
     ) -> RemotePatcher<P> {
         let addon_dir_url = base_url
-            .join(&format!("{}/", get_pack_addon_directory_name(&self.name)))
+            .join(&format!("{}/{}/", self.name, ADDONS_DIR_NAME))
             .expect("Failed to construct addon dir URL");
 
         RemotePatcher::new(addon_dir_url, reporter)

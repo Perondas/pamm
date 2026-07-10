@@ -2,7 +2,6 @@ use crate::handle::repo_handle::RepoHandle;
 use crate::io::fs::cache::file_cache_entry::FileCacheEntry;
 use crate::io::fs::cache::kv_cache::KVCache;
 use crate::io::name_consts::CACHE_DB_DIR_NAME;
-use crate::io::name_consts::get_pack_addon_directory_name;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::io::rel_path::RelPath;
 use crate::models::index::index_node::FileKind;
@@ -26,9 +25,7 @@ pub struct IndexGenerator<P: ProgressReporter> {
 
 impl<P: ProgressReporter> IndexGenerator<P> {
     pub fn from_handle(handle: &RepoHandle, pack_name: &str, progress_reporter: P) -> Result<Self> {
-        let addon_dir = handle
-            .repo_path
-            .join(get_pack_addon_directory_name(pack_name));
+        let addon_dir = handle.pack_addons_path(pack_name);
 
         if !addon_dir.is_dir() {
             anyhow::bail!("Path is not a directory: {:?}", addon_dir);

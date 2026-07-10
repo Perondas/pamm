@@ -18,18 +18,34 @@ impl<'a> Materializer<'a> {
         Self { mode, src, dest }
     }
 
+    /// Materialize `rel_path` under the same relative path on both sides.
     pub fn materialize(&self, rel_path: &RelPath) -> anyhow::Result<BuildReport> {
-        let src_path = rel_path.with_base_path(self.src);
+        self.materialize_from(rel_path, rel_path, &[])
+    }
+
+    /// Materialize the source at `src_rel` (relative to the source root) into
+    /// `dest_rel` (relative to the destination root). Directory trees keep the
+    /// same entry names below the top level. `top_level_excludes` names direct
+    /// children of the top-level directory to skip entirely — they are neither
+    /// materialized nor counted as live during stale pruning, so a leftover copy
+    /// in the destination gets removed.
+    pub fn materialize_from(
+        &self,
+        src_rel: &RelPath,
+        dest_rel: &RelPath,
+        top_level_excludes: &[&str],
+    ) -> anyhow::Result<BuildReport> {
+        let src_path = src_rel.with_base_path(self.src);
 
         if src_path.is_file() {
-            self.place_file(rel_path)
+            self.place_file(src_rel, dest_rel)
                 .with_context(|| format!("Failed to materialize file at {:?}", src_path))?;
 
             let mut report = BuildReport::from(self);
             report.files_materialized = 1;
             Ok(report)
         } else if src_path.is_dir() {
-            self.materialize_dir(rel_path)
+            self.materialize_dir(src_rel, dest_rel, top_level_excludes)
         } else {
             unreachable!("Source path {:?} is neither file nor directory", src_path);
         }
@@ -37,28 +53,34 @@ impl<'a> Materializer<'a> {
 
     /// Materialize a single file. `source` must exist and be a file; `dest` is the
     /// path in www/ to create. Parent directories are created as needed.
-    fn place_file(&self, rel_path: &RelPath) -> anyhow::Result<()> {
-        if let Some(parent) = self.dest.parent() {
+    fn place_file(&self, src_rel: &RelPath, dest_rel: &RelPath) -> anyhow::Result<()> {
+        if let Some(parent) = dest_rel.with_base_path(self.dest).parent() {
             fs::create_dir_all(parent)
                 .with_context(|| format!("Failed to create destination directory {:?}", parent))?;
         }
 
         match self.mode {
-            BuildMode::Symlink => self.place_symlink(rel_path),
-            BuildMode::Copy => self.place_copy(rel_path),
+            BuildMode::Symlink => self.place_symlink(src_rel, dest_rel),
+            BuildMode::Copy => self.place_copy(src_rel, dest_rel),
         }
     }
 
-    fn materialize_dir(&self, rel_path: &RelPath) -> anyhow::Result<BuildReport> {
-        let src = rel_path.with_base_path(self.src);
-        let dst = rel_path.with_base_path(self.dest);
+    fn materialize_dir(
+        &self,
+        src_rel: &RelPath,
+        dest_rel: &RelPath,
+        excludes: &[&str],
+    ) -> anyhow::Result<BuildReport> {
+        let src = src_rel.with_base_path(self.src);
+        let dst = dest_rel.with_base_path(self.dest);
 
         fs::create_dir_all(&dst)
             .with_context(|| format!("Failed to create directory {:?}", dst))?;
 
         let mut report = BuildReport::default();
 
-        // Remove stale entries in dst that are not present in src
+        // Remove stale entries in dst that are not present in src (excluded
+        // entries count as absent, so leftovers of them in dst are pruned too).
         if dst.is_dir() {
             use std::collections::HashSet;
 
@@ -66,6 +88,7 @@ impl<'a> Materializer<'a> {
                 .with_context(|| format!("Failed to read dir {:?}", src))?
                 .filter_map(Result::ok)
                 .map(|e| e.file_name())
+                .filter(|name| !excludes.iter().any(|excluded| name == excluded))
                 .collect::<HashSet<_>>();
 
             for entry in fs::read_dir(&dst).with_context(|| format!("Failed to read dir {:?}", dst))? {
@@ -86,14 +109,21 @@ impl<'a> Materializer<'a> {
         for entry in fs::read_dir(&src).with_context(|| format!("Failed to read dir {:?}", src))? {
             let entry = entry?;
             let entry_path = entry.path();
+            let entry_name = entry.file_name();
 
-            let rel_path = rel_path.push(&entry.file_name().to_string_lossy());
+            if excludes.iter().any(|excluded| entry_name == *excluded) {
+                continue;
+            }
+
+            let entry_name = entry_name.to_string_lossy();
+            let src_rel = src_rel.push(&entry_name);
+            let dest_rel = dest_rel.push(&entry_name);
 
             if entry_path.is_dir() {
-                let res = self.materialize_dir(&rel_path)?;
+                let res = self.materialize_dir(&src_rel, &dest_rel, &[])?;
                 report = report + res;
             } else if entry_path.is_file() {
-                self.place_file(&rel_path)?;
+                self.place_file(&src_rel, &dest_rel)?;
                 report.files_materialized += 1;
             } else {
                 return Err(anyhow!(
@@ -106,9 +136,9 @@ impl<'a> Materializer<'a> {
         Ok(report)
     }
 
-    fn place_symlink(&self, rel_path: &RelPath) -> anyhow::Result<()> {
-        let dest = rel_path.with_base_path(self.dest);
-        let source = rel_path.with_base_path(self.src);
+    fn place_symlink(&self, src_rel: &RelPath, dest_rel: &RelPath) -> anyhow::Result<()> {
+        let dest = dest_rel.with_base_path(self.dest);
+        let source = src_rel.with_base_path(self.src);
 
         let link_parent = dest
             .parent()
@@ -149,12 +179,12 @@ impl<'a> Materializer<'a> {
         })
     }
 
-    fn place_copy(&self, rel_path: &RelPath) -> anyhow::Result<()> {
+    fn place_copy(&self, src_rel: &RelPath, dest_rel: &RelPath) -> anyhow::Result<()> {
         // If dest is an existing symlink (e.g. from an earlier symlink-mode build),
         // remove it before copying so we get a real file.
 
-        let dest = rel_path.with_base_path(self.dest);
-        let source = rel_path.with_base_path(self.src);
+        let dest = dest_rel.with_base_path(self.dest);
+        let source = src_rel.with_base_path(self.src);
 
         if fs::symlink_metadata(&dest)
             .map(|m| m.file_type().is_symlink())
@@ -225,5 +255,16 @@ mod tests {
         let from = Path::new("/a/b/c");
         let to = Path::new("/a/b/file");
         assert_eq!(relative_path(from, to).unwrap(), PathBuf::from("../file"));
+    }
+
+    // www keeps the flat name while the source lives in a per-pack folder.
+    #[test]
+    fn relative_path_across_layouts() {
+        let from = Path::new("/repo/www/foo_pack_addons/@addon");
+        let to = Path::new("/repo/foo/addons/@addon/file.pbo");
+        assert_eq!(
+            relative_path(from, to).unwrap(),
+            PathBuf::from("../../../foo/addons/@addon/file.pbo")
+        );
     }
 }

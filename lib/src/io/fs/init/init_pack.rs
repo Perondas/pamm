@@ -1,43 +1,48 @@
-use crate::io::fs::fs_writable::{IdentifiableFSWritable, NamedFSWritable};
-use crate::io::name_consts::{INDEX_DIR_NAME, get_pack_addon_directory_name};
+use crate::io::fs::fs_writable::FsWritable;
+use crate::io::name_consts::{
+    WWW_DIR_NAME, pack_addons_rel, pack_config_rel, pack_indexes_rel, pack_settings_rel,
+};
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use std::fs;
 use std::path::Path;
 
 impl PackConfig {
-    /// Lay out a new pack on the **server**: create the source addon directory and
-    /// write the pack config. No client-only artifacts (`<pack>.pack.settings.json`)
-    /// and no `indexes/` directory — indexes are produced into `www/` by the build.
+    /// Lay out a new pack on the **server**: create the pack folder with its
+    /// `addons/` directory and write the pack config into it. No client-only
+    /// artifacts (pack settings) and no `indexes/` directory — indexes are
+    /// produced into `www/` by the build.
     pub fn init_source_on_fs(&self, parent_dir: &Path) -> anyhow::Result<()> {
         if !parent_dir.is_dir() {
             anyhow::bail!("{} is not a directory", parent_dir.display());
         }
+        if self.name == WWW_DIR_NAME {
+            anyhow::bail!(
+                "Pack must not be named '{}': its folder would collide with the build output",
+                WWW_DIR_NAME
+            );
+        }
 
-        let addon_dir_name = get_pack_addon_directory_name(&self.name);
-        fs::create_dir(parent_dir.join(&addon_dir_name))?;
+        fs::create_dir_all(parent_dir.join(pack_addons_rel(&self.name)))?;
 
-        self.write_to(parent_dir)
+        self.write_to_path(parent_dir.join(pack_config_rel(&self.name)))
     }
 
-    /// Lay out a new pack on the **client**: create the addon directory and its
-    /// `indexes/` subdirectory, write the default user settings, and write the
-    /// (downloaded) pack config.
+    /// Lay out a new pack on the **client**: create the pack folder with its
+    /// `addons/` and `indexes/` directories, write the default user settings,
+    /// and write the (downloaded) pack config.
     pub fn init_client_on_fs(&self, parent_dir: &Path) -> anyhow::Result<()> {
         if !parent_dir.is_dir() {
             anyhow::bail!("{} is not a directory", parent_dir.display());
         }
 
-        let addon_dir_name = get_pack_addon_directory_name(&self.name);
-        fs::create_dir(parent_dir.join(&addon_dir_name))?;
-
-        let index_dir = parent_dir.join(&addon_dir_name).join(INDEX_DIR_NAME);
-        fs::create_dir(&index_dir)?;
+        fs::create_dir_all(parent_dir.join(pack_addons_rel(&self.name)))?;
+        fs::create_dir_all(parent_dir.join(pack_indexes_rel(&self.name)))?;
 
         let settings = PackUserSettings::default();
-        settings.write_to_named(parent_dir, &self.name)?;
+        settings.write_to_path(parent_dir.join(pack_settings_rel(&self.name)))?;
 
-        self.write_to(parent_dir)
+        self.write_to_path(parent_dir.join(pack_config_rel(&self.name)))
     }
 }
 
@@ -64,41 +69,66 @@ mod tests {
         let config = test_pack_config();
         config.init_client_on_fs(temp.path()).unwrap();
 
-        let addon_dir_name = get_pack_addon_directory_name(&config.name);
-        let addon_dir = temp.path().join(&addon_dir_name);
-        assert!(addon_dir.is_dir());
-
-        let index_dir = addon_dir.join(INDEX_DIR_NAME);
-        assert!(index_dir.is_dir());
-
-        let settings_file = temp.path().join(format!("{}.pack.settings.json", config.name));
-        assert!(settings_file.is_file(), "client layout writes pack settings");
+        let pack_dir = temp.path().join(&config.name);
+        assert!(pack_dir.join("addons").is_dir());
+        assert!(pack_dir.join("indexes").is_dir());
+        assert!(pack_dir.join("pack.config.json").is_file());
+        assert!(
+            pack_dir.join("pack.settings.json").is_file(),
+            "client layout writes pack settings"
+        );
     }
 
     #[test]
-    fn test_init_source_on_fs_omits_client_artifacts() {
+    fn test_init_source_on_fs_uses_per_pack_layout() {
         let temp = TestTempDir::new("pamm_test_init_source");
 
         let config = test_pack_config();
         config.init_source_on_fs(temp.path()).unwrap();
 
-        let addon_dir_name = get_pack_addon_directory_name(&config.name);
-        let addon_dir = temp.path().join(&addon_dir_name);
-        assert!(addon_dir.is_dir());
+        let pack_dir = temp.path().join(&config.name);
+        assert!(pack_dir.join("addons").is_dir());
+        assert!(pack_dir.join("pack.config.json").is_file());
+
+        // No flat-layout artifacts at the repo root.
+        assert!(
+            !temp
+                .path()
+                .join(format!("{}_pack_addons", config.name))
+                .exists()
+        );
+        assert!(
+            !temp
+                .path()
+                .join(format!("{}.pack.config.json", config.name))
+                .exists()
+        );
 
         // Server layout must NOT create the client-only settings file...
-        let settings_file = temp.path().join(format!("{}.pack.settings.json", config.name));
         assert!(
-            !settings_file.exists(),
+            !pack_dir.join("pack.settings.json").exists(),
             "server layout must not write pack settings"
         );
 
-        // ...nor an indexes/ directory next to the source (indexes live in www/).
-        let index_dir = addon_dir.join(INDEX_DIR_NAME);
+        // ...nor an indexes/ directory (indexes live in www/).
         assert!(
-            !index_dir.exists(),
+            !pack_dir.join("indexes").exists(),
             "server layout must not create indexes/ next to source"
         );
+    }
+
+    #[test]
+    fn test_init_source_on_fs_rejects_www_pack_name() {
+        let temp = TestTempDir::new("pamm_test_init_source_www");
+
+        let mut config = test_pack_config();
+        config.name = "www".to_string();
+
+        let err = config
+            .init_source_on_fs(temp.path())
+            .unwrap_err()
+            .to_string();
+        assert!(err.contains("www"), "unexpected error: {}", err);
     }
 
     #[test]

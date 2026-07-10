@@ -1,6 +1,7 @@
 use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::reading::get_pack::GetPack;
 use crate::io::fs::pack::index_generator::IndexGenerator;
+use crate::io::net::remote_version::verify_remote_version;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_diff::{PackDiff, diff_packs};
@@ -12,6 +13,8 @@ impl ClientRepoHandle {
         progress_reporter: P,
         force_refresh: bool,
     ) -> anyhow::Result<PackDiff> {
+        verify_remote_version(self.get_remote_url())?;
+
         let (_, settings) = self.get_pack_with_settings(pack_name)?;
 
         let index_generator = IndexGenerator::from_handle(self, pack_name, progress_reporter)?;
