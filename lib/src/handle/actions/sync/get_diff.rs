@@ -3,8 +3,9 @@ use crate::handle::reading::get_pack::GetPack;
 use crate::io::fs::pack::index_generator::IndexGenerator;
 use crate::io::net::remote_version::verify_remote_version;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
+use crate::io::files::file_paths::rel_path::RelPath;
 use crate::models::pack::pack_config::PackConfig;
-use crate::models::pack::pack_diff::{PackDiff, diff_packs};
+use crate::models::pack::pack_diff::{diff_packs, PackDiff};
 
 impl ClientRepoHandle {
     pub fn get_pack_diff<P: ProgressReporter>(
@@ -25,7 +26,8 @@ impl ClientRepoHandle {
 
         let actual_index = index_generator.index_addons()?;
 
-        let mut remote_pack_config: PackConfig = self.download_named(pack_name)?;
+        let mut remote_pack_config: PackConfig =
+            self.download_known(&RelPath::from_name(&pack_name))?;
 
         remote_pack_config.remove_disabled_optionals(&settings);
 

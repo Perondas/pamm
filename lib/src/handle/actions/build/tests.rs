@@ -1,9 +1,9 @@
 use crate::handle::actions::build::{BuildMode, BuildOptions};
 use crate::handle::server_repo_handle::ServerRepoHandle;
 use crate::io::fs::fs_readable::KnownFSReadable;
-use crate::io::fs::fs_writable::NamedFSWritable;
-use crate::io::known_file::KnownFile;
-use crate::io::name_consts::{CACHE_DB_DIR_NAME, WWW_DIR_NAME};
+use crate::io::fs::fs_writable::KnownFSWritable;
+use crate::io::files::file_names::fixed_file::FixedFile;
+use crate::io::files::name_consts::{CACHE_DB_DIR_NAME, WWW_DIR_NAME};
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::models::index::checksum_index::ChecksumIndex;
 use crate::models::pack::pack_config::PackConfig;
@@ -394,7 +394,7 @@ fn open_migrates_v1_source_then_build_publishes_v2_www() {
         vec![],
         None,
     );
-    pack_config.write_to_named(&repo_path, "core").unwrap();
+    pack_config.write_to(&repo_path).unwrap();
     let addon_dir = repo_path.join("core_pack_addons").join("@addon1");
     fs::create_dir_all(addon_dir.join("sub")).unwrap();
     fs::write(addon_dir.join("file.txt"), b"hello").unwrap();

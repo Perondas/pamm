@@ -1,6 +1,6 @@
 use crate::handle::actions::build::{BuildMode, BuildReport};
 use crate::io::fs::util::symlink::create_or_recreate_symlink;
-use crate::io::rel_path::RelPath;
+use crate::io::files::file_paths::rel_path::RelPath;
 use anyhow::{Context, anyhow};
 use std::fs;
 use std::path::{Component, Path, PathBuf};

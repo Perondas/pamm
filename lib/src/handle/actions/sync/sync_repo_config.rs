@@ -46,7 +46,7 @@ impl ClientRepoHandle {
             .collect::<Vec<_>>();
 
         for pack in added {
-            let pack_config = PackConfig::download_named(&remote_url, pack)
+            let pack_config = PackConfig::download_known(&remote_url)
                 .context(format!("Failed to download pack {} configuration", pack))?;
 
             self.add_pack(&pack_config)?;
@@ -61,7 +61,7 @@ impl ClientRepoHandle {
             .collect::<Vec<_>>();
 
         for pack in existing {
-            let remote_pack_config = PackConfig::download_named(&remote_url, pack)
+            let remote_pack_config = PackConfig::download_known(&remote_url)
                 .context(format!("Failed to download pack {} configuration", pack))?;
             self.update_pack(&remote_pack_config)?;
         }

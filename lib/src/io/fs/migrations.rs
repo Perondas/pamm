@@ -1,14 +1,11 @@
 use crate::io::fs::fs_writable::KnownFSWritable;
-use crate::io::name_consts::{
-    INDEX_DIR_NAME, WWW_DIR_NAME, get_pack_addon_directory_name, pack_addons_rel, pack_config_rel,
-    pack_indexes_rel, pack_settings_rel,
-};
-use crate::io::named_file::NamedFile;
+use crate::io::files::name_consts::{get_pack_addon_directory_name, INDEX_DIR_NAME, WWW_DIR_NAME};
+use crate::io::files::file_names::keyed_file::KeyedFile;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use crate::models::repo::repo_config::RepoConfig;
-use crate::models::repo::repo_version::{CURRENT_REPO_VERSION, RepoVersion};
-use anyhow::{Context, bail, ensure};
+use crate::models::repo::repo_version::{RepoVersion, CURRENT_REPO_VERSION};
+use anyhow::{bail, ensure, Context};
 use log::{info, warn};
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -42,7 +39,10 @@ pub(crate) fn run_migrations(repo_path: &Path, repo_config: &RepoConfig) -> anyh
         RepoVersion(version)
             .write_to(repo_path)
             .context("writing version.pamm after migration")?;
-        info!("Repo at {:?} migrated to layout version {}", repo_path, version);
+        info!(
+            "Repo at {:?} migrated to layout version {}",
+            repo_path, version
+        );
     }
 
     Ok(())
@@ -62,7 +62,7 @@ pub(crate) fn run_migrations(repo_path: &Path, repo_config: &RepoConfig) -> anyh
 /// authoritative. Only files of packs listed in `repo.config.json` are
 /// touched; `www/` and the root-level repo/server config files never move.
 fn migrate_v1_to_v2(repo_path: &Path, repo_config: &RepoConfig) -> anyhow::Result<()> {
-    let mut moved_any = false;
+   /* let mut moved_any = false;
 
     for pack in &repo_config.packs {
         ensure!(
@@ -131,9 +131,8 @@ fn migrate_v1_to_v2(repo_path: &Path, repo_config: &RepoConfig) -> anyhow::Resul
                 indexes
             ),
             (true, false) => {
-                fs::rename(&nested_indexes, &indexes).with_context(|| {
-                    format!("moving {:?} to {:?}", nested_indexes, indexes)
-                })?;
+                fs::rename(&nested_indexes, &indexes)
+                    .with_context(|| format!("moving {:?} to {:?}", nested_indexes, indexes))?;
                 info!("Migrated {:?} -> {:?}", nested_indexes, indexes);
                 moved_any = true;
             }
@@ -153,7 +152,7 @@ fn migrate_v1_to_v2(repo_path: &Path, repo_config: &RepoConfig) -> anyhow::Resul
             "Repo source was migrated to per-pack folders; run `build` to regenerate \
              the www/ layout"
         );
-    }
+    }*/
 
     Ok(())
 }

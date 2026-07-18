@@ -1,5 +1,5 @@
 use crate::handle::reading::get_pack::GetPack;
-use crate::io::name_consts::pack_addons_rel;
+use crate::io::files::name_consts::ADDONS_DIR_NAME;
 use std::path::PathBuf;
 
 impl<T> ResolveAddons for T
@@ -11,7 +11,7 @@ where
     fn resolve_addons(&self, pack_name: &str) -> anyhow::Result<Vec<PathBuf>> {
         let pack_config = self.get_pack(pack_name)?;
 
-        let addon_dir = pack_addons_rel(&pack_config.name);
+        let addon_dir = PathBuf::from(pack_name).join(ADDONS_DIR_NAME);
 
         let own_addons = pack_config
             .addons

@@ -1,5 +1,5 @@
-use crate::io::known_file::KnownFile;
-use crate::io::named_file::NamedFile;
+use crate::io::files::file_names::fixed_file::FixedFile;
+use crate::io::files::file_names::keyed_file::KeyedFile;
 use crate::io::serialization::readable::Readable;
 use anyhow::Context;
 use log::debug;
@@ -22,11 +22,11 @@ impl<T: Readable> Downloadable for T {
     }
 }
 
-pub trait KnownDownloadable: Downloadable + KnownFile {
+pub trait KnownDownloadable: Downloadable + FixedFile {
     fn download_known(url: &Url) -> anyhow::Result<Self>;
 }
 
-impl<T: Downloadable + KnownFile> KnownDownloadable for T {
+impl<T: Downloadable + FixedFile> KnownDownloadable for T {
     fn download_known(url: &Url) -> anyhow::Result<Self> {
         let mut full_url = url.clone();
 
@@ -40,11 +40,11 @@ impl<T: Downloadable + KnownFile> KnownDownloadable for T {
     }
 }
 
-pub trait NamedDownloadable: Downloadable + NamedFile {
+pub trait NamedDownloadable: Downloadable + KeyedFile {
     fn download_named(url: &Url, identifier: &str) -> anyhow::Result<Self>;
 }
 
-impl<T: Downloadable + NamedFile> NamedDownloadable for T {
+impl<T: Downloadable + KeyedFile> NamedDownloadable for T {
     fn download_named(url: &Url, identifier: &str) -> anyhow::Result<Self> {
         let mut full_url = url.clone();
 
@@ -52,11 +52,7 @@ impl<T: Downloadable + NamedFile> NamedDownloadable for T {
             .path_segments_mut()
             .unwrap_or_else(|_| panic!("Bad base url: {:?}", url))
             .pop_if_empty()
-            .extend(
-                Self::get_rel_path(identifier)
-                    .components()
-                    .map(|c| c.as_os_str().to_string_lossy().into_owned()),
-            );
+            .push(&Self::file_name(identifier));
         debug!("Downloading named file from URL: {}", full_url);
         Self::download(&full_url)
     }

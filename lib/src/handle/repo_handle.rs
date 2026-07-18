@@ -1,6 +1,6 @@
 use crate::io::fs::fs_readable::KnownFSReadable;
-use crate::io::known_file::KnownFile;
-use crate::io::name_consts::pack_addons_rel;
+use crate::io::files::file_names::fixed_file::FixedFile;
+use crate::io::files::name_consts::ADDONS_DIR_NAME;
 use crate::models::repo::repo_config::RepoConfig;
 use anyhow::ensure;
 use std::path::{Path, PathBuf};
@@ -41,7 +41,7 @@ impl RepoHandle {
 
     /// Absolute-or-relative (like `repo_path`) path of a pack's addon directory.
     pub(crate) fn pack_addons_path(&self, pack_name: &str) -> PathBuf {
-        self.repo_path.join(pack_addons_rel(pack_name))
+        self.repo_path.join(pack_name).join(ADDONS_DIR_NAME)
     }
 }
 

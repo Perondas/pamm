@@ -1,7 +1,7 @@
 use crate::commands::input::from_cli_input::{FromCliInput, FromCliInputWithContext};
 use anyhow::Result;
 use dialoguer::theme::ColorfulTheme;
-use pamm_lib::io::named_file::NamedFile;
+use pamm_lib::io::files::file_names::fixed_file::FixedFile;
 use pamm_lib::models::pack::pack_config::PackConfig;
 use pamm_lib::models::pack::server_info::ServerInfo;
 use pamm_lib::models::repo::repo_config::RepoConfig;
@@ -13,7 +13,7 @@ impl FromCliInputWithContext for PackConfig {
             .with_prompt("Pack Name")
             .allow_empty(true)
             .validate_with(|input: &String| -> Result<(), &str> {
-                let path = PackConfig::get_file_name(input);
+                let path = PackConfig::file_name();
                 if PathBuf::from(path).exists() {
                     Err("A folder or file with this name already exists")
                 } else {

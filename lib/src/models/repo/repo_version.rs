@@ -1,5 +1,5 @@
 use crate::io::fs::fs_readable::KnownFSReadable;
-use crate::io::known_file::KnownFile;
+use crate::io::files::file_names::fixed_file::FixedFile;
 use crate::io::serialization::readable::Readable;
 use crate::io::serialization::writable::Writable;
 use anyhow::Context;

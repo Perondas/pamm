@@ -3,7 +3,7 @@ use crate::api::frb;
 use crate::api::progress_reporting::DartProgressReporter;
 use crate::frb_generated::RustAutoOpaque;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-use pamm_lib::models::identifiable::Identifiable;
+use pamm_lib::models::keyed::Keyed;
 use pamm_lib::models::index::get_dl_size::GetDlSize;
 use pamm_lib::models::index::get_size_change::GetSizeChange;
 use pamm_lib::models::pack::pack_diff::PackDiff;
@@ -34,7 +34,7 @@ pub fn diff_to_result(diff: PackDiff) -> DiffResult {
         .addon_diffs
         .iter()
         .map(|diff| {
-            let name = diff.get_identifier().to_owned();
+            let name = diff.get_key().to_owned();
             let changes = get_file_changes(diff);
             (name, changes)
         })

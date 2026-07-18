@@ -1,4 +1,4 @@
-use crate::models::identifiable::Identifiable;
+use crate::models::keyed::Keyed;
 use crate::models::index::index_node::{IndexNode, PBOPart};
 use serde::{Deserialize, Serialize};
 
@@ -49,8 +49,8 @@ impl FileModification {
     }
 }
 
-impl Identifiable for NodeDiff {
-    fn get_identifier(&self) -> &str {
+impl Keyed for NodeDiff {
+    fn get_key(&self) -> &str {
         match self {
             NodeDiff::Created(node) => &node.name,
             NodeDiff::Deleted { name, .. } => name,

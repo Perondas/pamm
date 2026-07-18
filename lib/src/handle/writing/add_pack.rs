@@ -1,6 +1,7 @@
 use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::repo_handle::RepoHandle;
 use crate::handle::server_repo_handle::ServerRepoHandle;
+use crate::io::files::file_paths::rel_path::RelPath;
 use crate::models::pack::pack_config::PackConfig;
 use anyhow::ensure;
 
@@ -20,7 +21,7 @@ impl RepoHandle {
         );
 
         self.repo_config.packs.insert(pack_config.name.clone());
-        self.write(&self.repo_config)
+        self.write(&RelPath::new(), &self.repo_config)
     }
 }
 
@@ -54,8 +55,7 @@ mod tests {
     #[test]
     fn server_add_pack_lays_out_per_pack_folder_without_settings() {
         let tmp = TestTempDir::new("pamm_server_add_pack_no_settings");
-        let repo_config =
-            RepoConfig::new("repo".to_string(), "desc".to_string(), HashSet::new());
+        let repo_config = RepoConfig::new("repo".to_string(), "desc".to_string(), HashSet::new());
         let mut server = ServerRepoHandle::create(tmp.path(), repo_config).unwrap();
 
         let pack = PackConfig::new("core".to_string(), "c".to_string(), vec![], vec![], None);

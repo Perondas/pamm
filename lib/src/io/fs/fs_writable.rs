@@ -1,6 +1,6 @@
-use crate::models::identifiable::Identifiable;
-use crate::io::known_file::KnownFile;
-use crate::io::named_file::NamedFile;
+use crate::models::keyed::Keyed;
+use crate::io::files::file_names::fixed_file::FixedFile;
+use crate::io::files::file_names::keyed_file::KeyedFile;
 use crate::io::serialization::writable::Writable;
 use anyhow::{Context, anyhow};
 use std::path::Path;
@@ -17,11 +17,11 @@ impl<T: Writable> FsWritable for T {
     }
 }
 
-pub(crate) trait KnownFSWritable: FsWritable + KnownFile {
+pub(crate) trait KnownFSWritable: FsWritable + FixedFile {
     fn write_to<P: AsRef<Path>>(&self, path: P) -> anyhow::Result<()>;
 }
 
-impl<T: FsWritable + KnownFile> KnownFSWritable for T {
+impl<T: FsWritable + FixedFile> KnownFSWritable for T {
     fn write_to<P: AsRef<Path>>(&self, path: P) -> anyhow::Result<()> {
         let full_path = path.as_ref().join(Self::file_name());
         self.write_to_path(full_path)
@@ -29,25 +29,25 @@ impl<T: FsWritable + KnownFile> KnownFSWritable for T {
     }
 }
 
-pub(crate) trait NamedFSWritable: FsWritable + NamedFile {
+pub(crate) trait NamedFSWritable: FsWritable + KeyedFile {
     fn write_to_named<P: AsRef<Path>>(&self, path: P, identifier: &str) -> anyhow::Result<()>;
 }
 
-impl<T: FsWritable + NamedFile> NamedFSWritable for T {
+impl<T: FsWritable + KeyedFile> NamedFSWritable for T {
     fn write_to_named<P: AsRef<Path>>(&self, path: P, identifier: &str) -> anyhow::Result<()> {
-        let full_path = path.as_ref().join(Self::get_file_name(identifier));
+        let full_path = path.as_ref().join(Self::file_name(identifier));
         self.write_to_path(full_path)
             .context(anyhow!("writing {:?}", identifier))
     }
 }
 
-pub(crate) trait IdentifiableFSWritable: NamedFSWritable + Identifiable {
+pub(crate) trait IdentifiableFSWritable: NamedFSWritable + Keyed {
     fn write_to<P: AsRef<Path>>(&self, base_path: P) -> anyhow::Result<()>;
 }
 
-impl<T: NamedFSWritable + Identifiable> IdentifiableFSWritable for T {
+impl<T: NamedFSWritable + Keyed> IdentifiableFSWritable for T {
     fn write_to<P: AsRef<Path>>(&self, base_path: P) -> anyhow::Result<()> {
-        self.write_to_named(base_path, self.get_identifier())
+        self.write_to_named(base_path, self.get_key())
             .context(anyhow!("writing"))
     }
 }

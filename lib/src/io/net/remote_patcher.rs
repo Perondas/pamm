@@ -1,8 +1,8 @@
-use crate::io::name_consts::ADDONS_DIR_NAME;
+use crate::io::files::name_consts::ADDONS_DIR_NAME;
 use crate::io::net::byte_range_response::{ByteRangeResponse, IntoByteRangeResponse};
 use crate::io::net::download_file::download_file;
 use crate::io::progress_reporting::download_reporter::DownloadReporter;
-use crate::io::rel_path::RelPath;
+use crate::io::files::file_paths::rel_path::RelPath;
 use crate::models::index::index_node::{PBO_CHECKSUM_LEN, PBOPart};
 use crate::models::index::node_diff::FileModification;
 use crate::models::pack::pack_config::PackConfig;

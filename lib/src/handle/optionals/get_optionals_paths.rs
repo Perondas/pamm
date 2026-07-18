@@ -1,7 +1,7 @@
 use crate::handle::reading::get_pack::GetPack;
-use crate::io::name_consts::pack_addons_rel;
 use log::{debug, trace};
 use std::path::PathBuf;
+use crate::io::files::name_consts::ADDONS_DIR_NAME;
 
 impl<T> GetOptionalsPaths for T
 where
@@ -14,7 +14,7 @@ where
 
         let mut res = Vec::new();
 
-        let addon_dir = pack_addons_rel(&config.name);
+        let addon_dir = PathBuf::from(pack_name).join(ADDONS_DIR_NAME);
 
         for optional in &settings.enabled_optionals {
             if config
