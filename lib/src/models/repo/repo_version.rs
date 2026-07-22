@@ -1,5 +1,5 @@
 use crate::io::fs::fs_readable::KnownFSReadable;
-use crate::io::known_file::KnownFile;
+use crate::io::files::file_names::fixed_file::FixedFile;
 use crate::io::serialization::readable::Readable;
 use crate::io::serialization::writable::Writable;
 use anyhow::Context;
@@ -53,14 +53,14 @@ impl Writable for RepoVersion {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::io::fs::fs_writable::KnownFSWritable;
+    use crate::io::fs::fs_writable::FixedFsWritable;
     use crate::util::test_utils::TestTempDir;
 
     #[test]
     fn round_trips_through_the_version_file() {
         let tmp = TestTempDir::new("pamm_repo_version_roundtrip");
 
-        RepoVersion::current().write_to(tmp.path()).unwrap();
+        RepoVersion::current().write_fixed(tmp.path()).unwrap();
 
         let content = std::fs::read_to_string(tmp.path().join("version.pamm")).unwrap();
         assert_eq!(content, CURRENT_REPO_VERSION.to_string());

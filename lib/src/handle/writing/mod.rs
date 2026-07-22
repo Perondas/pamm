@@ -6,35 +6,25 @@ pub mod update_pack;
 pub mod update_repo_config;
 
 use crate::handle::repo_handle::RepoHandle;
-use crate::io::fs::fs_writable::{KnownFSWritable, NamedFSWritable};
-use crate::models::identifiable::Identifiable;
-use anyhow::{Context, anyhow};
+use crate::io::files::file_paths::keyed_path::KeyedFilePath;
+use crate::io::files::file_paths::self_identified_path::SelfIdentifiedFilePath;
+use crate::io::fs::fs_writable::FixedFsWritable;
 
 impl RepoHandle {
-    pub(in crate::handle) fn write_named<T: NamedFSWritable>(
-        &self,
-        value: &T,
-        identifier: &str,
-    ) -> anyhow::Result<()> {
-        let path = self.repo_path.join(T::get_rel_path(identifier));
-        // Per-pack files nest in a pack folder that may not exist yet.
-        if let Some(parent) = path.parent() {
-            std::fs::create_dir_all(parent)
-                .with_context(|| format!("creating directory {:?}", parent))?;
-        }
-        value
-            .write_to_path(path)
-            .context(anyhow!("writing {:?}", identifier))
-    }
-
-    pub(in crate::handle) fn write_identifiable<T: NamedFSWritable + Identifiable>(
+    pub(in crate::handle) fn write<T: FixedFsWritable + SelfIdentifiedFilePath>(
         &self,
         value: &T,
     ) -> anyhow::Result<()> {
-        self.write_named(value, value.get_identifier())
+        let path = value.file_path().with_base_path(&self.repo_path);
+        value.write_fixed(&path)
     }
 
-    pub(in crate::handle) fn write<T: KnownFSWritable>(&self, value: &T) -> anyhow::Result<()> {
-        value.write_to(&self.repo_path)
+    pub(in crate::handle) fn write_keyed<T: FixedFsWritable + KeyedFilePath>(
+        &self,
+        value: &T,
+        key: &str,
+    ) -> anyhow::Result<()> {
+        let path = T::file_path(key).with_base_path(&self.repo_path);
+        value.write_fixed(&path)
     }
 }

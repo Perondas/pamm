@@ -1,4 +1,4 @@
-use crate::io::known_file::KnownFile;
+use crate::io::files::file_names::fixed_file::FixedFile;
 use crate::io::net::downloadable::KnownDownloadable;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_version::{CURRENT_REPO_VERSION, RepoVersion};

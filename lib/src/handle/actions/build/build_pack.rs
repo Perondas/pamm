@@ -3,15 +3,16 @@ use crate::handle::actions::build::{BuildOptions, BuildReport};
 use crate::handle::reading::get_pack::GetPack;
 use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::server_repo_handle::ServerRepoHandle;
-use crate::io::fs::fs_writable::KnownFSWritable;
+use crate::io::files::file_names::fixed_file::FixedFile;
+use crate::io::files::file_paths::rel_path::RelPath;
+use crate::io::files::name_consts::{ADDONS_DIR_NAME, CACHE_DB_DIR_NAME};
+use crate::io::fs::fs_writable::FixedFsWritable;
 use crate::io::fs::pack::index_generator::IndexGenerator;
-use crate::io::known_file::KnownFile;
-use crate::io::name_consts::{ADDONS_DIR_NAME, CACHE_DB_DIR_NAME, PACK_CONFIG_FILE_NAME};
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
-use crate::io::rel_path::RelPath;
+use crate::models::pack::pack_config::PackConfig;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_version::RepoVersion;
-use anyhow::{Context, ensure};
+use anyhow::{ensure, Context};
 use std::fs;
 
 impl ServerRepoHandle {
@@ -39,7 +40,7 @@ impl ServerRepoHandle {
 
         // Top-level files: repo.config.json and the layout version marker.
         materializer.materialize(&RelPath::from_name(RepoConfig::file_name()))?;
-        RepoVersion::current().write_to(&www_path)?;
+        RepoVersion::current().write_fixed(&www_path)?;
 
         Ok(report)
     }
@@ -51,7 +52,7 @@ pub(super) fn materialize_pack_config(
     materializer: &Materializer,
     pack_name: &str,
 ) -> anyhow::Result<BuildReport> {
-    materializer.materialize(&RelPath::from_name(pack_name).push(PACK_CONFIG_FILE_NAME))
+    materializer.materialize(&RelPath::from_name(pack_name).push(PackConfig::file_name()))
 }
 
 /// Core per-pack build routine, factored out so the whole-repo builder can call
@@ -101,7 +102,7 @@ pub(super) fn build_pack_inner(
         .addons
         .retain(|name, _| pack_index.addons.iter().any(|i| i.name == *name));
 
-    handle.write_identifiable(&config)?;
+    handle.write(&config)?;
 
     Ok(report)
 }

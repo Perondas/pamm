@@ -54,8 +54,7 @@ mod tests {
     #[test]
     fn server_add_pack_lays_out_per_pack_folder_without_settings() {
         let tmp = TestTempDir::new("pamm_server_add_pack_no_settings");
-        let repo_config =
-            RepoConfig::new("repo".to_string(), "desc".to_string(), HashSet::new());
+        let repo_config = RepoConfig::new("repo".to_string(), "desc".to_string(), HashSet::new());
         let mut server = ServerRepoHandle::create(tmp.path(), repo_config).unwrap();
 
         let pack = PackConfig::new("core".to_string(), "c".to_string(), vec![], vec![], None);

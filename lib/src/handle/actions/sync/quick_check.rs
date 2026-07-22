@@ -1,10 +1,10 @@
 use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::reading::get_pack::GetPack;
 use crate::io::fs::fs_readable::KnownFSReadable;
-use crate::io::name_consts::INDEX_DIR_NAME;
+use crate::io::files::name_consts::INDEX_DIR_NAME;
 use crate::io::net::downloadable::KnownDownloadable;
 use crate::io::net::remote_version::verify_remote_version;
-use crate::io::rel_path::RelPath;
+use crate::io::files::file_paths::rel_path::RelPath;
 use crate::models::index::checksum_index::ChecksumIndex;
 use anyhow::{Context, anyhow};
 use log::{debug, trace};

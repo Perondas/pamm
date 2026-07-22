@@ -1,7 +1,5 @@
-use crate::io::fs::fs_writable::FsWritable;
-use crate::io::name_consts::{
-    WWW_DIR_NAME, pack_addons_rel, pack_config_rel, pack_indexes_rel, pack_settings_rel,
-};
+use crate::io::fs::fs_writable::FixedFsWritable;
+use crate::io::files::name_consts::{ADDONS_DIR_NAME, INDEX_DIR_NAME, WWW_DIR_NAME};
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use std::fs;
@@ -23,9 +21,12 @@ impl PackConfig {
             );
         }
 
-        fs::create_dir_all(parent_dir.join(pack_addons_rel(&self.name)))?;
+        let addon_dir = parent_dir.join(&self.name);
 
-        self.write_to_path(parent_dir.join(pack_config_rel(&self.name)))
+
+        fs::create_dir_all(addon_dir.join(ADDONS_DIR_NAME))?;
+
+        self.write_fixed(addon_dir)
     }
 
     /// Lay out a new pack on the **client**: create the pack folder with its
@@ -36,13 +37,15 @@ impl PackConfig {
             anyhow::bail!("{} is not a directory", parent_dir.display());
         }
 
-        fs::create_dir_all(parent_dir.join(pack_addons_rel(&self.name)))?;
-        fs::create_dir_all(parent_dir.join(pack_indexes_rel(&self.name)))?;
+        let addon_dir = parent_dir.join(&self.name);
+
+        fs::create_dir_all(addon_dir.join(ADDONS_DIR_NAME))?;
+        fs::create_dir_all(addon_dir.join(INDEX_DIR_NAME))?;
 
         let settings = PackUserSettings::default();
-        settings.write_to_path(parent_dir.join(pack_settings_rel(&self.name)))?;
+        settings.write_fixed(&addon_dir)?;
 
-        self.write_to_path(parent_dir.join(pack_config_rel(&self.name)))
+        self.write_fixed(addon_dir)
     }
 }
 

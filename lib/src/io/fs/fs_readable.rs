@@ -1,5 +1,4 @@
-use crate::io::known_file::KnownFile;
-use crate::io::named_file::NamedFile;
+use crate::io::files::file_names::fixed_file::FixedFile;
 use crate::io::serialization::readable::Readable;
 use anyhow::{Context, anyhow};
 use std::path::Path;
@@ -16,19 +15,14 @@ impl<T: Readable> FsReadable for T {
     }
 }
 
-pub(crate) trait KnownFSReadable: FsReadable + KnownFile {
+pub(crate) trait KnownFSReadable: FsReadable + FixedFile {
     fn read_from_known<P: AsRef<Path>>(path: P) -> anyhow::Result<Self>;
 }
 
-impl<T: FsReadable + KnownFile> KnownFSReadable for T {
+impl<T: FsReadable + FixedFile> KnownFSReadable for T {
     fn read_from_known<P: AsRef<Path>>(path: P) -> anyhow::Result<Self> {
         let full_path = path.as_ref().join(Self::file_name());
         Self::read_from_path(full_path).context(anyhow!("reading {:?}", Self::file_name()))
     }
 }
 
-/// Marker for named files readable from a repo root; path resolution happens in
-/// `RepoHandle::read_named`, which is layout-aware.
-pub(crate) trait NamedFSReadable: FsReadable + NamedFile {}
-
-impl<T: FsReadable + NamedFile> NamedFSReadable for T {}

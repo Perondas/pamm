@@ -1,8 +1,8 @@
 use crate::handle::repo_handle::RepoHandle;
 use crate::io::fs::fs_readable::KnownFSReadable;
-use crate::io::fs::fs_writable::KnownFSWritable;
+use crate::io::fs::fs_writable::FixedFsWritable;
 use crate::io::fs::migrations::run_migrations;
-use crate::io::name_consts::WWW_DIR_NAME;
+use crate::io::files::name_consts::WWW_DIR_NAME;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::server_config::ServerConfig;
 use std::ops::{Deref, DerefMut};
@@ -34,7 +34,7 @@ impl ServerRepoHandle {
     pub fn create(parent_path: &Path, repo_config: RepoConfig) -> anyhow::Result<Self> {
         let base = RepoHandle::create_repo_folder(parent_path, repo_config)?;
         let server_config = ServerConfig::default();
-        server_config.write_to(&base.repo_path)?;
+        server_config.write_fixed(&base.repo_path)?;
 
         Ok(Self {
             base,

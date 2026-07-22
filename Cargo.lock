@@ -1438,6 +1438,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sled",
+ "static_assertions",
  "steam-vdf-parser",
  "ureq",
  "url",

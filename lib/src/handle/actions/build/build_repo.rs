@@ -3,15 +3,15 @@ use crate::handle::actions::build::materializer::Materializer;
 use crate::handle::actions::build::{BuildOptions, BuildReport};
 use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::server_repo_handle::ServerRepoHandle;
-use crate::io::fs::fs_writable::KnownFSWritable;
-use crate::io::known_file::KnownFile;
-use crate::io::name_consts::PACK_CONFIG_FILE_NAME;
+use crate::io::fs::fs_writable::FixedFsWritable;
+use crate::io::files::file_names::fixed_file::FixedFile;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
-use crate::io::rel_path::RelPath;
+use crate::io::files::file_paths::rel_path::RelPath;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_version::RepoVersion;
 use anyhow::Context;
 use std::fs;
+use crate::models::pack::pack_config::PackConfig;
 
 impl ServerRepoHandle {
     /// Build every pack listed in `repo.config.json` into `www/` (one
@@ -39,7 +39,7 @@ impl ServerRepoHandle {
         }
 
         materializer.materialize(&RelPath::from_name(RepoConfig::file_name()))?;
-        RepoVersion::current().write_to(&www_path)?;
+        RepoVersion::current().write_fixed(&www_path)?;
 
         // Prune stale entries in www/ that aren't part of the current repo config.
         let mut stale_removed = 0_usize;
@@ -52,7 +52,7 @@ impl ServerRepoHandle {
                 // Legacy v1 addon dirs are always stale; a pack dir (identified
                 // by its pack.config.json) is stale when the pack is gone.
                 let is_legacy = name_str.ends_with("_pack_addons");
-                let is_stale_pack_dir = entry.path().join(PACK_CONFIG_FILE_NAME).is_file()
+                let is_stale_pack_dir = entry.path().join(PackConfig::file_name()).is_file()
                     && !pack_names.iter().any(|p| name_str == p.as_str());
                 if is_legacy || is_stale_pack_dir {
                     fs::remove_dir_all(entry.path()).with_context(|| {

@@ -14,6 +14,6 @@ impl UpdatePack for RepoHandle {
             pack_config.name
         );
 
-        self.write_named(pack_config, &pack_config.name)
+        self.write(pack_config)
     }
 }

@@ -1,7 +1,7 @@
 use crate::handle::repo_handle::RepoHandle;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_user_settings::PackUserSettings;
-use anyhow::{Context, anyhow, ensure};
+use anyhow::{anyhow, ensure, Context};
 
 #[cfg_attr(test, mockall::automock)]
 pub trait GetPack {
@@ -20,11 +20,12 @@ impl GetPack for RepoHandle {
             pack_name
         );
 
-        self.read_named::<PackConfig>(pack_name).context(anyhow!(
-            "Failed to read pack config for {} in {:#?}",
-            pack_name,
-            self.repo_path
-        ))
+        self.read_keyed::<PackConfig>(pack_name)
+            .context(anyhow!(
+                "Failed to read pack config for {} in {:#?}",
+                pack_name,
+                self.repo_path
+            ))
     }
     fn get_pack_with_settings(
         &self,
@@ -32,11 +33,13 @@ impl GetPack for RepoHandle {
     ) -> anyhow::Result<(PackConfig, PackUserSettings)> {
         let pack_config = self.get_pack(pack_name)?;
 
-        let pack_user_settings = self.read_named(pack_name).context(anyhow!(
-            "Failed to read settings for {} in {:#?}",
-            pack_name,
-            self.repo_path
-        ))?;
+        let pack_user_settings =
+            self.read_keyed(pack_name)
+                .context(anyhow!(
+                    "Failed to read settings for {} in {:#?}",
+                    pack_name,
+                    self.repo_path
+                ))?;
 
         Ok((pack_config, pack_user_settings))
     }

@@ -1,5 +1,5 @@
 use crate::models::index::index_node::IndexNode;
-use crate::io::name_consts::INDEX_DIR_NAME;
+use crate::io::files::name_consts::INDEX_DIR_NAME;
 use crate::io::net::downloadable::NamedDownloadable;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_index::PackIndex;

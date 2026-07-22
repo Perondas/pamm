@@ -1,5 +1,5 @@
-use crate::io::fs::fs_writable::KnownFSWritable;
-use crate::io::net::downloadable::{KnownDownloadable, NamedDownloadable};
+use crate::io::fs::fs_writable::FixedFsWritable;
+use crate::io::net::downloadable::KnownDownloadable;
 use crate::io::net::remote_version::verify_remote_version;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::repo::repo_config::RepoConfig;
@@ -27,8 +27,8 @@ impl RepoConfig {
         }
 
         fs::create_dir(&base_path)?;
-        self.write_to(&base_path)?;
-        RepoVersion::current().write_to(&base_path)?;
+        self.write_fixed(&base_path)?;
+        RepoVersion::current().write_fixed(&base_path)?;
 
         Ok(base_path)
     }
@@ -55,14 +55,14 @@ impl RepoConfig {
         }
 
         fs::create_dir(&base_path)?;
-        repo.write_to(&base_path)?;
-        RepoVersion::current().write_to(&base_path)?;
+        repo.write_fixed(&base_path)?;
+        RepoVersion::current().write_fixed(&base_path)?;
 
         let repo_user_settings = RepoUserSettings::new(remote_url.clone());
-        repo_user_settings.write_to(&base_path)?;
+        repo_user_settings.write_fixed(&base_path)?;
 
         for pack in &repo.packs {
-            let pack_config = PackConfig::download_named(remote_url, pack)
+            let pack_config = PackConfig::download_known(remote_url)
                 .context(format!("Failed to download pack {} configuration", pack))?;
 
             pack_config.init_client_on_fs(&base_path)?;
@@ -75,7 +75,7 @@ impl RepoConfig {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::io::known_file::KnownFile;
+    use crate::io::files::file_names::fixed_file::FixedFile;
     use crate::util::test_utils::TestTempDir;
     use std::collections::HashSet;
 

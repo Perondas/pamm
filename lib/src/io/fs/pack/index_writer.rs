@@ -1,9 +1,9 @@
-use crate::io::fs::fs_writable::{IdentifiableFSWritable, KnownFSWritable};
-use crate::io::name_consts::pack_indexes_rel;
+use crate::io::fs::fs_writable::{SelfKeyedFSWritable, FixedFsWritable};
 use crate::models::index::checksum_index::ChecksumIndex;
 use crate::models::pack::pack_diff::PackDiff;
 use crate::models::pack::pack_index::PackIndex;
 use std::path::Path;
+use crate::io::files::name_consts::INDEX_DIR_NAME;
 
 impl PackDiff {
     pub fn write_checksum_index_to_fs(&self, base_path: &Path) -> anyhow::Result<()> {
@@ -13,7 +13,7 @@ impl PackDiff {
 
 impl PackIndex {
     pub fn write_checksum_index_to_fs(&self, base_path: &Path) -> anyhow::Result<()> {
-        let index_dir = base_path.join(pack_indexes_rel(&self.pack_name));
+        let index_dir = base_path.join(&self.pack_name).join(INDEX_DIR_NAME);
 
         std::fs::create_dir_all(&index_dir)?;
 
@@ -25,11 +25,11 @@ impl PackIndex {
                 .collect(),
         };
 
-        checksum_index.write_to(&index_dir)
+        checksum_index.write_fixed(&index_dir)
     }
 
     pub fn write_full_index_to_fs(&self, base_path: &Path) -> anyhow::Result<()> {
-        let index_dir = base_path.join(pack_indexes_rel(&self.pack_name));
+        let index_dir = base_path.join(&self.pack_name).join(INDEX_DIR_NAME);
 
         std::fs::create_dir_all(&index_dir)?;
 

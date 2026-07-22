@@ -4,7 +4,7 @@ use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::writing::delete_pack::DeletePack;
 use crate::handle::writing::update_pack::UpdatePack;
 use crate::handle::writing::update_repo_config::UpdateRepoConfig;
-use crate::io::net::downloadable::{KnownDownloadable, NamedDownloadable};
+use crate::io::net::downloadable::KnownDownloadable;
 use crate::io::net::remote_version::verify_remote_version;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::repo::repo_config::RepoConfig;
@@ -46,7 +46,7 @@ impl ClientRepoHandle {
             .collect::<Vec<_>>();
 
         for pack in added {
-            let pack_config = PackConfig::download_named(&remote_url, pack)
+            let pack_config = PackConfig::download_known(&remote_url)
                 .context(format!("Failed to download pack {} configuration", pack))?;
 
             self.add_pack(&pack_config)?;
@@ -61,7 +61,7 @@ impl ClientRepoHandle {
             .collect::<Vec<_>>();
 
         for pack in existing {
-            let remote_pack_config = PackConfig::download_named(&remote_url, pack)
+            let remote_pack_config = PackConfig::download_known(&remote_url)
                 .context(format!("Failed to download pack {} configuration", pack))?;
             self.update_pack(&remote_pack_config)?;
         }

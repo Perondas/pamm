@@ -1,7 +1,7 @@
 use crate::handle::repo_handle::RepoHandle;
 use crate::io::net::remote_patcher::RemotePatcher;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
-use crate::io::rel_path::RelPath;
+use crate::io::files::file_paths::rel_path::RelPath;
 use crate::models::index::get_dl_size::GetDlSize;
 use crate::models::index::index_node::{IndexNode, NodeKind};
 use crate::models::index::node_diff::{ModifiedNodeKind, NodeDiff, NodeModification};

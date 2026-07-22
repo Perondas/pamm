@@ -39,6 +39,6 @@ impl ClientRepoHandle {
 
         settings.launch_params = launch_params;
 
-        self.write_named(&settings, pack_name)
+        self.write_keyed(&settings, pack_name)
     }
 }

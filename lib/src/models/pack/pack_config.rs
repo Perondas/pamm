@@ -2,11 +2,11 @@ use crate::models::pack::addon::AddonSettings;
 use crate::models::pack::pack_diff::PackDiff;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use crate::models::pack::server_info::ServerInfo;
-use crate::named;
+use crate::keyed;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-named!(PackConfig);
+keyed!(PackConfig);
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PackConfig {
     pub name: String,
