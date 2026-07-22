@@ -1,5 +1,4 @@
 use crate::io::files::file_names::fixed_file::FixedFile;
-use crate::io::files::file_names::keyed_file::KeyedFile;
 use crate::io::serialization::readable::Readable;
 use anyhow::{Context, anyhow};
 use std::path::Path;
@@ -27,8 +26,3 @@ impl<T: FsReadable + FixedFile> KnownFSReadable for T {
     }
 }
 
-/// Marker for named files readable from a repo root; path resolution happens in
-/// `RepoHandle::read_named`, which is layout-aware.
-pub(crate) trait NamedFSReadable: FsReadable + KeyedFile {}
-
-impl<T: FsReadable + KeyedFile> NamedFSReadable for T {}
