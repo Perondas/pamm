@@ -1,5 +1,5 @@
 use crate::io::fs::fs_writable::FixedFsWritable;
-use crate::io::net::downloadable::{KnownDownloadable, NamedDownloadable};
+use crate::io::net::downloadable::KnownDownloadable;
 use crate::io::net::remote_version::verify_remote_version;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::repo::repo_config::RepoConfig;
@@ -27,8 +27,8 @@ impl RepoConfig {
         }
 
         fs::create_dir(&base_path)?;
-        self.write_to(&base_path)?;
-        RepoVersion::current().write_to(&base_path)?;
+        self.write_fixed(&base_path)?;
+        RepoVersion::current().write_fixed(&base_path)?;
 
         Ok(base_path)
     }
@@ -55,11 +55,11 @@ impl RepoConfig {
         }
 
         fs::create_dir(&base_path)?;
-        repo.write_to(&base_path)?;
-        RepoVersion::current().write_to(&base_path)?;
+        repo.write_fixed(&base_path)?;
+        RepoVersion::current().write_fixed(&base_path)?;
 
         let repo_user_settings = RepoUserSettings::new(remote_url.clone());
-        repo_user_settings.write_to(&base_path)?;
+        repo_user_settings.write_fixed(&base_path)?;
 
         for pack in &repo.packs {
             let pack_config = PackConfig::download_known(remote_url)

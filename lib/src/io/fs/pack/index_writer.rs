@@ -25,7 +25,7 @@ impl PackIndex {
                 .collect(),
         };
 
-        checksum_index.write_to(&index_dir)
+        checksum_index.write_fixed(&index_dir)
     }
 
     pub fn write_full_index_to_fs(&self, base_path: &Path) -> anyhow::Result<()> {

@@ -1,6 +1,5 @@
 use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::reading::get_pack::GetPack;
-use crate::io::files::file_paths::rel_path::RelPath;
 use log::debug;
 
 impl ClientRepoHandle {
@@ -40,6 +39,6 @@ impl ClientRepoHandle {
 
         settings.launch_params = launch_params;
 
-        self.write(&RelPath::from_name(pack_name), &settings)
+        self.write_keyed(&settings, pack_name)
     }
 }

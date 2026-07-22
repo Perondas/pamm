@@ -1,14 +1,9 @@
 use crate::io::fs::fs_writable::FixedFsWritable;
-use crate::io::files::name_consts::{get_pack_addon_directory_name, INDEX_DIR_NAME, WWW_DIR_NAME};
-use crate::io::files::file_names::keyed_file::KeyedFile;
-use crate::models::pack::pack_config::PackConfig;
-use crate::models::pack::pack_user_settings::PackUserSettings;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_version::{RepoVersion, CURRENT_REPO_VERSION};
-use anyhow::{bail, ensure, Context};
-use log::{info, warn};
-use std::fs;
-use std::path::{Path, PathBuf};
+use anyhow::{bail, Context};
+use log::info;
+use std::path::Path;
 
 /// Bring a local repo (server source or client) up to the current layout
 /// version. The version is read from `version.pamm` at the repo root (absent
@@ -37,7 +32,7 @@ pub(crate) fn run_migrations(repo_path: &Path, repo_config: &RepoConfig) -> anyh
         }
         version += 1;
         RepoVersion(version)
-            .write_to(repo_path)
+            .write_fixed(repo_path)
             .context("writing version.pamm after migration")?;
         info!(
             "Repo at {:?} migrated to layout version {}",
@@ -61,8 +56,8 @@ pub(crate) fn run_migrations(repo_path: &Path, repo_config: &RepoConfig) -> anyh
 /// file exists in BOTH locations we bail rather than guess which copy is
 /// authoritative. Only files of packs listed in `repo.config.json` are
 /// touched; `www/` and the root-level repo/server config files never move.
-fn migrate_v1_to_v2(repo_path: &Path, repo_config: &RepoConfig) -> anyhow::Result<()> {
-   /* let mut moved_any = false;
+fn migrate_v1_to_v2(_repo_path: &Path, _repo_config: &RepoConfig) -> anyhow::Result<()> {
+    /* let mut moved_any = false;
 
     for pack in &repo_config.packs {
         ensure!(
@@ -162,6 +157,8 @@ mod tests {
     use super::*;
     use crate::util::test_utils::TestTempDir;
     use std::collections::HashSet;
+    use std::fs;
+    use std::path::PathBuf;
 
     fn repo_config(packs: &[&str]) -> RepoConfig {
         RepoConfig::new(
@@ -236,7 +233,7 @@ mod tests {
         let tmp = TestTempDir::new("pamm_migrate_current_version");
         let repo_path = tmp.path().join("repo");
         fs::create_dir_all(&repo_path).unwrap();
-        RepoVersion::current().write_to(&repo_path).unwrap();
+        RepoVersion::current().write_fixed(&repo_path).unwrap();
 
         // Leftover flat-looking files must NOT be touched once the repo is
         // marked as current — the version file is authoritative.
@@ -254,7 +251,7 @@ mod tests {
         let repo_path = tmp.path().join("repo");
         fs::create_dir_all(&repo_path).unwrap();
         RepoVersion(CURRENT_REPO_VERSION + 1)
-            .write_to(&repo_path)
+            .write_fixed(&repo_path)
             .unwrap();
 
         let err = run_migrations(&repo_path, &repo_config(&[]))

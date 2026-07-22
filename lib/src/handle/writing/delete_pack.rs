@@ -8,17 +8,17 @@ pub trait DeletePack {
 }
 
 impl DeletePack for RepoHandle {
-    fn delete_pack(&mut self, pack_name: &str, delete_on_fs: bool) -> anyhow::Result<()> {
+    fn delete_pack(&mut self, pack_name: &str, _delete_on_fs: bool) -> anyhow::Result<()> {
         ensure!(
             self.repo_config.packs.contains(pack_name),
             "Pack '{}' not found in repo",
             pack_name
         );
 
-        let pack_path = RelPath::from_name(pack_name);
+        let _pack_path = RelPath::from_name(pack_name);
 
         self.repo_config.packs.remove(pack_name);
-        self.write(&pack_path, &self.repo_config)?;
+        self.write(&self.repo_config)?;
 
         let pack_dir = self.repo_path.join(pack_name);
         if pack_dir.is_dir() {

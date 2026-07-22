@@ -10,8 +10,8 @@ pub(crate) trait KeyedFilePath {
 macro_rules! key_is_folder {
     ($ty:ty) => {
         impl $crate::io::files::file_paths::keyed_path::KeyedFilePath for $ty {
-            fn file_path(key: &str) ->  $crate::io::files::file_paths::RelPath {
-                $crate::io::files::file_paths::RelPath::from_name(key)
+            fn file_path(key: &str) ->  $crate::io::files::file_paths::rel_path::RelPath {
+                $crate::io::files::file_paths::rel_path::RelPath::from_name(key)
             }
         }
     };

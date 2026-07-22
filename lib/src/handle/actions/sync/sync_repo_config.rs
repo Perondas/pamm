@@ -4,7 +4,7 @@ use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::writing::delete_pack::DeletePack;
 use crate::handle::writing::update_pack::UpdatePack;
 use crate::handle::writing::update_repo_config::UpdateRepoConfig;
-use crate::io::net::downloadable::{KnownDownloadable, NamedDownloadable};
+use crate::io::net::downloadable::KnownDownloadable;
 use crate::io::net::remote_version::verify_remote_version;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::repo::repo_config::RepoConfig;

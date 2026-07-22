@@ -6,11 +6,13 @@ pub mod update_pack;
 pub mod update_repo_config;
 
 use crate::handle::repo_handle::RepoHandle;
-use crate::io::fs::fs_writable::{FixedFsWritable, KeyedFSWritable};
+use crate::io::files::file_paths::fixed_path::FixedFilePath;
+use crate::io::files::file_paths::keyed_path::KeyedFilePath;
 use crate::io::files::file_paths::rel_path::RelPath;
+use crate::io::files::file_paths::self_identified_path::SelfIdentifiedFilePath;
+use crate::io::fs::fs_writable::{FixedFsWritable, KeyedFSWritable};
 use crate::models::self_keyed::SelfKeyed;
 use anyhow::{anyhow, Context};
-use crate::io::files::file_paths::fixed_path::FixedFilePath;
 
 impl RepoHandle {
     pub(in crate::handle) fn write_named<T: KeyedFSWritable>(
@@ -40,25 +42,20 @@ impl RepoHandle {
         self.write_named(value, rel_path, value.get_key())
     }
 
-    pub(in crate::handle) fn write<T: FixedFsWritable>(
+    pub(in crate::handle) fn write<T: FixedFsWritable + SelfIdentifiedFilePath>(
         &self,
-        rel_path: &RelPath,
         value: &T,
     ) -> anyhow::Result<()> {
-        let path = rel_path
-            .with_base_path(&self.repo_path)
-            .join(T::file_name());
-        value.write_to_path(&path)
+        let path = value.file_path().with_base_path(&self.repo_path);
+        value.write_fixed(&path)
     }
 
-    pub(in crate::handle) fn write<T: FixedFsWritable + FixedFilePath>(
+    pub(in crate::handle) fn write_keyed<T: FixedFsWritable + KeyedFilePath>(
         &self,
-        rel_path: &RelPath,
         value: &T,
+        key: &str,
     ) -> anyhow::Result<()> {
-        let path = rel_path
-            .with_base_path(&self.repo_path)
-            .join(T::file_name());
-        value.write_to_path(&path)
+        let path = T::file_path(key).with_base_path(&self.repo_path);
+        value.write_fixed(&path)
     }
 }

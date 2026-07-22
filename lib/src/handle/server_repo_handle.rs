@@ -34,7 +34,7 @@ impl ServerRepoHandle {
     pub fn create(parent_path: &Path, repo_config: RepoConfig) -> anyhow::Result<Self> {
         let base = RepoHandle::create_repo_folder(parent_path, repo_config)?;
         let server_config = ServerConfig::default();
-        server_config.write_to(&base.repo_path)?;
+        server_config.write_fixed(&base.repo_path)?;
 
         Ok(Self {
             base,

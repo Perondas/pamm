@@ -394,7 +394,7 @@ fn open_migrates_v1_source_then_build_publishes_v2_www() {
         vec![],
         None,
     );
-    pack_config.write_to(&repo_path).unwrap();
+    pack_config.write_fixed(&repo_path).unwrap();
     let addon_dir = repo_path.join("core_pack_addons").join("@addon1");
     fs::create_dir_all(addon_dir.join("sub")).unwrap();
     fs::write(addon_dir.join("file.txt"), b"hello").unwrap();

@@ -1,5 +1,4 @@
 use crate::handle::repo_handle::RepoHandle;
-use crate::io::files::file_paths::rel_path::RelPath;
 use crate::models::pack::pack_config::PackConfig;
 use anyhow::ensure;
 
@@ -15,6 +14,6 @@ impl UpdatePack for RepoHandle {
             pack_config.name
         );
 
-        self.write(&RelPath::from_name(&pack_config.name), pack_config)
+        self.write(pack_config)
     }
 }

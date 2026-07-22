@@ -1,5 +1,4 @@
 use crate::handle::repo_handle::RepoHandle;
-use crate::io::files::file_paths::rel_path::RelPath;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use anyhow::{anyhow, ensure, Context};

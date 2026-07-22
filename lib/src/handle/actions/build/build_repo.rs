@@ -39,7 +39,7 @@ impl ServerRepoHandle {
         }
 
         materializer.materialize(&RelPath::from_name(RepoConfig::file_name()))?;
-        RepoVersion::current().write_to(&www_path)?;
+        RepoVersion::current().write_fixed(&www_path)?;
 
         // Prune stale entries in www/ that aren't part of the current repo config.
         let mut stale_removed = 0_usize;

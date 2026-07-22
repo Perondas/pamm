@@ -18,11 +18,11 @@ impl<T: Writable> FsWritable for T {
 }
 
 pub(crate) trait FixedFsWritable: FsWritable + FixedFile {
-    fn write_to<P: AsRef<Path>>(&self, path: P) -> anyhow::Result<()>;
+    fn write_fixed<P: AsRef<Path>>(&self, path: P) -> anyhow::Result<()>;
 }
 
 impl<T: FsWritable + FixedFile> FixedFsWritable for T {
-    fn write_to<P: AsRef<Path>>(&self, path: P) -> anyhow::Result<()> {
+    fn write_fixed<P: AsRef<Path>>(&self, path: P) -> anyhow::Result<()> {
         let full_path = path.as_ref().join(Self::file_name());
         self.write_to_path(full_path)
             .context(anyhow!("writing {:?}", Self::file_name()))
@@ -30,11 +30,11 @@ impl<T: FsWritable + FixedFile> FixedFsWritable for T {
 }
 
 pub(crate) trait KeyedFSWritable: FsWritable + KeyedFile {
-    fn write_to_named<P: AsRef<Path>>(&self, path: P, identifier: &str) -> anyhow::Result<()>;
+    fn write_keyed<P: AsRef<Path>>(&self, path: P, identifier: &str) -> anyhow::Result<()>;
 }
 
 impl<T: FsWritable + KeyedFile> KeyedFSWritable for T {
-    fn write_to_named<P: AsRef<Path>>(&self, path: P, identifier: &str) -> anyhow::Result<()> {
+    fn write_keyed<P: AsRef<Path>>(&self, path: P, identifier: &str) -> anyhow::Result<()> {
         let full_path = path.as_ref().join(Self::file_name(identifier));
         self.write_to_path(full_path)
             .context(anyhow!("writing {:?}", identifier))
@@ -47,7 +47,7 @@ pub(crate) trait SelfKeyedFSWritable: KeyedFSWritable + SelfKeyed {
 
 impl<T: KeyedFSWritable + SelfKeyed> SelfKeyedFSWritable for T {
     fn write_to<P: AsRef<Path>>(&self, base_path: P) -> anyhow::Result<()> {
-        self.write_to_named(base_path, self.get_key())
+        self.write_keyed(base_path, self.get_key())
             .context(anyhow!("writing"))
     }
 }

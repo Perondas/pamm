@@ -1,5 +1,4 @@
-use crate::io::fs::fs_writable::{FsWritable, FixedFsWritable};
-use crate::io::files::file_names::fixed_file::FixedFile;
+use crate::io::fs::fs_writable::FixedFsWritable;
 use crate::io::files::name_consts::{ADDONS_DIR_NAME, INDEX_DIR_NAME, WWW_DIR_NAME};
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_user_settings::PackUserSettings;
@@ -27,7 +26,7 @@ impl PackConfig {
 
         fs::create_dir_all(addon_dir.join(ADDONS_DIR_NAME))?;
 
-        self.write_to(addon_dir)
+        self.write_fixed(addon_dir)
     }
 
     /// Lay out a new pack on the **client**: create the pack folder with its
@@ -44,9 +43,9 @@ impl PackConfig {
         fs::create_dir_all(addon_dir.join(INDEX_DIR_NAME))?;
 
         let settings = PackUserSettings::default();
-        settings.write_to(&addon_dir)?;
+        settings.write_fixed(&addon_dir)?;
 
-        self.write_to(addon_dir)
+        self.write_fixed(addon_dir)
     }
 }
 

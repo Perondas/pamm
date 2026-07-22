@@ -1,7 +1,6 @@
 use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::repo_handle::RepoHandle;
 use crate::handle::server_repo_handle::ServerRepoHandle;
-use crate::io::files::file_paths::rel_path::RelPath;
 use crate::models::pack::pack_config::PackConfig;
 use anyhow::ensure;
 
@@ -21,7 +20,7 @@ impl RepoHandle {
         );
 
         self.repo_config.packs.insert(pack_config.name.clone());
-        self.write(&RelPath::new(), &self.repo_config)
+        self.write(&self.repo_config)
     }
 }
 

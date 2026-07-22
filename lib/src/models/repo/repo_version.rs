@@ -60,7 +60,7 @@ mod tests {
     fn round_trips_through_the_version_file() {
         let tmp = TestTempDir::new("pamm_repo_version_roundtrip");
 
-        RepoVersion::current().write_to(tmp.path()).unwrap();
+        RepoVersion::current().write_fixed(tmp.path()).unwrap();
 
         let content = std::fs::read_to_string(tmp.path().join("version.pamm")).unwrap();
         assert_eq!(content, CURRENT_REPO_VERSION.to_string());
