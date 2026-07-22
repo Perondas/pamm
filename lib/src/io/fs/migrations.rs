@@ -1,8 +1,15 @@
+use crate::io::files::file_names::fixed_file::FixedFile;
+use crate::io::files::name_consts::{
+    get_pack_addon_directory_name, ADDONS_DIR_NAME, INDEX_DIR_NAME, WWW_DIR_NAME,
+};
 use crate::io::fs::fs_writable::FixedFsWritable;
+use crate::models::pack::pack_config::PackConfig;
+use crate::models::pack::pack_user_settings::PackUserSettings;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_version::{RepoVersion, CURRENT_REPO_VERSION};
-use anyhow::{bail, Context};
-use log::info;
+use anyhow::{bail, ensure, Context};
+use log::{info, warn};
+use std::fs;
 use std::path::Path;
 
 /// Bring a local repo (server source or client) up to the current layout
@@ -56,8 +63,8 @@ pub(crate) fn run_migrations(repo_path: &Path, repo_config: &RepoConfig) -> anyh
 /// file exists in BOTH locations we bail rather than guess which copy is
 /// authoritative. Only files of packs listed in `repo.config.json` are
 /// touched; `www/` and the root-level repo/server config files never move.
-fn migrate_v1_to_v2(_repo_path: &Path, _repo_config: &RepoConfig) -> anyhow::Result<()> {
-    /* let mut moved_any = false;
+fn migrate_v1_to_v2(repo_path: &Path, repo_config: &RepoConfig) -> anyhow::Result<()> {
+    let mut moved_any = false;
 
     for pack in &repo_config.packs {
         ensure!(
@@ -74,51 +81,117 @@ fn migrate_v1_to_v2(_repo_path: &Path, _repo_config: &RepoConfig) -> anyhow::Res
             pack_dir
         );
 
-        let artifacts = [
-            (
-                PathBuf::from(PackConfig::get_file_name(pack)),
-                pack_config_rel(pack),
-            ),
-            (
-                PathBuf::from(PackUserSettings::get_file_name(pack)),
-                pack_settings_rel(pack),
-            ),
-            (
-                PathBuf::from(get_pack_addon_directory_name(pack)),
-                pack_addons_rel(pack),
-            ),
-        ];
+        // Old (v1) artifact locations at repo root. Accept both the legacy
+        // per-pack flat name ("<pack>.pack.config.json") and the unkeyed
+        // filename that some callers may have produced ("pack.config.json").
+        let old_pack_config = repo_path.join(format!("{}.pack.config.json", pack));
+        let alt_old_pack_config = repo_path.join(PackConfig::file_name());
 
-        for (old_rel, new_rel) in artifacts {
-            let old = repo_path.join(&old_rel);
-            let new = repo_path.join(&new_rel);
+        let old_pack_settings = repo_path.join(format!("{}.pack.settings.json", pack));
+        let alt_old_pack_settings = repo_path.join(PackUserSettings::file_name());
 
-            match (old.exists(), new.exists()) {
-                (true, true) => bail!(
-                    "Both {:?} and {:?} exist; delete or move one of them manually, \
-                     then retry",
-                    old,
-                    new
-                ),
-                (true, false) => {
-                    fs::create_dir_all(&pack_dir)
-                        .with_context(|| format!("creating pack folder {:?}", pack_dir))?;
-                    fs::rename(&old, &new)
-                        .with_context(|| format!("moving {:?} to {:?}", old, new))?;
-                    info!("Migrated {:?} -> {:?}", old, new);
-                    moved_any = true;
-                }
-                // Already migrated, or the artifact doesn't exist (e.g. servers
-                // usually have no pack settings file) — nothing to do. A pack
-                // missing its config file fails later with the usual error.
-                (false, _) => {}
+        let old_addons_dir = repo_path.join(get_pack_addon_directory_name(pack));
+
+        // New (v2) artifact locations under <repo>/<pack>/
+        let new_pack_config = pack_dir.join("pack.config.json");
+        let new_pack_settings = pack_dir.join("pack.settings.json");
+        let new_addons_dir = pack_dir.join(ADDONS_DIR_NAME);
+
+        // Handle pack config (consider two possible legacy locations)
+        if new_pack_config.exists() {
+            // If the legacy v1 file also exists, that's a conflict: bail.
+            if old_pack_config.exists() || alt_old_pack_config.exists() {
+                let conflicting_old = if old_pack_config.exists() {
+                    old_pack_config.clone()
+                } else {
+                    alt_old_pack_config.clone()
+                };
+                bail!(
+                    "Both {:?} and {:?} exist; delete or move one of them manually, then retry",
+                    conflicting_old,
+                    new_pack_config
+                );
             }
+            // already migrated
+        } else if old_pack_config.exists() && !new_pack_config.exists() {
+            fs::create_dir_all(&pack_dir)
+                .with_context(|| format!("creating pack folder {:?}", pack_dir))?;
+            fs::rename(&old_pack_config, &new_pack_config).with_context(|| {
+                format!("moving {:?} to {:?}", old_pack_config, new_pack_config)
+            })?;
+            info!("Migrated {:?} -> {:?}", old_pack_config, new_pack_config);
+            moved_any = true;
+        } else if alt_old_pack_config.exists() && !new_pack_config.exists() {
+            fs::create_dir_all(&pack_dir)
+                .with_context(|| format!("creating pack folder {:?}", pack_dir))?;
+            fs::rename(&alt_old_pack_config, &new_pack_config).with_context(|| {
+                format!("moving {:?} to {:?}", alt_old_pack_config, new_pack_config)
+            })?;
+            info!(
+                "Migrated {:?} -> {:?}",
+                alt_old_pack_config, new_pack_config
+            );
+            moved_any = true;
+        }
+
+        // Handle pack settings
+        if new_pack_settings.exists() {
+            if old_pack_settings.exists() || alt_old_pack_settings.exists() {
+                let conflicting_old = if old_pack_settings.exists() {
+                    old_pack_settings.clone()
+                } else {
+                    alt_old_pack_settings.clone()
+                };
+                bail!(
+                    "Both {:?} and {:?} exist; delete or move one of them manually, then retry",
+                    conflicting_old,
+                    new_pack_settings
+                );
+            }
+            // already migrated
+        } else if old_pack_settings.exists() && !new_pack_settings.exists() {
+            fs::create_dir_all(&pack_dir)
+                .with_context(|| format!("creating pack folder {:?}", pack_dir))?;
+            fs::rename(&old_pack_settings, &new_pack_settings).with_context(|| {
+                format!("moving {:?} to {:?}", old_pack_settings, new_pack_settings)
+            })?;
+            info!(
+                "Migrated {:?} -> {:?}",
+                old_pack_settings, new_pack_settings
+            );
+            moved_any = true;
+        } else if alt_old_pack_settings.exists() && !new_pack_settings.exists() {
+            fs::create_dir_all(&pack_dir)
+                .with_context(|| format!("creating pack folder {:?}", pack_dir))?;
+            fs::rename(&alt_old_pack_settings, &new_pack_settings).with_context(|| {
+                format!(
+                    "moving {:?} to {:?}",
+                    alt_old_pack_settings, new_pack_settings
+                )
+            })?;
+            info!(
+                "Migrated {:?} -> {:?}",
+                alt_old_pack_settings, new_pack_settings
+            );
+            moved_any = true;
+        }
+
+        // Handle addons dir migration (legacy root dir -> per-pack addons dir)
+        if old_addons_dir.exists() && !new_addons_dir.exists() {
+            fs::create_dir_all(&pack_dir)
+                .with_context(|| format!("creating pack folder {:?}", pack_dir))?;
+            fs::rename(&old_addons_dir, &new_addons_dir)
+                .with_context(|| format!("moving {:?} to {:?}", old_addons_dir, new_addons_dir))?;
+            info!("Migrated {:?} -> {:?}", old_addons_dir, new_addons_dir);
+            moved_any = true;
         }
 
         // v1 kept the (client-side) indexes inside the addon directory; v2
-        // hoists them next to it.
-        let nested_indexes = repo_path.join(pack_addons_rel(pack)).join(INDEX_DIR_NAME);
-        let indexes = repo_path.join(pack_indexes_rel(pack));
+        // hoists them next to it. After the possible rename above the indexes
+        // will live under the new addons dir (core/addons/indexes), so look
+        // there when hoisting.
+        let nested_indexes = new_addons_dir.join(INDEX_DIR_NAME);
+        let indexes = pack_dir.join(INDEX_DIR_NAME);
         match (nested_indexes.exists(), indexes.exists()) {
             (true, true) => bail!(
                 "Both {:?} and {:?} exist; delete or move one of them manually, then retry",
@@ -126,6 +199,8 @@ fn migrate_v1_to_v2(_repo_path: &Path, _repo_config: &RepoConfig) -> anyhow::Res
                 indexes
             ),
             (true, false) => {
+                fs::create_dir_all(&pack_dir)
+                    .with_context(|| format!("creating pack folder {:?}", pack_dir))?;
                 fs::rename(&nested_indexes, &indexes)
                     .with_context(|| format!("moving {:?} to {:?}", nested_indexes, indexes))?;
                 info!("Migrated {:?} -> {:?}", nested_indexes, indexes);
@@ -134,7 +209,7 @@ fn migrate_v1_to_v2(_repo_path: &Path, _repo_config: &RepoConfig) -> anyhow::Res
             (false, _) => {}
         }
 
-        if !repo_path.join(pack_config_rel(pack)).exists() {
+        if !new_pack_config.exists() {
             warn!(
                 "Pack '{}' is listed in repo.config.json but has no pack config file",
                 pack
@@ -144,10 +219,9 @@ fn migrate_v1_to_v2(_repo_path: &Path, _repo_config: &RepoConfig) -> anyhow::Res
 
     if moved_any && repo_path.join(WWW_DIR_NAME).exists() {
         warn!(
-            "Repo source was migrated to per-pack folders; run `build` to regenerate \
-             the www/ layout"
+            "Repo source was migrated to per-pack folders; run `build` to regenerate the www/ layout"
         );
-    }*/
+    }
 
     Ok(())
 }
