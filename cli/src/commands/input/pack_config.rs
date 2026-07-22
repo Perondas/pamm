@@ -12,7 +12,7 @@ impl FromCliInputWithContext for PackConfig {
         let name = dialoguer::Input::<String>::with_theme(&ColorfulTheme::default())
             .with_prompt("Pack Name")
             .allow_empty(true)
-            .validate_with(|input: &String| -> Result<(), &str> {
+            .validate_with(|_input: &String| -> Result<(), &str> {
                 let path = PackConfig::file_name();
                 if PathBuf::from(path).exists() {
                     Err("A folder or file with this name already exists")

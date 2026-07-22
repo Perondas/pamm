@@ -280,16 +280,11 @@ fn build_pack_symlinks_point_into_per_pack_source() {
     assert_eq!(fs::read(&link).unwrap(), b"hello", "symlink must resolve");
 }
 
-fn walk_relative(root: &PathBuf) -> Vec<String> {
-    fn walk(root: &PathBuf, dir: &PathBuf, out: &mut Vec<String>) {
+fn walk_relative(root: &PathBuf) -> Vec<PathBuf> {
+    fn walk(root: &PathBuf, dir: &PathBuf, out: &mut Vec<PathBuf>) {
         for entry in fs::read_dir(dir).unwrap() {
             let path = entry.unwrap().path();
-            out.push(
-                path.strip_prefix(root)
-                    .unwrap()
-                    .to_string_lossy()
-                    .into_owned(),
-            );
+            out.push(path.strip_prefix(root).unwrap().to_path_buf());
             // Don't follow symlinks: www files are symlinks into the source.
             if fs::symlink_metadata(&path).unwrap().is_dir() {
                 walk(root, &path, out);
@@ -302,20 +297,22 @@ fn walk_relative(root: &PathBuf) -> Vec<String> {
     out
 }
 
-const EXPECTED_WWW_ENTRIES: &[&str] = &[
-    "core",
-    "core/addons",
-    "core/addons/@addon1",
-    "core/addons/@addon1/file.txt",
-    "core/addons/@addon1/sub",
-    "core/addons/@addon1/sub/nested.txt",
-    "core/indexes",
-    "core/indexes/@addon1.index.pamm",
-    "core/indexes/checksum_index.pamm",
-    "core/pack.config.json",
-    "repo.config.json",
-    "version.pamm",
-];
+fn expected_www_entries() -> Vec<PathBuf> {
+    vec![
+        PathBuf::from("core"),
+        PathBuf::from("core/addons"),
+        PathBuf::from("core/addons/@addon1"),
+        PathBuf::from("core/addons/@addon1/file.txt"),
+        PathBuf::from("core/addons/@addon1/sub"),
+        PathBuf::from("core/addons/@addon1/sub/nested.txt"),
+        PathBuf::from("core/indexes"),
+        PathBuf::from("core/indexes/@addon1.index.pamm"),
+        PathBuf::from("core/indexes/checksum_index.pamm"),
+        PathBuf::from("core/pack.config.json"),
+        PathBuf::from("repo.config.json"),
+        PathBuf::from("version.pamm"),
+    ]
+}
 
 // The exact www/ entry set is the client-facing contract for layout v2.
 #[test]
@@ -326,7 +323,7 @@ fn build_produces_the_v2_www_shape_clients_expect() {
         .build(opts(BuildMode::Symlink), NoopProgress)
         .unwrap();
 
-    assert_eq!(walk_relative(&fx.www()), EXPECTED_WWW_ENTRIES);
+    assert_eq!(walk_relative(&fx.www()), expected_www_entries());
 }
 
 // Building over a www tree produced by the legacy flat (v1) layout prunes the
@@ -347,7 +344,7 @@ fn build_prunes_legacy_v1_www_entries() {
         .build(opts(BuildMode::Symlink), NoopProgress)
         .unwrap();
 
-    assert_eq!(walk_relative(&fx.www()), EXPECTED_WWW_ENTRIES);
+    assert_eq!(walk_relative(&fx.www()), expected_www_entries());
 }
 
 // Stale pack dirs (pack removed from repo.config.json) are pruned, while
@@ -416,7 +413,7 @@ fn open_migrates_v1_source_then_build_publishes_v2_www() {
         .unwrap();
 
     let www = repo_path.join(WWW_DIR_NAME);
-    assert_eq!(walk_relative(&www), EXPECTED_WWW_ENTRIES);
+    assert_eq!(walk_relative(&www), expected_www_entries());
     assert_eq!(
         fs::read(www.join("core/addons/@addon1/file.txt")).unwrap(),
         b"hello"
