@@ -1,17 +1,15 @@
 use crate::handle::client_repo_handle::ClientRepoHandle;
+use crate::io::files::file_paths::keyed_path::KeyedFilePath;
 use crate::io::net::downloadable::KnownDownloadable;
-use crate::io::files::file_paths::rel_path::RelPath;
 use anyhow::Context;
 use url::Url;
 
 impl ClientRepoHandle {
-    pub(super) fn download_known<T: KnownDownloadable>(
+    pub(super) fn download_keyed<T: KnownDownloadable + KeyedFilePath>(
         &self,
-        rel_path: &RelPath,
+        key: &str,
     ) -> anyhow::Result<T> {
-        let url = rel_path
-            .push(T::file_name())
-            .with_base_url(self.get_remote_url());
+        let url = T::file_path(key).with_base_url(self.get_remote_url());
 
         T::download_known(&url).with_context(|| {
             format!(

@@ -3,7 +3,7 @@ use crate::handle::actions::build::materializer::Materializer;
 use crate::handle::actions::build::{BuildOptions, BuildReport};
 use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::server_repo_handle::ServerRepoHandle;
-use crate::io::fs::fs_writable::KnownFSWritable;
+use crate::io::fs::fs_writable::FixedFsWritable;
 use crate::io::files::file_names::fixed_file::FixedFile;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::io::files::file_paths::rel_path::RelPath;

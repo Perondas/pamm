@@ -53,7 +53,7 @@ impl Writable for RepoVersion {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::io::fs::fs_writable::KnownFSWritable;
+    use crate::io::fs::fs_writable::FixedFsWritable;
     use crate::util::test_utils::TestTempDir;
 
     #[test]

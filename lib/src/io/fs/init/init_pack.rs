@@ -1,4 +1,4 @@
-use crate::io::fs::fs_writable::{FsWritable, KnownFSWritable};
+use crate::io::fs::fs_writable::{FsWritable, FixedFsWritable};
 use crate::io::files::file_names::fixed_file::FixedFile;
 use crate::io::files::name_consts::{ADDONS_DIR_NAME, INDEX_DIR_NAME, WWW_DIR_NAME};
 use crate::models::pack::pack_config::PackConfig;

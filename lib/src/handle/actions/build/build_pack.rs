@@ -3,7 +3,7 @@ use crate::handle::actions::build::{BuildOptions, BuildReport};
 use crate::handle::reading::get_pack::GetPack;
 use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::server_repo_handle::ServerRepoHandle;
-use crate::io::fs::fs_writable::KnownFSWritable;
+use crate::io::fs::fs_writable::FixedFsWritable;
 use crate::io::fs::pack::index_generator::IndexGenerator;
 use crate::io::files::file_names::fixed_file::FixedFile;
 use crate::io::files::name_consts::{ADDONS_DIR_NAME, CACHE_DB_DIR_NAME};

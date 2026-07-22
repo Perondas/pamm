@@ -115,9 +115,9 @@ mod tests {
         let mut packs = HashSet::new();
         packs.insert("core".to_string());
         let repo_config = RepoConfig::new("repo".to_string(), "desc".to_string(), packs);
-        crate::io::fs::fs_writable::KnownFSWritable::write_to(&repo_config, &repo_path).unwrap();
+        crate::io::fs::fs_writable::FixedFsWritable::write_to(&repo_config, &repo_path).unwrap();
         let settings = RepoUserSettings::new(Url::parse("http://localhost/").unwrap());
-        crate::io::fs::fs_writable::KnownFSWritable::write_to(&settings, &repo_path).unwrap();
+        crate::io::fs::fs_writable::FixedFsWritable::write_to(&settings, &repo_path).unwrap();
 
         // Flat v1 client layout.
         fs::write(repo_path.join("core.pack.config.json"), b"{}").unwrap();

@@ -1,7 +1,7 @@
 use crate::handle::actions::build::{BuildMode, BuildOptions};
 use crate::handle::server_repo_handle::ServerRepoHandle;
 use crate::io::fs::fs_readable::KnownFSReadable;
-use crate::io::fs::fs_writable::KnownFSWritable;
+use crate::io::fs::fs_writable::FixedFsWritable;
 use crate::io::files::file_names::fixed_file::FixedFile;
 use crate::io::files::name_consts::{CACHE_DB_DIR_NAME, WWW_DIR_NAME};
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;

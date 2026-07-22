@@ -21,7 +21,7 @@ impl GetPack for RepoHandle {
             pack_name
         );
 
-        self.read_known::<PackConfig>(&RelPath::from_name(pack_name))
+        self.read_keyed::<PackConfig>(pack_name)
             .context(anyhow!(
                 "Failed to read pack config for {} in {:#?}",
                 pack_name,
@@ -35,7 +35,7 @@ impl GetPack for RepoHandle {
         let pack_config = self.get_pack(pack_name)?;
 
         let pack_user_settings =
-            self.read_known(&RelPath::from_name(pack_name))
+            self.read_keyed(pack_name)
                 .context(anyhow!(
                     "Failed to read settings for {} in {:#?}",
                     pack_name,

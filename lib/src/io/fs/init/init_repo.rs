@@ -1,4 +1,4 @@
-use crate::io::fs::fs_writable::KnownFSWritable;
+use crate::io::fs::fs_writable::FixedFsWritable;
 use crate::io::net::downloadable::{KnownDownloadable, NamedDownloadable};
 use crate::io::net::remote_version::verify_remote_version;
 use crate::models::pack::pack_config::PackConfig;

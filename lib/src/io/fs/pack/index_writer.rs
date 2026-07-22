@@ -1,4 +1,4 @@
-use crate::io::fs::fs_writable::{IdentifiableFSWritable, KnownFSWritable};
+use crate::io::fs::fs_writable::{SelfKeyedFSWritable, FixedFsWritable};
 use crate::models::index::checksum_index::ChecksumIndex;
 use crate::models::pack::pack_diff::PackDiff;
 use crate::models::pack::pack_index::PackIndex;
