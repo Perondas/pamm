@@ -1,7 +1,6 @@
 use crate::models::pack::addon::AddonSettings;
 use crate::models::pack::pack_diff::PackDiff;
 use crate::models::pack::pack_user_settings::PackUserSettings;
-use crate::models::pack::server_info::ServerInfo;
 use crate::keyed;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -12,7 +11,6 @@ pub struct PackConfig {
     pub name: String,
     pub description: String,
     pub client_params: Vec<String>,
-    pub servers: Vec<ServerInfo>,
     pub parent: Option<String>,
     pub addons: HashMap<String, AddonSettings>,
 }
@@ -22,14 +20,12 @@ impl PackConfig {
         name: String,
         description: String,
         client_params: Vec<String>,
-        servers: Vec<ServerInfo>,
         parent: Option<String>,
     ) -> Self {
         Self {
             name,
             description,
             client_params,
-            servers,
             parent,
             addons: HashMap::new(),
         }
@@ -69,7 +65,6 @@ mod tests {
             "test_pack".to_string(),
             "A test pack".to_string(),
             vec!["-mod=1".to_string()],
-            vec![],
             Some("parent_pack".to_string()),
         );
 
@@ -85,7 +80,6 @@ mod tests {
         let mut config = PackConfig::new(
             "test_pack".to_string(),
             "desc".to_string(),
-            vec![],
             vec![],
             None,
         );

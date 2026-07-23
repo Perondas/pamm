@@ -27,13 +27,7 @@ mod tests {
     fn test_load_externals() {
         let mut mock = MockHandle::new();
 
-        let config = PackConfig::new(
-            "test_pack".to_string(),
-            "desc".to_string(),
-            vec![],
-            vec![],
-            None,
-        );
+        let config = PackConfig::new("test_pack".to_string(), "desc".to_string(), vec![], None);
 
         let mut settings = PackUserSettings::default();
         let external = ExternalAddon {

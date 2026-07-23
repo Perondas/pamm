@@ -235,7 +235,6 @@ mod tests {
                 "core".to_string(),
                 "core pack".to_string(),
                 vec![],
-                vec![],
                 None,
             );
             pack.addons
@@ -357,7 +356,6 @@ mod tests {
         let mut pack = PackConfig::new(
             "core".to_string(),
             "core pack".to_string(),
-            vec![],
             vec![],
             None,
         );

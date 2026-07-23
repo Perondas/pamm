@@ -1,9 +1,8 @@
-use crate::commands::input::from_cli_input::{FromCliInput, FromCliInputWithContext};
+use crate::commands::input::from_cli_input::FromCliInputWithContext;
 use anyhow::Result;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::io::files::file_names::fixed_file::FixedFile;
 use pamm_lib::models::pack::pack_config::PackConfig;
-use pamm_lib::models::pack::server_info::ServerInfo;
 use pamm_lib::models::repo::repo_config::RepoConfig;
 use std::path::PathBuf;
 
@@ -36,21 +35,6 @@ impl FromCliInputWithContext for PackConfig {
             .map(|s| s.to_string())
             .collect();
 
-        let mut servers = vec![];
-
-        loop {
-            let confirm = dialoguer::Confirm::with_theme(&ColorfulTheme::default())
-                .with_prompt("Do you want to add a server?".to_string())
-                .default(false)
-                .interact()?;
-
-            if !confirm {
-                break;
-            } else {
-                servers.push(ServerInfo::from_cli_input()?);
-            }
-        }
-
         let mut parent = None;
 
         let pack_vec: Vec<String> = repo_config.packs.iter().cloned().collect();
@@ -64,12 +48,6 @@ impl FromCliInputWithContext for PackConfig {
                 .map(|i| pack_vec[i].clone());
         }
 
-        Ok(PackConfig::new(
-            name,
-            description,
-            client_params,
-            servers,
-            parent,
-        ))
+        Ok(PackConfig::new(name, description, client_params, parent))
     }
 }

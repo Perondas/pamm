@@ -47,7 +47,6 @@ impl Fixture {
             "core".to_string(),
             "test pack".to_string(),
             vec![],
-            vec![],
             None,
         );
         pack_config.init_source_on_fs(&repo_path).unwrap();
@@ -387,7 +386,6 @@ fn open_migrates_v1_source_then_build_publishes_v2_www() {
     let pack_config = PackConfig::new(
         "core".to_string(),
         "test pack".to_string(),
-        vec![],
         vec![],
         None,
     );

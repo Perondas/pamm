@@ -57,7 +57,7 @@ mod tests {
         let repo_config = RepoConfig::new("repo".to_string(), "desc".to_string(), HashSet::new());
         let mut server = ServerRepoHandle::create(tmp.path(), repo_config).unwrap();
 
-        let pack = PackConfig::new("core".to_string(), "c".to_string(), vec![], vec![], None);
+        let pack = PackConfig::new("core".to_string(), "c".to_string(), vec![], None);
         server.add_pack(&pack).unwrap();
 
         let repo_path = server.get_repo_path().to_path_buf();

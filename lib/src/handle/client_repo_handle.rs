@@ -3,7 +3,7 @@ use crate::handle::repo_handle::RepoHandle;
 use crate::handle::writing::save_pack_settings::SavePackSettings;
 use crate::io::files::file_names::fixed_file::FixedFile;
 use crate::io::fs::fs_readable::KnownFSReadable;
-use crate::io::fs::migrations::run_migrations;
+use crate::io::fs::migration::run_migrations;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use crate::models::repo::repo_config::RepoConfig;
@@ -29,7 +29,7 @@ impl ClientRepoHandle {
             repo_path
         );
         let user_settings = RepoUserSettings::read_from_known(repo_path)?;
-        run_migrations(repo_path, &base.repo_config)?;
+        run_migrations::run_migrations(repo_path, &base.repo_config)?;
         Ok(Self {
             base,
             user_settings,

@@ -48,7 +48,6 @@ impl MockHandleExt for MockHandle {
             pack_name.to_string(),
             "desc".to_string(),
             vec![],
-            vec![],
             parent.map(|s| s.to_string()),
         );
 
