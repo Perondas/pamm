@@ -59,7 +59,6 @@ mod tests {
             name: "test_pack".to_string(),
             description: "test pack".to_string(),
             client_params: vec![],
-            servers: vec![],
             parent: None,
             addons: Default::default(),
         }

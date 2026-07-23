@@ -2,53 +2,13 @@ use crate::io::files::file_names::fixed_file::FixedFile;
 use crate::io::files::name_consts::{
     get_pack_addon_directory_name, ADDONS_DIR_NAME, INDEX_DIR_NAME, WWW_DIR_NAME,
 };
-use crate::io::fs::fs_writable::FixedFsWritable;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use crate::models::repo::repo_config::RepoConfig;
-use crate::models::repo::repo_version::{RepoVersion, CURRENT_REPO_VERSION};
 use anyhow::{bail, ensure, Context};
 use log::{info, warn};
 use std::fs;
 use std::path::Path;
-
-/// Bring a local repo (server source or client) up to the current layout
-/// version. The version is read from `version.pamm` at the repo root (absent
-/// means v1); each pending migration runs in order and the file is updated
-/// after every successful step, so an interrupted run resumes where it left
-/// off. Repos already at the current version return immediately without
-/// touching the filesystem.
-pub(crate) fn run_migrations(repo_path: &Path, repo_config: &RepoConfig) -> anyhow::Result<()> {
-    let mut version = RepoVersion::read_or_v1(repo_path)?.0;
-
-    if version > CURRENT_REPO_VERSION {
-        bail!(
-            "Repo at {:?} has layout version {} but this pamm only supports up to {}; \
-             update pamm",
-            repo_path,
-            version,
-            CURRENT_REPO_VERSION
-        );
-    }
-
-    while version < CURRENT_REPO_VERSION {
-        match version {
-            1 => migrate_v1_to_v2(repo_path, repo_config)
-                .context("migrating repo layout from v1 to v2")?,
-            v => unreachable!("no migration registered for version {}", v),
-        }
-        version += 1;
-        RepoVersion(version)
-            .write_fixed(repo_path)
-            .context("writing version.pamm after migration")?;
-        info!(
-            "Repo at {:?} migrated to layout version {}",
-            repo_path, version
-        );
-    }
-
-    Ok(())
-}
 
 /// v1 -> v2: move each pack's root-level files into its own folder.
 ///
@@ -63,7 +23,7 @@ pub(crate) fn run_migrations(repo_path: &Path, repo_config: &RepoConfig) -> anyh
 /// file exists in BOTH locations we bail rather than guess which copy is
 /// authoritative. Only files of packs listed in `repo.config.json` are
 /// touched; `www/` and the root-level repo/server config files never move.
-fn migrate_v1_to_v2(repo_path: &Path, repo_config: &RepoConfig) -> anyhow::Result<()> {
+pub fn migrate_v1_to_v2(repo_path: &Path, repo_config: &RepoConfig) -> anyhow::Result<()> {
     let mut moved_any = false;
 
     for pack in &repo_config.packs {
@@ -228,7 +188,10 @@ fn migrate_v1_to_v2(repo_path: &Path, repo_config: &RepoConfig) -> anyhow::Resul
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::io::fs::fs_writable::FixedFsWritable;
+    use crate::io::fs::migration::run_migrations;
+    use crate::models::repo::repo_config::RepoConfig;
+    use crate::models::repo::repo_version::{RepoVersion, CURRENT_REPO_VERSION};
     use crate::util::test_utils::TestTempDir;
     use std::collections::HashSet;
     use std::fs;
@@ -264,7 +227,7 @@ mod tests {
         let tmp = TestTempDir::new("pamm_migrate_flat_happy");
         let repo_path = flat_fixture(&tmp);
 
-        run_migrations(&repo_path, &repo_config(&["core"])).unwrap();
+        run_migrations::run_migrations(&repo_path, &repo_config(&["core"])).unwrap();
 
         assert!(repo_path.join("core/pack.config.json").is_file());
         assert!(repo_path.join("core/pack.settings.json").is_file());
@@ -296,8 +259,8 @@ mod tests {
         let repo_path = flat_fixture(&tmp);
         let config = repo_config(&["core"]);
 
-        run_migrations(&repo_path, &config).unwrap();
-        run_migrations(&repo_path, &config).unwrap();
+        run_migrations::run_migrations(&repo_path, &config).unwrap();
+        run_migrations::run_migrations(&repo_path, &config).unwrap();
 
         assert!(repo_path.join("core/pack.config.json").is_file());
     }
@@ -313,7 +276,7 @@ mod tests {
         // marked as current — the version file is authoritative.
         fs::write(repo_path.join("core.pack.config.json"), b"{}").unwrap();
 
-        run_migrations(&repo_path, &repo_config(&["core"])).unwrap();
+        run_migrations::run_migrations(&repo_path, &repo_config(&["core"])).unwrap();
 
         assert!(repo_path.join("core.pack.config.json").is_file());
         assert!(!repo_path.join("core").exists());
@@ -328,7 +291,7 @@ mod tests {
             .write_fixed(&repo_path)
             .unwrap();
 
-        let err = run_migrations(&repo_path, &repo_config(&[]))
+        let err = run_migrations::run_migrations(&repo_path, &repo_config(&[]))
             .unwrap_err()
             .to_string();
         assert!(err.contains("update pamm"), "unexpected error: {}", err);
@@ -341,7 +304,7 @@ mod tests {
         fs::create_dir_all(repo_path.join("core")).unwrap();
         fs::write(repo_path.join("core/pack.config.json"), b"{}").unwrap();
 
-        let err = run_migrations(&repo_path, &repo_config(&["core"]))
+        let err = run_migrations::run_migrations(&repo_path, &repo_config(&["core"]))
             .unwrap_err()
             .to_string();
         assert!(err.contains("v1 to v2"), "unexpected error: {}", err);
@@ -357,7 +320,7 @@ mod tests {
         let repo_path = tmp.path().join("repo");
         fs::create_dir_all(&repo_path).unwrap();
 
-        run_migrations(&repo_path, &repo_config(&["ghost"])).unwrap();
+        run_migrations::run_migrations(&repo_path, &repo_config(&["ghost"])).unwrap();
         assert!(!repo_path.join("ghost").exists());
     }
 
@@ -369,7 +332,7 @@ mod tests {
 
         let err = format!(
             "{:#}",
-            run_migrations(&repo_path, &repo_config(&["www"])).unwrap_err()
+            run_migrations::run_migrations(&repo_path, &repo_config(&["www"])).unwrap_err()
         );
         assert!(err.contains("www"), "unexpected error: {}", err);
     }
@@ -380,7 +343,7 @@ mod tests {
         let repo_path = flat_fixture(&tmp);
         fs::write(repo_path.join("other.pack.config.json"), b"{}").unwrap();
 
-        run_migrations(&repo_path, &repo_config(&["core"])).unwrap();
+        run_migrations::run_migrations(&repo_path, &repo_config(&["core"])).unwrap();
 
         assert!(
             repo_path.join("other.pack.config.json").is_file(),
