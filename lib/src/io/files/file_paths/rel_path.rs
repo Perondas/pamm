@@ -40,6 +40,16 @@ impl RelPath {
         }
     }
 
+    pub fn from_path(path: impl AsRef<Path>) -> Self {
+        let mut components = Vec::new();
+        for component in path.as_ref().components() {
+            if let std::path::Component::Normal(c) = component {
+                components.push(c.to_string_lossy().into_owned());
+            }
+        }
+        Self { components }
+    }
+
     /// Returns `base_path` with this relative path's components appended. The
     /// result is relative to whatever `base_path` is relative to — absolute if
     /// `base_path` is absolute, relative otherwise.

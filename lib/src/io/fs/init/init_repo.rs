@@ -2,6 +2,7 @@ use crate::io::fs::fs_writable::FixedFsWritable;
 use crate::io::net::downloadable::KnownDownloadable;
 use crate::io::net::remote_version::verify_remote_version;
 use crate::models::pack::pack_config::PackConfig;
+use crate::models::pack::pack_customization::RepoCustomization;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_user_settings::RepoUserSettings;
 use crate::models::repo::repo_version::RepoVersion;
@@ -30,6 +31,8 @@ impl RepoConfig {
         self.write_fixed(&base_path)?;
         RepoVersion::current().write_fixed(&base_path)?;
 
+        RepoCustomization::default().write_fixed(&base_path)?;
+
         Ok(base_path)
     }
 
@@ -48,6 +51,11 @@ impl RepoConfig {
             remote_url
         ))?;
 
+        let customization = RepoCustomization::download_known(remote_url).context(format!(
+            "Failed to download pack customization from: {}",
+            remote_url
+        ))?;
+
         let base_path = parent_dir.join(&repo.name);
 
         if base_path.exists() {
@@ -57,6 +65,7 @@ impl RepoConfig {
         fs::create_dir(&base_path)?;
         repo.write_fixed(&base_path)?;
         RepoVersion::current().write_fixed(&base_path)?;
+        customization.write_fixed(&base_path)?;
 
         let repo_user_settings = RepoUserSettings::new(remote_url.clone());
         repo_user_settings.write_fixed(&base_path)?;
@@ -98,6 +107,10 @@ mod tests {
 
         // Check if config was written
         let config_file = created_path.join(RepoConfig::file_name());
+        assert!(config_file.exists());
+
+        // Check if customization was written
+        let config_file = created_path.join(RepoCustomization::file_name());
         assert!(config_file.exists());
 
         // Calling it again should fail since it already exists

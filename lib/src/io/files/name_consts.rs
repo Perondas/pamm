@@ -1,5 +1,6 @@
 pub(crate) const CACHE_DB_DIR_NAME: &str = ".cache";
 pub(crate) const INDEX_DIR_NAME: &str = "indexes";
+pub(crate) const MEDIA_DIR_NAME: &str = "media";
 pub(crate) const WWW_DIR_NAME: &str = "www";
 
 // File/dir names inside a per-pack folder (`<repo>/<pack>/`). The pack folder

@@ -7,15 +7,16 @@ pub(crate) trait KeyedFilePath {
 }
 
 #[macro_export]
-macro_rules! key_is_folder {
-    ($ty:ty) => {
+macro_rules! keyed_path {
+    ($ty:ty, $format:expr) => {
         impl $crate::io::files::file_paths::keyed_path::KeyedFilePath for $ty {
-            fn file_path(key: &str) ->  $crate::io::files::file_paths::rel_path::RelPath {
-                $crate::io::files::file_paths::rel_path::RelPath::from_name(key)
+            fn file_path(key: &str) -> $crate::io::files::file_paths::rel_path::RelPath {
+                let path = format!($format, key);
+                $crate::io::files::file_paths::rel_path::RelPath::from_path(&path)
             }
         }
     };
 }
 
-key_is_folder!(PackUserSettings);
-key_is_folder!(PackConfig);
+keyed_path!(PackUserSettings, "{}");
+keyed_path!(PackConfig, "{}");
