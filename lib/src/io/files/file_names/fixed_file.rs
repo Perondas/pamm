@@ -1,6 +1,5 @@
 use crate::models::index::checksum_index::ChecksumIndex;
 use crate::models::pack::pack_config::PackConfig;
-use crate::models::pack::pack_customization::RepoCustomization;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_user_settings::RepoUserSettings;
@@ -30,5 +29,3 @@ known_file_name!(ChecksumIndex, "checksum_index.pamm");
 known_file_name!(RepoVersion, "version.pamm");
 known_file_name!(PackConfig, "pack.config.json");
 known_file_name!(PackUserSettings, "pack.settings.json");
-
-known_file_name!(RepoCustomization, "pack.customization.json");

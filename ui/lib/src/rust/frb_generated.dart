@@ -1101,6 +1101,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  (int, int, int, int) dco_decode_box_autoadd_record_u_32_u_32_u_32_u_32(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as (int, int, int, int);
+  }
+
+  @protected
+  RepoCustomization dco_decode_box_autoadd_repo_customization(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_repo_customization(raw);
+  }
+
+  @protected
   ChangeType dco_decode_change_type(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     switch (raw[0]) {
@@ -1250,6 +1264,24 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  (int, int, int, int)? dco_decode_opt_box_autoadd_record_u_32_u_32_u_32_u_32(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null
+        ? null
+        : dco_decode_box_autoadd_record_u_32_u_32_u_32_u_32(raw);
+  }
+
+  @protected
+  RepoCustomization? dco_decode_opt_box_autoadd_repo_customization(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_repo_customization(raw);
+  }
+
+  @protected
   OptionalAddon dco_decode_optional_addon(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
@@ -1274,16 +1306,49 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  (int, int, int, int) dco_decode_record_u_32_u_32_u_32_u_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 4) {
+      throw Exception('Expected 4 elements, got ${arr.length}');
+    }
+    return (
+      dco_decode_u_32(arr[0]),
+      dco_decode_u_32(arr[1]),
+      dco_decode_u_32(arr[2]),
+      dco_decode_u_32(arr[3]),
+    );
+  }
+
+  @protected
   RepoConfig dco_decode_repo_config(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 3)
-      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
     return RepoConfig(
       name: dco_decode_String(arr[0]),
       description: dco_decode_String(arr[1]),
       packs: dco_decode_Set_String_None(arr[2]),
+      customization: dco_decode_opt_box_autoadd_repo_customization(arr[3]),
     );
+  }
+
+  @protected
+  RepoCustomization dco_decode_repo_customization(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 1)
+      throw Exception('unexpected arr length: expect 1 but see ${arr.length}');
+    return RepoCustomization(
+      color: dco_decode_opt_box_autoadd_record_u_32_u_32_u_32_u_32(arr[0]),
+    );
+  }
+
+  @protected
+  int dco_decode_u_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as int;
   }
 
   @protected
@@ -1433,6 +1498,22 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   bool sse_decode_bool(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getUint8() != 0;
+  }
+
+  @protected
+  (int, int, int, int) sse_decode_box_autoadd_record_u_32_u_32_u_32_u_32(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_record_u_32_u_32_u_32_u_32(deserializer));
+  }
+
+  @protected
+  RepoCustomization sse_decode_box_autoadd_repo_customization(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_repo_customization(deserializer));
   }
 
   @protected
@@ -1641,6 +1722,32 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  (int, int, int, int)? sse_decode_opt_box_autoadd_record_u_32_u_32_u_32_u_32(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_record_u_32_u_32_u_32_u_32(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
+  RepoCustomization? sse_decode_opt_box_autoadd_repo_customization(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_repo_customization(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
   OptionalAddon sse_decode_optional_addon(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_name = sse_decode_String(deserializer);
@@ -1659,16 +1766,49 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  (int, int, int, int) sse_decode_record_u_32_u_32_u_32_u_32(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_field0 = sse_decode_u_32(deserializer);
+    var var_field1 = sse_decode_u_32(deserializer);
+    var var_field2 = sse_decode_u_32(deserializer);
+    var var_field3 = sse_decode_u_32(deserializer);
+    return (var_field0, var_field1, var_field2, var_field3);
+  }
+
+  @protected
   RepoConfig sse_decode_repo_config(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_name = sse_decode_String(deserializer);
     var var_description = sse_decode_String(deserializer);
     var var_packs = sse_decode_Set_String_None(deserializer);
+    var var_customization = sse_decode_opt_box_autoadd_repo_customization(
+      deserializer,
+    );
     return RepoConfig(
       name: var_name,
       description: var_description,
       packs: var_packs,
+      customization: var_customization,
     );
+  }
+
+  @protected
+  RepoCustomization sse_decode_repo_customization(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_color = sse_decode_opt_box_autoadd_record_u_32_u_32_u_32_u_32(
+      deserializer,
+    );
+    return RepoCustomization(color: var_color);
+  }
+
+  @protected
+  int sse_decode_u_32(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getUint32();
   }
 
   @protected
@@ -1852,6 +1992,24 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_box_autoadd_record_u_32_u_32_u_32_u_32(
+    (int, int, int, int) self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_record_u_32_u_32_u_32_u_32(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_repo_customization(
+    RepoCustomization self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_repo_customization(self, serializer);
+  }
+
+  @protected
   void sse_encode_change_type(ChangeType self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     switch (self) {
@@ -2026,6 +2184,32 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_opt_box_autoadd_record_u_32_u_32_u_32_u_32(
+    (int, int, int, int)? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_record_u_32_u_32_u_32_u_32(self, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_opt_box_autoadd_repo_customization(
+    RepoCustomization? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_repo_customization(self, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_optional_addon(OptionalAddon self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.name, serializer);
@@ -2043,11 +2227,45 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_record_u_32_u_32_u_32_u_32(
+    (int, int, int, int) self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_u_32(self.$1, serializer);
+    sse_encode_u_32(self.$2, serializer);
+    sse_encode_u_32(self.$3, serializer);
+    sse_encode_u_32(self.$4, serializer);
+  }
+
+  @protected
   void sse_encode_repo_config(RepoConfig self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.name, serializer);
     sse_encode_String(self.description, serializer);
     sse_encode_Set_String_None(self.packs, serializer);
+    sse_encode_opt_box_autoadd_repo_customization(
+      self.customization,
+      serializer,
+    );
+  }
+
+  @protected
+  void sse_encode_repo_customization(
+    RepoCustomization self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_opt_box_autoadd_record_u_32_u_32_u_32_u_32(
+      self.color,
+      serializer,
+    );
+  }
+
+  @protected
+  void sse_encode_u_32(int self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putUint32(self);
   }
 
   @protected

@@ -1,5 +1,4 @@
 use crate::io::files::file_paths::rel_path::RelPath;
-use crate::models::pack::pack_customization::RepoCustomization;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::server_config::ServerConfig;
 
@@ -21,4 +20,3 @@ macro_rules! at_root {
 
 at_root!(RepoConfig);
 at_root!(ServerConfig);
-at_root!(RepoCustomization);

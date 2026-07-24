@@ -3,6 +3,7 @@ use flutter_rust_bridge::frb;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use pamm_lib::handle::reading::get_repo_info::GetRepoInfo;
 pub use pamm_lib::models::repo::repo_config::RepoConfig;
+pub use pamm_lib::models::repo::repo_customization::RepoCustomization;
 use std::collections::HashSet;
 use std::path::Path;
 use url::Url;
@@ -21,4 +22,10 @@ pub struct _RepoConfig {
     pub name: String,
     pub description: String,
     pub packs: HashSet<String>,
+    pub customization: Option<RepoCustomization>,
+}
+
+#[frb(mirror(RepoCustomization))]
+pub struct _RepoCustomization {
+    pub color: Option<(u32, u32, u32, u32)>,
 }

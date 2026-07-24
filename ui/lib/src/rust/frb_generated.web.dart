@@ -106,6 +106,14 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool dco_decode_bool(dynamic raw);
 
   @protected
+  (int, int, int, int) dco_decode_box_autoadd_record_u_32_u_32_u_32_u_32(
+    dynamic raw,
+  );
+
+  @protected
+  RepoCustomization dco_decode_box_autoadd_repo_customization(dynamic raw);
+
+  @protected
   ChangeType dco_decode_change_type(dynamic raw);
 
   @protected
@@ -155,6 +163,14 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   String? dco_decode_opt_String(dynamic raw);
 
   @protected
+  (int, int, int, int)? dco_decode_opt_box_autoadd_record_u_32_u_32_u_32_u_32(
+    dynamic raw,
+  );
+
+  @protected
+  RepoCustomization? dco_decode_opt_box_autoadd_repo_customization(dynamic raw);
+
+  @protected
   OptionalAddon dco_decode_optional_addon(dynamic raw);
 
   @protected
@@ -163,7 +179,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  (int, int, int, int) dco_decode_record_u_32_u_32_u_32_u_32(dynamic raw);
+
+  @protected
   RepoConfig dco_decode_repo_config(dynamic raw);
+
+  @protected
+  RepoCustomization dco_decode_repo_customization(dynamic raw);
+
+  @protected
+  int dco_decode_u_32(dynamic raw);
 
   @protected
   BigInt dco_decode_u_64(dynamic raw);
@@ -241,6 +266,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool sse_decode_bool(SseDeserializer deserializer);
 
   @protected
+  (int, int, int, int) sse_decode_box_autoadd_record_u_32_u_32_u_32_u_32(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  RepoCustomization sse_decode_box_autoadd_repo_customization(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   ChangeType sse_decode_change_type(SseDeserializer deserializer);
 
   @protected
@@ -294,6 +329,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   String? sse_decode_opt_String(SseDeserializer deserializer);
 
   @protected
+  (int, int, int, int)? sse_decode_opt_box_autoadd_record_u_32_u_32_u_32_u_32(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  RepoCustomization? sse_decode_opt_box_autoadd_repo_customization(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   OptionalAddon sse_decode_optional_addon(SseDeserializer deserializer);
 
   @protected
@@ -302,7 +347,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  (int, int, int, int) sse_decode_record_u_32_u_32_u_32_u_32(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   RepoConfig sse_decode_repo_config(SseDeserializer deserializer);
+
+  @protected
+  RepoCustomization sse_decode_repo_customization(SseDeserializer deserializer);
+
+  @protected
+  int sse_decode_u_32(SseDeserializer deserializer);
 
   @protected
   BigInt sse_decode_u_64(SseDeserializer deserializer);
@@ -395,6 +451,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_bool(bool self, SseSerializer serializer);
 
   @protected
+  void sse_encode_box_autoadd_record_u_32_u_32_u_32_u_32(
+    (int, int, int, int) self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_repo_customization(
+    RepoCustomization self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_change_type(ChangeType self, SseSerializer serializer);
 
   @protected
@@ -465,6 +533,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_opt_String(String? self, SseSerializer serializer);
 
   @protected
+  void sse_encode_opt_box_autoadd_record_u_32_u_32_u_32_u_32(
+    (int, int, int, int)? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_box_autoadd_repo_customization(
+    RepoCustomization? self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_optional_addon(OptionalAddon self, SseSerializer serializer);
 
   @protected
@@ -474,7 +554,22 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_record_u_32_u_32_u_32_u_32(
+    (int, int, int, int) self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_repo_config(RepoConfig self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_repo_customization(
+    RepoCustomization self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_u_32(int self, SseSerializer serializer);
 
   @protected
   void sse_encode_u_64(BigInt self, SseSerializer serializer);

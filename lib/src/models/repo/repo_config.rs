@@ -1,3 +1,4 @@
+use crate::models::repo::repo_customization::RepoCustomization;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
@@ -7,6 +8,7 @@ pub struct RepoConfig {
     pub description: String,
     /// Store the names of packs available in this repo
     pub packs: HashSet<String>,
+    pub customization: Option<RepoCustomization>,
 }
 
 impl RepoConfig {
@@ -15,6 +17,7 @@ impl RepoConfig {
             name,
             description,
             packs,
+            customization: None,
         }
     }
 
