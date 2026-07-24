@@ -18,15 +18,21 @@ class RepoConfig {
   final String name;
   final String description;
   final Set<String> packs;
+  final RepoCustomization? customization;
 
   const RepoConfig({
     required this.name,
     required this.description,
     required this.packs,
+    this.customization,
   });
 
   @override
-  int get hashCode => name.hashCode ^ description.hashCode ^ packs.hashCode;
+  int get hashCode =>
+      name.hashCode ^
+      description.hashCode ^
+      packs.hashCode ^
+      customization.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -35,5 +41,22 @@ class RepoConfig {
           runtimeType == other.runtimeType &&
           name == other.name &&
           description == other.description &&
-          packs == other.packs;
+          packs == other.packs &&
+          customization == other.customization;
+}
+
+class RepoCustomization {
+  final (int, int, int, int)? color;
+
+  const RepoCustomization({this.color});
+
+  @override
+  int get hashCode => color.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RepoCustomization &&
+          runtimeType == other.runtimeType &&
+          color == other.color;
 }

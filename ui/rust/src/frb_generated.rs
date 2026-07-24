@@ -876,6 +876,13 @@ const _: fn() = || {
         let _: String = RepoConfig.name;
         let _: String = RepoConfig.description;
         let _: std::collections::HashSet<String> = RepoConfig.packs;
+        let _: Option<crate::api::commands::init_from_remote::RepoCustomization> =
+            RepoConfig.customization;
+    }
+    {
+        let RepoCustomization =
+            None::<crate::api::commands::init_from_remote::RepoCustomization>.unwrap();
+        let _: Option<(u32, u32, u32, u32)> = RepoCustomization.color;
     }
 };
 
@@ -1241,6 +1248,32 @@ impl SseDecode for Option<String> {
     }
 }
 
+impl SseDecode for Option<(u32, u32, u32, u32)> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<(u32, u32, u32, u32)>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for Option<crate::api::commands::init_from_remote::RepoCustomization> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(
+                <crate::api::commands::init_from_remote::RepoCustomization>::sse_decode(
+                    deserializer,
+                ),
+            );
+        } else {
+            return None;
+        }
+    }
+}
+
 impl SseDecode for crate::api::commands::optionals::load_optionals::OptionalAddon {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1270,17 +1303,47 @@ impl SseDecode
     }
 }
 
+impl SseDecode for (u32, u32, u32, u32) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_field0 = <u32>::sse_decode(deserializer);
+        let mut var_field1 = <u32>::sse_decode(deserializer);
+        let mut var_field2 = <u32>::sse_decode(deserializer);
+        let mut var_field3 = <u32>::sse_decode(deserializer);
+        return (var_field0, var_field1, var_field2, var_field3);
+    }
+}
+
 impl SseDecode for crate::api::commands::init_from_remote::RepoConfig {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_name = <String>::sse_decode(deserializer);
         let mut var_description = <String>::sse_decode(deserializer);
         let mut var_packs = <std::collections::HashSet<String>>::sse_decode(deserializer);
+        let mut var_customization = <Option<
+            crate::api::commands::init_from_remote::RepoCustomization,
+        >>::sse_decode(deserializer);
         return crate::api::commands::init_from_remote::RepoConfig {
             name: var_name,
             description: var_description,
             packs: var_packs,
+            customization: var_customization,
         };
+    }
+}
+
+impl SseDecode for crate::api::commands::init_from_remote::RepoCustomization {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_color = <Option<(u32, u32, u32, u32)>>::sse_decode(deserializer);
+        return crate::api::commands::init_from_remote::RepoCustomization { color: var_color };
+    }
+}
+
+impl SseDecode for u32 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_u32::<NativeEndian>().unwrap()
     }
 }
 
@@ -1580,6 +1643,7 @@ impl flutter_rust_bridge::IntoDart
             self.0.name.into_into_dart().into_dart(),
             self.0.description.into_into_dart().into_dart(),
             self.0.packs.into_into_dart().into_dart(),
+            self.0.customization.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -1594,6 +1658,29 @@ impl
     > for crate::api::commands::init_from_remote::RepoConfig
 {
     fn into_into_dart(self) -> FrbWrapper<crate::api::commands::init_from_remote::RepoConfig> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart
+    for FrbWrapper<crate::api::commands::init_from_remote::RepoCustomization>
+{
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [self.0.color.into_into_dart().into_dart()].into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::commands::init_from_remote::RepoCustomization>
+{
+}
+impl
+    flutter_rust_bridge::IntoIntoDart<
+        FrbWrapper<crate::api::commands::init_from_remote::RepoCustomization>,
+    > for crate::api::commands::init_from_remote::RepoCustomization
+{
+    fn into_into_dart(
+        self,
+    ) -> FrbWrapper<crate::api::commands::init_from_remote::RepoCustomization> {
         self.into()
     }
 }
@@ -1891,6 +1978,28 @@ impl SseEncode for Option<String> {
     }
 }
 
+impl SseEncode for Option<(u32, u32, u32, u32)> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <(u32, u32, u32, u32)>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<crate::api::commands::init_from_remote::RepoCustomization> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::commands::init_from_remote::RepoCustomization>::sse_encode(
+                value, serializer,
+            );
+        }
+    }
+}
+
 impl SseEncode for crate::api::commands::optionals::load_optionals::OptionalAddon {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -1914,12 +2023,40 @@ impl SseEncode
     }
 }
 
+impl SseEncode for (u32, u32, u32, u32) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <u32>::sse_encode(self.0, serializer);
+        <u32>::sse_encode(self.1, serializer);
+        <u32>::sse_encode(self.2, serializer);
+        <u32>::sse_encode(self.3, serializer);
+    }
+}
+
 impl SseEncode for crate::api::commands::init_from_remote::RepoConfig {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.name, serializer);
         <String>::sse_encode(self.description, serializer);
         <std::collections::HashSet<String>>::sse_encode(self.packs, serializer);
+        <Option<crate::api::commands::init_from_remote::RepoCustomization>>::sse_encode(
+            self.customization,
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::commands::init_from_remote::RepoCustomization {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <Option<(u32, u32, u32, u32)>>::sse_encode(self.color, serializer);
+    }
+}
+
+impl SseEncode for u32 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer.cursor.write_u32::<NativeEndian>(self).unwrap();
     }
 }
 
