@@ -174,7 +174,7 @@ class _RepoListState extends State<RepoList> {
           title: Text(repo.name),
           subtitle: Text(path),
           selected: _selectedRepo != null && path == _selectedRepo!.path,
-          selectedTileColor: Colors.grey.shade200,
+          selectedTileColor: Theme.of(context).colorScheme.secondaryContainer,
           onTap: () {
             setState(() {
               _selectedRepo = repoStateManager.repoState!;

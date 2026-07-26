@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pamm_ui/main.dart';
 import 'package:pamm_ui/src/pages/settings_screen/settings_group.dart';
+import 'package:pamm_ui/src/services/theme_service.dart';
 import 'package:pamm_ui/src/services/settings_service.dart';
 
 class CustomizationGroup extends StatefulWidget {
@@ -17,6 +17,17 @@ class _CustomizationGroupState extends State<CustomizationGroup> {
     return SettingsGroup(
       title: "Customization",
       children: [
+        SwitchListTile(
+          secondary: Icon(Icons.dark_mode_outlined),
+          title: Text("Dark theme"),
+          value: customization.darkMode,
+          onChanged: (val) async {
+            await settingsService.update(
+              (settings) => settings.customizationSettings.darkMode = val,
+            );
+            setState(() {});
+          },
+        ),
         ListTile(
           leading: Icon(Icons.palette),
           title: Text("Custom seed color"),
@@ -52,6 +63,9 @@ class _CustomizationGroupState extends State<CustomizationGroup> {
         SwitchListTile(
           secondary: Icon(Icons.push_pin_outlined),
           title: Text("Fix seed color"),
+          subtitle: Text(
+            "Keep the seed color even when the selected repository has a custom color",
+          ),
           value: customization.fixedSeedColor,
           onChanged: (val) async {
             await settingsService.update(
@@ -77,11 +91,12 @@ class _ColorPickerDialog extends StatefulWidget {
 class _ColorPickerDialogState extends State<_ColorPickerDialog> {
   static final _presets = <Color>[defaultSeedColor, ...Colors.primaries];
 
+  late int _alpha;
   late int _red;
   late int _green;
   late int _blue;
 
-  Color get _color => Color.fromARGB(255, _red, _green, _blue);
+  Color get _color => Color.fromARGB(_alpha, _red, _green, _blue);
 
   @override
   void initState() {
@@ -90,6 +105,7 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
   }
 
   void _setColor(Color color) {
+    _alpha = (color.a * 255).round();
     _red = (color.r * 255).round();
     _green = (color.g * 255).round();
     _blue = (color.b * 255).round();
@@ -143,11 +159,12 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
                 CircleAvatar(radius: 16, backgroundColor: _color),
                 SizedBox(width: 12),
                 Text(
-                  '#${_color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}',
+                  '#${_color.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()} (ARGB)',
                   style: TextStyle(fontFamily: 'monospace'),
                 ),
               ],
             ),
+            _channelSlider('A', _alpha, (val) => _alpha = val),
             _channelSlider('R', _red, (val) => _red = val),
             _channelSlider('G', _green, (val) => _green = val),
             _channelSlider('B', _blue, (val) => _blue = val),

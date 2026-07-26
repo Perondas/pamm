@@ -6,12 +6,18 @@ part 'customization_settings.g.dart';
 
 @JsonSerializable()
 class CustomizationSettings {
-  CustomizationSettings({this.seedColor, this.fixedSeedColor = false});
+  CustomizationSettings({
+    this.seedColor,
+    this.fixedSeedColor = false,
+    this.darkMode = false,
+  });
 
   @ColorJsonConverter()
   Color? seedColor;
 
   bool fixedSeedColor;
+
+  bool darkMode;
 
   factory CustomizationSettings.fromJson(Map<String, dynamic> json) =>
       _$CustomizationSettingsFromJson(json);

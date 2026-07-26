@@ -3,6 +3,7 @@ import 'package:pamm_ui/src/models/repo_with_path.dart';
 import 'package:pamm_ui/src/pages/main_screen/repo_details/main.dart';
 import 'package:pamm_ui/src/pages/main_screen/repo_list/main.dart';
 import 'package:pamm_ui/src/pages/settings_screen/main.dart';
+import 'package:pamm_ui/src/services/theme_service.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -15,6 +16,7 @@ class _MainScreenState extends State<MainScreen> {
   RepoWithPath? _selectedRepo;
 
   void _onSelectRepo(RepoWithPath? repo) {
+    themeService.applyRepo(repo?.repo);
     setState(() {
       _selectedRepo = repo;
     });

@@ -14,6 +14,7 @@ CustomizationSettings _$CustomizationSettingsFromJson(
     const ColorJsonConverter().fromJson,
   ),
   fixedSeedColor: json['fixedSeedColor'] as bool? ?? false,
+  darkMode: json['darkMode'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$CustomizationSettingsToJson(
@@ -24,6 +25,7 @@ Map<String, dynamic> _$CustomizationSettingsToJson(
     const ColorJsonConverter().toJson,
   ),
   'fixedSeedColor': instance.fixedSeedColor,
+  'darkMode': instance.darkMode,
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(

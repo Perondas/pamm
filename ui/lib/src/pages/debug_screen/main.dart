@@ -119,7 +119,7 @@ class _DebugScreenState extends State<DebugScreen> {
                   var log = logs[index];
                   return Container(
                     color: index % 2 == 0
-                        ? Colors.grey.shade200
+                        ? Theme.of(context).colorScheme.surfaceContainerHighest
                         : Colors.transparent,
                     width: double.infinity,
                     child: Text(
