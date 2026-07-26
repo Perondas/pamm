@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pamm_ui/src/models/settings/customization_settings.dart';
 import 'package:pamm_ui/src/pages/settings_screen/settings_group.dart';
 import 'package:pamm_ui/src/services/theme_service.dart';
 import 'package:pamm_ui/src/services/settings_service.dart';
@@ -17,16 +18,27 @@ class _CustomizationGroupState extends State<CustomizationGroup> {
     return SettingsGroup(
       title: "Customization",
       children: [
-        SwitchListTile(
-          secondary: Icon(Icons.dark_mode_outlined),
-          title: Text("Dark theme"),
-          value: customization.darkMode,
-          onChanged: (val) async {
-            await settingsService.update(
-              (settings) => settings.customizationSettings.darkMode = val,
-            );
-            setState(() {});
-          },
+        ListTile(
+          leading: Icon(Icons.dark_mode_outlined),
+          title: Text("Theme"),
+          trailing: SegmentedButton<ThemePreference>(
+            segments: const [
+              ButtonSegment(
+                value: ThemePreference.system,
+                label: Text("System"),
+              ),
+              ButtonSegment(value: ThemePreference.light, label: Text("Light")),
+              ButtonSegment(value: ThemePreference.dark, label: Text("Dark")),
+            ],
+            selected: {customization.theme},
+            onSelectionChanged: (selection) async {
+              await settingsService.update(
+                (settings) =>
+                    settings.customizationSettings.theme = selection.first,
+              );
+              setState(() {});
+            },
+          ),
         ),
         ListTile(
           leading: Icon(Icons.palette),

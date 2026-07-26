@@ -4,12 +4,14 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'customization_settings.g.dart';
 
+enum ThemePreference { system, light, dark }
+
 @JsonSerializable()
 class CustomizationSettings {
   CustomizationSettings({
     this.seedColor,
     this.fixedSeedColor = false,
-    this.darkMode = false,
+    this.theme = ThemePreference.system,
   });
 
   @ColorJsonConverter()
@@ -17,7 +19,7 @@ class CustomizationSettings {
 
   bool fixedSeedColor;
 
-  bool darkMode;
+  ThemePreference theme;
 
   factory CustomizationSettings.fromJson(Map<String, dynamic> json) =>
       _$CustomizationSettingsFromJson(json);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pamm_ui/src/models/settings/customization_settings.dart';
 import 'package:pamm_ui/src/rust/api/commands/init_from_remote.dart';
 import 'package:pamm_ui/src/services/settings_service.dart';
 
@@ -36,9 +37,11 @@ class ThemeService extends ChangeNotifier {
   }
 
   ThemeMode get themeMode =>
-      settingsService.settings.customizationSettings.darkMode
-      ? ThemeMode.dark
-      : ThemeMode.light;
+      switch (settingsService.settings.customizationSettings.theme) {
+        ThemePreference.system => ThemeMode.system,
+        ThemePreference.light => ThemeMode.light,
+        ThemePreference.dark => ThemeMode.dark,
+      };
 
   /// Repo configs store colors as an (a, r, g, b) tuple.
   static Color? _colorFromConfig((int, int, int, int)? color) {
