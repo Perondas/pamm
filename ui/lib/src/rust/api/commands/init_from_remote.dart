@@ -47,16 +47,20 @@ class RepoConfig {
 
 class RepoCustomization {
   final (int, int, int, int)? color;
+  final String? icon;
+  final String? banner;
 
-  const RepoCustomization({this.color});
+  const RepoCustomization({this.color, this.icon, this.banner});
 
   @override
-  int get hashCode => color.hashCode;
+  int get hashCode => color.hashCode ^ icon.hashCode ^ banner.hashCode;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is RepoCustomization &&
           runtimeType == other.runtimeType &&
-          color == other.color;
+          color == other.color &&
+          icon == other.icon &&
+          banner == other.banner;
 }

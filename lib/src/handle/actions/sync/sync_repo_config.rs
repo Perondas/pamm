@@ -1,4 +1,5 @@
 use crate::handle::actions::sync::config_sync_interactor::ConfigSyncInteractor;
+use crate::handle::actions::sync::sync_media::download_referenced_media;
 use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::writing::delete_pack::DeletePack;
@@ -46,6 +47,8 @@ impl ClientRepoHandle {
             .filter(|p| !local_repo_config.packs.contains(*p))
             .collect::<Vec<_>>();
 
+        let mut pack_configs = Vec::with_capacity(remote_repo_config.packs.len());
+
         for pack in added {
             let path = PackConfig::file_path(pack);
             let pack_config = PackConfig::download_known(&path.with_base_url(&remote_url))
@@ -54,6 +57,7 @@ impl ClientRepoHandle {
             self.add_pack(&pack_config)?;
 
             interactor.notify_pack_added(pack)?;
+            pack_configs.push(pack_config);
         }
 
         let existing = remote_repo_config
@@ -67,8 +71,18 @@ impl ClientRepoHandle {
             let remote_pack_config = PackConfig::download_known(&path.with_base_url(&remote_url))
                 .context(format!("Failed to download pack {} configuration", pack))?;
             self.update_pack(&remote_pack_config)?;
+            pack_configs.push(remote_pack_config);
         }
 
-        self.update_repo_config(remote_repo_config)
+        self.update_repo_config(remote_repo_config.clone())?;
+
+        download_referenced_media(
+            self.get_repo_path(),
+            &remote_url,
+            &remote_repo_config,
+            &pack_configs,
+        );
+
+        Ok(())
     }
 }

@@ -9,6 +9,7 @@ import 'api/commands/externals/save_externals.dart';
 import 'api/commands/get_remote_repo_info.dart';
 import 'api/commands/init_from_remote.dart';
 import 'api/commands/launch.dart';
+import 'api/commands/load_pack_display.dart';
 import 'api/commands/load_repo.dart';
 import 'api/commands/optionals/load_optionals.dart';
 import 'api/commands/optionals/save_optionals.dart';
@@ -170,6 +171,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   OptionalAddon dco_decode_optional_addon(dynamic raw);
+
+  @protected
+  PackDisplayInfo dco_decode_pack_display_info(dynamic raw);
 
   @protected
   (String, List<FileChange>) dco_decode_record_string_list_file_change(
@@ -338,6 +342,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   OptionalAddon sse_decode_optional_addon(SseDeserializer deserializer);
+
+  @protected
+  PackDisplayInfo sse_decode_pack_display_info(SseDeserializer deserializer);
 
   @protected
   (String, List<FileChange>) sse_decode_record_string_list_file_change(
@@ -544,6 +551,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_optional_addon(OptionalAddon self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_pack_display_info(
+    PackDisplayInfo self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_record_string_list_file_change(

@@ -1,4 +1,5 @@
 use crate::models::pack::addon::AddonSettings;
+use crate::models::pack::pack_customization::PackCustomization;
 use crate::models::pack::pack_diff::PackDiff;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use crate::keyed;
@@ -13,6 +14,7 @@ pub struct PackConfig {
     pub client_params: Vec<String>,
     pub parent: Option<String>,
     pub addons: HashMap<String, AddonSettings>,
+    pub customization: Option<PackCustomization>,
 }
 
 impl PackConfig {
@@ -28,6 +30,7 @@ impl PackConfig {
             client_params,
             parent,
             addons: HashMap::new(),
+            customization: None,
         }
     }
 

@@ -28,4 +28,6 @@ pub struct _RepoConfig {
 #[frb(mirror(RepoCustomization))]
 pub struct _RepoCustomization {
     pub color: Option<(u32, u32, u32, u32)>,
+    pub icon: Option<String>,
+    pub banner: Option<String>,
 }

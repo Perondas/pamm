@@ -40,7 +40,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.12.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1234091837;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1731696316;
 
 // Section: executor
 
@@ -520,6 +520,45 @@ fn wire__crate__api__commands__optionals__load_optionals__load_optionals_impl(
         },
     )
 }
+fn wire__crate__api__commands__load_pack_display__load_pack_display_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "load_pack_display",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_repo_path = <String>::sse_decode(&mut deserializer);
+            let api_pack_name = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::api::commands::load_pack_display::load_pack_display(
+                            api_repo_path,
+                            api_pack_name,
+                        )?;
+                        Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__commands__load_repo__load_repo_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -883,6 +922,8 @@ const _: fn() = || {
         let RepoCustomization =
             None::<crate::api::commands::init_from_remote::RepoCustomization>.unwrap();
         let _: Option<(u32, u32, u32, u32)> = RepoCustomization.color;
+        let _: Option<String> = RepoCustomization.icon;
+        let _: Option<String> = RepoCustomization.banner;
     }
 };
 
@@ -1286,6 +1327,22 @@ impl SseDecode for crate::api::commands::optionals::load_optionals::OptionalAddo
     }
 }
 
+impl SseDecode for crate::api::commands::load_pack_display::PackDisplayInfo {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_name = <String>::sse_decode(deserializer);
+        let mut var_description = <String>::sse_decode(deserializer);
+        let mut var_icon = <Option<String>>::sse_decode(deserializer);
+        let mut var_banner = <Option<String>>::sse_decode(deserializer);
+        return crate::api::commands::load_pack_display::PackDisplayInfo {
+            name: var_name,
+            description: var_description,
+            icon: var_icon,
+            banner: var_banner,
+        };
+    }
+}
+
 impl SseDecode
     for (
         String,
@@ -1336,7 +1393,13 @@ impl SseDecode for crate::api::commands::init_from_remote::RepoCustomization {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_color = <Option<(u32, u32, u32, u32)>>::sse_decode(deserializer);
-        return crate::api::commands::init_from_remote::RepoCustomization { color: var_color };
+        let mut var_icon = <Option<String>>::sse_decode(deserializer);
+        let mut var_banner = <Option<String>>::sse_decode(deserializer);
+        return crate::api::commands::init_from_remote::RepoCustomization {
+            color: var_color,
+            icon: var_icon,
+            banner: var_banner,
+        };
     }
 }
 
@@ -1398,14 +1461,15 @@ fn pde_ffi_dispatcher_primary_impl(
 10 => wire__crate__api__commands__launch__launch_impl(port, ptr, rust_vec_len, data_len),
 11 => wire__crate__api__commands__externals__load_externals__load_externals_impl(port, ptr, rust_vec_len, data_len),
 12 => wire__crate__api__commands__optionals__load_optionals__load_optionals_impl(port, ptr, rust_vec_len, data_len),
-13 => wire__crate__api__commands__load_repo__load_repo_impl(port, ptr, rust_vec_len, data_len),
-14 => wire__crate__api__commands__pack_sync__quick_check__quick_check_impl(port, ptr, rust_vec_len, data_len),
-15 => wire__crate__api__commands__externals__save_externals__save_externals_impl(port, ptr, rust_vec_len, data_len),
-16 => wire__crate__api__commands__optionals__save_optionals__save_optionals_impl(port, ptr, rust_vec_len, data_len),
-17 => wire__crate__api__commands__params__set_launch_params_impl(port, ptr, rust_vec_len, data_len),
-19 => wire__crate__api__commands__sync_config__sync_config_impl(port, ptr, rust_vec_len, data_len),
-20 => wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(port, ptr, rust_vec_len, data_len),
-21 => wire__crate__api__commands__pack_sync__sync_pack_with_parents__sync_pack_with_parents_impl(port, ptr, rust_vec_len, data_len),
+13 => wire__crate__api__commands__load_pack_display__load_pack_display_impl(port, ptr, rust_vec_len, data_len),
+14 => wire__crate__api__commands__load_repo__load_repo_impl(port, ptr, rust_vec_len, data_len),
+15 => wire__crate__api__commands__pack_sync__quick_check__quick_check_impl(port, ptr, rust_vec_len, data_len),
+16 => wire__crate__api__commands__externals__save_externals__save_externals_impl(port, ptr, rust_vec_len, data_len),
+17 => wire__crate__api__commands__optionals__save_optionals__save_optionals_impl(port, ptr, rust_vec_len, data_len),
+18 => wire__crate__api__commands__params__set_launch_params_impl(port, ptr, rust_vec_len, data_len),
+20 => wire__crate__api__commands__sync_config__sync_config_impl(port, ptr, rust_vec_len, data_len),
+21 => wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(port, ptr, rust_vec_len, data_len),
+22 => wire__crate__api__commands__pack_sync__sync_pack_with_parents__sync_pack_with_parents_impl(port, ptr, rust_vec_len, data_len),
                         _ => unreachable!(),
                     }
 }
@@ -1425,7 +1489,7 @@ fn pde_ffi_dispatcher_sync_impl(
         ),
         7 => wire__crate__api__init_app_impl(ptr, rust_vec_len, data_len),
         9 => wire__crate__api__logging__init_rust_logger_impl(ptr, rust_vec_len, data_len),
-        18 => wire__crate__api__logging__set_rust_log_level_impl(ptr, rust_vec_len, data_len),
+        19 => wire__crate__api__logging__set_rust_log_level_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -1635,6 +1699,29 @@ impl
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::commands::load_pack_display::PackDisplayInfo {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.name.into_into_dart().into_dart(),
+            self.description.into_into_dart().into_dart(),
+            self.icon.into_into_dart().into_dart(),
+            self.banner.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::commands::load_pack_display::PackDisplayInfo
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::load_pack_display::PackDisplayInfo>
+    for crate::api::commands::load_pack_display::PackDisplayInfo
+{
+    fn into_into_dart(self) -> crate::api::commands::load_pack_display::PackDisplayInfo {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart
     for FrbWrapper<crate::api::commands::init_from_remote::RepoConfig>
 {
@@ -1666,7 +1753,12 @@ impl flutter_rust_bridge::IntoDart
     for FrbWrapper<crate::api::commands::init_from_remote::RepoCustomization>
 {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        [self.0.color.into_into_dart().into_dart()].into_dart()
+        [
+            self.0.color.into_into_dart().into_dart(),
+            self.0.icon.into_into_dart().into_dart(),
+            self.0.banner.into_into_dart().into_dart(),
+        ]
+        .into_dart()
     }
 }
 impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
@@ -2008,6 +2100,16 @@ impl SseEncode for crate::api::commands::optionals::load_optionals::OptionalAddo
     }
 }
 
+impl SseEncode for crate::api::commands::load_pack_display::PackDisplayInfo {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.name, serializer);
+        <String>::sse_encode(self.description, serializer);
+        <Option<String>>::sse_encode(self.icon, serializer);
+        <Option<String>>::sse_encode(self.banner, serializer);
+    }
+}
+
 impl SseEncode
     for (
         String,
@@ -2050,6 +2152,8 @@ impl SseEncode for crate::api::commands::init_from_remote::RepoCustomization {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <Option<(u32, u32, u32, u32)>>::sse_encode(self.color, serializer);
+        <Option<String>>::sse_encode(self.icon, serializer);
+        <Option<String>>::sse_encode(self.banner, serializer);
     }
 }
 

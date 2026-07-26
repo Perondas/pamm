@@ -40,6 +40,10 @@ class RepoStateManager with ChangeNotifier {
       var repo = await syncConfig(repoPath: repoPath);
       isConfigUpToDate = true;
       repoState = RepoWithPath(repo, repoPath);
+      // Media files may have been re-downloaded under the same names; drop
+      // cached images so FileImage picks up the new content.
+      imageCache.clear();
+      imageCache.clearLiveImages();
       notifyListeners();
     } catch (e) {
       configUpdateError =

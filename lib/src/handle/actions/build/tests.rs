@@ -368,6 +368,69 @@ fn build_prunes_stale_pack_dirs_but_keeps_unrelated_entries() {
     assert!(www.join("robots.txt").is_file(), "unrelated file survives");
 }
 
+// Repo-root media/ is published into www/ (symlinked), survives rebuilds and
+// the root stale-prune loop, and stale entries inside www/media are pruned.
+#[test]
+fn build_materializes_media_and_prunes_stale_media_entries() {
+    let fx = Fixture::new("pamm_build_materializes_media");
+    let server = fx.open();
+
+    let media_dir = fx.repo_path.join("media");
+    fs::create_dir_all(&media_dir).unwrap();
+    fs::write(media_dir.join("icon.png"), b"icon").unwrap();
+    fs::write(media_dir.join("banner.png"), b"banner").unwrap();
+
+    server
+        .build(opts(BuildMode::Symlink), NoopProgress)
+        .unwrap();
+
+    let www_icon = fx.www().join("media/icon.png");
+    assert!(
+        fs::symlink_metadata(&www_icon)
+            .unwrap()
+            .file_type()
+            .is_symlink()
+    );
+    assert_eq!(fs::read(&www_icon).unwrap(), b"icon");
+    assert_eq!(fs::read(fx.www().join("media/banner.png")).unwrap(), b"banner");
+
+    // Rebuild after removing one file: the stale www entry is pruned, the
+    // rest (and www/media itself) survive the root prune loop.
+    fs::remove_file(media_dir.join("banner.png")).unwrap();
+    server
+        .build(opts(BuildMode::Symlink), NoopProgress)
+        .unwrap();
+
+    assert!(!fx.www().join("media/banner.png").exists());
+    assert_eq!(fs::read(&www_icon).unwrap(), b"icon");
+}
+
+// Removing (or emptying) the source media/ removes the published www/media.
+#[test]
+fn build_removes_www_media_when_source_is_gone() {
+    let fx = Fixture::new("pamm_build_removes_www_media");
+    let server = fx.open();
+
+    let media_dir = fx.repo_path.join("media");
+    fs::create_dir_all(&media_dir).unwrap();
+    fs::write(media_dir.join("icon.png"), b"icon").unwrap();
+
+    server
+        .build(opts(BuildMode::Symlink), NoopProgress)
+        .unwrap();
+    assert!(fx.www().join("media/icon.png").exists());
+
+    fs::remove_dir_all(&media_dir).unwrap();
+    server
+        .build(opts(BuildMode::Symlink), NoopProgress)
+        .unwrap();
+
+    assert!(
+        !fx.www().join("media").exists(),
+        "www/media must be removed when the source media/ is gone"
+    );
+}
+
 // End-to-end: opening a legacy flat (v1) repo migrates the source into
 // per-pack folders, stamps version.pamm, and the subsequent build publishes
 // the v2 www shape.

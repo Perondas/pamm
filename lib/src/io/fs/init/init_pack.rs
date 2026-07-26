@@ -1,6 +1,4 @@
-use crate::io::files::name_consts::{
-    ADDONS_DIR_NAME, INDEX_DIR_NAME, MEDIA_DIR_NAME, WWW_DIR_NAME,
-};
+use crate::io::files::name_consts::{ADDONS_DIR_NAME, INDEX_DIR_NAME, WWW_DIR_NAME};
 use crate::io::fs::fs_writable::FixedFsWritable;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_user_settings::PackUserSettings;
@@ -42,7 +40,6 @@ impl PackConfig {
 
         fs::create_dir_all(pack_dir.join(ADDONS_DIR_NAME))?;
         fs::create_dir_all(pack_dir.join(INDEX_DIR_NAME))?;
-        fs::create_dir_all(pack_dir.join(MEDIA_DIR_NAME))?;
 
         let settings = PackUserSettings::default();
         settings.write_fixed(&pack_dir)?;
@@ -63,6 +60,7 @@ mod tests {
             client_params: vec![],
             parent: None,
             addons: Default::default(),
+            customization: None,
         }
     }
 
