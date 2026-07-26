@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pamm_ui/src/models/repo_with_path.dart';
-import 'package:pamm_ui/src/pages/debug_screen/main.dart';
 import 'package:pamm_ui/src/pages/main_screen/repo_details/main.dart';
 import 'package:pamm_ui/src/pages/main_screen/repo_list/main.dart';
+import 'package:pamm_ui/src/pages/settings_screen/main.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -36,10 +36,10 @@ class _MainScreenState extends State<MainScreen> {
                 child: IconButton(
                   onPressed: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => DebugScreen()),
+                      MaterialPageRoute(builder: (context) => SettingsScreen()),
                     );
                   },
-                  icon: Icon(Icons.bug_report),
+                  icon: Icon(Icons.settings),
                 ),
               ),
             ],

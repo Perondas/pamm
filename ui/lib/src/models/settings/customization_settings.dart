@@ -6,30 +6,25 @@ part 'customization_settings.g.dart';
 
 @JsonSerializable()
 class CustomizationSettings {
+  CustomizationSettings({this.seedColor, this.fixedSeedColor = false});
+
   @ColorJsonConverter()
   Color? seedColor;
+
+  bool fixedSeedColor;
+
+  factory CustomizationSettings.fromJson(Map<String, dynamic> json) =>
+      _$CustomizationSettingsFromJson(json);
+
+  Map<String, dynamic> toJson() => _$CustomizationSettingsToJson(this);
 }
 
-class ColorJsonConverter extends JsonConverter<Color, Map<String, int>> {
+class ColorJsonConverter extends JsonConverter<Color, int> {
   const ColorJsonConverter();
 
   @override
-  Color fromJson(Map<String, int> json) {
-    return Color.fromARGB(
-      json['a'] ?? 255,
-      json['r'] ?? 0,
-      json['g'] ?? 0,
-      json['b'] ?? 0,
-    );
-  }
+  Color fromJson(int json) => Color(json);
 
   @override
-  Map<String, int> toJson(Color object) {
-    return {
-      'a': object.alpha,
-      'r': object.red,
-      'g': object.green,
-      'b': object.blue,
-    };
-  }
+  int toJson(Color object) => object.toARGB32();
 }

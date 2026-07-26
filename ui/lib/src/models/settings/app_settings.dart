@@ -3,9 +3,12 @@ import 'package:pamm_ui/src/models/settings/customization_settings.dart';
 
 part 'app_settings.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class AppSettings {
-  late CustomizationSettings customizationSettings;
+  AppSettings({CustomizationSettings? customizationSettings})
+    : customizationSettings = customizationSettings ?? CustomizationSettings();
+
+  CustomizationSettings customizationSettings;
 
   factory AppSettings.fromJson(Map<String, dynamic> json) =>
       _$AppSettingsFromJson(json);

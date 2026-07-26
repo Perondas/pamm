@@ -8,19 +8,22 @@ part of 'customization_settings.dart';
 
 CustomizationSettings _$CustomizationSettingsFromJson(
   Map<String, dynamic> json,
-) => CustomizationSettings()
-  ..seedColor = _$JsonConverterFromJson<Map<String, int>, Color>(
+) => CustomizationSettings(
+  seedColor: _$JsonConverterFromJson<int, Color>(
     json['seedColor'],
     const ColorJsonConverter().fromJson,
-  );
+  ),
+  fixedSeedColor: json['fixedSeedColor'] as bool? ?? false,
+);
 
 Map<String, dynamic> _$CustomizationSettingsToJson(
   CustomizationSettings instance,
 ) => <String, dynamic>{
-  'seedColor': _$JsonConverterToJson<Map<String, int>, Color>(
+  'seedColor': _$JsonConverterToJson<int, Color>(
     instance.seedColor,
     const ColorJsonConverter().toJson,
   ),
+  'fixedSeedColor': instance.fixedSeedColor,
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(
