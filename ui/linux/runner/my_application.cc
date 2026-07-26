@@ -136,11 +136,13 @@ static void my_application_class_init(MyApplicationClass* klass) {
 static void my_application_init(MyApplication* self) {}
 
 MyApplication* my_application_new() {
-  // Set the program name to the application ID, which helps various systems
-  // like GTK and desktop environments map this running application to its
-  // corresponding .desktop file. This ensures better integration by allowing
-  // the application to be recognized beyond its binary name.
-  g_set_prgname(APPLICATION_ID);
+  // The program name becomes the window's WM_CLASS / Wayland app-id, which
+  // GNOME uses to find the matching .desktop file (name and icon of the
+  // running app). Our deb/rpm packaging (fastforge) names the desktop file
+  // and hicolor icons after the binary ("pamm_ui.desktop"), so the program
+  // name must be the binary name — not APPLICATION_ID, for which no desktop
+  // file is installed.
+  g_set_prgname("pamm_ui");
 
   return MY_APPLICATION(g_object_new(my_application_get_type(),
                                      "application-id", APPLICATION_ID, "flags",
