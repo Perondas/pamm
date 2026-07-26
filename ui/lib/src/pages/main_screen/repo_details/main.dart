@@ -8,6 +8,7 @@ import 'package:pamm_ui/src/rust/api/commands/load_pack_display.dart';
 import 'package:pamm_ui/src/rust/api/commands/pack_sync/quick_check.dart';
 import 'package:pamm_ui/src/services/debug_settings_service.dart';
 import 'package:pamm_ui/src/util/media.dart';
+import 'package:pamm_ui/src/widgets/media_icon.dart';
 
 class RepoDetails extends StatefulWidget {
   const RepoDetails(this.selectedRepo, {super.key});
@@ -19,51 +20,19 @@ class RepoDetails extends StatefulWidget {
 }
 
 class _RepoDetailsState extends State<RepoDetails> {
-  String? _selectedPack;
-  PackDisplayInfo? _selectedPackDisplay;
-
-  @override
-  void didUpdateWidget(covariant RepoDetails oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.selectedRepo.path != widget.selectedRepo.path) {
-      _selectedPack = null;
-      _selectedPackDisplay = null;
-    }
-  }
-
-  void _onSelectPack(String packName, PackDisplayInfo? display) {
-    setState(() {
-      if (_selectedPack == packName) {
-        // Tapping the selected pack again deselects it.
-        _selectedPack = null;
-        _selectedPackDisplay = null;
-      } else {
-        _selectedPack = packName;
-        _selectedPackDisplay = display;
-      }
-    });
-  }
-
-  /// Banner of the selected pack, falling back to the repo banner.
+  /// The repo's banner, when it has one.
   Widget? _buildBanner() {
-    if (_selectedPack == null) return null;
-
-    final repoPath = widget.selectedRepo.path;
-    final banner =
-        mediaFile(repoPath, _selectedPackDisplay?.banner) ??
-        mediaFile(repoPath, widget.selectedRepo.repo.customization?.banner);
+    final banner = mediaFile(
+      widget.selectedRepo.path,
+      widget.selectedRepo.repo.customization?.banner,
+    );
     if (banner == null) return null;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
-      child: SizedBox(
-        width: double.infinity,
-        height: 180,
-        child: Image.file(
-          banner,
-          fit: BoxFit.cover,
-          errorBuilder: (_, _, _) => const SizedBox.shrink(),
-        ),
+      child: Image(
+        image: MediaFileImage(banner),
+        errorBuilder: (_, _, _) => const SizedBox.shrink(),
       ),
     );
   }
@@ -85,8 +54,10 @@ class _RepoDetailsState extends State<RepoDetails> {
           children: [
             //AppBar(title: Text(repo?.name ?? '')),
             Text(repo.name, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 8),
-            Text(repo.description),
+            if (repo.description.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(repo.description),
+            ],
             const SizedBox(height: 12),
             Text('Path:', style: TextStyle(fontWeight: FontWeight.bold)),
             Text(widget.selectedRepo.path),
@@ -105,8 +76,6 @@ class _RepoDetailsState extends State<RepoDetails> {
                         packName: sortedPacks[index],
                         repoPath: widget.selectedRepo.path,
                         repoIconName: repo.customization?.icon,
-                        selected: _selectedPack == sortedPacks[index],
-                        onSelected: _onSelectPack,
                       ),
                       itemCount: repo.packs.length,
                       shrinkWrap: true,
@@ -123,15 +92,11 @@ class PackListTile extends StatefulWidget {
   final String packName;
   final String repoPath;
   final String? repoIconName;
-  final bool selected;
-  final void Function(String packName, PackDisplayInfo? display)? onSelected;
 
   const PackListTile({
     required this.packName,
     required this.repoPath,
     this.repoIconName,
-    this.selected = false,
-    this.onSelected,
     super.key,
   });
 
@@ -184,29 +149,16 @@ class _PackListTileState extends State<PackListTile> {
 
   @override
   Widget build(BuildContext context) {
-    final iconFile =
-        mediaFile(widget.repoPath, _display?.icon) ??
-        mediaFile(widget.repoPath, widget.repoIconName);
-    final Widget leadingWidget = CircleAvatar(
-      backgroundImage: iconFile != null ? FileImage(iconFile) : null,
-      onBackgroundImageError: iconFile != null ? (_, _) {} : null,
-      child: iconFile == null
-          ? Text(
-              widget.packName.isNotEmpty
-                  ? widget.packName[0].toUpperCase()
-                  : '?',
-            )
-          : null,
+    final Widget leadingWidget = MediaIcon(
+      iconFile:
+          mediaFile(widget.repoPath, _display?.icon) ??
+          mediaFile(widget.repoPath, widget.repoIconName),
+      fallback: widget.packName,
     );
 
     return ListTile(
       leading: leadingWidget,
       title: Text(widget.packName),
-      selected: widget.selected,
-      selectedTileColor: Theme.of(context).colorScheme.secondaryContainer,
-      onTap: widget.onSelected == null
-          ? null
-          : () => widget.onSelected!(widget.packName, _display),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

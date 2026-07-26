@@ -1333,12 +1333,10 @@ impl SseDecode for crate::api::commands::load_pack_display::PackDisplayInfo {
         let mut var_name = <String>::sse_decode(deserializer);
         let mut var_description = <String>::sse_decode(deserializer);
         let mut var_icon = <Option<String>>::sse_decode(deserializer);
-        let mut var_banner = <Option<String>>::sse_decode(deserializer);
         return crate::api::commands::load_pack_display::PackDisplayInfo {
             name: var_name,
             description: var_description,
             icon: var_icon,
-            banner: var_banner,
         };
     }
 }
@@ -1705,7 +1703,6 @@ impl flutter_rust_bridge::IntoDart for crate::api::commands::load_pack_display::
             self.name.into_into_dart().into_dart(),
             self.description.into_into_dart().into_dart(),
             self.icon.into_into_dart().into_dart(),
-            self.banner.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -2106,7 +2103,6 @@ impl SseEncode for crate::api::commands::load_pack_display::PackDisplayInfo {
         <String>::sse_encode(self.name, serializer);
         <String>::sse_encode(self.description, serializer);
         <Option<String>>::sse_encode(self.icon, serializer);
-        <Option<String>>::sse_encode(self.banner, serializer);
     }
 }
 

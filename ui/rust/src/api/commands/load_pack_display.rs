@@ -7,8 +7,6 @@ pub struct PackDisplayInfo {
     pub description: String,
     /// File name of the pack's icon inside the repo's `media/` directory.
     pub icon: Option<String>,
-    /// File name of the pack's banner inside the repo's `media/` directory.
-    pub banner: Option<String>,
 }
 
 pub fn load_pack_display(
@@ -25,6 +23,5 @@ pub fn load_pack_display(
         name: pack.name,
         description: pack.description,
         icon: customization.icon,
-        banner: customization.banner,
     })
 }

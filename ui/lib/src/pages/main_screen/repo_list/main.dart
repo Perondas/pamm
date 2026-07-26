@@ -7,6 +7,7 @@ import 'package:pamm_ui/src/services/repo_path_store.dart';
 import 'package:pamm_ui/src/services/repo_state_store.dart';
 import 'package:pamm_ui/src/util/media.dart';
 import 'package:pamm_ui/src/widgets/confirm_dialog.dart';
+import 'package:pamm_ui/src/widgets/media_icon.dart';
 
 import 'add_repo_dialog.dart';
 
@@ -163,13 +164,9 @@ class _RepoListState extends State<RepoList> {
         final repo = repoStateManager.repoState!.repo;
         final path = repoStateManager.repoState!.path;
 
-        final iconFile = mediaFile(path, repo.customization?.icon);
-        final Widget leadingWidget = CircleAvatar(
-          backgroundImage: iconFile != null ? FileImage(iconFile) : null,
-          onBackgroundImageError: iconFile != null ? (_, _) {} : null,
-          child: iconFile == null
-              ? Text(repo.name.isNotEmpty ? repo.name[0].toUpperCase() : '?')
-              : null,
+        final Widget leadingWidget = MediaIcon(
+          iconFile: mediaFile(path, repo.customization?.icon),
+          fallback: repo.name,
         );
 
         return ListTile(

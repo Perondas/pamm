@@ -22,19 +22,14 @@ class PackDisplayInfo {
   /// File name of the pack's icon inside the repo's `media/` directory.
   final String? icon;
 
-  /// File name of the pack's banner inside the repo's `media/` directory.
-  final String? banner;
-
   const PackDisplayInfo({
     required this.name,
     required this.description,
     this.icon,
-    this.banner,
   });
 
   @override
-  int get hashCode =>
-      name.hashCode ^ description.hashCode ^ icon.hashCode ^ banner.hashCode;
+  int get hashCode => name.hashCode ^ description.hashCode ^ icon.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -43,6 +38,5 @@ class PackDisplayInfo {
           runtimeType == other.runtimeType &&
           name == other.name &&
           description == other.description &&
-          icon == other.icon &&
-          banner == other.banner;
+          icon == other.icon;
 }
