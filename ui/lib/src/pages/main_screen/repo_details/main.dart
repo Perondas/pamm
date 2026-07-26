@@ -4,8 +4,11 @@ import 'package:pamm_ui/src/pages/main_screen/repo_details/edit_pack_dialog.dart
 import 'package:pamm_ui/src/pages/sync_screen/main.dart';
 import 'package:pamm_ui/src/pages/sync_single_pack_screen/main.dart';
 import 'package:pamm_ui/src/rust/api/commands/launch.dart';
+import 'package:pamm_ui/src/rust/api/commands/load_pack_display.dart';
 import 'package:pamm_ui/src/rust/api/commands/pack_sync/quick_check.dart';
 import 'package:pamm_ui/src/services/debug_settings_service.dart';
+import 'package:pamm_ui/src/util/media.dart';
+import 'package:pamm_ui/src/widgets/media_icon.dart';
 
 class RepoDetails extends StatefulWidget {
   const RepoDetails(this.selectedRepo, {super.key});
@@ -17,11 +20,30 @@ class RepoDetails extends StatefulWidget {
 }
 
 class _RepoDetailsState extends State<RepoDetails> {
+  /// The repo's banner, when it has one.
+  Widget? _buildBanner() {
+    final banner = mediaFile(
+      widget.selectedRepo.path,
+      widget.selectedRepo.repo.customization?.banner,
+    );
+    if (banner == null) return null;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Image(
+        image: MediaFileImage(banner),
+        errorBuilder: (_, _, _) => const SizedBox.shrink(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var repo = widget.selectedRepo.repo;
     var sortedPacks = repo.packs.toList();
     sortedPacks.sort();
+
+    final banner = _buildBanner();
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -32,11 +54,14 @@ class _RepoDetailsState extends State<RepoDetails> {
           children: [
             //AppBar(title: Text(repo?.name ?? '')),
             Text(repo.name, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 8),
-            Text(repo.description),
+            if (repo.description.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(repo.description),
+            ],
             const SizedBox(height: 12),
             Text('Path:', style: TextStyle(fontWeight: FontWeight.bold)),
             Text(widget.selectedRepo.path),
+            if (banner != null) ...[const SizedBox(height: 12), banner],
             const SizedBox(height: 12),
             Text('Packs:', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
@@ -50,6 +75,7 @@ class _RepoDetailsState extends State<RepoDetails> {
                       itemBuilder: (context, index) => PackListTile(
                         packName: sortedPacks[index],
                         repoPath: widget.selectedRepo.path,
+                        repoIconName: repo.customization?.icon,
                       ),
                       itemCount: repo.packs.length,
                       shrinkWrap: true,
@@ -65,10 +91,12 @@ class _RepoDetailsState extends State<RepoDetails> {
 class PackListTile extends StatefulWidget {
   final String packName;
   final String repoPath;
+  final String? repoIconName;
 
   const PackListTile({
     required this.packName,
     required this.repoPath,
+    this.repoIconName,
     super.key,
   });
 
@@ -78,11 +106,29 @@ class PackListTile extends StatefulWidget {
 
 class _PackListTileState extends State<PackListTile> {
   bool? _upToDate;
+  PackDisplayInfo? _display;
 
   @override
   void initState() {
     super.initState();
     _checkStatus();
+    _loadDisplay();
+  }
+
+  Future<void> _loadDisplay() async {
+    try {
+      final display = await loadPackDisplay(
+        repoPath: widget.repoPath,
+        packName: widget.packName,
+      );
+      if (mounted) {
+        setState(() {
+          _display = display;
+        });
+      }
+    } catch (e) {
+      // Media is cosmetic; fall back to the letter avatar.
+    }
   }
 
   Future<void> _checkStatus() async {
@@ -103,16 +149,12 @@ class _PackListTileState extends State<PackListTile> {
 
   @override
   Widget build(BuildContext context) {
-    final String? imageUrl = null; // TODO: Implement image URL in PackConfig
-    final Widget leadingWidget = imageUrl != null && imageUrl.isNotEmpty
-        ? CircleAvatar(backgroundImage: NetworkImage(imageUrl))
-        : CircleAvatar(
-            child: Text(
-              widget.packName.isNotEmpty
-                  ? widget.packName[0].toUpperCase()
-                  : '?',
-            ),
-          );
+    final Widget leadingWidget = MediaIcon(
+      iconFile:
+          mediaFile(widget.repoPath, _display?.icon) ??
+          mediaFile(widget.repoPath, widget.repoIconName),
+      fallback: widget.packName,
+    );
 
     return ListTile(
       leading: leadingWidget,

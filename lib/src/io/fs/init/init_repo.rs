@@ -1,3 +1,6 @@
+use crate::handle::actions::sync::sync_media::download_referenced_media;
+use crate::io::files::file_paths::keyed_path::KeyedFilePath;
+use crate::io::files::name_consts::MEDIA_DIR_NAME;
 use crate::io::fs::fs_writable::FixedFsWritable;
 use crate::io::net::downloadable::KnownDownloadable;
 use crate::io::net::remote_version::verify_remote_version;
@@ -27,6 +30,7 @@ impl RepoConfig {
         }
 
         fs::create_dir(&base_path)?;
+        fs::create_dir(base_path.join(MEDIA_DIR_NAME))?;
         self.write_fixed(&base_path)?;
         RepoVersion::current().write_fixed(&base_path)?;
 
@@ -61,12 +65,17 @@ impl RepoConfig {
         let repo_user_settings = RepoUserSettings::new(remote_url.clone());
         repo_user_settings.write_fixed(&base_path)?;
 
+        let mut pack_configs = Vec::with_capacity(repo.packs.len());
         for pack in &repo.packs {
-            let pack_config = PackConfig::download_known(remote_url)
+            let path = PackConfig::file_path(pack);
+            let pack_config = PackConfig::download_known(&path.with_base_url(remote_url))
                 .context(format!("Failed to download pack {} configuration", pack))?;
 
             pack_config.init_client_on_fs(&base_path)?;
+            pack_configs.push(pack_config);
         }
+
+        download_referenced_media(&base_path, remote_url, &repo, &pack_configs);
 
         Ok((repo, repo_user_settings))
     }

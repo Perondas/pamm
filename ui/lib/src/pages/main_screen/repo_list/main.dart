@@ -5,7 +5,9 @@ import 'package:pamm_ui/src/pages/main_screen/repo_list/fix_repo_dialog.dart';
 import 'package:pamm_ui/src/rust/api/commands/init_from_remote.dart';
 import 'package:pamm_ui/src/services/repo_path_store.dart';
 import 'package:pamm_ui/src/services/repo_state_store.dart';
+import 'package:pamm_ui/src/util/media.dart';
 import 'package:pamm_ui/src/widgets/confirm_dialog.dart';
+import 'package:pamm_ui/src/widgets/media_icon.dart';
 
 import 'add_repo_dialog.dart';
 
@@ -162,19 +164,17 @@ class _RepoListState extends State<RepoList> {
         final repo = repoStateManager.repoState!.repo;
         final path = repoStateManager.repoState!.path;
 
-        final String? imageUrl = null; // TODO: Implement image URL in RepoConfig
-        final Widget leadingWidget = imageUrl != null && imageUrl.isNotEmpty
-            ? CircleAvatar(backgroundImage: NetworkImage(imageUrl))
-            : CircleAvatar(
-                child: Text(repo.name.isNotEmpty ? repo.name[0].toUpperCase() : '?'),
-              );
+        final Widget leadingWidget = MediaIcon(
+          iconFile: mediaFile(path, repo.customization?.icon),
+          fallback: repo.name,
+        );
 
         return ListTile(
           leading: leadingWidget,
           title: Text(repo.name),
           subtitle: Text(path),
           selected: _selectedRepo != null && path == _selectedRepo!.path,
-          selectedTileColor: Colors.grey.shade200,
+          selectedTileColor: Theme.of(context).colorScheme.secondaryContainer,
           onTap: () {
             setState(() {
               _selectedRepo = repoStateManager.repoState!;

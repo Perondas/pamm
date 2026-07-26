@@ -1,5 +1,6 @@
 pub mod addon;
 pub mod pack_config;
+pub mod pack_customization;
 pub mod pack_diff;
 pub mod pack_index;
 pub mod pack_user_settings;

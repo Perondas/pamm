@@ -7,6 +7,7 @@ use crate::io::fs::fs_writable::FixedFsWritable;
 use crate::io::files::file_names::fixed_file::FixedFile;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::io::files::file_paths::rel_path::RelPath;
+use crate::io::files::name_consts::MEDIA_DIR_NAME;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_version::RepoVersion;
 use anyhow::Context;
@@ -43,6 +44,27 @@ impl ServerRepoHandle {
 
         // Prune stale entries in www/ that aren't part of the current repo config.
         let mut stale_removed = 0_usize;
+
+        // Publish the repo-level media/ directory (icons/banners referenced by
+        // repo and pack configs). materialize handles the recursion, symlinking
+        // and pruning of stale entries inside www/media itself.
+        let media_rel = RelPath::from_name(MEDIA_DIR_NAME);
+        let media_src = media_rel.with_base_path(&self.repo_path);
+        let has_media = media_src.is_dir() && fs::read_dir(&media_src)?.next().is_some();
+        if has_media {
+            let media_report = materializer.materialize(&media_rel)?;
+            report = report + media_report;
+        } else {
+            // Source media/ was removed or emptied: drop a leftover www/media.
+            let www_media = media_rel.with_base_path(&www_path);
+            if www_media.exists() {
+                fs::remove_dir_all(&www_media).with_context(|| {
+                    format!("Failed to remove stale www media dir {:?}", www_media)
+                })?;
+                stale_removed += 1;
+            }
+        }
+
         for entry in fs::read_dir(&www_path)? {
             let entry = entry?;
             let name = entry.file_name();
@@ -51,6 +73,8 @@ impl ServerRepoHandle {
             if entry.path().is_dir() {
                 // Legacy v1 addon dirs are always stale; a pack dir (identified
                 // by its pack.config.json) is stale when the pack is gone.
+                // www/media is live and must survive this loop — it matches
+                // neither condition, keep it that way when tightening pruning.
                 let is_legacy = name_str.ends_with("_pack_addons");
                 let is_stale_pack_dir = entry.path().join(PackConfig::file_name()).is_file()
                     && !pack_names.iter().any(|p| name_str == p.as_str());
