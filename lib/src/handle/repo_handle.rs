@@ -3,7 +3,7 @@ use crate::io::files::file_names::fixed_file::FixedFile;
 use crate::io::files::name_consts::ADDONS_DIR_NAME;
 use crate::io::fs::fs_readable::KnownFSReadable;
 use crate::models::repo::repo_config::RepoConfig;
-use anyhow::ensure;
+use anyhow::{Context, ensure};
 use std::path::{Path, PathBuf};
 
 #[derive(Debug)]
@@ -14,7 +14,7 @@ pub struct RepoHandle {
 
 impl RepoHandle {
     pub fn open(repo_path: &Path) -> anyhow::Result<Self> {
-        check_repo(repo_path)?;
+        check_repo(repo_path).context("Could not find repo files. Are you sure you are running the command in the right folder?")?;
 
         let repo_config = RepoConfig::read_from_known(repo_path)?;
 

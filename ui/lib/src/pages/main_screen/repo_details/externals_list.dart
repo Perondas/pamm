@@ -94,28 +94,41 @@ class _ExternalsListState extends State<ExternalsList> {
           ),
           if (loading) CircularProgressIndicator(),
           for (int i = 0; i < externals.length; i++)
-            SwitchListTile(
-              title: Text(
-                externals[i].name ??
-                    externals[i].path.split(Platform.pathSeparator).last,
-              ),
-              subtitle: Text(
-                externals[i].path,
-                style: Theme.of(context).textTheme.labelSmall,
-              ),
-              value: externals[i].enabled,
-              onChanged: (value) {
-                setState(() {
-                  externals.setRange(i, i + 1, [
-                    ExternalAddon(
-                      name: externals[i].name,
-                      enabled: value,
-                      path: externals[i].path,
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    externals.removeAt(i);
+                    _saveExternals();
+                  },
+                  icon: Icon(Icons.delete_forever, color: Colors.red),
+                ),
+                Expanded(
+                  child: SwitchListTile(
+                    title: Text(
+                      externals[i].name ??
+                          externals[i].path.split(Platform.pathSeparator).last,
                     ),
-                  ]);
-                });
-                _saveExternals();
-              },
+                    subtitle: Text(
+                      externals[i].path,
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                    value: externals[i].enabled,
+                    onChanged: (value) {
+                      setState(() {
+                        externals.setRange(i, i + 1, [
+                          ExternalAddon(
+                            name: externals[i].name,
+                            enabled: value,
+                            path: externals[i].path,
+                          ),
+                        ]);
+                      });
+                      _saveExternals();
+                    },
+                  ),
+                ),
+              ],
             ),
         ],
       ),

@@ -15,6 +15,7 @@ use crate::commands::launch::launch_command;
 use crate::commands::sync_pack::sync_pack_command;
 use crate::commands::sync_this_only_pack::sync_this_only_pack_command;
 use crate::subcommands::externals::ExternalsSubcommand;
+use crate::subcommands::externals::remove_external::remove_external_command;
 use crate::subcommands::optionals::OptionalsSubcommand;
 use anyhow::Result;
 use clap::Parser;
@@ -45,6 +46,7 @@ fn main() -> Result<()> {
         AppSubcommand::Externals(args) => match args.command {
             ExternalsSubcommand::Toggle(args) => toggle_externals_command(args),
             ExternalsSubcommand::Add(args) => add_external_command(args),
+            ExternalsSubcommand::Remove(args) => remove_external_command(args),
         },
         AppSubcommand::Optionals(args) => match args.command {
             OptionalsSubcommand::Toggle(args) => toggle_optionals_command(args),
