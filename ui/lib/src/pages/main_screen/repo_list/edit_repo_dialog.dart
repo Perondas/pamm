@@ -35,7 +35,7 @@ class _EditRepoDialogState extends State<EditRepoDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              SelectableText(
                 'Repository Path: ${widget.path}',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),

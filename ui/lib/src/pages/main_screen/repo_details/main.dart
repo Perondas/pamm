@@ -60,7 +60,7 @@ class _RepoDetailsState extends State<RepoDetails> {
             ],
             const SizedBox(height: 12),
             Text('Path:', style: TextStyle(fontWeight: FontWeight.bold)),
-            Text(widget.selectedRepo.path),
+            SelectableText (widget.selectedRepo.path),
             if (banner != null) ...[const SizedBox(height: 12), banner],
             const SizedBox(height: 12),
             Text('Packs:', style: TextStyle(fontWeight: FontWeight.bold)),
