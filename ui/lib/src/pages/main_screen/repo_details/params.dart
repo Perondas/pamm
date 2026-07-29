@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pamm_ui/src/pages/main_screen/repo_details/cldc_dialog.dart';
 import 'package:pamm_ui/src/rust/api/commands/params.dart';
 
 class ParamsForm extends StatefulWidget {
@@ -36,10 +37,7 @@ class _ParamsFormState extends State<ParamsForm> {
           repotPath: widget.repotPath,
           packName: widget.packName,
         ),
-        getLaunchParams(
-          repotPath: widget.repotPath,
-          packName: widget.packName,
-        ),
+        getLaunchParams(repotPath: widget.repotPath, packName: widget.packName),
       ]);
       if (!mounted) return;
       setState(() {
@@ -116,12 +114,42 @@ class _ParamsFormState extends State<ParamsForm> {
             ),
           ),
           const SizedBox(height: 16),
-          Text('Your parameters', style: theme.textTheme.titleSmall),
-          const SizedBox(height: 4),
-          Text(
-            'Enter each parameter on a new line.',
-            style: theme.textTheme.bodySmall,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Your parameters', style: theme.textTheme.titleSmall),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Enter each parameter on a new line.',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    var selected = await showDialog<String?>(
+                      context: context,
+                      builder: (_) => CdlcDialog(),
+                    );
+
+                    if (selected != null) {
+                      _controller.text += "\n-mod=$selected";
+                      await _saveParams();
+                    }
+                  },
+                  label: Text('Add CDLC'),
+                  icon: Icon(Icons.add),
+                ),
+              ),
+            ],
           ),
+
           const SizedBox(height: 8),
           Expanded(
             child: TextField(
@@ -129,9 +157,7 @@ class _ParamsFormState extends State<ParamsForm> {
               maxLines: null,
               expands: true,
               textAlignVertical: TextAlignVertical.top,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(border: OutlineInputBorder()),
               onChanged: (_) => _saveParams(),
             ),
           ),
@@ -140,4 +166,3 @@ class _ParamsFormState extends State<ParamsForm> {
     );
   }
 }
-
