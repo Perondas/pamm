@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
 
-class CdlcDialog extends StatefulWidget {
+class CdlcDialog extends StatelessWidget {
   const CdlcDialog({super.key});
 
-  @override
-  State<CdlcDialog> createState() => _CdlcDialogState();
-}
-
-class _CdlcDialogState extends State<CdlcDialog> {
-  List<Cdlc> cdlcs = [
+  static const List<Cdlc> cdlcs = [
     Cdlc("Global Mobilization", "gm"),
     Cdlc("SOG Prairie Fire", "vn"),
     Cdlc("CSLA Iron Curtain", "csla"),
