@@ -102,7 +102,7 @@ class _DebugScreenState extends State<DebugScreen> {
                       return Text('Error: ${snapshot.error}');
                     }
                     var packageInfo = snapshot.data!;
-                    return Text(
+                    return SelectableText(
                       'Version: ${packageInfo.version}+${packageInfo.buildNumber}',
                       style: TextStyle(fontFamily: 'monospace'),
                     );
@@ -122,7 +122,7 @@ class _DebugScreenState extends State<DebugScreen> {
                         ? Theme.of(context).colorScheme.surfaceContainerHighest
                         : Colors.transparent,
                     width: double.infinity,
-                    child: Text(
+                    child: SelectableText(
                       log,
                       style: TextStyle(fontFamily: 'monospace', fontSize: 12),
                     ),
