@@ -1,21 +1,16 @@
-use anyhow::{anyhow, Context};
-use std::env::home_dir;
+use anyhow::{Context, anyhow, ensure};
 use std::fs::read_to_string;
-use std::path::{PathBuf};
-use steam_vdf_parser::{parse_text, Value};
-
-static LIBRARYFOLDERS_PATH: &str = ".steam/root/steamapps/libraryfolders.vdf";
+use std::path::PathBuf;
+use steam_vdf_parser::{Value, parse_text};
 
 /// Returns the absolute path to the Arma 3 installation directory,
 /// `<steam library>/steamapps/common/<installdir>`. It is absolute because it
 /// is built from the Steam library path in `libraryfolders.vdf`, which Steam
 /// stores as an absolute path. The path is not canonicalized.
-pub fn get_arma_install_dir() -> anyhow::Result<PathBuf> {
+pub fn find_arma_install_dir() -> anyhow::Result<PathBuf> {
     log::debug!("Attempting to find Arma install directory");
-    let home_dir = home_dir().ok_or_else(|| anyhow!("Unable to find home directory"))?;
-    log::trace!("Found home directory: {:?}", home_dir);
 
-    let libfolders_path = home_dir.join(LIBRARYFOLDERS_PATH);
+    let libfolders_path = find_libraryfolders()?;
 
     log::trace!("Reading libraryfolders from {:?}", libfolders_path);
     let libfolders_file = read_to_string(&libfolders_path)
@@ -41,6 +36,7 @@ pub fn get_arma_install_dir() -> anyhow::Result<PathBuf> {
         .get("path")
         .context(anyhow!("libraryfolders entry does not contain 'path'"))?
         .as_str()
+        .map(PathBuf::from)
         .context(anyhow!("libraryfolders path is not a string"))?;
 
     log::debug!(
@@ -61,6 +57,7 @@ pub fn get_arma_install_dir() -> anyhow::Result<PathBuf> {
         .get("installdir")
         .context(anyhow!("appmanifest does not contain 'installdir'"))?
         .as_str()
+        .map(PathBuf::from)
         .context(anyhow!("installdir is not a string"))?;
 
     log::debug!(
@@ -68,10 +65,10 @@ pub fn get_arma_install_dir() -> anyhow::Result<PathBuf> {
         arma_dir_name
     );
 
-    let full_path = PathBuf::from(format!(
-        "{}/steamapps/common/{}",
-        library_path, arma_dir_name
-    ));
+    let full_path = library_path
+        .join("steamapps")
+        .join("common")
+        .join(&arma_dir_name);
 
     log::debug!("Resolved full Arma install path: {:?}", full_path);
 
@@ -83,4 +80,46 @@ fn arma_in_location(value: &Value) -> anyhow::Result<bool> {
         .get("apps")
         .context(anyhow!("libraryfolders entry does not contain 'apps'"))?;
     Ok(apps.get("107410").map(|_| true).unwrap_or_default())
+}
+
+#[cfg(target_os = "linux")]
+fn find_libraryfolders() -> anyhow::Result<PathBuf> {
+    let home_dir = std::env::home_dir().ok_or_else(|| anyhow!("Unable to find home directory"))?;
+    log::trace!("Found home directory: {:?}", home_dir);
+
+    let libfolders_path = home_dir
+        .join(".steam")
+        .join("root")
+        .join("steamapps")
+        .join("libraryfolders.vdf");
+
+    ensure!(
+        libfolders_path.exists(),
+        "libraryfolders.vdf does not exist at expected path: {:?}",
+        libfolders_path
+    );
+
+    Ok(libfolders_path)
+}
+
+#[cfg(target_os = "windows")]
+fn find_libraryfolders() -> anyhow::Result<PathBuf> {
+    let program_files = std::env::var("ProgramFiles(x86)")
+        .map(PathBuf::from)
+        .context(anyhow!(
+            "Unable to find ProgramFiles(x86) environment variable"
+        ))?;
+
+    let libfolders_path = program_files
+        .join("Steam")
+        .join("config")
+        .join("libraryfolders.vdf");
+
+    ensure!(
+        libfolders_path.exists(),
+        "libraryfolders.vdf does not exist at expected path: {:?}",
+        libfolders_path
+    );
+
+    Ok(libfolders_path)
 }

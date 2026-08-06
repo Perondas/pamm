@@ -6,5 +6,5 @@ pub fn launch(repo_dir: String, pack_name: String) -> anyhow::Result<()> {
 
     let handle = ClientRepoHandle::open(repo_dir)?;
 
-    handle.launch_via_steam(&pack_name)
+    handle.launch_via_executable(&pack_name)
 }
