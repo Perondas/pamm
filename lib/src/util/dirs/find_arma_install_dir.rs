@@ -81,8 +81,6 @@ fn arma_in_location(value: &Value) -> anyhow::Result<bool> {
         .context(anyhow!("libraryfolders entry does not contain 'apps'"))?;
     Ok(apps.get("107410").map(|_| true).unwrap_or_default())
 }
-
-#[cfg(target_os = "linux")]
 fn find_libraryfolders() -> anyhow::Result<PathBuf> {
     let home_dir = std::env::home_dir().ok_or_else(|| anyhow!("Unable to find home directory"))?;
     log::trace!("Found home directory: {:?}", home_dir);
@@ -92,21 +90,6 @@ fn find_libraryfolders() -> anyhow::Result<PathBuf> {
         .join("root")
         .join("steamapps")
         .join("libraryfolders.vdf");
-
-    ensure!(
-        libfolders_path.exists(),
-        "libraryfolders.vdf does not exist at expected path: {:?}",
-        libfolders_path
-    );
-
-    Ok(libfolders_path)
-}
-
-#[cfg(target_os = "windows")]
-fn find_libraryfolders() -> anyhow::Result<PathBuf> {
-    let steam_path = super::find_steam_folder::find_steam_dir()?;
-
-    let libfolders_path = steam_path.join("config").join("libraryfolders.vdf");
 
     ensure!(
         libfolders_path.exists(),
