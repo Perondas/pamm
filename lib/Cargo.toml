@@ -22,6 +22,8 @@ run_script = { version = "0.11.2", optional = true }
 chrono = { version = "0.4.45", optional = true }
 static_assertions = "1.1.0"
 steam-vdf-parser = "0.1.1"
+
+[target.'cfg(windows)'.dependencies]
 windows-registry = "0.6.1"
 
 [dev-dependencies]
