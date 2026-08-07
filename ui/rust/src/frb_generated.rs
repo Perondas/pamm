@@ -427,12 +427,17 @@ fn wire__crate__api__commands__launch__launch_impl(
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_repo_dir = <String>::sse_decode(&mut deserializer);
             let api_pack_name = <String>::sse_decode(&mut deserializer);
+            let api_launch_type =
+                <crate::api::commands::launch::LaunchType>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || {
-                        let output_ok =
-                            crate::api::commands::launch::launch(api_repo_dir, api_pack_name)?;
+                        let output_ok = crate::api::commands::launch::launch(
+                            api_repo_dir,
+                            api_pack_name,
+                            api_launch_type,
+                        )?;
                         Ok(output_ok)
                     })(),
                 )
@@ -1132,10 +1137,29 @@ impl SseDecode for crate::api::commands::pack_sync::file_change::FileChange {
     }
 }
 
+impl SseDecode for i32 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_i32::<NativeEndian>().unwrap()
+    }
+}
+
 impl SseDecode for i64 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         deserializer.cursor.read_i64::<NativeEndian>().unwrap()
+    }
+}
+
+impl SseDecode for crate::api::commands::launch::LaunchType {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::commands::launch::LaunchType::Steam,
+            1 => crate::api::commands::launch::LaunchType::File,
+            _ => unreachable!("Invalid variant for LaunchType: {}", inner),
+        };
     }
 }
 
@@ -1434,13 +1458,6 @@ impl SseDecode for usize {
     }
 }
 
-impl SseDecode for i32 {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        deserializer.cursor.read_i32::<NativeEndian>().unwrap()
-    }
-}
-
 fn pde_ffi_dispatcher_primary_impl(
     func_id: i32,
     port: flutter_rust_bridge::for_generated::MessagePort,
@@ -1635,6 +1652,27 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::pack_sync::file_cha
     for crate::api::commands::pack_sync::file_change::FileChange
 {
     fn into_into_dart(self) -> crate::api::commands::pack_sync::file_change::FileChange {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::commands::launch::LaunchType {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::Steam => 0.into_dart(),
+            Self::File => 1.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::commands::launch::LaunchType
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::launch::LaunchType>
+    for crate::api::commands::launch::LaunchType
+{
+    fn into_into_dart(self) -> crate::api::commands::launch::LaunchType {
         self
     }
 }
@@ -1941,10 +1979,33 @@ impl SseEncode for crate::api::commands::pack_sync::file_change::FileChange {
     }
 }
 
+impl SseEncode for i32 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer.cursor.write_i32::<NativeEndian>(self).unwrap();
+    }
+}
+
 impl SseEncode for i64 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         serializer.cursor.write_i64::<NativeEndian>(self).unwrap();
+    }
+}
+
+impl SseEncode for crate::api::commands::launch::LaunchType {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::commands::launch::LaunchType::Steam => 0,
+                crate::api::commands::launch::LaunchType::File => 1,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
     }
 }
 
@@ -2186,13 +2247,6 @@ impl SseEncode for usize {
             .cursor
             .write_u64::<NativeEndian>(self as _)
             .unwrap();
-    }
-}
-
-impl SseEncode for i32 {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        serializer.cursor.write_i32::<NativeEndian>(self).unwrap();
     }
 }
 

@@ -104,16 +104,9 @@ fn find_libraryfolders() -> anyhow::Result<PathBuf> {
 
 #[cfg(target_os = "windows")]
 fn find_libraryfolders() -> anyhow::Result<PathBuf> {
-    let program_files = std::env::var("ProgramFiles(x86)")
-        .map(PathBuf::from)
-        .context(anyhow!(
-            "Unable to find ProgramFiles(x86) environment variable"
-        ))?;
+    let steam_path = super::find_steam_folder::find_steam_dir()?;
 
-    let libfolders_path = program_files
-        .join("Steam")
-        .join("config")
-        .join("libraryfolders.vdf");
+    let libfolders_path = steam_path.join("config").join("libraryfolders.vdf");
 
     ensure!(
         libfolders_path.exists(),

@@ -4,8 +4,8 @@ use crate::handle::optionals::GetOptionalsPaths;
 use crate::handle::reading::get_pack::GetPack;
 use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::io::fs::util::symlink::create_or_recreate_symlink;
-use crate::util::linux::get_arma_install_dir::get_arma_install_dir;
-use anyhow::{anyhow, Context};
+use crate::util::dirs::find_arma_install_dir::find_arma_install_dir;
+use anyhow::{Context, anyhow};
 use std::fs::create_dir_all;
 use std::path::Path;
 
@@ -24,14 +24,18 @@ where
     fn get_linux_addon_paths(&self, pack_name: &str) -> anyhow::Result<Vec<String>> {
         log::debug!("Resolving addon paths for pack '{}'", pack_name);
 
-        let arma_install_dir =
-            get_arma_install_dir().context(anyhow!("Failed to get Arma installation directory"))?;
+        let arma_install_dir = find_arma_install_dir()
+            .context(anyhow!("Failed to get Arma installation directory"))?;
         log::debug!("Found Arma installation directory: {:?}", arma_install_dir);
 
         let pamm_dir = arma_install_dir.join("pamm");
         let externals_dir = pamm_dir.join("externals");
 
-        log::trace!("Ensuring pamm directories exist at {:?} and {:?}", pamm_dir, externals_dir);
+        log::trace!(
+            "Ensuring pamm directories exist at {:?} and {:?}",
+            pamm_dir,
+            externals_dir
+        );
         create_dir_all(&pamm_dir)
             .context(anyhow!("Failed to create PAMM directory at {:?}", pamm_dir))?;
         create_dir_all(&externals_dir).context(anyhow!(
@@ -68,13 +72,20 @@ where
             let external_path = Path::new(&external);
             if let Some(folder_name) = external_path.file_name() {
                 let link_path = externals_dir.join(folder_name);
-                log::trace!("Processing external addon {:?} -> {:?}", external_path, link_path);
+                log::trace!(
+                    "Processing external addon {:?} -> {:?}",
+                    external_path,
+                    link_path
+                );
                 create_or_recreate_symlink(external_path, &link_path)?;
                 if let Some(folder_name_str) = folder_name.to_str() {
                     addons.push(format!("pamm/externals/{}", folder_name_str));
                 }
             } else {
-                log::warn!("Failed to determine folder name for external addon {:?}", external_path);
+                log::warn!(
+                    "Failed to determine folder name for external addon {:?}",
+                    external_path
+                );
             }
         }
 

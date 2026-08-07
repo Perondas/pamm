@@ -6,8 +6,14 @@
 import '../../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-Future<void> launch({required String repoDir, required String packName}) =>
-    RustLib.instance.api.crateApiCommandsLaunchLaunch(
-      repoDir: repoDir,
-      packName: packName,
-    );
+Future<void> launch({
+  required String repoDir,
+  required String packName,
+  required LaunchType launchType,
+}) => RustLib.instance.api.crateApiCommandsLaunchLaunch(
+  repoDir: repoDir,
+  packName: packName,
+  launchType: launchType,
+);
+
+enum LaunchType { steam, file }

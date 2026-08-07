@@ -7,6 +7,7 @@ import 'package:pamm_ui/src/rust/api/commands/launch.dart';
 import 'package:pamm_ui/src/rust/api/commands/load_pack_display.dart';
 import 'package:pamm_ui/src/rust/api/commands/pack_sync/quick_check.dart';
 import 'package:pamm_ui/src/services/debug_settings_service.dart';
+import 'package:pamm_ui/src/services/settings_service.dart';
 import 'package:pamm_ui/src/util/media.dart';
 import 'package:pamm_ui/src/widgets/media_icon.dart';
 
@@ -60,7 +61,7 @@ class _RepoDetailsState extends State<RepoDetails> {
             ],
             const SizedBox(height: 12),
             Text('Path:', style: TextStyle(fontWeight: FontWeight.bold)),
-            SelectableText (widget.selectedRepo.path),
+            SelectableText(widget.selectedRepo.path),
             if (banner != null) ...[const SizedBox(height: 12), banner],
             const SizedBox(height: 12),
             Text('Packs:', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -168,6 +169,7 @@ class _PackListTileState extends State<PackListTile> {
                 await launch(
                   repoDir: widget.repoPath,
                   packName: widget.packName,
+                  launchType: settingsService.settings.armaSettings.launchType,
                 );
               } catch (e) {
                 if (!context.mounted) return;
@@ -187,11 +189,8 @@ class _PackListTileState extends State<PackListTile> {
                 MaterialPageRoute(
                   builder: (context) =>
                       debugSettingsService.useLegacySinglePackSync
-                          ? SyncSinglePackScreen(
-                              widget.packName,
-                              widget.repoPath,
-                            )
-                          : SyncScreen(widget.packName, widget.repoPath),
+                      ? SyncSinglePackScreen(widget.packName, widget.repoPath)
+                      : SyncScreen(widget.packName, widget.repoPath),
                 ),
               );
               // Re-check status after returning from sync

@@ -125,7 +125,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   FileChange dco_decode_file_change(dynamic raw);
 
   @protected
+  int dco_decode_i_32(dynamic raw);
+
+  @protected
   PlatformInt64 dco_decode_i_64(dynamic raw);
+
+  @protected
+  LaunchType dco_decode_launch_type(dynamic raw);
 
   @protected
   List<OpaqueDiff>
@@ -290,7 +296,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   FileChange sse_decode_file_change(SseDeserializer deserializer);
 
   @protected
+  int sse_decode_i_32(SseDeserializer deserializer);
+
+  @protected
   PlatformInt64 sse_decode_i_64(SseDeserializer deserializer);
+
+  @protected
+  LaunchType sse_decode_launch_type(SseDeserializer deserializer);
 
   @protected
   List<OpaqueDiff>
@@ -376,9 +388,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   BigInt sse_decode_usize(SseDeserializer deserializer);
-
-  @protected
-  int sse_decode_i_32(SseDeserializer deserializer);
 
   @protected
   void sse_encode_AnyhowException(
@@ -480,7 +489,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_file_change(FileChange self, SseSerializer serializer);
 
   @protected
+  void sse_encode_i_32(int self, SseSerializer serializer);
+
+  @protected
   void sse_encode_i_64(PlatformInt64 self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_launch_type(LaunchType self, SseSerializer serializer);
 
   @protected
   void
@@ -593,9 +608,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_usize(BigInt self, SseSerializer serializer);
-
-  @protected
-  void sse_encode_i_32(int self, SseSerializer serializer);
 }
 
 // Section: wire_class

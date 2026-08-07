@@ -1,7 +1,7 @@
 use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::reading::get_canonical_addon_paths::GetAddonPaths;
 use crate::handle::reading::get_pack::GetPack;
-use crate::util::arma::find_arma_install_dir::find_arma_install_dir;
+use crate::util::dirs::find_steam_folder::find_steam_dir;
 use anyhow::Context;
 use log::{debug, info};
 use std::os::windows::process::CommandExt;
@@ -11,9 +11,9 @@ impl ClientRepoHandle {
     pub fn launch_via_executable(&self, pack_name: &str) -> anyhow::Result<()> {
         info!("Launching pack '{}' via executable", pack_name);
 
-        let executable = find_arma_install_dir()
+        let steam_executable = find_steam_dir()
             .context("Failed to find Arma install directory")?
-            .join("arma3_x64.exe");
+            .join("steam.exe");
 
         let addon_paths = self.get_canonical_addon_paths(pack_name)?;
 
@@ -23,11 +23,14 @@ impl ClientRepoHandle {
             pack_name
         );
 
-        let mut command = Command::new(executable);
+        let mut command = Command::new(steam_executable);
 
         // Start arma as a new process group
+
         command.creation_flags(0x00000200);
 
+        command.arg("-applaunch");
+        command.arg("107410"); // Arma 3 Steam App ID
         command.arg("-nolauncher");
 
         let (pack_config, settings) = self.get_pack_with_settings(pack_name)?;
