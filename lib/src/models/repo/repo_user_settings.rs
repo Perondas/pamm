@@ -3,7 +3,7 @@ use url::Url;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RepoUserSettings {
-    pub(crate) remote: Url,
+    pub remote: Url,
     // TODO: Add authentication
 }
 

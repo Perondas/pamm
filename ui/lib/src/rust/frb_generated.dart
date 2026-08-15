@@ -21,6 +21,9 @@ import 'api/commands/pack_sync/sync_pack.dart';
 import 'api/commands/pack_sync/sync_pack_with_parents.dart';
 import 'api/commands/params.dart';
 import 'api/commands/sync_config.dart';
+import 'api/commands/user_repo_settings.dart';
+import 'api/commands/user_repo_settings/load_settings.dart';
+import 'api/commands/user_repo_settings/save_settings.dart';
 import 'api/logging.dart';
 import 'api/progress_reporting.dart';
 import 'dart:async';
@@ -83,7 +86,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.12.0';
 
   @override
-  int get rustContentHash => 1731696316;
+  int get rustContentHash => 815617942;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -165,6 +168,11 @@ abstract class RustLibApi extends BaseApi {
     required String repoPath,
   });
 
+  Future<FlutterRepoUserSettings>
+  crateApiCommandsUserRepoSettingsLoadSettingsLoadSettings({
+    required String repotPath,
+  });
+
   Future<bool> crateApiCommandsPackSyncQuickCheckQuickCheck({
     required String packName,
     required String repoPath,
@@ -180,6 +188,11 @@ abstract class RustLibApi extends BaseApi {
     required String repoPath,
     required String packName,
     required List<OptionalAddon> optionals,
+  });
+
+  Future<void> crateApiCommandsUserRepoSettingsSaveSettingsSaveSettings({
+    required String repoPath,
+    required FlutterRepoUserSettings setting,
   });
 
   Future<void> crateApiCommandsParamsSetLaunchParams({
@@ -732,6 +745,39 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "load_repo", argNames: ["repoPath"]);
 
   @override
+  Future<FlutterRepoUserSettings>
+  crateApiCommandsUserRepoSettingsLoadSettingsLoadSettings({
+    required String repotPath,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(repotPath, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 15,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_flutter_repo_user_settings,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta:
+            kCrateApiCommandsUserRepoSettingsLoadSettingsLoadSettingsConstMeta,
+        argValues: [repotPath],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiCommandsUserRepoSettingsLoadSettingsLoadSettingsConstMeta =>
+      const TaskConstMeta(debugName: "load_settings", argNames: ["repotPath"]);
+
+  @override
   Future<bool> crateApiCommandsPackSyncQuickCheckQuickCheck({
     required String packName,
     required String repoPath,
@@ -745,7 +791,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 15,
+            funcId: 16,
             port: port_,
           );
         },
@@ -782,7 +828,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 16,
+            funcId: 17,
             port: port_,
           );
         },
@@ -821,7 +867,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 17,
+            funcId: 18,
             port: port_,
           );
         },
@@ -845,6 +891,46 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<void> crateApiCommandsUserRepoSettingsSaveSettingsSaveSettings({
+    required String repoPath,
+    required FlutterRepoUserSettings setting,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(repoPath, serializer);
+          sse_encode_box_autoadd_flutter_repo_user_settings(
+            setting,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 19,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta:
+            kCrateApiCommandsUserRepoSettingsSaveSettingsSaveSettingsConstMeta,
+        argValues: [repoPath, setting],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiCommandsUserRepoSettingsSaveSettingsSaveSettingsConstMeta =>
+      const TaskConstMeta(
+        debugName: "save_settings",
+        argNames: ["repoPath", "setting"],
+      );
+
+  @override
   Future<void> crateApiCommandsParamsSetLaunchParams({
     required String repotPath,
     required String packName,
@@ -860,7 +946,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 18,
+            funcId: 20,
             port: port_,
           );
         },
@@ -888,7 +974,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(level, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 19)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 21)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -916,7 +1002,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 20,
+            funcId: 22,
             port: port_,
           );
         },
@@ -958,7 +1044,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 21,
+            funcId: 23,
             port: port_,
           );
         },
@@ -1001,7 +1087,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 22,
+            funcId: 24,
             port: port_,
           );
         },
@@ -1145,6 +1231,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  FlutterRepoUserSettings dco_decode_box_autoadd_flutter_repo_user_settings(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_flutter_repo_user_settings(raw);
+  }
+
+  @protected
   (int, int, int, int) dco_decode_box_autoadd_record_u_32_u_32_u_32_u_32(
     dynamic raw,
   ) {
@@ -1219,6 +1313,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       filePath: dco_decode_String(arr[0]),
       change: dco_decode_change_type(arr[1]),
     );
+  }
+
+  @protected
+  FlutterRepoUserSettings dco_decode_flutter_repo_user_settings(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 1)
+      throw Exception('unexpected arr length: expect 1 but see ${arr.length}');
+    return FlutterRepoUserSettings(remote: dco_decode_String(arr[0]));
   }
 
   @protected
@@ -1572,6 +1675,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  FlutterRepoUserSettings sse_decode_box_autoadd_flutter_repo_user_settings(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_flutter_repo_user_settings(deserializer));
+  }
+
+  @protected
   (int, int, int, int) sse_decode_box_autoadd_record_u_32_u_32_u_32_u_32(
     SseDeserializer deserializer,
   ) {
@@ -1651,6 +1762,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_filePath = sse_decode_String(deserializer);
     var var_change = sse_decode_change_type(deserializer);
     return FileChange(filePath: var_filePath, change: var_change);
+  }
+
+  @protected
+  FlutterRepoUserSettings sse_decode_flutter_repo_user_settings(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_remote = sse_decode_String(deserializer);
+    return FlutterRepoUserSettings(remote: var_remote);
   }
 
   @protected
@@ -2089,6 +2209,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_box_autoadd_flutter_repo_user_settings(
+    FlutterRepoUserSettings self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_flutter_repo_user_settings(self, serializer);
+  }
+
+  @protected
   void sse_encode_box_autoadd_record_u_32_u_32_u_32_u_32(
     (int, int, int, int) self,
     SseSerializer serializer,
@@ -2153,6 +2282,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.filePath, serializer);
     sse_encode_change_type(self.change, serializer);
+  }
+
+  @protected
+  void sse_encode_flutter_repo_user_settings(
+    FlutterRepoUserSettings self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.remote, serializer);
   }
 
   @protected

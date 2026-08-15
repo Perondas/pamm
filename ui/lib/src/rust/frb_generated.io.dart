@@ -21,6 +21,9 @@ import 'api/commands/pack_sync/sync_pack.dart';
 import 'api/commands/pack_sync/sync_pack_with_parents.dart';
 import 'api/commands/params.dart';
 import 'api/commands/sync_config.dart';
+import 'api/commands/user_repo_settings.dart';
+import 'api/commands/user_repo_settings/load_settings.dart';
+import 'api/commands/user_repo_settings/save_settings.dart';
 import 'api/logging.dart';
 import 'api/progress_reporting.dart';
 import 'dart:async';
@@ -105,6 +108,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool dco_decode_bool(dynamic raw);
 
   @protected
+  FlutterRepoUserSettings dco_decode_box_autoadd_flutter_repo_user_settings(
+    dynamic raw,
+  );
+
+  @protected
   (int, int, int, int) dco_decode_box_autoadd_record_u_32_u_32_u_32_u_32(
     dynamic raw,
   );
@@ -123,6 +131,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   FileChange dco_decode_file_change(dynamic raw);
+
+  @protected
+  FlutterRepoUserSettings dco_decode_flutter_repo_user_settings(dynamic raw);
 
   @protected
   int dco_decode_i_32(dynamic raw);
@@ -274,6 +285,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool sse_decode_bool(SseDeserializer deserializer);
 
   @protected
+  FlutterRepoUserSettings sse_decode_box_autoadd_flutter_repo_user_settings(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   (int, int, int, int) sse_decode_box_autoadd_record_u_32_u_32_u_32_u_32(
     SseDeserializer deserializer,
   );
@@ -294,6 +310,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   FileChange sse_decode_file_change(SseDeserializer deserializer);
+
+  @protected
+  FlutterRepoUserSettings sse_decode_flutter_repo_user_settings(
+    SseDeserializer deserializer,
+  );
 
   @protected
   int sse_decode_i_32(SseDeserializer deserializer);
@@ -465,6 +486,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_bool(bool self, SseSerializer serializer);
 
   @protected
+  void sse_encode_box_autoadd_flutter_repo_user_settings(
+    FlutterRepoUserSettings self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_record_u_32_u_32_u_32_u_32(
     (int, int, int, int) self,
     SseSerializer serializer,
@@ -487,6 +514,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_file_change(FileChange self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_flutter_repo_user_settings(
+    FlutterRepoUserSettings self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_i_32(int self, SseSerializer serializer);

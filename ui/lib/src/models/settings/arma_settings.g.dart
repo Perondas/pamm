@@ -9,7 +9,7 @@ part of 'arma_settings.dart';
 ArmaSettings _$ArmaSettingsFromJson(Map<String, dynamic> json) => ArmaSettings(
   launchType:
       $enumDecodeNullable(_$LaunchTypeEnumMap, json['launchType']) ??
-      LaunchType.file,
+      LaunchType.steam,
 );
 
 Map<String, dynamic> _$ArmaSettingsToJson(ArmaSettings instance) =>

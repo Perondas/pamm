@@ -1,5 +1,6 @@
 use crate::io::files::file_paths::rel_path::RelPath;
 use crate::models::repo::repo_config::RepoConfig;
+use crate::models::repo::repo_user_settings::RepoUserSettings;
 use crate::models::server_config::ServerConfig;
 
 pub(crate) trait FixedFilePath {
@@ -20,3 +21,4 @@ macro_rules! at_root {
 
 at_root!(RepoConfig);
 at_root!(ServerConfig);
+at_root!(RepoUserSettings);

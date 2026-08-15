@@ -8,7 +8,7 @@ use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_user_settings::RepoUserSettings;
-use anyhow::ensure;
+use anyhow::{Context, ensure};
 use std::ops::{Deref, DerefMut};
 use std::path::Path;
 use url::Url;
@@ -56,6 +56,13 @@ impl ClientRepoHandle {
 
     pub fn remote(&self) -> &Url {
         self.user_settings.get_remote()
+    }
+
+    pub fn update_settings(&mut self, settings: RepoUserSettings) -> anyhow::Result<()> {
+        self.user_settings = settings;
+        self.write(&self.user_settings)
+            .context("Failed to write user settings")?;
+        Ok(())
     }
 }
 
