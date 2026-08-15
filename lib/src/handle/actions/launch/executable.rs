@@ -1,7 +1,7 @@
 use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::reading::get_canonical_addon_paths::GetAddonPaths;
 use crate::handle::reading::get_pack::GetPack;
-use crate::util::dirs::find_steam_folder::find_steam_dir;
+use crate::util::dirs::find_steam_dir::find_steam_dir;
 use anyhow::Context;
 use log::{debug, info};
 use std::os::windows::process::CommandExt;
