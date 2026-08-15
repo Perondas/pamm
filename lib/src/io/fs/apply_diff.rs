@@ -1,7 +1,7 @@
 use crate::handle::repo_handle::RepoHandle;
+use crate::io::files::file_paths::rel_path::RelPath;
 use crate::io::net::remote_patcher::RemotePatcher;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
-use crate::io::files::file_paths::rel_path::RelPath;
 use crate::models::index::get_dl_size::GetDlSize;
 use crate::models::index::index_node::{IndexNode, NodeKind};
 use crate::models::index::node_diff::{ModifiedNodeKind, NodeDiff, NodeModification};
@@ -10,6 +10,7 @@ use crate::models::pack::pack_diff::PackDiff;
 use anyhow::Context;
 use rayon::iter::ParallelIterator;
 use rayon::prelude::IntoParallelIterator;
+use std::cmp::Ordering;
 use std::fs;
 use std::path::PathBuf;
 use url::Url;
@@ -35,7 +36,11 @@ impl PackConfig {
 }
 
 impl<P: ProgressReporter> DiffApplier<P> {
-    pub(crate) fn new(addon_dir: PathBuf, remote_patcher: RemotePatcher<P>, progress_reporter: P) -> Self {
+    pub(crate) fn new(
+        addon_dir: PathBuf,
+        remote_patcher: RemotePatcher<P>,
+        progress_reporter: P,
+    ) -> Self {
         Self {
             addon_dir,
             remote_patcher,
@@ -163,8 +168,18 @@ impl<P: ProgressReporter> DiffApplier<P> {
         let file_path = path.with_base_path(&self.addon_dir);
 
         match modification.kind {
-            ModifiedNodeKind::Folder(children) => {
+            ModifiedNodeKind::Folder(mut children) => {
                 log::debug!("Applying modifications to folder {}", path);
+
+                // We move deletes up because they COULD conflict with creates
+                // This is mainly an issue on windows when a folder has the case of its name changed
+                children.sort_by(|a, b| match (a, b) {
+                    (NodeDiff::Deleted { .. }, NodeDiff::Deleted { .. }) => Ordering::Equal,
+                    (NodeDiff::Deleted { .. }, _) => Ordering::Less,
+                    (_, NodeDiff::Deleted { .. }) => Ordering::Greater,
+                    _ => Ordering::Equal,
+                });
+
                 for child in children {
                     self.apply_node_diff(child, path.clone())?;
                 }
