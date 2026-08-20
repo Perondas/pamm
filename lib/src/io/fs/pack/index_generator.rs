@@ -1,9 +1,9 @@
 use crate::handle::repo_handle::RepoHandle;
+use crate::io::files::file_paths::rel_path::RelPath;
+use crate::io::files::name_consts::CACHE_DB_DIR_NAME;
 use crate::io::fs::cache::file_cache_entry::FileCacheEntry;
 use crate::io::fs::cache::kv_cache::KVCache;
-use crate::io::files::name_consts::CACHE_DB_DIR_NAME;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
-use crate::io::files::file_paths::rel_path::RelPath;
 use crate::models::index::index_node::FileKind;
 use crate::models::index::index_node::IndexNode;
 use crate::models::index::index_node::NodeKind;
@@ -132,7 +132,7 @@ impl<P: ProgressReporter> IndexGenerator<P> {
             .as_secs();
         let length = metadata.len();
 
-        let stored_node = self.cache.get::<_, FileCacheEntry>(&rel_path.as_str())?;
+        let stored_node: Option<FileCacheEntry> = self.cache.get(rel_path.as_str())?;
 
         if let Some(FileCacheEntry {
             length: cached_length,

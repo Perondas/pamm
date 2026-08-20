@@ -8,14 +8,14 @@ pub struct KVCache {
 }
 
 impl KVCache {
-    pub fn new<P: AsRef<Path>>(path: P) -> Result<Self, anyhow::Error> {
+    pub fn new(path: impl AsRef<Path>) -> Result<Self, anyhow::Error> {
         let db = sled::open(path)?;
         Ok(KVCache { db })
     }
 
-    pub fn get<K: AsRef<[u8]>, V: DeserializeOwned>(
+    pub fn get<V: DeserializeOwned>(
         &self,
-        key: K,
+        key: impl AsRef<[u8]>,
     ) -> Result<Option<V>, anyhow::Error> {
         match self.db.get(key)? {
             Some(value) => bincode::serde::decode_from_slice(&value, bincode::config::standard())
@@ -26,13 +26,13 @@ impl KVCache {
         }
     }
 
-    pub fn set<K: AsRef<[u8]>, V: Serialize>(&self, key: K, value: V) -> Result<(), anyhow::Error> {
+    pub fn set(&self, key: impl AsRef<[u8]>, value: impl Serialize) -> Result<(), anyhow::Error> {
         let encoded: Vec<u8> = bincode::serde::encode_to_vec(value, bincode::config::standard())?;
         self.db.insert(key, encoded)?;
         Ok(())
     }
 
-    pub fn remove(&self, key: &str) -> Result<(), anyhow::Error> {
+    pub fn remove(&self, key: impl AsRef<[u8]>) -> Result<(), anyhow::Error> {
         self.db.remove(key)?;
         Ok(())
     }
