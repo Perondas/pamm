@@ -20,6 +20,8 @@ jobs:
           submodules: 'recursive'
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Fmt
+        run: cargo fmt --all -- --check
       - name: Build
         run: cargo build --verbose
       - name: Run tests
