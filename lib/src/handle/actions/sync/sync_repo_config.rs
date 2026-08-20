@@ -10,7 +10,7 @@ use crate::io::net::downloadable::KnownDownloadable;
 use crate::io::net::remote_version::verify_remote_version;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::repo::repo_config::RepoConfig;
-use anyhow::{anyhow, Context};
+use anyhow::{Context, anyhow};
 use log::debug;
 
 impl ClientRepoHandle {
@@ -68,8 +68,9 @@ impl ClientRepoHandle {
 
         for pack in existing {
             let path = PackConfig::file_path(pack);
-            let remote_pack_config = PackConfig::download_known(&path.with_base_url(&remote_url))
-                .context(format!("Failed to download pack {} configuration", pack))?;
+            let remote_pack_config =
+                PackConfig::download_known(&path.with_base_url(&remote_url))
+                    .context(format!("Failed to download pack {} configuration", pack))?;
             self.update_pack(&remote_pack_config)?;
             pack_configs.push(remote_pack_config);
         }

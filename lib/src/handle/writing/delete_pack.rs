@@ -1,6 +1,6 @@
 use crate::handle::repo_handle::RepoHandle;
 use crate::io::files::file_paths::rel_path::RelPath;
-use anyhow::{anyhow, ensure, Context};
+use anyhow::{Context, anyhow, ensure};
 use std::fs;
 
 pub trait DeletePack {

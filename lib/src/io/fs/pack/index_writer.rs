@@ -1,9 +1,9 @@
-use crate::io::fs::fs_writable::{SelfKeyedFSWritable, FixedFsWritable};
+use crate::io::files::name_consts::INDEX_DIR_NAME;
+use crate::io::fs::fs_writable::{FixedFsWritable, SelfKeyedFSWritable};
 use crate::models::index::checksum_index::ChecksumIndex;
 use crate::models::pack::pack_diff::PackDiff;
 use crate::models::pack::pack_index::PackIndex;
 use std::path::Path;
-use crate::io::files::name_consts::INDEX_DIR_NAME;
 
 impl PackDiff {
     pub fn write_checksum_index_to_fs(&self, base_path: &Path) -> anyhow::Result<()> {

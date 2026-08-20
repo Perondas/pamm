@@ -1,8 +1,8 @@
+use crate::keyed;
 use crate::models::pack::addon::AddonSettings;
 use crate::models::pack::pack_customization::PackCustomization;
 use crate::models::pack::pack_diff::PackDiff;
 use crate::models::pack::pack_user_settings::PackUserSettings;
-use crate::keyed;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -80,12 +80,7 @@ mod tests {
 
     #[test]
     fn test_remove_disabled_optionals() {
-        let mut config = PackConfig::new(
-            "test_pack".to_string(),
-            "desc".to_string(),
-            vec![],
-            None,
-        );
+        let mut config = PackConfig::new("test_pack".to_string(), "desc".to_string(), vec![], None);
 
         // Required addon
         config.addons.insert(
@@ -116,5 +111,4 @@ mod tests {
         assert!(config.addons.contains_key("optional_enabled"));
         assert!(!config.addons.contains_key("optional_disabled"));
     }
-
 }

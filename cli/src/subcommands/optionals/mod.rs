@@ -1,5 +1,5 @@
-use toggle_optionals::ToggleOptionalsArgs;
 use clap::Subcommand;
+use toggle_optionals::ToggleOptionalsArgs;
 
 pub mod toggle_optionals;
 

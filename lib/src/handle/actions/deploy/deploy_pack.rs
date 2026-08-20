@@ -3,7 +3,7 @@ use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::server_repo_handle::ServerRepoHandle;
 use crate::io::fs::util::clean_path::canonicalize_and_clean_path;
 use crate::io::fs::util::symlink::create_or_recreate_symlink;
-use anyhow::{anyhow, ensure, Context};
+use anyhow::{Context, anyhow, ensure};
 use log::{debug, warn};
 use run_script::ScriptOptions;
 use std::fs;
@@ -231,12 +231,8 @@ mod tests {
             let mut server = ServerRepoHandle::create(tmp.path(), repo_config).unwrap();
             let repo_path = server.get_repo_path().to_path_buf();
 
-            let mut pack = PackConfig::new(
-                "core".to_string(),
-                "core pack".to_string(),
-                vec![],
-                None,
-            );
+            let mut pack =
+                PackConfig::new("core".to_string(), "core pack".to_string(), vec![], None);
             pack.addons
                 .insert("@addon1".to_string(), AddonSettings { is_optional: false });
             pack.init_source_on_fs(&repo_path).unwrap();
@@ -353,12 +349,7 @@ mod tests {
         let repo_config = RepoConfig::new("repo".to_string(), "desc".to_string(), packs);
         let server = ServerRepoHandle::create(tmp.path(), repo_config).unwrap();
 
-        let mut pack = PackConfig::new(
-            "core".to_string(),
-            "core pack".to_string(),
-            vec![],
-            None,
-        );
+        let mut pack = PackConfig::new("core".to_string(), "core pack".to_string(), vec![], None);
         pack.addons
             .insert("@addon1".to_string(), AddonSettings { is_optional: false });
         pack.init_source_on_fs(server.get_repo_path()).unwrap();

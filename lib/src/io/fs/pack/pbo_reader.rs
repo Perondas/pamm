@@ -1,5 +1,5 @@
 use crate::models::index::index_node::{FileKind, IndexNode, NodeKind, PBO_CHECKSUM_LEN, PBOPart};
-use anyhow::{ensure, Result};
+use anyhow::{Result, ensure};
 use bi_fs_rs::pbo::handle::PBOHandle;
 use std::io::{Read, Seek, SeekFrom};
 

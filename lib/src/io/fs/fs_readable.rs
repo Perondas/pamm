@@ -25,4 +25,3 @@ impl<T: FsReadable + FixedFile> KnownFSReadable for T {
         Self::read_from_path(full_path).context(anyhow!("reading {:?}", Self::file_name()))
     }
 }
-

@@ -1,7 +1,7 @@
 use clap::Args;
+use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use pamm_lib::handle::optionals::SaveOptionals;
 use pamm_lib::handle::optionals::load_optionals::LoadOptionals;
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 
 #[derive(Debug, Args)]
 pub struct ToggleOptionalsArgs {

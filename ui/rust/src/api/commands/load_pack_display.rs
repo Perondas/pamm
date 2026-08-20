@@ -9,10 +9,7 @@ pub struct PackDisplayInfo {
     pub icon: Option<String>,
 }
 
-pub fn load_pack_display(
-    repo_path: String,
-    pack_name: String,
-) -> anyhow::Result<PackDisplayInfo> {
+pub fn load_pack_display(repo_path: String, pack_name: String) -> anyhow::Result<PackDisplayInfo> {
     let repo_path = std::path::Path::new(&repo_path);
 
     let handle = ClientRepoHandle::open(repo_path)?;

@@ -1,6 +1,6 @@
 use crate::handle::actions::build::{BuildMode, BuildReport};
-use crate::io::fs::util::symlink::create_or_recreate_symlink;
 use crate::io::files::file_paths::rel_path::RelPath;
+use crate::io::fs::util::symlink::create_or_recreate_symlink;
 use anyhow::{Context, anyhow};
 use std::fs;
 use std::path::{Component, Path, PathBuf};
@@ -91,20 +91,23 @@ impl<'a> Materializer<'a> {
                 .filter(|name| !excludes.iter().any(|excluded| name == excluded))
                 .collect::<HashSet<_>>();
 
-            for entry in fs::read_dir(&dst).with_context(|| format!("Failed to read dir {:?}", dst))? {
+            for entry in
+                fs::read_dir(&dst).with_context(|| format!("Failed to read dir {:?}", dst))?
+            {
                 let entry = entry?;
                 if !src_entries.contains(&entry.file_name()) {
                     let path = entry.path();
                     if path.is_dir() {
-                        fs::remove_dir_all(&path).with_context(|| format!("Failed to remove stale dir {:?}", path))?;
+                        fs::remove_dir_all(&path)
+                            .with_context(|| format!("Failed to remove stale dir {:?}", path))?;
                     } else {
-                        fs::remove_file(&path).with_context(|| format!("Failed to remove stale file {:?}", path))?;
+                        fs::remove_file(&path)
+                            .with_context(|| format!("Failed to remove stale file {:?}", path))?;
                     }
                     report.stale_removed += 1;
                 }
             }
         }
-
 
         for entry in fs::read_dir(&src).with_context(|| format!("Failed to read dir {:?}", src))? {
             let entry = entry?;

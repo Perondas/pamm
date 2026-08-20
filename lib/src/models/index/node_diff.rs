@@ -1,5 +1,5 @@
-use crate::models::self_keyed::SelfKeyed;
 use crate::models::index::index_node::{IndexNode, PBOPart};
+use crate::models::self_keyed::SelfKeyed;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug)]

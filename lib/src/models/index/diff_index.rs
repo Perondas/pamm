@@ -1,9 +1,9 @@
+use crate::models::index::get_size_change::GetSizeChange;
 use crate::models::index::index_node::{FileKind, IndexNode, NodeKind, PBO_CHECKSUM_LEN, PBOPart};
 use crate::models::index::node_diff::{
     FileModification, ModifiedNodeKind, NodeDiff, NodeModification,
 };
 use crate::util::iterator_diff::{DiffResult, diff_iterators};
-use crate::models::index::get_size_change::GetSizeChange;
 use rayon::prelude::*;
 use std::collections::HashSet;
 
@@ -164,7 +164,6 @@ pub fn diff_folder_contents(old: &[IndexNode], new: &[IndexNode]) -> anyhow::Res
     Ok(added.into_iter().chain(removed).chain(changes?).collect())
 }
 
-
 #[cfg(test)]
 mod test {
     use super::*;
@@ -207,7 +206,11 @@ mod test {
         if let NodeDiff::Modified(mod_node) = diff {
             assert_eq!(mod_node.name, "test");
             match mod_node.kind {
-                ModifiedNodeKind::File { old_length, target_checksum, modification } => {
+                ModifiedNodeKind::File {
+                    old_length,
+                    target_checksum,
+                    modification,
+                } => {
                     assert_eq!(old_length, 10);
                     assert_eq!(target_checksum, vec![4, 5, 6]);
                     if let FileModification::Generic { new_length } = modification {
@@ -310,10 +313,21 @@ mod test {
         if let NodeDiff::Modified(mod_node) = diff {
             assert_eq!(mod_node.name, "test.pbo");
             match mod_node.kind {
-                ModifiedNodeKind::File { old_length, target_checksum, modification } => {
+                ModifiedNodeKind::File {
+                    old_length,
+                    target_checksum,
+                    modification,
+                } => {
                     assert_eq!(old_length, 300);
                     assert_eq!(target_checksum, vec![2, 2, 2]);
-                    if let FileModification::PBO { new_length, dl_size, required_checksums, new_order, new_blob_start } = modification {
+                    if let FileModification::PBO {
+                        new_length,
+                        dl_size,
+                        required_checksums,
+                        new_order,
+                        new_blob_start,
+                    } = modification
+                    {
                         assert_eq!(new_length, 400);
                         // required_parts_size for part3 (300) + blob_start (60) + 20 = 380
                         assert_eq!(dl_size, 380);
@@ -336,7 +350,10 @@ mod test {
         let child1 = IndexNode {
             name: "file.txt".to_string(),
             checksum: vec![1],
-            kind: NodeKind::File { length: 5, kind: FileKind::Generic },
+            kind: NodeKind::File {
+                length: 5,
+                kind: FileKind::Generic,
+            },
         };
         let old = IndexNode {
             name: "dir".to_string(),
@@ -357,12 +374,18 @@ mod test {
         let child1 = IndexNode {
             name: "file1.txt".to_string(),
             checksum: vec![1],
-            kind: NodeKind::File { length: 5, kind: FileKind::Generic },
+            kind: NodeKind::File {
+                length: 5,
+                kind: FileKind::Generic,
+            },
         };
         let child2 = IndexNode {
             name: "file2.txt".to_string(),
             checksum: vec![2],
-            kind: NodeKind::File { length: 10, kind: FileKind::Generic },
+            kind: NodeKind::File {
+                length: 10,
+                kind: FileKind::Generic,
+            },
         };
         let old = IndexNode {
             name: "dir".to_string(),
@@ -388,10 +411,10 @@ mod test {
                         NodeDiff::Created(node) => {
                             assert_eq!(node.name, "file2.txt");
                             created_found = true;
-                        },
+                        }
                         NodeDiff::None(name) => {
                             assert_eq!(name, "file1.txt");
-                        },
+                        }
                         _ => panic!("Unexpected diff kind"),
                     }
                 }
@@ -410,7 +433,10 @@ mod test {
         let old = IndexNode {
             name: "dir".to_string(),
             checksum: vec![100],
-            kind: NodeKind::File { length: 5, kind: FileKind::Generic },
+            kind: NodeKind::File {
+                length: 5,
+                kind: FileKind::Generic,
+            },
         };
         let new = IndexNode {
             name: "dir".to_string(),
@@ -431,7 +457,10 @@ mod test {
         let new = IndexNode {
             name: "dir".to_string(),
             checksum: vec![200],
-            kind: NodeKind::File { length: 5, kind: FileKind::Generic },
+            kind: NodeKind::File {
+                length: 5,
+                kind: FileKind::Generic,
+            },
         };
         let _ = diff_folders(&old, &new);
     }

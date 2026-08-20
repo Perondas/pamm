@@ -1,8 +1,8 @@
-use crate::api::commands::pack_sync::get_diff::{DiffResult, diff_to_result};
+use crate::api::commands::pack_sync::get_diff::{diff_to_result, DiffResult};
 use crate::api::progress_reporting::DartProgressReporter;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-use std::path::Path;
 use pamm_lib::io::progress_reporting::progress_reporter::ProgressReporter;
+use std::path::Path;
 
 pub fn get_diff_with_parents(
     pack_name: String,

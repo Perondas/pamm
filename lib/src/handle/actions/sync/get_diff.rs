@@ -4,7 +4,7 @@ use crate::io::fs::pack::index_generator::IndexGenerator;
 use crate::io::net::remote_version::verify_remote_version;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::models::pack::pack_config::PackConfig;
-use crate::models::pack::pack_diff::{diff_packs, PackDiff};
+use crate::models::pack::pack_diff::{PackDiff, diff_packs};
 
 impl ClientRepoHandle {
     pub fn get_pack_diff<P: ProgressReporter>(

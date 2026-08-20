@@ -1,11 +1,11 @@
 use crate::io::files::file_names::fixed_file::FixedFile;
 use crate::io::files::name_consts::{
-    get_pack_addon_directory_name, ADDONS_DIR_NAME, INDEX_DIR_NAME, WWW_DIR_NAME,
+    ADDONS_DIR_NAME, INDEX_DIR_NAME, WWW_DIR_NAME, get_pack_addon_directory_name,
 };
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use crate::models::repo::repo_config::RepoConfig;
-use anyhow::{bail, ensure, Context};
+use anyhow::{Context, bail, ensure};
 use log::{info, warn};
 use std::fs;
 use std::path::Path;
@@ -191,7 +191,7 @@ mod tests {
     use crate::io::fs::fs_writable::FixedFsWritable;
     use crate::io::fs::migration::run_migrations;
     use crate::models::repo::repo_config::RepoConfig;
-    use crate::models::repo::repo_version::{RepoVersion, CURRENT_REPO_VERSION};
+    use crate::models::repo::repo_version::{CURRENT_REPO_VERSION, RepoVersion};
     use crate::util::test_utils::TestTempDir;
     use std::collections::HashSet;
     use std::fs;

@@ -4,7 +4,7 @@ use crate::handle::optionals::get_optionals_paths::GetOptionalsPaths;
 use crate::handle::reading::get_pack::GetPack;
 use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::io::fs::util::clean_path::canonicalize_and_clean_path;
-use anyhow::{anyhow, Context};
+use anyhow::{Context, anyhow};
 
 pub trait GetAddonPaths {
     /// Gets the paths to all enabled addons of the pack (required, optional and

@@ -60,10 +60,9 @@ pub(crate) fn download_referenced_media(
 
     for name in &referenced {
         let rel = RelPath::from_name(MEDIA_DIR_NAME).push(name);
-        if let Err(e) = download_file_unverified(
-            &rel.with_base_path(repo_path),
-            rel.with_base_url(remote),
-        ) {
+        if let Err(e) =
+            download_file_unverified(&rel.with_base_path(repo_path), rel.with_base_url(remote))
+        {
             warn!("Failed to download media file '{}': {}", name, e);
         }
     }
@@ -90,11 +89,8 @@ mod tests {
         fs::write(media_dir.join("old.png"), b"old").unwrap();
         fs::write(media_dir.join("interrupted.png.part"), b"part").unwrap();
 
-        let mut repo_config = RepoConfig::new(
-            "repo".to_string(),
-            "test".to_string(),
-            Default::default(),
-        );
+        let mut repo_config =
+            RepoConfig::new("repo".to_string(), "test".to_string(), Default::default());
         repo_config.customization = Some(RepoCustomization {
             color: None,
             icon: Some("keep.png".to_string()),
@@ -130,7 +126,11 @@ fn prune_unreferenced(media_dir: &Path, referenced: &HashSet<&str>) {
             continue;
         }
         if let Err(e) = fs::remove_file(entry.path()) {
-            warn!("Failed to remove stale media file {:?}: {}", entry.path(), e);
+            warn!(
+                "Failed to remove stale media file {:?}: {}",
+                entry.path(),
+                e
+            );
         }
     }
 }

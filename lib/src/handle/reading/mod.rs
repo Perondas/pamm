@@ -7,7 +7,7 @@ pub mod get_repo_info;
 use crate::handle::repo_handle::RepoHandle;
 use crate::io::files::file_paths::keyed_path::KeyedFilePath;
 use crate::io::fs::fs_readable::KnownFSReadable;
-use anyhow::{anyhow, Context};
+use anyhow::{Context, anyhow};
 
 impl RepoHandle {
     pub(in crate::handle) fn read_keyed<T: KnownFSReadable + KeyedFilePath>(

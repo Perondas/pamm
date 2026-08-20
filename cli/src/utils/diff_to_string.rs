@@ -24,7 +24,10 @@ impl ToPrettyString for PackDiff {
             result.push_str("Changes:\n");
             result.push_str(&diffs_to_string(changes, ""));
             result.push('\n');
-            result.push_str(&totals_to_string(self.get_dl_size(), self.get_size_change()));
+            result.push_str(&totals_to_string(
+                self.get_dl_size(),
+                self.get_size_change(),
+            ));
         }
 
         result

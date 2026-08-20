@@ -1,7 +1,7 @@
-use crate::models::self_keyed::SelfKeyed;
 use crate::io::files::file_names::fixed_file::FixedFile;
 use crate::io::files::file_names::keyed_file::KeyedFile;
 use crate::io::serialization::writable::Writable;
+use crate::models::self_keyed::SelfKeyed;
 use anyhow::{Context, anyhow};
 use std::path::Path;
 

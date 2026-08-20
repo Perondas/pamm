@@ -39,12 +39,7 @@ mod tests {
     fn test_get_external_addon_paths() {
         let mut mock = MockHandle::new();
 
-        let config = PackConfig::new(
-            "test_pack".to_string(),
-            "desc".to_string(),
-            vec![],
-            None,
-        );
+        let config = PackConfig::new("test_pack".to_string(), "desc".to_string(), vec![], None);
 
         let mut settings = PackUserSettings::default();
         let external_enabled = ExternalAddon {

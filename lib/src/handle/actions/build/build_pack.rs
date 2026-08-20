@@ -12,7 +12,7 @@ use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_version::RepoVersion;
-use anyhow::{ensure, Context};
+use anyhow::{Context, ensure};
 use std::fs;
 
 impl ServerRepoHandle {

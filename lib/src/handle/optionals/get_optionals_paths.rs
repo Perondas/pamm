@@ -1,7 +1,7 @@
 use crate::handle::reading::get_pack::GetPack;
+use crate::io::files::name_consts::ADDONS_DIR_NAME;
 use log::{debug, trace};
 use std::path::PathBuf;
-use crate::io::files::name_consts::ADDONS_DIR_NAME;
 
 impl<T> GetOptionalsPaths for T
 where
@@ -81,7 +81,10 @@ mod tests {
         let paths = mock.get_optional_paths("test_pack").unwrap();
 
         assert_eq!(paths.len(), 1);
-        assert_eq!(paths[0], PathBuf::from("test_pack/addons").join("@opt_addon"));
+        assert_eq!(
+            paths[0],
+            PathBuf::from("test_pack/addons").join("@opt_addon")
+        );
     }
 
     #[test]

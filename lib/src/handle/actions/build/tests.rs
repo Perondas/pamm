@@ -1,9 +1,9 @@
 use crate::handle::actions::build::{BuildMode, BuildOptions};
 use crate::handle::server_repo_handle::ServerRepoHandle;
-use crate::io::fs::fs_readable::KnownFSReadable;
-use crate::io::fs::fs_writable::FixedFsWritable;
 use crate::io::files::file_names::fixed_file::FixedFile;
 use crate::io::files::name_consts::{CACHE_DB_DIR_NAME, WWW_DIR_NAME};
+use crate::io::fs::fs_readable::KnownFSReadable;
+use crate::io::fs::fs_writable::FixedFsWritable;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::models::index::checksum_index::ChecksumIndex;
 use crate::models::pack::pack_config::PackConfig;
@@ -43,12 +43,8 @@ impl Fixture {
 
         // Minimal pack config, no required/optional addons declared. Lays out
         // the per-pack source folder: core/pack.config.json + core/addons/.
-        let pack_config = PackConfig::new(
-            "core".to_string(),
-            "test pack".to_string(),
-            vec![],
-            None,
-        );
+        let pack_config =
+            PackConfig::new("core".to_string(), "test pack".to_string(), vec![], None);
         pack_config.init_source_on_fs(&repo_path).unwrap();
 
         // Source pack addon dir with one addon containing a tiny file.
@@ -392,7 +388,10 @@ fn build_materializes_media_and_prunes_stale_media_entries() {
             .is_symlink()
     );
     assert_eq!(fs::read(&www_icon).unwrap(), b"icon");
-    assert_eq!(fs::read(fx.www().join("media/banner.png")).unwrap(), b"banner");
+    assert_eq!(
+        fs::read(fx.www().join("media/banner.png")).unwrap(),
+        b"banner"
+    );
 
     // Rebuild after removing one file: the stale www entry is pruned, the
     // rest (and www/media itself) survive the root prune loop.
@@ -446,12 +445,7 @@ fn open_migrates_v1_source_then_build_publishes_v2_www() {
 
     // Turn the fresh repo into a v1 one: flat source files, no version.pamm.
     fs::remove_file(repo_path.join(RepoVersion::file_name())).unwrap();
-    let pack_config = PackConfig::new(
-        "core".to_string(),
-        "test pack".to_string(),
-        vec![],
-        None,
-    );
+    let pack_config = PackConfig::new("core".to_string(), "test pack".to_string(), vec![], None);
     pack_config.write_fixed(&repo_path).unwrap();
     let addon_dir = repo_path.join("core_pack_addons").join("@addon1");
     fs::create_dir_all(addon_dir.join("sub")).unwrap();
