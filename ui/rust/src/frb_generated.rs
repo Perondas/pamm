@@ -1223,8 +1223,10 @@ impl SseDecode for crate::api::commands::user_repo_settings::FlutterRepoUserSett
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_remote = <String>::sse_decode(deserializer);
+        let mut var_localPacks = <Vec<String>>::sse_decode(deserializer);
         return crate::api::commands::user_repo_settings::FlutterRepoUserSettings {
             remote: var_remote,
+            local_packs: var_localPacks,
         };
     }
 }
@@ -1754,7 +1756,11 @@ impl flutter_rust_bridge::IntoDart
     for crate::api::commands::user_repo_settings::FlutterRepoUserSettings
 {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        [self.remote.into_into_dart().into_dart()].into_dart()
+        [
+            self.remote.into_into_dart().into_dart(),
+            self.local_packs.into_into_dart().into_dart(),
+        ]
+        .into_dart()
     }
 }
 impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
@@ -2098,6 +2104,7 @@ impl SseEncode for crate::api::commands::user_repo_settings::FlutterRepoUserSett
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.remote, serializer);
+        <Vec<String>>::sse_encode(self.local_packs, serializer);
     }
 }
 

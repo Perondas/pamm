@@ -4,12 +4,16 @@ use url::Url;
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RepoUserSettings {
     pub remote: Url,
-    // TODO: Add authentication
+    #[serde(default)]
+    pub local_packs: Vec<String>,
 }
 
 impl RepoUserSettings {
     pub fn new(remote: Url) -> Self {
-        RepoUserSettings { remote }
+        RepoUserSettings {
+            remote,
+            local_packs: Vec::default(),
+        }
     }
 
     pub fn get_remote(&self) -> &Url {
