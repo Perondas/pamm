@@ -8,7 +8,7 @@ crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
 flutter_rust_bridge = "=2.13.0"
-pamm_lib = { path = "../../lib" }
+pamm_lib = { path = "../../lib", features = ["client"] }
 url = "2.5.8"
 anyhow = "1.0.102"
 log = { version = "0.4.29" , features = ["std"]}

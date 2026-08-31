@@ -32,4 +32,9 @@ windows-registry = "0.6.1"
 mockall = "0.15.0"
 
 [features]
-deploy = ["dep:run_script", "dep:chrono"]
+# The client half of the library: `ClientRepoHandle` and everything hung off it —
+# syncing against a remote, launching, and local (mission-maker) packs.
+client = []
+# The server half: `ServerRepoHandle`, building a repo into `www/`, and deploying.
+server = []
+deploy = ["server", "dep:run_script", "dep:chrono"]

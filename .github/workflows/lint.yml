@@ -29,6 +29,34 @@ jobs:
       - name: Lint
         run: cargo clippy -- -D warnings
 
+  # The workspace-root steps above only ever build pamm_lib with the union of
+  # what the front-ends ask for (client + server + deploy), so a break confined
+  # to one half of the feature split would go unnoticed. Each half has to stand
+  # on its own, so check every valid combination explicitly.
+  lib-features:
+    name: pamm_lib (${{ matrix.features }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        features:
+          - client
+          - server
+          - client,server
+          - client,server,deploy
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@master
+        with:
+          fetch-depth: '0'
+          submodules: 'recursive'
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Run tests
+        run: cargo test -p pamm_lib --no-default-features --features ${{ matrix.features }} --verbose
+      - name: Lint
+        run: cargo clippy -p pamm_lib --all-targets --no-default-features --features ${{ matrix.features }} -- -D warnings
+
   ui:
     defaults:
       run:

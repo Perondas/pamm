@@ -12,6 +12,8 @@ use std::collections::HashSet;
 
 impl ClientRepoHandle {
     pub fn quick_check_pack_up_to_date(&self, pack_name: &str) -> anyhow::Result<bool> {
+        self.ensure_not_local(pack_name)?;
+
         let index_rel = RelPath::new().push(pack_name).push(INDEX_DIR_NAME);
 
         let remote_url = self.remote().clone();

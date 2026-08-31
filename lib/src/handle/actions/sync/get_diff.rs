@@ -13,6 +13,8 @@ impl ClientRepoHandle {
         progress_reporter: P,
         force_refresh: bool,
     ) -> anyhow::Result<PackDiff> {
+        self.ensure_not_local(pack_name)?;
+
         verify_remote_version(self.get_remote_url())?;
 
         let (_, settings) = self.get_pack_with_settings(pack_name)?;
