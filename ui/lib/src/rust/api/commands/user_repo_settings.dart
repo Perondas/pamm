@@ -10,16 +10,21 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 class FlutterRepoUserSettings {
   final String remote;
+  final List<String> localPacks;
 
-  const FlutterRepoUserSettings({required this.remote});
+  const FlutterRepoUserSettings({
+    required this.remote,
+    required this.localPacks,
+  });
 
   @override
-  int get hashCode => remote.hashCode;
+  int get hashCode => remote.hashCode ^ localPacks.hashCode;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is FlutterRepoUserSettings &&
           runtimeType == other.runtimeType &&
-          remote == other.remote;
+          remote == other.remote &&
+          localPacks == other.localPacks;
 }

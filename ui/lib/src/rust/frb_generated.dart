@@ -1319,9 +1319,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   FlutterRepoUserSettings dco_decode_flutter_repo_user_settings(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 1)
-      throw Exception('unexpected arr length: expect 1 but see ${arr.length}');
-    return FlutterRepoUserSettings(remote: dco_decode_String(arr[0]));
+    if (arr.length != 2)
+      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    return FlutterRepoUserSettings(
+      remote: dco_decode_String(arr[0]),
+      localPacks: dco_decode_list_String(arr[1]),
+    );
   }
 
   @protected
@@ -1770,7 +1773,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_remote = sse_decode_String(deserializer);
-    return FlutterRepoUserSettings(remote: var_remote);
+    var var_localPacks = sse_decode_list_String(deserializer);
+    return FlutterRepoUserSettings(
+      remote: var_remote,
+      localPacks: var_localPacks,
+    );
   }
 
   @protected
@@ -2291,6 +2298,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.remote, serializer);
+    sse_encode_list_String(self.localPacks, serializer);
   }
 
   @protected
