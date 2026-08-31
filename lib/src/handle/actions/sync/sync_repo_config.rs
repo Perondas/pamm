@@ -10,7 +10,7 @@ use crate::io::net::downloadable::KnownDownloadable;
 use crate::io::net::remote_version::verify_remote_version;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::repo::repo_config::RepoConfig;
-use anyhow::{Context, anyhow};
+use anyhow::{Context, anyhow, ensure};
 use log::debug;
 
 impl ClientRepoHandle {
@@ -26,6 +26,21 @@ impl ClientRepoHandle {
             "Failed to download remote config from {}",
             remote_url
         ))?;
+
+        // A local pack owns its folder outright. If the remote starts publishing a
+        // pack of the same name, the `added` loop below would lay a downloaded
+        // pack straight over it, so refuse before anything has been applied.
+        let collisions = remote_repo_config
+            .packs
+            .iter()
+            .filter(|p| self.is_local_pack(p))
+            .collect::<Vec<_>>();
+        ensure!(
+            collisions.is_empty(),
+            "Remote repository introduced pack(s) {:?} whose name(s) collide with existing \
+             local pack(s). Rename or remove the local pack(s), then sync again.",
+            collisions
+        );
 
         let local_repo_config = self.get_config().clone();
 

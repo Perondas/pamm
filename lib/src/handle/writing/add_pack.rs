@@ -1,5 +1,7 @@
+#[cfg(feature = "client")]
 use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::repo_handle::RepoHandle;
+#[cfg(feature = "server")]
 use crate::handle::server_repo_handle::ServerRepoHandle;
 use crate::models::pack::pack_config::PackConfig;
 use anyhow::ensure;
@@ -24,6 +26,7 @@ impl RepoHandle {
     }
 }
 
+#[cfg(feature = "server")]
 impl ServerRepoHandle {
     /// Add a pack to the server repo: register it and lay out the source addon
     /// directory. No client-only settings file is created.
@@ -33,6 +36,7 @@ impl ServerRepoHandle {
     }
 }
 
+#[cfg(feature = "client")]
 impl ClientRepoHandle {
     /// Add a pack to the client repo: register it and lay out the client addon
     /// directory (including the default user settings).
@@ -42,7 +46,7 @@ impl ClientRepoHandle {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "server"))]
 mod tests {
     use crate::handle::reading::get_repo_info::GetRepoInfo;
     use crate::handle::server_repo_handle::ServerRepoHandle;

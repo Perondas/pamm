@@ -1,3 +1,5 @@
+#[cfg(feature = "client")]
+pub mod add_local_pack;
 pub mod add_pack;
 pub mod delete_pack;
 pub mod save_pack_settings;
@@ -6,6 +8,7 @@ pub mod update_pack;
 pub mod update_repo_config;
 
 use crate::handle::repo_handle::RepoHandle;
+#[cfg(feature = "client")]
 use crate::io::files::file_paths::keyed_path::KeyedFilePath;
 use crate::io::files::file_paths::self_identified_path::SelfIdentifiedFilePath;
 use crate::io::fs::fs_writable::FixedFsWritable;
@@ -19,6 +22,7 @@ impl RepoHandle {
         value.write_fixed(&path)
     }
 
+    #[cfg(feature = "client")]
     pub(in crate::handle) fn write_keyed<T: FixedFsWritable + KeyedFilePath>(
         &self,
         value: &T,

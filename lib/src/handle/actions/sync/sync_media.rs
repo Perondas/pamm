@@ -70,6 +70,33 @@ pub(crate) fn download_referenced_media(
     prune_unreferenced(&media_dir, &referenced);
 }
 
+fn prune_unreferenced(media_dir: &Path, referenced: &HashSet<&str>) {
+    let entries = match fs::read_dir(media_dir) {
+        Ok(entries) => entries,
+        Err(e) => {
+            warn!("Failed to read media directory {:?}: {}", media_dir, e);
+            return;
+        }
+    };
+
+    for entry in entries.flatten() {
+        if !entry.path().is_file() {
+            continue;
+        }
+        let name = entry.file_name();
+        if referenced.contains(name.to_string_lossy().as_ref()) {
+            continue;
+        }
+        if let Err(e) = fs::remove_file(entry.path()) {
+            warn!(
+                "Failed to remove stale media file {:?}: {}",
+                entry.path(),
+                e
+            );
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -105,32 +132,5 @@ mod tests {
         assert!(!media_dir.join("old.png").exists());
         assert!(!media_dir.join("interrupted.png.part").exists());
         assert!(!repo_path.join("escape.png").exists());
-    }
-}
-
-fn prune_unreferenced(media_dir: &Path, referenced: &HashSet<&str>) {
-    let entries = match fs::read_dir(media_dir) {
-        Ok(entries) => entries,
-        Err(e) => {
-            warn!("Failed to read media directory {:?}: {}", media_dir, e);
-            return;
-        }
-    };
-
-    for entry in entries.flatten() {
-        if !entry.path().is_file() {
-            continue;
-        }
-        let name = entry.file_name();
-        if referenced.contains(name.to_string_lossy().as_ref()) {
-            continue;
-        }
-        if let Err(e) = fs::remove_file(entry.path()) {
-            warn!(
-                "Failed to remove stale media file {:?}: {}",
-                entry.path(),
-                e
-            );
-        }
     }
 }

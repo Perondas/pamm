@@ -24,6 +24,7 @@ impl RepoHandle {
         })
     }
 
+    #[cfg(feature = "server")]
     pub fn create_repo_folder(parent_path: &Path, repo_config: RepoConfig) -> anyhow::Result<Self> {
         let repo_path = repo_config.init_blank_on_fs(parent_path)?;
 
@@ -33,6 +34,7 @@ impl RepoHandle {
         })
     }
 
+    #[cfg(feature = "client")]
     pub(in crate::handle) fn from_parts(repo_path: PathBuf, repo_config: RepoConfig) -> Self {
         Self {
             repo_path,

@@ -10,6 +10,10 @@ impl ClientRepoHandle {
         progress_reporter: P,
         force_refresh: bool,
     ) -> anyhow::Result<Vec<PackDiff>> {
+        // Only the requested pack needs checking: a normal pack can never name a
+        // local pack as its parent, since local packs exist on one machine only.
+        self.ensure_not_local(pack_name)?;
+
         let chain = collect_pack_chain(self, pack_name)?;
 
         chain

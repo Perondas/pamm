@@ -239,7 +239,18 @@ class _RemoteEditorState extends State<_RemoteEditor> {
     });
 
     try {
-      await saveSettings(repoPath: widget.repoPath, setting: FlutterRepoUserSettings(remote: newUrl));
+      // saveSettings replaces the whole settings object, so every field other
+      // than the edited one has to be carried over or it is wiped -- local packs
+      // in particular exist nowhere else. Re-read instead of trusting a snapshot
+      // taken when the dialog opened.
+      final current = await loadSettings(repotPath: widget.repoPath);
+      await saveSettings(
+        repoPath: widget.repoPath,
+        setting: FlutterRepoUserSettings(
+          remote: newUrl,
+          localPacks: current.localPacks,
+        ),
+      );
       setState(() {
         _initial = newUrl;
         _editing = false;

@@ -7,7 +7,7 @@ description = "A command-line interface for pamm, a arma 3 mod manager."
 license = "GPL-3"
 
 [dependencies]
-pamm_lib = { path = "../lib", features = ["deploy"] }
+pamm_lib = { path = "../lib", features = ["client", "server", "deploy"] }
 clap = { version = "4.6.1", features = ["derive"] }
 anyhow = "1.0.102"
 dialoguer = "0.12.0"
