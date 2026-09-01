@@ -109,7 +109,7 @@ jobs:
       - name: Install cargo-deb
         run: cargo install cargo-deb
       - name: Install rpm-build
-        run: sudo apt-get install -y rpm
+        run: sudo apt-get update && sudo apt-get install -y rpm
       - name: Install cargo-rpm
         run: cargo install cargo-rpm
       - name: Build cli
@@ -170,7 +170,7 @@ jobs:
           channel: 'stable'
       - name: Install build deps for Linux
         if: matrix.target == 'linux'
-        run: sudo apt-get install -y build-essential libgtk-3-dev
+        run: sudo apt-get update && sudo apt-get install -y build-essential libgtk-3-dev
       - name: Set version
         shell: bash
         working-directory: ${{ github.workspace }}
@@ -220,7 +220,7 @@ jobs:
         with:
           channel: 'stable'
       - name: Install build deps for Linux
-        run: sudo apt-get install -y build-essential libgtk-3-dev rpm patchelf
+        run: sudo apt-get update && sudo apt-get install -y build-essential libgtk-3-dev rpm patchelf
       - name: Install fastforge
         run: dart pub global activate fastforge && echo 'export PATH="$PATH":"$HOME/.pub-cache/bin"' >> $GITHUB_ENV
       - name: Set version
