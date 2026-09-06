@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:pamm_ui/src/pages/settings_screen/customization_group.dart';
 import 'package:pamm_ui/src/pages/settings_screen/debug_group.dart';
+import 'package:pamm_ui/src/pages/settings_screen/mm_mode_group.dart';
 
 import 'arma_group.dart';
 
@@ -19,6 +20,7 @@ class SettingsScreen extends StatelessWidget {
           CustomizationGroup(),
           DebugGroup(),
           if (Platform.isWindows) ArmaGroup(),
+          MmModeGroup(),
         ],
       ),
     );

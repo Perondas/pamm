@@ -1,15 +1,9 @@
-#[cfg(feature = "client")]
 pub mod apply_diff;
-#[cfg(feature = "client")]
 pub mod apply_diffs_with_parents;
-#[cfg(feature = "client")]
 pub mod config_sync_interactor;
-#[cfg(feature = "client")]
 pub mod get_diff;
-#[cfg(feature = "client")]
 pub mod get_diffs_with_parents;
-#[cfg(feature = "client")]
 pub mod quick_check;
+pub mod sync_local_pack;
 pub(crate) mod sync_media;
-#[cfg(feature = "client")]
 pub mod sync_repo_config;

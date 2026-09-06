@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:pamm_ui/src/models/repo_with_path.dart';
+import 'package:pamm_ui/src/pages/main_screen/repo_details/add_local_pack_dialog.dart';
 import 'package:pamm_ui/src/pages/main_screen/repo_details/edit_pack_dialog.dart';
 import 'package:pamm_ui/src/pages/sync_screen/main.dart';
 import 'package:pamm_ui/src/pages/sync_single_pack_screen/main.dart';
+import 'package:pamm_ui/src/rust/api/commands/add_local_pack.dart';
 import 'package:pamm_ui/src/rust/api/commands/launch.dart';
 import 'package:pamm_ui/src/rust/api/commands/load_pack_display.dart';
 import 'package:pamm_ui/src/rust/api/commands/pack_sync/quick_check.dart';
@@ -82,10 +84,76 @@ class _RepoDetailsState extends State<RepoDetails> {
                       shrinkWrap: true,
                     ),
             ),
+            if (settingsService.settings.mmSettings.mmModeEnabled) ...[
+              ...buildLocalPacksList(),
+            ],
           ],
         ),
       ),
     );
+  }
+
+  List<Widget> buildLocalPacksList() {
+    var localPacks = widget.selectedRepo.settings.localPacks.toList();
+    localPacks.sort();
+
+    return [
+      SizedBox(height: 12),
+      Row(
+        children: [
+          Text('Local Packs:', style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(width: 8),
+          Tooltip(
+            message:
+                'Local packs are packs that are treated like part of the repository but are stored locally on your machine.',
+            child: Icon(Icons.info_outline, size: 16),
+          ),
+        ],
+      ),
+      const SizedBox(height: 8),
+      ElevatedButton.icon(
+        onPressed: _onAddLocalPack,
+        icon: Icon(Icons.add),
+        label: Text("Add local pack"),
+        style: ElevatedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadiusGeometry.all(Radius.circular(20)),
+          ),
+        ),
+      ),
+      const SizedBox(height: 8),
+      Flexible(
+        child: localPacks.isEmpty
+            ? ListTile(
+                leading: Icon(Icons.info_outline),
+                title: Text('No local packs found in this repository'),
+              )
+            : ListView.builder(
+                itemBuilder: (context, index) => PackListTile(
+                  packName: localPacks[index],
+                  repoPath: widget.selectedRepo.path,
+                  repoIconName: widget.selectedRepo.repo.customization?.icon,
+                ),
+                itemCount: localPacks.length,
+                shrinkWrap: true,
+              ),
+      ),
+    ];
+  }
+
+  Future<void> _onAddLocalPack() async {
+    final result = await showDialog<FlutterLocalPackConfig?>(
+      context: context,
+      builder: (_) => AddLocalPackDialog(
+        possibleParents:
+            widget.selectedRepo.repo.packs.toList() +
+            widget.selectedRepo.settings.localPacks.toList(),
+      ),
+    );
+    if (result != null && result.name != null) {
+      await addLocalPack(repoPath: widget.selectedRepo.path, config: result);
+      setState(() {});
+    }
   }
 }
 

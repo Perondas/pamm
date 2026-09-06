@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:pamm_ui/src/models/repo_with_path.dart';
 import 'package:pamm_ui/src/rust/api/commands/load_repo.dart';
 import 'package:pamm_ui/src/rust/api/commands/sync_config.dart';
+import 'package:pamm_ui/src/rust/api/commands/user_repo_settings/load_settings.dart';
 
 class RepoStateManager with ChangeNotifier {
   final String repoPath;
@@ -23,7 +24,8 @@ class RepoStateManager with ChangeNotifier {
   Future<void> _loadRepoState() async {
     try {
       var repo = await loadRepo(repoPath: repoPath);
-      repoState = RepoWithPath(repo, repoPath);
+      var settings = await loadSettings(repoPath: repoPath);
+      repoState = RepoWithPath(repo, settings, repoPath);
       notifyListeners();
     } catch (e) {
       repoState = null;
@@ -39,7 +41,8 @@ class RepoStateManager with ChangeNotifier {
     try {
       var repo = await syncConfig(repoPath: repoPath);
       isConfigUpToDate = true;
-      repoState = RepoWithPath(repo, repoPath);
+      var settings = await loadSettings(repoPath: repoPath);
+      repoState = RepoWithPath(repo, settings, repoPath);
       notifyListeners();
     } catch (e) {
       configUpdateError =

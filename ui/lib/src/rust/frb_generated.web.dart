@@ -7,6 +7,7 @@
 // ignore_for_file: argument_type_not_assignable
 
 import 'api.dart';
+import 'api/commands/add_local_pack.dart';
 import 'api/commands/externals/load_externals.dart';
 import 'api/commands/externals/save_externals.dart';
 import 'api/commands/get_remote_repo_info.dart';
@@ -20,6 +21,7 @@ import 'api/commands/pack_sync/file_change.dart';
 import 'api/commands/pack_sync/get_diff.dart';
 import 'api/commands/pack_sync/get_diffs_with_parents.dart';
 import 'api/commands/pack_sync/quick_check.dart';
+import 'api/commands/pack_sync/sync_local_pack.dart';
 import 'api/commands/pack_sync/sync_pack.dart';
 import 'api/commands/pack_sync/sync_pack_with_parents.dart';
 import 'api/commands/params.dart';
@@ -110,6 +112,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool dco_decode_bool(dynamic raw);
 
   @protected
+  FlutterLocalPackConfig dco_decode_box_autoadd_flutter_local_pack_config(
+    dynamic raw,
+  );
+
+  @protected
   FlutterRepoUserSettings dco_decode_box_autoadd_flutter_repo_user_settings(
     dynamic raw,
   );
@@ -133,6 +140,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   FileChange dco_decode_file_change(dynamic raw);
+
+  @protected
+  FlutterLocalPackConfig dco_decode_flutter_local_pack_config(dynamic raw);
 
   @protected
   FlutterRepoUserSettings dco_decode_flutter_repo_user_settings(dynamic raw);
@@ -287,6 +297,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool sse_decode_bool(SseDeserializer deserializer);
 
   @protected
+  FlutterLocalPackConfig sse_decode_box_autoadd_flutter_local_pack_config(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   FlutterRepoUserSettings sse_decode_box_autoadd_flutter_repo_user_settings(
     SseDeserializer deserializer,
   );
@@ -312,6 +327,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   FileChange sse_decode_file_change(SseDeserializer deserializer);
+
+  @protected
+  FlutterLocalPackConfig sse_decode_flutter_local_pack_config(
+    SseDeserializer deserializer,
+  );
 
   @protected
   FlutterRepoUserSettings sse_decode_flutter_repo_user_settings(
@@ -488,6 +508,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_bool(bool self, SseSerializer serializer);
 
   @protected
+  void sse_encode_box_autoadd_flutter_local_pack_config(
+    FlutterLocalPackConfig self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_flutter_repo_user_settings(
     FlutterRepoUserSettings self,
     SseSerializer serializer,
@@ -516,6 +542,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_file_change(FileChange self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_flutter_local_pack_config(
+    FlutterLocalPackConfig self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_flutter_repo_user_settings(

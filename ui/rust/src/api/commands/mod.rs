@@ -9,3 +9,4 @@ pub mod pack_sync;
 pub mod params;
 pub mod sync_config;
 pub mod user_repo_settings;
+pub mod add_local_pack;

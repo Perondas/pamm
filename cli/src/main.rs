@@ -6,6 +6,7 @@ pub mod subcommands;
 pub mod utils;
 
 use crate::args::{AppSubcommand, Args};
+use crate::commands::add_local_pack::add_local_pack_command;
 use crate::commands::add_pack::add_pack_command;
 use crate::commands::build::build_command;
 use crate::commands::deploy::deploy_command;
@@ -38,6 +39,7 @@ fn main() -> Result<()> {
     match args.command {
         AppSubcommand::Init => init_repo_command(),
         AppSubcommand::AddPack(args) => add_pack_command(args),
+        AppSubcommand::AddLocalPack(args) => add_local_pack_command(args),
         AppSubcommand::Build(args) => build_command(args, log_wrapper),
         AppSubcommand::InitRemote(args) => init_remote_command(args),
         AppSubcommand::Sync(args) => sync_pack_command(args, log_wrapper),

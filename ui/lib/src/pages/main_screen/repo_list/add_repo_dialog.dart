@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:pamm_ui/src/models/repo_with_path.dart';
 import 'package:pamm_ui/src/rust/api/commands/get_remote_repo_info.dart';
 import 'package:pamm_ui/src/rust/api/commands/init_from_remote.dart';
+import 'package:pamm_ui/src/rust/api/commands/user_repo_settings/load_settings.dart';
 import 'package:pamm_ui/src/services/repo_path_store.dart';
 
 class AddRepoDialog extends StatefulWidget {
@@ -78,6 +79,8 @@ class _AddRepoDialogState extends State<AddRepoDialog> {
       final path = target + Platform.pathSeparator + repo.name;
       await RepoPathStore.add(path);
 
+      final settings = await loadSettings(repoPath: path);
+
       setState(() => _repoInfo = repo);
 
       if (!mounted) return false;
@@ -85,7 +88,7 @@ class _AddRepoDialogState extends State<AddRepoDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Initialized repo "${repo.name}" at $target')),
       );
-      Navigator.of(context).pop(RepoWithPath(repo, path));
+      Navigator.of(context).pop(RepoWithPath(repo, settings, path));
     } catch (e) {
       setState(() => _error = e.toString());
     } finally {

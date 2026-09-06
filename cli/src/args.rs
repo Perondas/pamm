@@ -8,6 +8,7 @@ use crate::commands::sync_this_only_pack::SyncThisOnlyPackArgs;
 use crate::subcommands::externals::ExternalsArgs;
 use crate::subcommands::optionals::OptionalArgs;
 use clap::{Parser, Subcommand};
+use crate::commands::add_local_pack::AddLocalPackArgs;
 
 /// Personal ARMA mod manager CLI
 #[derive(Parser, Debug)]
@@ -26,6 +27,7 @@ pub enum AppSubcommand {
     Init,
     InitRemote(InitRemoteArgs),
     AddPack(AddPackArgs),
+    AddLocalPack(AddLocalPackArgs),
     Build(BuildArgs),
     Sync(SyncPackArgs),
     SyncThisOnly(SyncThisOnlyPackArgs),

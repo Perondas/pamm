@@ -95,7 +95,7 @@ pub(super) fn build_pack_inner(
         config
             .addons
             .entry(index.name.clone())
-            .or_insert(Default::default());
+            .or_default();
     }
 
     config

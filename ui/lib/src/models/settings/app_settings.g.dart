@@ -15,10 +15,14 @@ AppSettings _$AppSettingsFromJson(Map<String, dynamic> json) => AppSettings(
   armaSettings: json['armaSettings'] == null
       ? null
       : ArmaSettings.fromJson(json['armaSettings'] as Map<String, dynamic>),
+  mmSettings: json['mmSettings'] == null
+      ? null
+      : MmSettings.fromJson(json['mmSettings'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$AppSettingsToJson(AppSettings instance) =>
     <String, dynamic>{
       'customizationSettings': instance.customizationSettings.toJson(),
       'armaSettings': instance.armaSettings.toJson(),
+      'mmSettings': instance.mmSettings.toJson(),
     };

@@ -4,3 +4,4 @@ pub mod get_diffs_with_parents;
 pub mod quick_check;
 pub mod sync_pack;
 pub mod sync_pack_with_parents;
+pub mod sync_local_pack;
