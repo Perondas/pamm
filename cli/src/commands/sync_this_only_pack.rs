@@ -1,3 +1,4 @@
+use crate::commands::sync_pack::DialogerInteractor;
 use crate::log_wrapper::LogWrapper;
 use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::ToPrettyString;
@@ -5,7 +6,6 @@ use clap::Args;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use std::env::current_dir;
-use crate::commands::sync_pack::DialogerInteractor;
 
 #[derive(Debug, Args)]
 pub struct SyncThisOnlyPackArgs {

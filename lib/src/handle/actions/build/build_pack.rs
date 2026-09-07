@@ -92,10 +92,7 @@ pub(super) fn build_pack_inner(
 
     // Update the pack config
     for index in &pack_index.addons {
-        config
-            .addons
-            .entry(index.name.clone())
-            .or_default();
+        config.addons.entry(index.name.clone()).or_default();
     }
 
     config

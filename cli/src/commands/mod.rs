@@ -1,3 +1,4 @@
+pub mod add_local_pack;
 pub mod add_pack;
 pub mod build;
 pub mod deploy;
@@ -7,4 +8,3 @@ pub mod input;
 pub mod launch;
 pub mod sync_pack;
 pub mod sync_this_only_pack;
-pub mod add_local_pack;

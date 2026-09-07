@@ -1,3 +1,4 @@
+pub mod add_local_pack;
 pub mod externals;
 pub mod get_remote_repo_info;
 pub mod init_from_remote;
@@ -9,4 +10,3 @@ pub mod pack_sync;
 pub mod params;
 pub mod sync_config;
 pub mod user_repo_settings;
-pub mod add_local_pack;
