@@ -14,7 +14,7 @@ import 'add_repo_dialog.dart';
 class RepoList extends StatefulWidget {
   const RepoList(this.selectedRepoChanged, {super.key});
 
-  final ValueChanged<RepoWithPath?> selectedRepoChanged;
+  final ValueChanged<RepoStateManager?> selectedRepoChanged;
 
   @override
   State<RepoList> createState() => _RepoListState();
@@ -22,7 +22,7 @@ class RepoList extends StatefulWidget {
 
 class _RepoListState extends State<RepoList> {
   List<RepoStateManager> _repos = [];
-  RepoWithPath? _selectedRepo;
+  RepoStateManager? _selectedRepo;
 
   @override
   void initState() {
@@ -33,7 +33,7 @@ class _RepoListState extends State<RepoList> {
   Future<void> _loadRepos() async {
     final set = await RepoPathStore.getRepoPaths();
     if (!mounted) return;
-    var selectedExists = set.contains(_selectedRepo?.path);
+    var selectedExists = set.contains(_selectedRepo?.repoPath);
     var list = set.toList();
     list.sort();
 
@@ -173,13 +173,13 @@ class _RepoListState extends State<RepoList> {
           leading: leadingWidget,
           title: Text(repo.name),
           subtitle: Text(path),
-          selected: _selectedRepo != null && path == _selectedRepo!.path,
+          selected: _selectedRepo != null && path == _selectedRepo!.repoPath,
           selectedTileColor: Theme.of(context).colorScheme.secondaryContainer,
           onTap: () {
             setState(() {
-              _selectedRepo = repoStateManager.repoState!;
+              _selectedRepo = repoStateManager;
             });
-            widget.selectedRepoChanged(repoStateManager.repoState!);
+            widget.selectedRepoChanged(repoStateManager);
           },
           trailing: Row(
             mainAxisSize: MainAxisSize.min,

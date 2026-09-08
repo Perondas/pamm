@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pamm_ui/src/models/repo_with_path.dart';
 import 'package:pamm_ui/src/pages/main_screen/repo_details/add_local_pack_dialog.dart';
 import 'package:pamm_ui/src/pages/main_screen/repo_details/edit_pack_dialog.dart';
 import 'package:pamm_ui/src/pages/sync_screen/main.dart';
@@ -9,6 +8,7 @@ import 'package:pamm_ui/src/rust/api/commands/launch.dart';
 import 'package:pamm_ui/src/rust/api/commands/load_pack_display.dart';
 import 'package:pamm_ui/src/rust/api/commands/pack_sync/quick_check.dart';
 import 'package:pamm_ui/src/services/debug_settings_service.dart';
+import 'package:pamm_ui/src/services/repo_state_store.dart';
 import 'package:pamm_ui/src/services/settings_service.dart';
 import 'package:pamm_ui/src/util/media.dart';
 import 'package:pamm_ui/src/widgets/media_icon.dart';
@@ -16,18 +16,76 @@ import 'package:pamm_ui/src/widgets/media_icon.dart';
 class RepoDetails extends StatefulWidget {
   const RepoDetails(this.selectedRepo, {super.key});
 
-  final RepoWithPath selectedRepo;
+  final RepoStateManager selectedRepo;
 
   @override
   State<RepoDetails> createState() => _RepoDetailsState();
 }
 
 class _RepoDetailsState extends State<RepoDetails> {
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: widget.selectedRepo,
+      builder: (BuildContext context, Widget? child) {
+        var repo = widget.selectedRepo.repoState!.repo;
+        var sortedPacks = repo.packs.toList();
+        sortedPacks.sort();
+
+        final banner = _buildBanner();
+
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                //AppBar(title: Text(repo?.name ?? '')),
+                Text(repo.name, style: Theme.of(context).textTheme.titleLarge),
+                if (repo.description.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(repo.description),
+                ],
+                const SizedBox(height: 12),
+                Text('Path:', style: TextStyle(fontWeight: FontWeight.bold)),
+                SelectableText(widget.selectedRepo.repoPath),
+                if (banner != null) ...[const SizedBox(height: 12), banner],
+                const SizedBox(height: 12),
+                Text('Packs:', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Flexible(
+                  child: repo.packs.isEmpty
+                      ? ListTile(
+                          leading: Icon(Icons.info_outline),
+                          title: Text('No packs found in this repository'),
+                        )
+                      : ListView.builder(
+                          itemBuilder: (context, index) => PackListTile(
+                            packName: sortedPacks[index],
+                            repoPath: widget.selectedRepo.repoPath,
+                            repoIconName: repo.customization?.icon,
+                          ),
+                          itemCount: repo.packs.length,
+                          shrinkWrap: true,
+                        ),
+                ),
+                if (settingsService.settings.mmSettings.mmModeEnabled) ...[
+                  ...buildLocalPacksList(),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   /// The repo's banner, when it has one.
   Widget? _buildBanner() {
     final banner = mediaFile(
-      widget.selectedRepo.path,
-      widget.selectedRepo.repo.customization?.banner,
+      widget.selectedRepo.repoPath,
+      widget.selectedRepo.repoState!.repo.customization?.banner,
     );
     if (banner == null) return null;
 
@@ -40,61 +98,9 @@ class _RepoDetailsState extends State<RepoDetails> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    var repo = widget.selectedRepo.repo;
-    var sortedPacks = repo.packs.toList();
-    sortedPacks.sort();
-
-    final banner = _buildBanner();
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            //AppBar(title: Text(repo?.name ?? '')),
-            Text(repo.name, style: Theme.of(context).textTheme.titleLarge),
-            if (repo.description.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(repo.description),
-            ],
-            const SizedBox(height: 12),
-            Text('Path:', style: TextStyle(fontWeight: FontWeight.bold)),
-            SelectableText(widget.selectedRepo.path),
-            if (banner != null) ...[const SizedBox(height: 12), banner],
-            const SizedBox(height: 12),
-            Text('Packs:', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Flexible(
-              child: repo.packs.isEmpty
-                  ? ListTile(
-                      leading: Icon(Icons.info_outline),
-                      title: Text('No packs found in this repository'),
-                    )
-                  : ListView.builder(
-                      itemBuilder: (context, index) => PackListTile(
-                        packName: sortedPacks[index],
-                        repoPath: widget.selectedRepo.path,
-                        repoIconName: repo.customization?.icon,
-                      ),
-                      itemCount: repo.packs.length,
-                      shrinkWrap: true,
-                    ),
-            ),
-            if (settingsService.settings.mmSettings.mmModeEnabled) ...[
-              ...buildLocalPacksList(),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
   List<Widget> buildLocalPacksList() {
-    var localPacks = widget.selectedRepo.settings.localPacks.toList();
+    var localPacks = widget.selectedRepo.repoState!.settings.localPacks
+        .toList();
     localPacks.sort();
 
     return [
@@ -131,8 +137,9 @@ class _RepoDetailsState extends State<RepoDetails> {
             : ListView.builder(
                 itemBuilder: (context, index) => PackListTile(
                   packName: localPacks[index],
-                  repoPath: widget.selectedRepo.path,
-                  repoIconName: widget.selectedRepo.repo.customization?.icon,
+                  repoPath: widget.selectedRepo.repoPath,
+                  repoIconName:
+                      widget.selectedRepo.repoState!.repo.customization?.icon,
                 ),
                 itemCount: localPacks.length,
                 shrinkWrap: true,
@@ -146,13 +153,18 @@ class _RepoDetailsState extends State<RepoDetails> {
       context: context,
       builder: (_) => AddLocalPackDialog(
         possibleParents:
-            widget.selectedRepo.repo.packs.toList() +
-            widget.selectedRepo.settings.localPacks.toList(),
+            widget.selectedRepo.repoState!.repo.packs.toList() +
+            widget.selectedRepo.repoState!.settings.localPacks.toList(),
       ),
     );
-    if (result != null && result.name != null) {
-      await addLocalPack(repoPath: widget.selectedRepo.path, config: result);
-      setState(() {});
+    if (result != null) {
+      await addLocalPack(
+        repoPath: widget.selectedRepo.repoPath,
+        config: result,
+      );
+      setState(() {
+        widget.selectedRepo.reLoad();
+      });
     }
   }
 }

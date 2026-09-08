@@ -21,6 +21,20 @@ class RepoStateManager with ChangeNotifier {
     _loadRepoState();
   }
 
+  Future<void> reLoad() async {
+    try {
+      var repo = await loadRepo(repoPath: repoPath);
+      var settings = await loadSettings(repoPath: repoPath);
+      repoState = RepoWithPath(repo, settings, repoPath);
+      notifyListeners();
+    } catch (e) {
+      repoState = null;
+      configLoadError = "Failed to load repo at $repoPath: $e";
+      notifyListeners();
+      return;
+    }
+  }
+
   Future<void> _loadRepoState() async {
     try {
       var repo = await loadRepo(repoPath: repoPath);
