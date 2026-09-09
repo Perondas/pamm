@@ -446,6 +446,7 @@ fn wire__crate__api__commands__launch__launch_impl(
             let api_pack_name = <String>::sse_decode(&mut deserializer);
             let api_launch_type =
                 <crate::api::commands::launch::LaunchType>::sse_decode(&mut deserializer);
+            let api_disable_optionals = <bool>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
@@ -454,6 +455,7 @@ fn wire__crate__api__commands__launch__launch_impl(
                             api_repo_dir,
                             api_pack_name,
                             api_launch_type,
+                            api_disable_optionals,
                         )?;
                         std::result::Result::Ok(output_ok)
                     })(),

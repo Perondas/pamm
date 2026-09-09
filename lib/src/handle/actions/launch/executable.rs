@@ -8,20 +8,16 @@ use std::os::windows::process::CommandExt;
 use std::process::Command;
 
 impl ClientRepoHandle {
-    pub fn launch_via_executable(&self, pack_name: &str) -> anyhow::Result<()> {
+    pub(super) fn launch_via_executable(
+        &self,
+        pack_name: &str,
+        addon_paths: &[String],
+    ) -> anyhow::Result<()> {
         info!("Launching pack '{}' via executable", pack_name);
 
         let steam_executable = find_steam_dir()
             .context("Failed to find Arma install directory")?
             .join("steam.exe");
-
-        let addon_paths = self.get_canonical_addon_paths(pack_name)?;
-
-        debug!(
-            "Resolved {} addon path(s) for pack '{}'",
-            addon_paths.len(),
-            pack_name
-        );
 
         let mut command = Command::new(steam_executable);
 

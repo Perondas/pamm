@@ -153,6 +153,7 @@ abstract class RustLibApi extends BaseApi {
     required String repoDir,
     required String packName,
     required LaunchType launchType,
+    required bool disableOptionals,
   });
 
   Future<List<ExternalAddon>>
@@ -625,6 +626,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     required String repoDir,
     required String packName,
     required LaunchType launchType,
+    required bool disableOptionals,
   }) {
     return handler.executeNormal(
       NormalTask(
@@ -633,6 +635,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           sse_encode_String(repoDir, serializer);
           sse_encode_String(packName, serializer);
           sse_encode_launch_type(launchType, serializer);
+          sse_encode_bool(disableOptionals, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
@@ -645,7 +648,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: sse_decode_AnyhowException,
         ),
         constMeta: kCrateApiCommandsLaunchLaunchConstMeta,
-        argValues: [repoDir, packName, launchType],
+        argValues: [repoDir, packName, launchType, disableOptionals],
         apiImpl: this,
       ),
     );
@@ -654,7 +657,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiCommandsLaunchLaunchConstMeta =>
       const TaskConstMeta(
         debugName: "launch",
-        argNames: ["repoDir", "packName", "launchType"],
+        argNames: ["repoDir", "packName", "launchType", "disableOptionals"],
       );
 
   @override

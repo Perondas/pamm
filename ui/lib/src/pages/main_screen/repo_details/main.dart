@@ -55,6 +55,29 @@ class _RepoDetailsState extends State<RepoDetails> {
                 SelectableText(widget.selectedRepo.repoPath),
                 if (banner != null) ...[const SizedBox(height: 12), banner],
                 const SizedBox(height: 12),
+                if (settingsService.settings.mmSettings.mmModeEnabled) ...[
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: 339,
+                    child: ListTile(
+                      leading: Icon(Icons.tune),
+                      title: Text("Launch without optionals"),
+                      trailing: Switch(
+                        value: settingsService
+                            .settings
+                            .mmSettings
+                            .launchWithoutOptionals,
+                        onChanged: (value) async {
+                          await settingsService.update(
+                            (settings) =>
+                                settings.mmSettings.launchWithoutOptionals =
+                                    value,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
                 Text('Packs:', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 Flexible(
@@ -297,6 +320,12 @@ class _PackListTileState extends State<PackListTile> {
                   repoDir: widget.repoPath,
                   packName: widget.packName,
                   launchType: settingsService.settings.armaSettings.launchType,
+                  disableOptionals:
+                      settingsService.settings.mmSettings.mmModeEnabled &&
+                      settingsService
+                          .settings
+                          .mmSettings
+                          .launchWithoutOptionals,
                 );
               } catch (e) {
                 if (!context.mounted) return;

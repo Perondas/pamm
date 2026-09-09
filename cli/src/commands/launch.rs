@@ -1,4 +1,5 @@
 use clap::{Args, ValueEnum};
+use pamm_lib::handle::actions::launch::launch::LaunchParams;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use std::env::current_dir;
 
@@ -7,24 +8,30 @@ pub struct LaunchArgs {
     #[arg()]
     pub name: String,
 
-    #[arg(long, value_enum, default_value_t = LaunchType::Steam)]
-    pub launch_type: LaunchType,
+    #[arg(long, value_enum, default_value_t = LaunchMode::Steam)]
+    pub launch_type: LaunchMode,
+
+    #[arg(long)]
+    pub no_optionals: bool,
 }
 
 #[derive(Debug, Clone, Copy, ValueEnum)]
-pub enum LaunchType {
+pub enum LaunchMode {
     Steam,
     File,
 }
 
+impl From<LaunchMode> for pamm_lib::handle::actions::launch::launch::LaunchMode {
+    fn from(mode: LaunchMode) -> Self {
+        match mode {
+            LaunchMode::Steam => Self::Steam,
+            LaunchMode::File => Self::Executable,
+        }
+    }
+}
+
 pub fn launch_command(args: LaunchArgs) -> anyhow::Result<()> {
     let handle = ClientRepoHandle::open(&current_dir()?)?;
-
-    #[allow(unreachable_patterns)]
-    match args.launch_type {
-        LaunchType::Steam => handle.launch_via_steam(&args.name),
-        #[cfg(target_os = "windows")]
-        LaunchType::File => handle.launch_via_executable(&args.name),
-        _ => handle.launch_via_steam(&args.name),
-    }
+    let launch_params = LaunchParams::new(args.launch_type.into(), args.no_optionals);
+    handle.launch_pack(&args.name, &launch_params)
 }

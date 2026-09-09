@@ -278,7 +278,7 @@ mod local_pack_tests {
         let (_tmp, repo_path, handle) =
             repo_with_local_pack("pamm_local_pack_canonical_addon_paths");
 
-        let paths = handle.get_canonical_addon_paths("my_mission").unwrap();
+        let paths = handle.get_canonical_addon_paths("my_mission", false).unwrap();
 
         let clean = |rel: &str| {
             fs::canonicalize(repo_path.join(rel))

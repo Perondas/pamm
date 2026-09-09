@@ -6,14 +6,18 @@
 import '../../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `from`
+
 Future<void> launch({
   required String repoDir,
   required String packName,
   required LaunchType launchType,
+  required bool disableOptionals,
 }) => RustLib.instance.api.crateApiCommandsLaunchLaunch(
   repoDir: repoDir,
   packName: packName,
   launchType: launchType,
+  disableOptionals: disableOptionals,
 );
 
 enum LaunchType { steam, file }

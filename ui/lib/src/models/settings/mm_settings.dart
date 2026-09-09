@@ -4,9 +4,10 @@ part 'mm_settings.g.dart';
 
 @JsonSerializable()
 class MmSettings {
-  MmSettings({this.mmModeEnabled = false});
+  MmSettings({this.mmModeEnabled = false, this.launchWithoutOptionals = false});
 
   bool mmModeEnabled;
+  bool launchWithoutOptionals;
 
   factory MmSettings.fromJson(Map<String, dynamic> json) =>
       _$MmSettingsFromJson(json);
