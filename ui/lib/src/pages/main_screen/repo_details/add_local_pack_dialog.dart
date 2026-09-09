@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pamm_ui/src/rust/api/commands/add_local_pack.dart';
+import 'package:pamm_ui/src/rust/api/commands/local_pack/add_local_pack.dart';
 
 class AddLocalPackDialog extends StatefulWidget {
   const AddLocalPackDialog({super.key, required this.possibleParents});

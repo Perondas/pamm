@@ -41,7 +41,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 839044760;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 575283620;
 
 // Section: executor
 
@@ -49,47 +49,21 @@ flutter_rust_bridge::frb_generated_default_handler!();
 
 // Section: wire_funcs
 
-fn wire__crate__api__commands__add_local_pack__add_local_pack_impl(
+fn wire__crate__api__commands__local_pack__add_local_pack__add_local_pack_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "add_local_pack",
-            port: Some(port_),
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec,_,_>(flutter_rust_bridge::for_generated::TaskInfo{ debug_name: "add_local_pack", port: Some(port_), mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal }, move || {
+            let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
+            let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_repo_path = <String>::sse_decode(&mut deserializer);
-            let api_config =
-                <crate::api::commands::add_local_pack::FlutterLocalPackConfig>::sse_decode(
-                    &mut deserializer,
-                );
-            deserializer.end();
-            move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let output_ok = crate::api::commands::add_local_pack::add_local_pack(
-                            api_repo_path,
-                            api_config,
-                        )?;
-                        std::result::Result::Ok(output_ok)
-                    })(),
-                )
-            }
-        },
-    )
+let api_config = <crate::api::commands::local_pack::add_local_pack::FlutterLocalPackConfig>::sse_decode(&mut deserializer);deserializer.end(); move |context|  {
+                    transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move ||  {
+                         let output_ok = crate::api::commands::local_pack::add_local_pack::add_local_pack(api_repo_path, api_config)?;   std::result::Result::Ok(output_ok)
+                    })())
+                } })
 }
 fn wire__crate__api__progress_reporting__create_dart_progress_reporter_impl(
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -719,6 +693,46 @@ fn wire__crate__api__commands__pack_sync__quick_check__quick_check_impl(
         },
     )
 }
+fn wire__crate__api__commands__local_pack__remove_local_pack__remove_local_pack_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "remove_local_pack",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_repo_path = <String>::sse_decode(&mut deserializer);
+            let api_pack_name = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok =
+                            crate::api::commands::local_pack::remove_local_pack::remove_local_pack(
+                                api_repo_path,
+                                api_pack_name,
+                            )?;
+                        std::result::Result::Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__commands__externals__save_externals__save_externals_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -961,7 +975,7 @@ fn wire__crate__api__commands__sync_config__sync_config_impl(
         },
     )
 }
-fn wire__crate__api__commands__pack_sync__sync_local_pack__sync_local_pack_impl(
+fn wire__crate__api__commands__local_pack__sync_local_pack__sync_local_pack_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -985,16 +999,14 @@ fn wire__crate__api__commands__pack_sync__sync_local_pack__sync_local_pack_impl(
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_pack_name = <String>::sse_decode(&mut deserializer);
             let api_repo_path = <String>::sse_decode(&mut deserializer);
-            let api_dart_progress_reporter = <DartProgressReporter>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || {
                         let output_ok =
-                            crate::api::commands::pack_sync::sync_local_pack::sync_local_pack(
+                            crate::api::commands::local_pack::sync_local_pack::sync_local_pack(
                                 api_pack_name,
                                 api_repo_path,
-                                api_dart_progress_reporter,
                             )?;
                         std::result::Result::Ok(output_ok)
                     })(),
@@ -1303,12 +1315,12 @@ impl SseDecode for crate::api::commands::pack_sync::file_change::FileChange {
     }
 }
 
-impl SseDecode for crate::api::commands::add_local_pack::FlutterLocalPackConfig {
+impl SseDecode for crate::api::commands::local_pack::add_local_pack::FlutterLocalPackConfig {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_name = <String>::sse_decode(deserializer);
         let mut var_parent = <Option<String>>::sse_decode(deserializer);
-        return crate::api::commands::add_local_pack::FlutterLocalPackConfig {
+        return crate::api::commands::local_pack::add_local_pack::FlutterLocalPackConfig {
             name: var_name,
             parent: var_parent,
         };
@@ -1657,7 +1669,7 @@ fn pde_ffi_dispatcher_primary_impl(
 ) {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-                        1 => wire__crate__api__commands__add_local_pack__add_local_pack_impl(port, ptr, rust_vec_len, data_len),
+                        1 => wire__crate__api__commands__local_pack__add_local_pack__add_local_pack_impl(port, ptr, rust_vec_len, data_len),
 3 => wire__crate__api__commands__pack_sync__get_diff__get_diff_impl(port, ptr, rust_vec_len, data_len),
 4 => wire__crate__api__commands__pack_sync__get_diffs_with_parents__get_diff_with_parents_impl(port, ptr, rust_vec_len, data_len),
 5 => wire__crate__api__commands__params__get_launch_params_impl(port, ptr, rust_vec_len, data_len),
@@ -1671,14 +1683,15 @@ fn pde_ffi_dispatcher_primary_impl(
 15 => wire__crate__api__commands__load_repo__load_repo_impl(port, ptr, rust_vec_len, data_len),
 16 => wire__crate__api__commands__user_repo_settings__load_settings__load_settings_impl(port, ptr, rust_vec_len, data_len),
 17 => wire__crate__api__commands__pack_sync__quick_check__quick_check_impl(port, ptr, rust_vec_len, data_len),
-18 => wire__crate__api__commands__externals__save_externals__save_externals_impl(port, ptr, rust_vec_len, data_len),
-19 => wire__crate__api__commands__optionals__save_optionals__save_optionals_impl(port, ptr, rust_vec_len, data_len),
-20 => wire__crate__api__commands__user_repo_settings__save_settings__save_settings_impl(port, ptr, rust_vec_len, data_len),
-21 => wire__crate__api__commands__params__set_launch_params_impl(port, ptr, rust_vec_len, data_len),
-23 => wire__crate__api__commands__sync_config__sync_config_impl(port, ptr, rust_vec_len, data_len),
-24 => wire__crate__api__commands__pack_sync__sync_local_pack__sync_local_pack_impl(port, ptr, rust_vec_len, data_len),
-25 => wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(port, ptr, rust_vec_len, data_len),
-26 => wire__crate__api__commands__pack_sync__sync_pack_with_parents__sync_pack_with_parents_impl(port, ptr, rust_vec_len, data_len),
+18 => wire__crate__api__commands__local_pack__remove_local_pack__remove_local_pack_impl(port, ptr, rust_vec_len, data_len),
+19 => wire__crate__api__commands__externals__save_externals__save_externals_impl(port, ptr, rust_vec_len, data_len),
+20 => wire__crate__api__commands__optionals__save_optionals__save_optionals_impl(port, ptr, rust_vec_len, data_len),
+21 => wire__crate__api__commands__user_repo_settings__save_settings__save_settings_impl(port, ptr, rust_vec_len, data_len),
+22 => wire__crate__api__commands__params__set_launch_params_impl(port, ptr, rust_vec_len, data_len),
+24 => wire__crate__api__commands__sync_config__sync_config_impl(port, ptr, rust_vec_len, data_len),
+25 => wire__crate__api__commands__local_pack__sync_local_pack__sync_local_pack_impl(port, ptr, rust_vec_len, data_len),
+26 => wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(port, ptr, rust_vec_len, data_len),
+27 => wire__crate__api__commands__pack_sync__sync_pack_with_parents__sync_pack_with_parents_impl(port, ptr, rust_vec_len, data_len),
                         _ => unreachable!(),
                     }
 }
@@ -1698,7 +1711,7 @@ fn pde_ffi_dispatcher_sync_impl(
         ),
         8 => wire__crate__api__init_app_impl(ptr, rust_vec_len, data_len),
         10 => wire__crate__api__logging__init_rust_logger_impl(ptr, rust_vec_len, data_len),
-        22 => wire__crate__api__logging__set_rust_log_level_impl(ptr, rust_vec_len, data_len),
+        23 => wire__crate__api__logging__set_rust_log_level_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -1851,7 +1864,7 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::pack_sync::file_cha
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart
-    for crate::api::commands::add_local_pack::FlutterLocalPackConfig
+    for crate::api::commands::local_pack::add_local_pack::FlutterLocalPackConfig
 {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
@@ -1862,13 +1875,17 @@ impl flutter_rust_bridge::IntoDart
     }
 }
 impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
-    for crate::api::commands::add_local_pack::FlutterLocalPackConfig
+    for crate::api::commands::local_pack::add_local_pack::FlutterLocalPackConfig
 {
 }
-impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::add_local_pack::FlutterLocalPackConfig>
-    for crate::api::commands::add_local_pack::FlutterLocalPackConfig
+impl
+    flutter_rust_bridge::IntoIntoDart<
+        crate::api::commands::local_pack::add_local_pack::FlutterLocalPackConfig,
+    > for crate::api::commands::local_pack::add_local_pack::FlutterLocalPackConfig
 {
-    fn into_into_dart(self) -> crate::api::commands::add_local_pack::FlutterLocalPackConfig {
+    fn into_into_dart(
+        self,
+    ) -> crate::api::commands::local_pack::add_local_pack::FlutterLocalPackConfig {
         self
     }
 }
@@ -2221,7 +2238,7 @@ impl SseEncode for crate::api::commands::pack_sync::file_change::FileChange {
     }
 }
 
-impl SseEncode for crate::api::commands::add_local_pack::FlutterLocalPackConfig {
+impl SseEncode for crate::api::commands::local_pack::add_local_pack::FlutterLocalPackConfig {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.name, serializer);

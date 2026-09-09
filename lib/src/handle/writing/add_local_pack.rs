@@ -12,21 +12,7 @@ use crate::models::repo::repo_version::RepoVersion;
 use crate::models::server_config::ServerConfig;
 use anyhow::{Context, ensure};
 use std::path::{Component, Path};
-
-/// Repo-root entries a pack folder must not shadow. The fixed file names are
-/// included because a pack folder sits at the repo root alongside them.
-fn reserved_root_names() -> [&'static str; 8] {
-    [
-        WWW_DIR_NAME,
-        MEDIA_DIR_NAME,
-        CACHE_DB_DIR_NAME,
-        INDEX_DIR_NAME,
-        RepoConfig::file_name(),
-        RepoUserSettings::file_name(),
-        ServerConfig::file_name(),
-        RepoVersion::file_name(),
-    ]
-}
+use crate::handle::writing::reserved_root_names;
 
 impl ClientRepoHandle {
     /// Create a pack that exists only in this client repo. It is laid out on disk

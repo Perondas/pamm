@@ -6,3 +6,4 @@ pub mod init;
 pub(crate) mod migration;
 pub mod pack;
 pub mod util;
+pub(crate) mod rm;

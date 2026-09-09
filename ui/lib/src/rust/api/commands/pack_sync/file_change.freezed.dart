@@ -21,7 +21,7 @@ mixin _$ChangeType {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChangeType);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is ChangeType);
 }
 
 
@@ -30,7 +30,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'ChangeType()';
+    return 'ChangeType()';
 }
 
 
@@ -197,16 +197,18 @@ $ChangeType_CreatedCopyWith<ChangeType_Created> get copyWith => _$ChangeType_Cre
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChangeType_Created&&(identical(other.size, size) || other.size == size));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is ChangeType_Created&&(identical(other.size, size) || other.size == size));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,size);
+int get hashCode {
+    return Object.hash(runtimeType,size);
+}
 
 @override
 String toString() {
-  return 'ChangeType.created(size: $size)';
+    return 'ChangeType.created(size: $size)';
 }
 
 
@@ -258,7 +260,7 @@ class ChangeType_Deleted extends ChangeType {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChangeType_Deleted);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is ChangeType_Deleted);
 }
 
 
@@ -267,7 +269,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'ChangeType.deleted()';
+    return 'ChangeType.deleted()';
 }
 
 
@@ -296,16 +298,18 @@ $ChangeType_ModifiedCopyWith<ChangeType_Modified> get copyWith => _$ChangeType_M
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChangeType_Modified&&(identical(other.sizeChange, sizeChange) || other.sizeChange == sizeChange)&&(identical(other.dlSize, dlSize) || other.dlSize == dlSize));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is ChangeType_Modified&&(identical(other.sizeChange, sizeChange) || other.sizeChange == sizeChange)&&(identical(other.dlSize, dlSize) || other.dlSize == dlSize));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,sizeChange,dlSize);
+int get hashCode {
+    return Object.hash(runtimeType,sizeChange,dlSize);
+}
 
 @override
 String toString() {
-  return 'ChangeType.modified(sizeChange: $sizeChange, dlSize: $dlSize)';
+    return 'ChangeType.modified(sizeChange: $sizeChange, dlSize: $dlSize)';
 }
 
 

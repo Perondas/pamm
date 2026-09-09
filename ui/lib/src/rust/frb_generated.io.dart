@@ -4,7 +4,6 @@
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
 import 'api.dart';
-import 'api/commands/add_local_pack.dart';
 import 'api/commands/externals/load_externals.dart';
 import 'api/commands/externals/save_externals.dart';
 import 'api/commands/get_remote_repo_info.dart';
@@ -12,13 +11,15 @@ import 'api/commands/init_from_remote.dart';
 import 'api/commands/launch.dart';
 import 'api/commands/load_pack_display.dart';
 import 'api/commands/load_repo.dart';
+import 'api/commands/local_pack/add_local_pack.dart';
+import 'api/commands/local_pack/remove_local_pack.dart';
+import 'api/commands/local_pack/sync_local_pack.dart';
 import 'api/commands/optionals/load_optionals.dart';
 import 'api/commands/optionals/save_optionals.dart';
 import 'api/commands/pack_sync/file_change.dart';
 import 'api/commands/pack_sync/get_diff.dart';
 import 'api/commands/pack_sync/get_diffs_with_parents.dart';
 import 'api/commands/pack_sync/quick_check.dart';
-import 'api/commands/pack_sync/sync_local_pack.dart';
 import 'api/commands/pack_sync/sync_pack.dart';
 import 'api/commands/pack_sync/sync_pack_with_parents.dart';
 import 'api/commands/params.dart';

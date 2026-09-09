@@ -280,17 +280,17 @@ mod local_pack_tests {
 
         let paths = handle.get_canonical_addon_paths("my_mission").unwrap();
 
-        let expected = |rel: &str| {
+        let clean = |rel: &str| {
             fs::canonicalize(repo_path.join(rel))
                 .unwrap()
                 .to_string_lossy()
                 .to_string()
         };
-        let mut paths = paths;
+        let mut paths = paths.into_iter().map(|p| clean(&p)).collect::<Vec<_>>();
         paths.sort();
         let mut want = vec![
-            expected("my_mission/addons/@mission_addon"),
-            expected("core/addons/@core_addon"),
+            clean("my_mission/addons/@mission_addon"),
+            clean("core/addons/@core_addon"),
         ];
         want.sort();
         assert_eq!(paths, want);

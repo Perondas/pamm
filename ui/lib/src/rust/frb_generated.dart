@@ -4,7 +4,6 @@
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
 import 'api.dart';
-import 'api/commands/add_local_pack.dart';
 import 'api/commands/externals/load_externals.dart';
 import 'api/commands/externals/save_externals.dart';
 import 'api/commands/get_remote_repo_info.dart';
@@ -12,13 +11,15 @@ import 'api/commands/init_from_remote.dart';
 import 'api/commands/launch.dart';
 import 'api/commands/load_pack_display.dart';
 import 'api/commands/load_repo.dart';
+import 'api/commands/local_pack/add_local_pack.dart';
+import 'api/commands/local_pack/remove_local_pack.dart';
+import 'api/commands/local_pack/sync_local_pack.dart';
 import 'api/commands/optionals/load_optionals.dart';
 import 'api/commands/optionals/save_optionals.dart';
 import 'api/commands/pack_sync/file_change.dart';
 import 'api/commands/pack_sync/get_diff.dart';
 import 'api/commands/pack_sync/get_diffs_with_parents.dart';
 import 'api/commands/pack_sync/quick_check.dart';
-import 'api/commands/pack_sync/sync_local_pack.dart';
 import 'api/commands/pack_sync/sync_pack.dart';
 import 'api/commands/pack_sync/sync_pack_with_parents.dart';
 import 'api/commands/params.dart';
@@ -88,7 +89,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.13.0';
 
   @override
-  int get rustContentHash => 839044760;
+  int get rustContentHash => 575283620;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -100,7 +101,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
-  Future<void> crateApiCommandsAddLocalPackAddLocalPack({
+  Future<void> crateApiCommandsLocalPackAddLocalPackAddLocalPack({
     required String repoPath,
     required FlutterLocalPackConfig config,
   });
@@ -185,6 +186,11 @@ abstract class RustLibApi extends BaseApi {
     required String repoPath,
   });
 
+  Future<void> crateApiCommandsLocalPackRemoveLocalPackRemoveLocalPack({
+    required String repoPath,
+    required String packName,
+  });
+
   Future<void> crateApiCommandsExternalsSaveExternalsSaveExternals({
     required String repoPath,
     required String packName,
@@ -214,10 +220,9 @@ abstract class RustLibApi extends BaseApi {
     required String repoPath,
   });
 
-  Future<void> crateApiCommandsPackSyncSyncLocalPackSyncLocalPack({
+  Future<void> crateApiCommandsLocalPackSyncLocalPackSyncLocalPack({
     required String packName,
     required String repoPath,
-    required DartProgressReporter dartProgressReporter,
   });
 
   Future<void> crateApiCommandsPackSyncSyncPackSyncPack({
@@ -260,7 +265,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   });
 
   @override
-  Future<void> crateApiCommandsAddLocalPackAddLocalPack({
+  Future<void> crateApiCommandsLocalPackAddLocalPackAddLocalPack({
     required String repoPath,
     required FlutterLocalPackConfig config,
   }) {
@@ -281,14 +286,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeSuccessData: sse_decode_unit,
           decodeErrorData: sse_decode_AnyhowException,
         ),
-        constMeta: kCrateApiCommandsAddLocalPackAddLocalPackConstMeta,
+        constMeta: kCrateApiCommandsLocalPackAddLocalPackAddLocalPackConstMeta,
         argValues: [repoPath, config],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiCommandsAddLocalPackAddLocalPackConstMeta =>
+  TaskConstMeta
+  get kCrateApiCommandsLocalPackAddLocalPackAddLocalPackConstMeta =>
       const TaskConstMeta(
         debugName: "add_local_pack",
         argNames: ["repoPath", "config"],
@@ -861,6 +867,43 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<void> crateApiCommandsLocalPackRemoveLocalPackRemoveLocalPack({
+    required String repoPath,
+    required String packName,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(repoPath, serializer);
+          sse_encode_String(packName, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 18,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta:
+            kCrateApiCommandsLocalPackRemoveLocalPackRemoveLocalPackConstMeta,
+        argValues: [repoPath, packName],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiCommandsLocalPackRemoveLocalPackRemoveLocalPackConstMeta =>
+      const TaskConstMeta(
+        debugName: "remove_local_pack",
+        argNames: ["repoPath", "packName"],
+      );
+
+  @override
   Future<void> crateApiCommandsExternalsSaveExternalsSaveExternals({
     required String repoPath,
     required String packName,
@@ -876,7 +919,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 18,
+            funcId: 19,
             port: port_,
           );
         },
@@ -915,7 +958,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 19,
+            funcId: 20,
             port: port_,
           );
         },
@@ -955,7 +998,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 20,
+            funcId: 21,
             port: port_,
           );
         },
@@ -994,7 +1037,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 21,
+            funcId: 22,
             port: port_,
           );
         },
@@ -1022,7 +1065,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(level, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 22)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 23)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -1050,7 +1093,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 23,
+            funcId: 24,
             port: port_,
           );
         },
@@ -1069,10 +1112,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "sync_config", argNames: ["repoPath"]);
 
   @override
-  Future<void> crateApiCommandsPackSyncSyncLocalPackSyncLocalPack({
+  Future<void> crateApiCommandsLocalPackSyncLocalPackSyncLocalPack({
     required String packName,
     required String repoPath,
-    required DartProgressReporter dartProgressReporter,
   }) {
     return handler.executeNormal(
       NormalTask(
@@ -1080,14 +1122,10 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(packName, serializer);
           sse_encode_String(repoPath, serializer);
-          sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartProgressReporter(
-            dartProgressReporter,
-            serializer,
-          );
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 24,
+            funcId: 25,
             port: port_,
           );
         },
@@ -1095,18 +1133,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeSuccessData: sse_decode_unit,
           decodeErrorData: sse_decode_AnyhowException,
         ),
-        constMeta: kCrateApiCommandsPackSyncSyncLocalPackSyncLocalPackConstMeta,
-        argValues: [packName, repoPath, dartProgressReporter],
+        constMeta:
+            kCrateApiCommandsLocalPackSyncLocalPackSyncLocalPackConstMeta,
+        argValues: [packName, repoPath],
         apiImpl: this,
       ),
     );
   }
 
   TaskConstMeta
-  get kCrateApiCommandsPackSyncSyncLocalPackSyncLocalPackConstMeta =>
+  get kCrateApiCommandsLocalPackSyncLocalPackSyncLocalPackConstMeta =>
       const TaskConstMeta(
         debugName: "sync_local_pack",
-        argNames: ["packName", "repoPath", "dartProgressReporter"],
+        argNames: ["packName", "repoPath"],
       );
 
   @override
@@ -1133,7 +1172,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 25,
+            funcId: 26,
             port: port_,
           );
         },
@@ -1176,7 +1215,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 26,
+            funcId: 27,
             port: port_,
           );
         },

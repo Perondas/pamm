@@ -3,14 +3,17 @@ import 'package:pamm_ui/src/pages/main_screen/repo_details/add_local_pack_dialog
 import 'package:pamm_ui/src/pages/main_screen/repo_details/edit_pack_dialog.dart';
 import 'package:pamm_ui/src/pages/sync_screen/main.dart';
 import 'package:pamm_ui/src/pages/sync_single_pack_screen/main.dart';
-import 'package:pamm_ui/src/rust/api/commands/add_local_pack.dart';
 import 'package:pamm_ui/src/rust/api/commands/launch.dart';
 import 'package:pamm_ui/src/rust/api/commands/load_pack_display.dart';
+import 'package:pamm_ui/src/rust/api/commands/local_pack/add_local_pack.dart';
+import 'package:pamm_ui/src/rust/api/commands/local_pack/remove_local_pack.dart';
+import 'package:pamm_ui/src/rust/api/commands/local_pack/sync_local_pack.dart';
 import 'package:pamm_ui/src/rust/api/commands/pack_sync/quick_check.dart';
 import 'package:pamm_ui/src/services/debug_settings_service.dart';
 import 'package:pamm_ui/src/services/repo_state_store.dart';
 import 'package:pamm_ui/src/services/settings_service.dart';
 import 'package:pamm_ui/src/util/media.dart';
+import 'package:pamm_ui/src/widgets/confirm_dialog.dart';
 import 'package:pamm_ui/src/widgets/media_icon.dart';
 
 class RepoDetails extends StatefulWidget {
@@ -65,6 +68,7 @@ class _RepoDetailsState extends State<RepoDetails> {
                             packName: sortedPacks[index],
                             repoPath: widget.selectedRepo.repoPath,
                             repoIconName: repo.customization?.icon,
+                            onDelete: () {},
                           ),
                           itemCount: repo.packs.length,
                           shrinkWrap: true,
@@ -138,6 +142,10 @@ class _RepoDetailsState extends State<RepoDetails> {
                 itemBuilder: (context, index) => PackListTile(
                   packName: localPacks[index],
                   repoPath: widget.selectedRepo.repoPath,
+                  isLocal: true,
+                  onDelete: () {
+                    widget.selectedRepo.reLoad();
+                  },
                   repoIconName:
                       widget.selectedRepo.repoState!.repo.customization?.icon,
                 ),
@@ -173,11 +181,15 @@ class PackListTile extends StatefulWidget {
   final String packName;
   final String repoPath;
   final String? repoIconName;
+  final bool isLocal;
+  final VoidCallback onDelete;
 
   const PackListTile({
     required this.packName,
     required this.repoPath,
     this.repoIconName,
+    required this.onDelete,
+    this.isLocal = false,
     super.key,
   });
 
@@ -243,6 +255,41 @@ class _PackListTileState extends State<PackListTile> {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (widget.isLocal &&
+              settingsService.settings.mmSettings.mmModeEnabled) ...[
+            IconButton(
+              onPressed: () async {
+                try {
+                  final confirm =
+                      await showDialog<bool?>(
+                        context: context,
+                        builder: (_) => ConfirmDialog(
+                          content:
+                              'Are you sure you want to delete the pack "${widget.packName}"? This WILL delete files on disk.',
+                        ),
+                      ) ??
+                      false;
+
+                  if (confirm) {
+                    await removeLocalPack(
+                      repoPath: widget.repoPath,
+                      packName: widget.packName,
+                    );
+                  }
+                  widget.onDelete();
+                } catch (e) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Error deleting pack: $e"),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              icon: Icon(Icons.delete_forever),
+            ),
+          ],
           IconButton(
             onPressed: () async {
               try {
@@ -265,21 +312,28 @@ class _PackListTileState extends State<PackListTile> {
           ),
           IconButton(
             onPressed: () async {
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) =>
-                      debugSettingsService.useLegacySinglePackSync
-                      ? SyncSinglePackScreen(widget.packName, widget.repoPath)
-                      : SyncScreen(widget.packName, widget.repoPath),
-                ),
-              );
-              // Re-check status after returning from sync
-              _checkStatus();
+              if (widget.isLocal) {
+                await syncLocalPack(
+                  packName: widget.packName,
+                  repoPath: widget.repoPath,
+                );
+              } else {
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        debugSettingsService.useLegacySinglePackSync
+                        ? SyncSinglePackScreen(widget.packName, widget.repoPath)
+                        : SyncScreen(widget.packName, widget.repoPath),
+                  ),
+                );
+                // Re-check status after returning from sync
+                _checkStatus();
+              }
             },
             tooltip: _upToDate == false ? 'Updates available' : 'Sync pack',
             icon: Badge(
               isLabelVisible: _upToDate == false,
-              child: Icon(Icons.download),
+              child: Icon(widget.isLocal ? Icons.sync : Icons.download),
             ),
           ),
           IconButton(
