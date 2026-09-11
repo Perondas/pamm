@@ -25,9 +25,9 @@ pub enum LaunchType {
 impl From<LaunchType> for LaunchMode {
     fn from(value: LaunchType) -> Self {
         match value {
-            LaunchType::Steam => LaunchMode::Steam,
             #[cfg(target_os = "windows")]
             LaunchType::File => LaunchMode::Executable,
+            _ => LaunchMode::Steam
         }
     }
 }
