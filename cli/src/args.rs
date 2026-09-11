@@ -6,10 +6,9 @@ use crate::commands::launch::LaunchArgs;
 use crate::commands::sync_pack::SyncPackArgs;
 use crate::commands::sync_this_only_pack::SyncThisOnlyPackArgs;
 use crate::subcommands::externals::ExternalsArgs;
-use crate::subcommands::local_packs::add_local_pack::AddLocalPackArgs;
 use crate::subcommands::optionals::OptionalArgs;
 use clap::{Parser, Subcommand};
-use crate::subcommands::local_packs::{LocalPacksArgs, LocalPacksSubcommand};
+use crate::subcommands::local_packs::LocalPacksArgs;
 
 /// Personal ARMA mod manager CLI
 #[derive(Parser, Debug)]

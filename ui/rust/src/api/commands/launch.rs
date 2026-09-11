@@ -1,4 +1,4 @@
-use pamm_lib::handle::actions::launch::launch::{LaunchMode, LaunchParams};
+use pamm_lib::handle::actions::launch::launch_pack::{LaunchMode, LaunchParams};
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use std::path::Path;
 

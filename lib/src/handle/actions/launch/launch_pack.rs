@@ -1,7 +1,6 @@
 use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::reading::get_canonical_addon_paths::GetAddonPaths;
 use log::{debug, info};
-use crate::handle::reading::get_pack::GetPack;
 
 #[derive(Debug, Clone)]
 pub enum LaunchMode {

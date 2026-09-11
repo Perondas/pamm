@@ -1,5 +1,5 @@
 use clap::{Args, ValueEnum};
-use pamm_lib::handle::actions::launch::launch::LaunchParams;
+use pamm_lib::handle::actions::launch::launch_pack::LaunchParams;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use std::env::current_dir;
 
@@ -21,7 +21,7 @@ pub enum LaunchMode {
     File,
 }
 
-impl From<LaunchMode> for pamm_lib::handle::actions::launch::launch::LaunchMode {
+impl From<LaunchMode> for pamm_lib::handle::actions::launch::launch_pack::LaunchMode {
     fn from(mode: LaunchMode) -> Self {
         match mode {
             LaunchMode::Steam => Self::Steam,
