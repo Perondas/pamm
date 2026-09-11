@@ -14,7 +14,11 @@ pub trait GetLinuxAddonPaths {
     /// of the form `pamm/<repo name>/<addon>` or `pamm/externals/<addon>`,
     /// relative to the Arma install directory (where the `pamm` symlinks are
     /// created), suitable for use as `-mod=` launch parameters.
-    fn get_linux_addon_paths(&self, pack_name: &str) -> anyhow::Result<Vec<String>>;
+    fn get_linux_addon_paths(
+        &self,
+        pack_name: &str,
+        disable_optionals: bool,
+    ) -> anyhow::Result<Vec<String>>;
 }
 
 impl<T> GetLinuxAddonPaths for T
