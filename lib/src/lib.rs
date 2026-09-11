@@ -1,3 +1,4 @@
+#![cfg_attr(not(feature = "client"), allow(dead_code))]
 #[cfg(not(any(feature = "client", feature = "server")))]
 compile_error!(
     "pamm_lib needs at least one of the `client` or `server` features enabled. \
