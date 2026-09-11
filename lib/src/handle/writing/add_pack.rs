@@ -1,5 +1,6 @@
 #[cfg(feature = "client")]
 use crate::handle::client_repo_handle::ClientRepoHandle;
+#[cfg(feature = "client")]
 use crate::handle::client_repo_handle::names_match;
 use crate::handle::repo_handle::RepoHandle;
 #[cfg(feature = "server")]

@@ -1,4 +1,3 @@
-use crate::handle::actions::sync::sync_media::download_referenced_media;
 use crate::io::files::file_paths::keyed_path::KeyedFilePath;
 use crate::io::files::name_consts::MEDIA_DIR_NAME;
 use crate::io::fs::fs_writable::FixedFsWritable;
@@ -37,6 +36,7 @@ impl RepoConfig {
         Ok(base_path)
     }
 
+    #[cfg(feature = "client")]
     pub fn init_from_remote(
         parent_dir: &Path,
         remote_url: &Url,
@@ -75,7 +75,12 @@ impl RepoConfig {
             pack_configs.push(pack_config);
         }
 
-        download_referenced_media(&base_path, remote_url, &repo, &pack_configs);
+        crate::handle::actions::sync::sync_media::download_referenced_media(
+            &base_path,
+            remote_url,
+            &repo,
+            &pack_configs,
+        );
 
         Ok((repo, repo_user_settings))
     }

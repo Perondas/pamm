@@ -27,7 +27,7 @@ impl From<LaunchType> for LaunchMode {
         match value {
             #[cfg(target_os = "windows")]
             LaunchType::File => LaunchMode::Executable,
-            _ => LaunchMode::Steam
+            _ => LaunchMode::Steam,
         }
     }
 }
