@@ -1,6 +1,4 @@
 use crate::handle::client_repo_handle::ClientRepoHandle;
-#[cfg(target_os = "linux")]
-use crate::handle::reading::get_linux_addon_paths::GetLinuxAddonPaths;
 use crate::handle::reading::get_pack::GetPack;
 use anyhow::Context;
 use log::{debug, info};
