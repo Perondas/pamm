@@ -9,6 +9,7 @@ use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_user_settings::RepoUserSettings;
+use crate::util::name_matches;
 use anyhow::{Context, ensure};
 use std::ops::{Deref, DerefMut};
 use std::path::Path;
@@ -74,7 +75,7 @@ impl ClientRepoHandle {
         self.user_settings
             .local_packs
             .iter()
-            .any(|p| names_match(p, pack_name))
+            .any(|p| name_matches::names_match(p, pack_name))
     }
 
     /// Guard for every operation that talks to the remote. Local packs exist
@@ -87,13 +88,6 @@ impl ClientRepoHandle {
         );
         Ok(())
     }
-}
-
-/// Compare two pack names for identity. Pack names are folder names, and NTFS
-/// and APFS are case-insensitive, so two names differing only in case would
-/// share a single directory.
-pub(in crate::handle) fn names_match(a: &str, b: &str) -> bool {
-    a.eq_ignore_ascii_case(b)
 }
 
 impl Deref for ClientRepoHandle {

@@ -1,12 +1,11 @@
 #[cfg(feature = "client")]
 use crate::handle::client_repo_handle::ClientRepoHandle;
-#[cfg(feature = "client")]
-use crate::handle::client_repo_handle::names_match;
 use crate::handle::repo_handle::RepoHandle;
 #[cfg(feature = "server")]
 use crate::handle::server_repo_handle::ServerRepoHandle;
 use crate::handle::writing::reserved_root_names;
 use crate::models::pack::pack_config::PackConfig;
+use crate::util::name_matches::names_match;
 use anyhow::ensure;
 
 impl RepoHandle {
