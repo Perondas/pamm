@@ -116,6 +116,9 @@ mod tests {
     use std::fs;
     use std::path::PathBuf;
     use url::Url;
+    use crate::models::repo::repo_config::RepoConfig;
+    use crate::models::repo::repo_user_settings::RepoUserSettings;
+    use crate::models::repo::repo_version::RepoVersion;
 
     /// A client repo at layout v2 holding the remote packs named in `remote_packs`,
     /// each laid out on disk. Written through the real writers so `open` sees a

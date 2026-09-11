@@ -4,7 +4,7 @@ use crate::io::files::file_names::fixed_file::FixedFile;
 use crate::io::files::name_consts::{CACHE_DB_DIR_NAME, WWW_DIR_NAME};
 use crate::io::fs::fs_readable::KnownFSReadable;
 use crate::io::fs::fs_writable::FixedFsWritable;
-use crate::io::progress_reporting::progress_reporter::{NoopProgressReporter, ProgressReporter};
+use crate::io::progress_reporting::progress_reporter::NoopProgressReporter;
 use crate::models::index::checksum_index::ChecksumIndex;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::repo::repo_config::RepoConfig;
