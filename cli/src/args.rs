@@ -1,4 +1,3 @@
-use crate::commands::add_local_pack::AddLocalPackArgs;
 use crate::commands::add_pack::AddPackArgs;
 use crate::commands::build::BuildArgs;
 use crate::commands::deploy::DeployArgs;
@@ -7,8 +6,10 @@ use crate::commands::launch::LaunchArgs;
 use crate::commands::sync_pack::SyncPackArgs;
 use crate::commands::sync_this_only_pack::SyncThisOnlyPackArgs;
 use crate::subcommands::externals::ExternalsArgs;
+use crate::subcommands::local_packs::add_local_pack::AddLocalPackArgs;
 use crate::subcommands::optionals::OptionalArgs;
 use clap::{Parser, Subcommand};
+use crate::subcommands::local_packs::{LocalPacksArgs, LocalPacksSubcommand};
 
 /// Personal ARMA mod manager CLI
 #[derive(Parser, Debug)]
@@ -27,12 +28,12 @@ pub enum AppSubcommand {
     Init,
     InitRemote(InitRemoteArgs),
     AddPack(AddPackArgs),
-    AddLocalPack(AddLocalPackArgs),
     Build(BuildArgs),
     Sync(SyncPackArgs),
     SyncThisOnly(SyncThisOnlyPackArgs),
     Launch(LaunchArgs),
     Optionals(OptionalArgs),
     Externals(ExternalsArgs),
+    Local(LocalPacksArgs),
     Deploy(DeployArgs),
 }

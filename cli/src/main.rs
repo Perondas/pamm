@@ -6,7 +6,6 @@ pub mod subcommands;
 pub mod utils;
 
 use crate::args::{AppSubcommand, Args};
-use crate::commands::add_local_pack::add_local_pack_command;
 use crate::commands::add_pack::add_pack_command;
 use crate::commands::build::build_command;
 use crate::commands::deploy::deploy_command;
@@ -17,11 +16,14 @@ use crate::commands::sync_pack::sync_pack_command;
 use crate::commands::sync_this_only_pack::sync_this_only_pack_command;
 use crate::subcommands::externals::ExternalsSubcommand;
 use crate::subcommands::externals::remove_external::remove_external_command;
+use crate::subcommands::local_packs::LocalPacksSubcommand;
+use crate::subcommands::local_packs::remove_local_pack::remove_local_pack_command;
 use crate::subcommands::optionals::OptionalsSubcommand;
 use anyhow::Result;
 use clap::Parser;
 use subcommands::externals::add_external::add_external_command;
 use subcommands::externals::toggle_externals::toggle_externals_command;
+use subcommands::local_packs::add_local_pack::add_local_pack_command;
 use subcommands::optionals::toggle_optionals::toggle_optionals_command;
 
 fn main() -> Result<()> {
@@ -39,7 +41,6 @@ fn main() -> Result<()> {
     match args.command {
         AppSubcommand::Init => init_repo_command(),
         AppSubcommand::AddPack(args) => add_pack_command(args),
-        AppSubcommand::AddLocalPack(args) => add_local_pack_command(args),
         AppSubcommand::Build(args) => build_command(args, log_wrapper),
         AppSubcommand::InitRemote(args) => init_remote_command(args),
         AppSubcommand::Sync(args) => sync_pack_command(args, log_wrapper),
@@ -52,6 +53,10 @@ fn main() -> Result<()> {
         },
         AppSubcommand::Optionals(args) => match args.command {
             OptionalsSubcommand::Toggle(args) => toggle_optionals_command(args),
+        },
+        AppSubcommand::Local(args) => match args.command {
+            LocalPacksSubcommand::Add(args) => add_local_pack_command(args),
+            LocalPacksSubcommand::Remove(args) => remove_local_pack_command(args),
         },
         AppSubcommand::Deploy(args) => deploy_command(args),
     }
