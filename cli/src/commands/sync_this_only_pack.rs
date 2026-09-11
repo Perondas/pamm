@@ -1,9 +1,9 @@
+use crate::commands::sync_pack::DialogerInteractor;
 use crate::log_wrapper::LogWrapper;
 use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::ToPrettyString;
 use clap::Args;
 use dialoguer::theme::ColorfulTheme;
-use pamm_lib::handle::actions::sync::config_sync_interactor::ConfigSyncInteractor;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use std::env::current_dir;
 
@@ -57,24 +57,4 @@ pub fn sync_this_only_pack_command(
     println!("Pack synchronized successfully.");
 
     Ok(())
-}
-
-struct DialogerInteractor;
-
-impl ConfigSyncInteractor for DialogerInteractor {
-    fn confirm_pack_removal(&self, pack_name: &str) -> anyhow::Result<bool> {
-        let outcome = dialoguer::Confirm::with_theme(&ColorfulTheme::default())
-            .with_prompt(format!(
-                "Pack '{}' has been removed from remote repository. Do you want to remove all local files as well?",
-                pack_name
-            ))
-            .default(false)
-            .interact()?;
-        Ok(outcome)
-    }
-
-    fn notify_pack_added(&self, pack_name: &str) -> anyhow::Result<()> {
-        println!("Pack '{}' has been added to repository.", pack_name);
-        Ok(())
-    }
 }

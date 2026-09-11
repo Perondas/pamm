@@ -6,6 +6,7 @@ use crate::commands::launch::LaunchArgs;
 use crate::commands::sync_pack::SyncPackArgs;
 use crate::commands::sync_this_only_pack::SyncThisOnlyPackArgs;
 use crate::subcommands::externals::ExternalsArgs;
+use crate::subcommands::local_packs::LocalPacksArgs;
 use crate::subcommands::optionals::OptionalArgs;
 use clap::{Parser, Subcommand};
 
@@ -32,5 +33,6 @@ pub enum AppSubcommand {
     Launch(LaunchArgs),
     Optionals(OptionalArgs),
     Externals(ExternalsArgs),
+    Local(LocalPacksArgs),
     Deploy(DeployArgs),
 }

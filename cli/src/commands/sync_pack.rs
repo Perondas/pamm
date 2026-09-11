@@ -10,8 +10,11 @@ use std::env::current_dir;
 #[derive(Debug, Args)]
 pub struct SyncPackArgs {
     #[arg()]
+    /// Name of the pack to sync
     pub name: String,
     #[arg(short, long, default_value_t = false)]
+    /// Discards indices, reads all addons from disk
+    /// Does nothing for local packs
     pub force_refresh: bool,
     /// Silent mode, minimal output
     #[arg(short, long, action)]
@@ -21,13 +24,19 @@ pub struct SyncPackArgs {
 pub fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow::Result<()> {
     let mut repo_handle = ClientRepoHandle::open(&current_dir()?)?;
 
-    repo_handle.sync_repo_config(&DialogerInteractor)?;
-
     let progress_reporter = if args.silent {
         IndicatifProgressReporter::disabled(log_wrapper)
     } else {
         IndicatifProgressReporter::new(log_wrapper)
     };
+
+    if repo_handle.is_local_pack(&args.name) {
+        println!("Syncing local pack '{}'", args.name);
+        repo_handle.sync_local_pack(&args.name, &progress_reporter)?;
+        return Ok(());
+    }
+
+    repo_handle.sync_repo_config(&DialogerInteractor)?;
 
     let diffs = repo_handle.get_pack_and_parents_diffs(
         &args.name,
@@ -70,7 +79,7 @@ pub fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow:
     Ok(())
 }
 
-struct DialogerInteractor;
+pub(super) struct DialogerInteractor;
 
 impl ConfigSyncInteractor for DialogerInteractor {
     fn confirm_pack_removal(&self, pack_name: &str) -> anyhow::Result<bool> {

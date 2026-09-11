@@ -4,7 +4,7 @@ use crate::io::files::file_names::fixed_file::FixedFile;
 use crate::io::files::name_consts::{CACHE_DB_DIR_NAME, WWW_DIR_NAME};
 use crate::io::fs::fs_readable::KnownFSReadable;
 use crate::io::fs::fs_writable::FixedFsWritable;
-use crate::io::progress_reporting::progress_reporter::ProgressReporter;
+use crate::io::progress_reporting::progress_reporter::NoopProgressReporter;
 use crate::models::index::checksum_index::ChecksumIndex;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::repo::repo_config::RepoConfig;
@@ -13,17 +13,6 @@ use crate::util::test_utils::TestTempDir;
 use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
-
-#[derive(Clone, Default)]
-struct NoopProgress;
-
-impl ProgressReporter for NoopProgress {
-    fn start_for_download(&self, _total_work: u64) {}
-    fn start_without_len(&self) {}
-    fn report_progress(&self, _progress: u64) {}
-    fn report_message(&self, _message: &str) {}
-    fn finish(&self) {}
-}
 
 struct Fixture {
     _tmp: TestTempDir,
@@ -83,7 +72,7 @@ fn build_pack_symlink_creates_links() {
     let server = fx.open();
 
     server
-        .build_pack("core", opts(BuildMode::Symlink), &NoopProgress)
+        .build_pack("core", opts(BuildMode::Symlink), &NoopProgressReporter)
         .unwrap();
 
     let www_file = fx.www().join("core/addons/@addon1/file.txt");
@@ -101,7 +90,7 @@ fn build_pack_copy_creates_files() {
     let server = fx.open();
 
     server
-        .build_pack("core", opts(BuildMode::Copy), &NoopProgress)
+        .build_pack("core", opts(BuildMode::Copy), &NoopProgressReporter)
         .unwrap();
 
     let www_file = fx.www().join("core/addons/@addon1/file.txt");
@@ -116,7 +105,7 @@ fn build_pack_writes_indexes_to_www_only() {
     let fx = Fixture::new("pamm_build_indexes_to_www_only");
     let server = fx.open();
     server
-        .build_pack("core", opts(BuildMode::Symlink), &NoopProgress)
+        .build_pack("core", opts(BuildMode::Symlink), &NoopProgressReporter)
         .unwrap();
 
     let www_indexes = fx.www().join("core/indexes");
@@ -148,7 +137,7 @@ fn build_pack_removes_stale_addon_subtree() {
     fs::write(&stale, b"old").unwrap();
 
     server
-        .build_pack("core", opts(BuildMode::Symlink), &NoopProgress)
+        .build_pack("core", opts(BuildMode::Symlink), &NoopProgressReporter)
         .unwrap();
 
     assert!(!stale.exists(), "phantom addon should be removed");
@@ -160,7 +149,7 @@ fn build_pack_force_refresh_clears_cache() {
     let fx = Fixture::new("pamm_build_force_refresh_clears_cache");
     let server = fx.open();
     server
-        .build_pack("core", opts(BuildMode::Symlink), &NoopProgress)
+        .build_pack("core", opts(BuildMode::Symlink), &NoopProgressReporter)
         .unwrap();
 
     // The cache dir should exist after the first build.
@@ -175,7 +164,7 @@ fn build_pack_force_refresh_clears_cache() {
                 mode: BuildMode::Symlink,
                 force_refresh: true,
             },
-            &NoopProgress,
+            &NoopProgressReporter,
         )
         .unwrap();
 
@@ -188,7 +177,7 @@ fn build_repo_materializes_top_level_files() {
     let fx = Fixture::new("pamm_build_repo_top_level");
     let server = fx.open();
     server
-        .build(opts(BuildMode::Symlink), NoopProgress)
+        .build(opts(BuildMode::Symlink), NoopProgressReporter)
         .unwrap();
 
     assert!(fx.www().join(RepoConfig::file_name()).exists());
@@ -205,7 +194,7 @@ fn build_pack_skips_dotcache_in_source() {
     let fx = Fixture::new("pamm_build_skips_dotcache");
     let server = fx.open();
     server
-        .build_pack("core", opts(BuildMode::Symlink), &NoopProgress)
+        .build_pack("core", opts(BuildMode::Symlink), &NoopProgressReporter)
         .unwrap();
 
     // The sled cache dir should be at the source.
@@ -225,10 +214,10 @@ fn rebuild_keeps_dotcache_out_of_www() {
     let server = fx.open();
 
     server
-        .build_pack("core", opts(BuildMode::Symlink), &NoopProgress)
+        .build_pack("core", opts(BuildMode::Symlink), &NoopProgressReporter)
         .unwrap();
     server
-        .build_pack("core", opts(BuildMode::Symlink), &NoopProgress)
+        .build_pack("core", opts(BuildMode::Symlink), &NoopProgressReporter)
         .unwrap();
 
     let www_cache = fx.www().join("core/addons").join(CACHE_DB_DIR_NAME);
@@ -245,7 +234,7 @@ fn build_pack_symlink_target_is_relative() {
     let fx = Fixture::new("pamm_build_symlink_target_relative");
     let server = fx.open();
     server
-        .build_pack("core", opts(BuildMode::Symlink), &NoopProgress)
+        .build_pack("core", opts(BuildMode::Symlink), &NoopProgressReporter)
         .unwrap();
 
     let link = fx.www().join("core/addons/@addon1/file.txt");
@@ -264,7 +253,7 @@ fn build_pack_symlinks_point_into_per_pack_source() {
     let fx = Fixture::new("pamm_build_symlink_per_pack_target");
     let server = fx.open();
     server
-        .build_pack("core", opts(BuildMode::Symlink), &NoopProgress)
+        .build_pack("core", opts(BuildMode::Symlink), &NoopProgressReporter)
         .unwrap();
 
     let link = fx.www().join("core/addons/@addon1/file.txt");
@@ -315,7 +304,7 @@ fn build_produces_the_v2_www_shape_clients_expect() {
     let fx = Fixture::new("pamm_build_www_shape");
     let server = fx.open();
     server
-        .build(opts(BuildMode::Symlink), NoopProgress)
+        .build(opts(BuildMode::Symlink), NoopProgressReporter)
         .unwrap();
 
     assert_eq!(walk_relative(&fx.www()), expected_www_entries());
@@ -336,7 +325,7 @@ fn build_prunes_legacy_v1_www_entries() {
     fs::write(www.join("core.pack.config.json"), b"{}").unwrap();
 
     server
-        .build(opts(BuildMode::Symlink), NoopProgress)
+        .build(opts(BuildMode::Symlink), NoopProgressReporter)
         .unwrap();
 
     assert_eq!(walk_relative(&fx.www()), expected_www_entries());
@@ -356,7 +345,7 @@ fn build_prunes_stale_pack_dirs_but_keeps_unrelated_entries() {
     fs::write(www.join("robots.txt"), b"deny all").unwrap();
 
     server
-        .build(opts(BuildMode::Symlink), NoopProgress)
+        .build(opts(BuildMode::Symlink), NoopProgressReporter)
         .unwrap();
 
     assert!(!www.join("oldpack").exists(), "stale pack dir is pruned");
@@ -377,7 +366,7 @@ fn build_materializes_media_and_prunes_stale_media_entries() {
     fs::write(media_dir.join("banner.png"), b"banner").unwrap();
 
     server
-        .build(opts(BuildMode::Symlink), NoopProgress)
+        .build(opts(BuildMode::Symlink), NoopProgressReporter)
         .unwrap();
 
     let www_icon = fx.www().join("media/icon.png");
@@ -397,7 +386,7 @@ fn build_materializes_media_and_prunes_stale_media_entries() {
     // rest (and www/media itself) survive the root prune loop.
     fs::remove_file(media_dir.join("banner.png")).unwrap();
     server
-        .build(opts(BuildMode::Symlink), NoopProgress)
+        .build(opts(BuildMode::Symlink), NoopProgressReporter)
         .unwrap();
 
     assert!(!fx.www().join("media/banner.png").exists());
@@ -415,13 +404,13 @@ fn build_removes_www_media_when_source_is_gone() {
     fs::write(media_dir.join("icon.png"), b"icon").unwrap();
 
     server
-        .build(opts(BuildMode::Symlink), NoopProgress)
+        .build(opts(BuildMode::Symlink), NoopProgressReporter)
         .unwrap();
     assert!(fx.www().join("media/icon.png").exists());
 
     fs::remove_dir_all(&media_dir).unwrap();
     server
-        .build(opts(BuildMode::Symlink), NoopProgress)
+        .build(opts(BuildMode::Symlink), NoopProgressReporter)
         .unwrap();
 
     assert!(
@@ -464,7 +453,7 @@ fn open_migrates_v1_source_then_build_publishes_v2_www() {
     );
 
     server
-        .build(opts(BuildMode::Symlink), NoopProgress)
+        .build(opts(BuildMode::Symlink), NoopProgressReporter)
         .unwrap();
 
     let www = repo_path.join(WWW_DIR_NAME);

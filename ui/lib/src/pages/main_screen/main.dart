@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pamm_ui/src/models/repo_with_path.dart';
 import 'package:pamm_ui/src/pages/main_screen/repo_details/main.dart';
 import 'package:pamm_ui/src/pages/main_screen/repo_list/main.dart';
 import 'package:pamm_ui/src/pages/settings_screen/main.dart';
+import 'package:pamm_ui/src/services/repo_state_store.dart';
 import 'package:pamm_ui/src/services/theme_service.dart';
 
 class MainScreen extends StatefulWidget {
@@ -13,10 +13,10 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  RepoWithPath? _selectedRepo;
+  RepoStateManager? _selectedRepo;
 
-  void _onSelectRepo(RepoWithPath? repo) {
-    themeService.applyRepo(repo?.repo);
+  void _onSelectRepo(RepoStateManager? repo) {
+    themeService.applyRepo(repo?.repoState?.repo);
     setState(() {
       _selectedRepo = repo;
     });

@@ -7,8 +7,8 @@ import '../../../frb_generated.dart';
 import '../user_repo_settings.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-Future<FlutterRepoUserSettings> loadSettings({required String repotPath}) =>
+Future<FlutterRepoUserSettings> loadSettings({required String repoPath}) =>
     RustLib.instance.api
         .crateApiCommandsUserRepoSettingsLoadSettingsLoadSettings(
-          repotPath: repotPath,
+          repoPath: repoPath,
         );

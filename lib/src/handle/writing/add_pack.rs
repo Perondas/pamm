@@ -1,7 +1,11 @@
+#[cfg(feature = "client")]
 use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::repo_handle::RepoHandle;
+#[cfg(feature = "server")]
 use crate::handle::server_repo_handle::ServerRepoHandle;
+use crate::handle::writing::reserved_root_names;
 use crate::models::pack::pack_config::PackConfig;
+use crate::util::name_matches::names_match;
 use anyhow::ensure;
 
 impl RepoHandle {
@@ -14,16 +18,32 @@ impl RepoHandle {
         pack_config: &PackConfig,
     ) -> anyhow::Result<()> {
         ensure!(
-            !self.repo_config.packs.contains(&pack_config.name),
+            !self
+                .repo_config
+                .packs
+                .iter()
+                .any(|p| names_match(p, &pack_config.name)),
             "Pack '{}' already exists in repo",
             pack_config.name
         );
+
+        if let Some(reserved) = reserved_root_names()
+            .into_iter()
+            .find(|reserved| names_match(reserved, &pack_config.name))
+        {
+            anyhow::bail!(
+                "Pack must not be named '{}': its folder would collide with '{}' in the repo root",
+                pack_config.name,
+                reserved
+            );
+        }
 
         self.repo_config.packs.insert(pack_config.name.clone());
         self.write(&self.repo_config)
     }
 }
 
+#[cfg(feature = "server")]
 impl ServerRepoHandle {
     /// Add a pack to the server repo: register it and lay out the source addon
     /// directory. No client-only settings file is created.
@@ -33,6 +53,7 @@ impl ServerRepoHandle {
     }
 }
 
+#[cfg(feature = "client")]
 impl ClientRepoHandle {
     /// Add a pack to the client repo: register it and lay out the client addon
     /// directory (including the default user settings).
@@ -42,7 +63,7 @@ impl ClientRepoHandle {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "server"))]
 mod tests {
     use crate::handle::reading::get_repo_info::GetRepoInfo;
     use crate::handle::server_repo_handle::ServerRepoHandle;

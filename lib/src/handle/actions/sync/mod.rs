@@ -4,5 +4,6 @@ pub mod config_sync_interactor;
 pub mod get_diff;
 pub mod get_diffs_with_parents;
 pub mod quick_check;
+pub mod sync_local_pack;
 pub(crate) mod sync_media;
 pub mod sync_repo_config;
