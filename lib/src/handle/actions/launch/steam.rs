@@ -6,7 +6,11 @@ use anyhow::Context;
 use log::{debug, info};
 
 impl ClientRepoHandle {
-     pub(super) fn launch_via_steam(&self, pack_name: &str, addon_paths: &[String]) -> anyhow::Result<()> {
+    pub(super) fn launch_via_steam(
+        &self,
+        pack_name: &str,
+        addon_paths: &[String],
+    ) -> anyhow::Result<()> {
         info!("Launching pack '{}' via Steam", pack_name);
 
         let mut launch_url = String::from("steam://rungameid/107410// -nolauncher ");

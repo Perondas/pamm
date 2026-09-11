@@ -9,14 +9,22 @@ use anyhow::{Context, anyhow};
 pub trait GetAddonPaths {
     /// Gets the paths to all enabled addons of the pack (required, optional and
     /// external) as absolute, canonicalized path strings.
-    fn get_canonical_addon_paths(&self, pack_name: &str, disable_optionals: bool) -> anyhow::Result<Vec<String>>;
+    fn get_canonical_addon_paths(
+        &self,
+        pack_name: &str,
+        disable_optionals: bool,
+    ) -> anyhow::Result<Vec<String>>;
 }
 
 impl<T> GetAddonPaths for T
 where
     T: GetPack + GetRepoInfo,
 {
-    fn get_canonical_addon_paths(&self, pack_name: &str, disable_optionals: bool) -> anyhow::Result<Vec<String>> {
+    fn get_canonical_addon_paths(
+        &self,
+        pack_name: &str,
+        disable_optionals: bool,
+    ) -> anyhow::Result<Vec<String>> {
         log::debug!("Resolving canonical addon paths for pack '{}'", pack_name);
 
         let repo_path = self.get_repo_path();

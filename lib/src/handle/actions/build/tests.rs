@@ -14,8 +14,6 @@ use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
 
-
-
 struct Fixture {
     _tmp: TestTempDir,
     repo_path: PathBuf,

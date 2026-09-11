@@ -21,7 +21,11 @@ impl<T> GetLinuxAddonPaths for T
 where
     T: GetPack + GetRepoInfo + GetExternalAddonsPaths,
 {
-    fn get_linux_addon_paths(&self, pack_name: &str, disable_optionals: bool) -> anyhow::Result<Vec<String>> {
+    fn get_linux_addon_paths(
+        &self,
+        pack_name: &str,
+        disable_optionals: bool,
+    ) -> anyhow::Result<Vec<String>> {
         log::debug!("Resolving addon paths for pack '{}'", pack_name);
 
         let arma_install_dir = find_arma_install_dir()

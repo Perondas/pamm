@@ -4,16 +4,18 @@ pub mod add_pack;
 pub mod delete_pack;
 pub mod save_pack_settings;
 
+pub mod remove_local_pack;
 pub mod update_pack;
 pub mod update_repo_config;
-pub mod remove_local_pack;
 
 use crate::handle::repo_handle::RepoHandle;
 use crate::io::files::file_names::fixed_file::FixedFile;
 #[cfg(feature = "client")]
 use crate::io::files::file_paths::keyed_path::KeyedFilePath;
 use crate::io::files::file_paths::self_identified_path::SelfIdentifiedFilePath;
-use crate::io::files::name_consts::{CACHE_DB_DIR_NAME, INDEX_DIR_NAME, MEDIA_DIR_NAME, WWW_DIR_NAME};
+use crate::io::files::name_consts::{
+    CACHE_DB_DIR_NAME, INDEX_DIR_NAME, MEDIA_DIR_NAME, WWW_DIR_NAME,
+};
 use crate::io::fs::fs_writable::FixedFsWritable;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_user_settings::RepoUserSettings;

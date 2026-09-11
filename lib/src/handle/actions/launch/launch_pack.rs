@@ -24,11 +24,7 @@ impl LaunchParams {
 }
 
 impl ClientRepoHandle {
-    pub fn launch_pack(
-        &self,
-        pack_name: &str,
-        params: &LaunchParams,
-    ) -> anyhow::Result<()> {
+    pub fn launch_pack(&self, pack_name: &str, params: &LaunchParams) -> anyhow::Result<()> {
         info!("Launching pack with params: '{:#?}'", params);
 
         // On linux we need to have the load path be in the Arma directory.
@@ -42,7 +38,7 @@ impl ClientRepoHandle {
             addon_paths.len(),
             pack_name
         );
-        
+
         match params.mode {
             LaunchMode::Steam => self.launch_via_steam(pack_name, &addon_paths),
             #[cfg(target_os = "windows")]

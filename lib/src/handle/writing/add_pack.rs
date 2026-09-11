@@ -18,7 +18,11 @@ impl RepoHandle {
         pack_config: &PackConfig,
     ) -> anyhow::Result<()> {
         ensure!(
-            !self.repo_config.packs.iter().any(|p| names_match(p, &pack_config.name)),
+            !self
+                .repo_config
+                .packs
+                .iter()
+                .any(|p| names_match(p, &pack_config.name)),
             "Pack '{}' already exists in repo",
             pack_config.name
         );
