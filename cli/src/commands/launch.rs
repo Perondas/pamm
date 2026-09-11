@@ -16,16 +16,19 @@ pub struct LaunchArgs {
 }
 
 #[derive(Debug, Clone, Copy, ValueEnum)]
+#[non_exhaustive]
 pub enum LaunchMode {
     Steam,
+    #[cfg(target_os = "windows")]
     File,
 }
 
 impl From<LaunchMode> for pamm_lib::handle::actions::launch::launch_pack::LaunchMode {
     fn from(mode: LaunchMode) -> Self {
         match mode {
-            LaunchMode::Steam => Self::Steam,
+            #[cfg(target_os = "windows")]
             LaunchMode::File => Self::Executable,
+            _ => Self::Steam,
         }
     }
 }
