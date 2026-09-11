@@ -111,14 +111,14 @@ mod tests {
     use super::*;
     use crate::io::fs::fs_readable::KnownFSReadable;
     use crate::io::fs::fs_writable::FixedFsWritable;
+    use crate::models::repo::repo_config::RepoConfig;
+    use crate::models::repo::repo_user_settings::RepoUserSettings;
+    use crate::models::repo::repo_version::RepoVersion;
     use crate::util::test_utils::TestTempDir;
     use std::collections::HashSet;
     use std::fs;
     use std::path::PathBuf;
     use url::Url;
-    use crate::models::repo::repo_config::RepoConfig;
-    use crate::models::repo::repo_user_settings::RepoUserSettings;
-    use crate::models::repo::repo_version::RepoVersion;
 
     /// A client repo at layout v2 holding the remote packs named in `remote_packs`,
     /// each laid out on disk. Written through the real writers so `open` sees a
