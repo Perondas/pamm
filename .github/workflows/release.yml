@@ -23,7 +23,7 @@ jobs:
           fetch-depth: '0'
           submodules: 'recursive'
       - name: Set up Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@v2
       - name: Fmt
         run: cargo fmt --all -- --check
       - name: Build
@@ -55,7 +55,7 @@ jobs:
           fetch-depth: '0'
           submodules: 'recursive'
       - name: Set up Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@v2
       - name: Run tests
         run: cargo test -p pamm_lib --no-default-features --features ${{ matrix.features }} --verbose
       - name: Lint
@@ -88,7 +88,7 @@ jobs:
           fetch-depth: '0'
           submodules: 'recursive'
       - name: Set up Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@v2
       - name: Set version
         shell: bash
         run: sed -i "s/^version = \".*\"/version = \"${GITHUB_REF_NAME#v}\"/" cli/Cargo.toml
@@ -130,7 +130,7 @@ jobs:
           fetch-depth: '0'
           submodules: 'recursive'
       - name: Set up Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@v2
       - name: Set version
         shell: bash
         run: sed -i "s/^version = \".*\"/version = \"${GITHUB_REF_NAME#v}\"/" cli/Cargo.toml
@@ -191,7 +191,7 @@ jobs:
           fetch-depth: '0'
           submodules: 'recursive'
       - name: Set up Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@v2
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -242,7 +242,7 @@ jobs:
           fetch-depth: '0'
           submodules: 'recursive'
       - name: Set up Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@v2
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -293,7 +293,7 @@ jobs:
           fetch-depth: '0'
           submodules: 'recursive'
       - name: Set up Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@v2
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
