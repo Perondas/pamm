@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_folder/open_folder.dart';
 import 'package:pamm_ui/src/pages/main_screen/repo_details/add_local_pack_dialog.dart';
 import 'package:pamm_ui/src/pages/main_screen/repo_details/edit_pack_dialog.dart';
 import 'package:pamm_ui/src/pages/sync_screen/main.dart';
@@ -56,28 +57,55 @@ class _RepoDetailsState extends State<RepoDetails> {
                 if (banner != null) ...[const SizedBox(height: 12), banner],
                 const SizedBox(height: 12),
                 if (settingsService.settings.mmSettings.mmModeEnabled) ...[
+                  Text(
+                    'MM Options:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+
                   const SizedBox(height: 8),
-                  SizedBox(
-                    width: 339,
-                    child: ListTile(
-                      leading: Icon(Icons.tune),
-                      title: Text("Launch without optionals"),
-                      trailing: Switch(
-                        value: settingsService
-                            .settings
-                            .mmSettings
-                            .launchWithoutOptionals,
-                        onChanged: (value) async {
-                          await settingsService.update(
-                            (settings) =>
-                                settings.mmSettings.launchWithoutOptionals =
-                                    value,
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 339,
+                        child: ListTile(
+                          leading: Icon(Icons.tune),
+                          title: Text("Launch without optionals"),
+                          trailing: Switch(
+                            value: settingsService
+                                .settings
+                                .mmSettings
+                                .launchWithoutOptionals,
+                            onChanged: (value) async {
+                              await settingsService.update(
+                                (settings) =>
+                                    settings.mmSettings.launchWithoutOptionals =
+                                        value,
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+
+                      FilledButton(
+                        onPressed: () async {
+                          // The double backslash is correct, but for some
+                          // reason the library won't open it.
+                          await OpenFolder.openFolder(
+                            widget.selectedRepo.repoPath.replaceAll(
+                              "\\\\",
+                              "\\",
+                            ),
                           );
                         },
+                        child: Text("Open repo on disk"),
                       ),
-                    ),
+                    ],
                   ),
                 ],
+                const SizedBox(height: 8),
+
                 Text('Packs:', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 Flexible(

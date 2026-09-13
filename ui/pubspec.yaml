@@ -48,6 +48,7 @@ dependencies:
   version: ^3.0.2
   url_launcher: ^6.3.2
   package_info_plus: ^10.2.1
+  open_folder: ^0.0.4
 
 dev_dependencies:
   flutter_test:
