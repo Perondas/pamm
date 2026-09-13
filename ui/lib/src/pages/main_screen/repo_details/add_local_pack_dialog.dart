@@ -22,13 +22,20 @@ class _AddLocalPackDialogState extends State<AddLocalPackDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           TextFormField(
-            decoration: InputDecoration(hintText: "Name of the pack"),
+            decoration: InputDecoration(
+              hintText: "Name of the pack",
+              label: Text("Name"),
+            ),
             onChanged: (value) {
               selectedName = value;
             },
           ),
+          const SizedBox(height: 16),
           DropdownButtonFormField<String?>(
-            decoration: InputDecoration(hintText: "Select a parent pack"),
+            decoration: InputDecoration(
+              hintText: "Select a parent pack",
+              label: Text("Parent Pack"),
+            ),
             items:
                 widget.possibleParents
                     .map(
