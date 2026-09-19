@@ -1,4 +1,4 @@
-//! Based on the indicatif-log-bridge crate https://crates.io/crates/indicatif-log-bridge
+//! Based on the indicatif-log-bridge crate <https://crates.io/crates/indicatif-log-bridge>
 
 use env_logger::Logger;
 use indicatif::ProgressBar;

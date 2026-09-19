@@ -5,10 +5,10 @@ use crate::models::pack::pack_diff::PackDiff;
 use anyhow::ensure;
 
 impl ClientRepoHandle {
-    pub fn apply_pack_diff<P: ProgressReporter>(
+    pub fn apply_pack_diff(
         &self,
         pack_name: &str,
-        progress_reporter: P,
+        progress_reporter: impl ProgressReporter,
         diff: PackDiff,
     ) -> anyhow::Result<()> {
         ensure!(

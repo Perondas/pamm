@@ -4,10 +4,10 @@ use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::models::pack::pack_diff::PackDiff;
 
 impl ClientRepoHandle {
-    pub fn get_pack_and_parents_diffs<P: ProgressReporter>(
+    pub fn get_pack_and_parents_diffs(
         &self,
         pack_name: &str,
-        progress_reporter: P,
+        progress_reporter: impl ProgressReporter,
         force_refresh: bool,
     ) -> anyhow::Result<Vec<PackDiff>> {
         // Only the requested pack needs checking: a normal pack can never name a

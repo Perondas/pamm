@@ -3,9 +3,9 @@ use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::models::pack::pack_diff::PackDiff;
 
 impl ClientRepoHandle {
-    pub fn apply_pack_and_parents_diffs<P: ProgressReporter>(
+    pub fn apply_pack_and_parents_diffs(
         &self,
-        progress_reporter: P,
+        progress_reporter: impl ProgressReporter,
         diffs: Vec<PackDiff>,
     ) -> anyhow::Result<()> {
         for diff in diffs {

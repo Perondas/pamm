@@ -182,7 +182,7 @@ impl<P: ProgressReporter> IndexGenerator<P> {
     }
 }
 
-fn file_name_to_string<P: AsRef<Path> + Debug>(fs_path: P) -> String {
+fn file_name_to_string(fs_path: impl AsRef<Path> + Debug) -> String {
     fs_path
         .as_ref()
         .file_name()

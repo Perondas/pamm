@@ -7,10 +7,10 @@ use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_diff::{PackDiff, diff_packs};
 
 impl ClientRepoHandle {
-    pub fn get_pack_diff<P: ProgressReporter>(
+    pub fn get_pack_diff(
         &self,
         pack_name: &str,
-        progress_reporter: P,
+        progress_reporter: impl ProgressReporter,
         force_refresh: bool,
     ) -> anyhow::Result<PackDiff> {
         self.ensure_not_local(pack_name)?;
