@@ -31,6 +31,9 @@ impl ClientRepoHandle {
         launch_url.push_str(&urlencoding::encode(&addons_combined));
 
         debug!("Steam launch URL: {}", launch_url);
-        open::that(launch_url).context("Failed to launch pack via Steam")
+        open::that(launch_url).context("Failed to launch pack via Steam")?;
+
+        // No preset file on this platform: the mod list rides in the URL.
+        Ok(LaunchOutcome::default())
     }
 }
