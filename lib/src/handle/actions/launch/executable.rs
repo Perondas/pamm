@@ -1,3 +1,4 @@
+use crate::handle::actions::launch::launch_pack::LaunchOutcome;
 use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::reading::get_pack::GetPack;
 use crate::util::dirs::find_steam_dir::find_steam_dir;
@@ -11,7 +12,7 @@ impl ClientRepoHandle {
         &self,
         pack_name: &str,
         addon_paths: &[String],
-    ) -> anyhow::Result<()> {
+    ) -> anyhow::Result<LaunchOutcome> {
         info!("Launching pack '{}' via executable", pack_name);
 
         let steam_executable = find_steam_dir()
