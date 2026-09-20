@@ -1,9 +1,9 @@
 use crate::handle::actions::build::{BuildMode, BuildReport};
 use crate::io::files::file_paths::rel_path::RelPath;
-use crate::io::fs::util::symlink::create_or_recreate_symlink;
+use crate::io::fs::util::symlink::{create_or_recreate_symlink, relative_path};
 use anyhow::{Context, anyhow};
 use std::fs;
-use std::path::{Component, Path, PathBuf};
+use std::path::Path;
 
 /// Per-build helper that places source files into the `www/` build output, either
 /// as relative symlinks (default) or as copies.
@@ -200,74 +200,5 @@ impl<'a> Materializer<'a> {
         fs::copy(&source, &dest)
             .with_context(|| format!("Failed to copy {:?} -> {:?}", source, dest))?;
         Ok(())
-    }
-}
-
-/// Compute a relative path from `from_dir` to `to`. Both paths should refer to
-/// locations under a common ancestor (typically the repo root).
-///
-/// The returned path is always relative — relative to `from_dir`, e.g.
-/// `../../foo_pack_addons/@addon/file.pbo` — regardless of whether the inputs
-/// were absolute or relative (they just have to be both one or the other).
-///
-/// We do not canonicalize: callers want the symlink target to remain relative so
-/// the whole repo directory stays portable.
-pub fn relative_path(from_dir: &Path, to: &Path) -> Option<PathBuf> {
-    let from: Vec<Component<'_>> = from_dir.components().collect();
-    let to: Vec<Component<'_>> = to.components().collect();
-    let common = from
-        .iter()
-        .zip(to.iter())
-        .take_while(|(a, b)| a == b)
-        .count();
-
-    let up = from.len().checked_sub(common)?;
-    let mut out = PathBuf::new();
-    for _ in 0..up {
-        out.push("..");
-    }
-    for c in &to[common..] {
-        out.push(c.as_os_str());
-    }
-    Some(out)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn relative_path_sibling() {
-        let from = Path::new("/repo/www/foo_pack_addons/@addon/sub");
-        let to = Path::new("/repo/foo_pack_addons/@addon/sub/file.pbo");
-        assert_eq!(
-            relative_path(from, to).unwrap(),
-            PathBuf::from("../../../../foo_pack_addons/@addon/sub/file.pbo")
-        );
-    }
-
-    #[test]
-    fn relative_path_same_dir() {
-        let from = Path::new("/a/b");
-        let to = Path::new("/a/b/file");
-        assert_eq!(relative_path(from, to).unwrap(), PathBuf::from("file"));
-    }
-
-    #[test]
-    fn relative_path_one_up() {
-        let from = Path::new("/a/b/c");
-        let to = Path::new("/a/b/file");
-        assert_eq!(relative_path(from, to).unwrap(), PathBuf::from("../file"));
-    }
-
-    // www keeps the flat name while the source lives in a per-pack folder.
-    #[test]
-    fn relative_path_across_layouts() {
-        let from = Path::new("/repo/www/foo_pack_addons/@addon");
-        let to = Path::new("/repo/foo/addons/@addon/file.pbo");
-        assert_eq!(
-            relative_path(from, to).unwrap(),
-            PathBuf::from("../../../foo/addons/@addon/file.pbo")
-        );
     }
 }
