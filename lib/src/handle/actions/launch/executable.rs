@@ -48,6 +48,7 @@ impl ClientRepoHandle {
             .spawn()
             .context("Failed to launch pack via executable")?;
 
-        Ok(())
+        // No preset file on this platform: the mod list rides in the arguments.
+        Ok(LaunchOutcome::default())
     }
 }
