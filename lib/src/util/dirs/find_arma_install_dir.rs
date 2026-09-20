@@ -1,6 +1,7 @@
-use anyhow::{Context, anyhow, ensure};
+use anyhow::{Context, anyhow, bail};
+use std::collections::HashSet;
 use std::fs::read_to_string;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use steam_vdf_parser::{Value, parse_text};
 
 /// Returns the absolute path to the Arma 3 installation directory,
@@ -81,21 +82,73 @@ fn arma_in_location(value: &Value) -> anyhow::Result<bool> {
         .context(anyhow!("libraryfolders entry does not contain 'apps'"))?;
     Ok(apps.get("107410").map(|_| true).unwrap_or_default())
 }
-fn find_libraryfolders() -> anyhow::Result<PathBuf> {
+
+/// Steam roots relative to $HOME, in order of preference.
+const STEAM_ROOT_CANDIDATES: &[&str] = &[
+    ".steam/root",
+    ".steam/steam",
+    ".local/share/Steam",
+    ".var/app/com.valvesoftware.Steam/.local/share/Steam", // Flatpak
+    ".var/app/com.valvesoftware.Steam/data/Steam",         // older Flatpak
+    "snap/steam/common/.local/share/Steam",                // Snap
+];
+
+fn candidate_manifests() -> anyhow::Result<Vec<PathBuf>> {
     let home_dir = std::env::home_dir().ok_or_else(|| anyhow!("Unable to find home directory"))?;
-    log::trace!("Found home directory: {:?}", home_dir);
+    log::trace!("Found home directory: {home_dir:?}");
 
-    let libfolders_path = home_dir
-        .join(".steam")
-        .join("root")
-        .join("steamapps")
-        .join("libraryfolders.vdf");
+    let mut roots = Vec::new();
 
-    ensure!(
-        libfolders_path.exists(),
-        "libraryfolders.vdf does not exist at expected path: {:?}",
-        libfolders_path
-    );
+    // Explicit overrides win.
+    if let Some(root) = std::env::var_os("STEAM_ROOT") {
+        roots.push(PathBuf::from(root));
+    }
+    if let Some(data_home) = std::env::var_os("XDG_DATA_HOME") {
+        roots.push(Path::new(&data_home).join("Steam"));
+    }
+    roots.extend(STEAM_ROOT_CANDIDATES.iter().map(|rel| home_dir.join(rel)));
 
-    Ok(libfolders_path)
+    Ok(roots
+        .into_iter()
+        .map(|root| root.join("steamapps").join("libraryfolders.vdf"))
+        .collect())
+}
+
+/// Every `libraryfolders.vdf` on this machine, deduplicated.
+pub fn find_all_libraryfolders() -> anyhow::Result<Vec<PathBuf>> {
+    let candidates = candidate_manifests()?;
+    let mut found = Vec::new();
+    let mut seen = HashSet::new();
+
+    for path in &candidates {
+        if !path.is_file() {
+            log::trace!("No libraryfolders.vdf at {path:?}");
+            continue;
+        }
+        // ~/.steam/root, ~/.steam/steam and ~/.local/share/Steam are usually
+        // symlinks onto the same directory, so canonicalize before deduping.
+        let key = path.canonicalize().unwrap_or_else(|_| path.clone());
+        if seen.insert(key) {
+            log::debug!("Found libraryfolders.vdf at {path:?}");
+            found.push(path.clone());
+        } else {
+            log::trace!("Skipping {path:?}, duplicate of an earlier candidate");
+        }
+    }
+
+    if found.is_empty() {
+        let tried = candidates
+            .iter()
+            .map(|p| format!("  {}", p.display()))
+            .collect::<Vec<_>>()
+            .join("\n");
+        bail!("No libraryfolders.vdf found in any known Steam location. Tried:\n{tried}");
+    }
+
+    Ok(found)
+}
+
+/// The first `libraryfolders.vdf` found.
+pub fn find_libraryfolders() -> anyhow::Result<PathBuf> {
+    find_all_libraryfolders().map(|mut found| found.remove(0))
 }
