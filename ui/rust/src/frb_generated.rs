@@ -41,7 +41,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 575283620;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 320472387;
 
 // Section: executor
 
@@ -457,6 +457,42 @@ fn wire__crate__api__commands__launch__launch_impl(
                             api_launch_type,
                             api_disable_optionals,
                         )?;
+                        std::result::Result::Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__commands__linux_setup__linux_setup_info_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "linux_setup_info",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_repo_dir = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok =
+                            crate::api::commands::linux_setup::linux_setup_info(api_repo_dir)?;
                         std::result::Result::Ok(output_ok)
                     })(),
                 )
@@ -1367,6 +1403,27 @@ impl SseDecode for crate::api::commands::launch::LaunchType {
     }
 }
 
+impl SseDecode for crate::api::commands::linux_setup::LinuxSetupInfo {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_steamFlavour =
+            <crate::api::commands::linux_setup::SteamFlavour>::sse_decode(deserializer);
+        let mut var_armaInstallDir = <String>::sse_decode(deserializer);
+        let mut var_launchOptions = <Option<String>>::sse_decode(deserializer);
+        let mut var_pressureVesselRoots = <Vec<String>>::sse_decode(deserializer);
+        let mut var_flatpakRoots = <Vec<String>>::sse_decode(deserializer);
+        let mut var_flatpakOverrideCommand = <Option<String>>::sse_decode(deserializer);
+        return crate::api::commands::linux_setup::LinuxSetupInfo {
+            steam_flavour: var_steamFlavour,
+            arma_install_dir: var_armaInstallDir,
+            launch_options: var_launchOptions,
+            pressure_vessel_roots: var_pressureVesselRoots,
+            flatpak_roots: var_flatpakRoots,
+            flatpak_override_command: var_flatpakOverrideCommand,
+        };
+    }
+}
+
 impl SseDecode for Vec<OpaqueDiff> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1517,6 +1574,19 @@ impl SseDecode for Option<String> {
     }
 }
 
+impl SseDecode for Option<crate::api::commands::linux_setup::LinuxSetupInfo> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(
+                <crate::api::commands::linux_setup::LinuxSetupInfo>::sse_decode(deserializer),
+            );
+        } else {
+            return None;
+        }
+    }
+}
+
 impl SseDecode for Option<(u32, u32, u32, u32)> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1629,6 +1699,18 @@ impl SseDecode for crate::api::commands::init_from_remote::RepoCustomization {
     }
 }
 
+impl SseDecode for crate::api::commands::linux_setup::SteamFlavour {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::commands::linux_setup::SteamFlavour::Native,
+            1 => crate::api::commands::linux_setup::SteamFlavour::Flatpak,
+            _ => unreachable!("Invalid variant for SteamFlavour: {}", inner),
+        };
+    }
+}
+
 impl SseDecode for u32 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1679,21 +1761,22 @@ fn pde_ffi_dispatcher_primary_impl(
 7 => wire__crate__api__commands__params__get_server_launch_params_impl(port, ptr, rust_vec_len, data_len),
 9 => wire__crate__api__commands__init_from_remote__init_from_remote_impl(port, ptr, rust_vec_len, data_len),
 11 => wire__crate__api__commands__launch__launch_impl(port, ptr, rust_vec_len, data_len),
-12 => wire__crate__api__commands__externals__load_externals__load_externals_impl(port, ptr, rust_vec_len, data_len),
-13 => wire__crate__api__commands__optionals__load_optionals__load_optionals_impl(port, ptr, rust_vec_len, data_len),
-14 => wire__crate__api__commands__load_pack_display__load_pack_display_impl(port, ptr, rust_vec_len, data_len),
-15 => wire__crate__api__commands__load_repo__load_repo_impl(port, ptr, rust_vec_len, data_len),
-16 => wire__crate__api__commands__user_repo_settings__load_settings__load_settings_impl(port, ptr, rust_vec_len, data_len),
-17 => wire__crate__api__commands__pack_sync__quick_check__quick_check_impl(port, ptr, rust_vec_len, data_len),
-18 => wire__crate__api__commands__local_pack__remove_local_pack__remove_local_pack_impl(port, ptr, rust_vec_len, data_len),
-19 => wire__crate__api__commands__externals__save_externals__save_externals_impl(port, ptr, rust_vec_len, data_len),
-20 => wire__crate__api__commands__optionals__save_optionals__save_optionals_impl(port, ptr, rust_vec_len, data_len),
-21 => wire__crate__api__commands__user_repo_settings__save_settings__save_settings_impl(port, ptr, rust_vec_len, data_len),
-22 => wire__crate__api__commands__params__set_launch_params_impl(port, ptr, rust_vec_len, data_len),
-24 => wire__crate__api__commands__sync_config__sync_config_impl(port, ptr, rust_vec_len, data_len),
-25 => wire__crate__api__commands__local_pack__sync_local_pack__sync_local_pack_impl(port, ptr, rust_vec_len, data_len),
-26 => wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(port, ptr, rust_vec_len, data_len),
-27 => wire__crate__api__commands__pack_sync__sync_pack_with_parents__sync_pack_with_parents_impl(port, ptr, rust_vec_len, data_len),
+12 => wire__crate__api__commands__linux_setup__linux_setup_info_impl(port, ptr, rust_vec_len, data_len),
+13 => wire__crate__api__commands__externals__load_externals__load_externals_impl(port, ptr, rust_vec_len, data_len),
+14 => wire__crate__api__commands__optionals__load_optionals__load_optionals_impl(port, ptr, rust_vec_len, data_len),
+15 => wire__crate__api__commands__load_pack_display__load_pack_display_impl(port, ptr, rust_vec_len, data_len),
+16 => wire__crate__api__commands__load_repo__load_repo_impl(port, ptr, rust_vec_len, data_len),
+17 => wire__crate__api__commands__user_repo_settings__load_settings__load_settings_impl(port, ptr, rust_vec_len, data_len),
+18 => wire__crate__api__commands__pack_sync__quick_check__quick_check_impl(port, ptr, rust_vec_len, data_len),
+19 => wire__crate__api__commands__local_pack__remove_local_pack__remove_local_pack_impl(port, ptr, rust_vec_len, data_len),
+20 => wire__crate__api__commands__externals__save_externals__save_externals_impl(port, ptr, rust_vec_len, data_len),
+21 => wire__crate__api__commands__optionals__save_optionals__save_optionals_impl(port, ptr, rust_vec_len, data_len),
+22 => wire__crate__api__commands__user_repo_settings__save_settings__save_settings_impl(port, ptr, rust_vec_len, data_len),
+23 => wire__crate__api__commands__params__set_launch_params_impl(port, ptr, rust_vec_len, data_len),
+25 => wire__crate__api__commands__sync_config__sync_config_impl(port, ptr, rust_vec_len, data_len),
+26 => wire__crate__api__commands__local_pack__sync_local_pack__sync_local_pack_impl(port, ptr, rust_vec_len, data_len),
+27 => wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(port, ptr, rust_vec_len, data_len),
+28 => wire__crate__api__commands__pack_sync__sync_pack_with_parents__sync_pack_with_parents_impl(port, ptr, rust_vec_len, data_len),
                         _ => unreachable!(),
                     }
 }
@@ -1713,7 +1796,7 @@ fn pde_ffi_dispatcher_sync_impl(
         ),
         8 => wire__crate__api__init_app_impl(ptr, rust_vec_len, data_len),
         10 => wire__crate__api__logging__init_rust_logger_impl(ptr, rust_vec_len, data_len),
-        23 => wire__crate__api__logging__set_rust_log_level_impl(ptr, rust_vec_len, data_len),
+        24 => wire__crate__api__logging__set_rust_log_level_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -1938,6 +2021,31 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::launch::LaunchType>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::commands::linux_setup::LinuxSetupInfo {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.steam_flavour.into_into_dart().into_dart(),
+            self.arma_install_dir.into_into_dart().into_dart(),
+            self.launch_options.into_into_dart().into_dart(),
+            self.pressure_vessel_roots.into_into_dart().into_dart(),
+            self.flatpak_roots.into_into_dart().into_dart(),
+            self.flatpak_override_command.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::commands::linux_setup::LinuxSetupInfo
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::linux_setup::LinuxSetupInfo>
+    for crate::api::commands::linux_setup::LinuxSetupInfo
+{
+    fn into_into_dart(self) -> crate::api::commands::linux_setup::LinuxSetupInfo {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart
     for crate::api::commands::pack_sync::get_diffs_with_parents::MultiDiffResult
 {
@@ -2070,6 +2178,27 @@ impl
         self,
     ) -> FrbWrapper<crate::api::commands::init_from_remote::RepoCustomization> {
         self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::commands::linux_setup::SteamFlavour {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::Native => 0.into_dart(),
+            Self::Flatpak => 1.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::commands::linux_setup::SteamFlavour
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::linux_setup::SteamFlavour>
+    for crate::api::commands::linux_setup::SteamFlavour
+{
+    fn into_into_dart(self) -> crate::api::commands::linux_setup::SteamFlavour {
+        self
     }
 }
 
@@ -2286,6 +2415,21 @@ impl SseEncode for crate::api::commands::launch::LaunchType {
     }
 }
 
+impl SseEncode for crate::api::commands::linux_setup::LinuxSetupInfo {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <crate::api::commands::linux_setup::SteamFlavour>::sse_encode(
+            self.steam_flavour,
+            serializer,
+        );
+        <String>::sse_encode(self.arma_install_dir, serializer);
+        <Option<String>>::sse_encode(self.launch_options, serializer);
+        <Vec<String>>::sse_encode(self.pressure_vessel_roots, serializer);
+        <Vec<String>>::sse_encode(self.flatpak_roots, serializer);
+        <Option<String>>::sse_encode(self.flatpak_override_command, serializer);
+    }
+}
+
 impl SseEncode for Vec<OpaqueDiff> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -2405,6 +2549,16 @@ impl SseEncode for Option<String> {
     }
 }
 
+impl SseEncode for Option<crate::api::commands::linux_setup::LinuxSetupInfo> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::commands::linux_setup::LinuxSetupInfo>::sse_encode(value, serializer);
+        }
+    }
+}
+
 impl SseEncode for Option<(u32, u32, u32, u32)> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -2488,6 +2642,22 @@ impl SseEncode for crate::api::commands::init_from_remote::RepoCustomization {
         <Option<(u32, u32, u32, u32)>>::sse_encode(self.color, serializer);
         <Option<String>>::sse_encode(self.icon, serializer);
         <Option<String>>::sse_encode(self.banner, serializer);
+    }
+}
+
+impl SseEncode for crate::api::commands::linux_setup::SteamFlavour {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::commands::linux_setup::SteamFlavour::Native => 0,
+                crate::api::commands::linux_setup::SteamFlavour::Flatpak => 1,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
     }
 }
 

@@ -1,9 +1,13 @@
 use crate::handle::client_repo_handle::ClientRepoHandle;
-#[cfg(target_os = "windows")]
 use crate::handle::reading::get_canonical_addon_paths::GetAddonPaths;
-#[cfg(target_os = "linux")]
-use crate::handle::reading::get_linux_addon_paths::GetLinuxAddonPaths;
 use log::{debug, info};
+
+/// What a launch left behind, for callers that want to tell the user about it.
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub struct LaunchOutcome {
+    /// The preset file the launch wrote, where the platform uses one.
+    pub preset_path: Option<String>,
+}
 
 #[derive(Debug, Clone)]
 pub enum LaunchMode {
@@ -27,14 +31,17 @@ impl LaunchParams {
 }
 
 impl ClientRepoHandle {
-    pub fn launch_pack(&self, pack_name: &str, params: &LaunchParams) -> anyhow::Result<()> {
+    pub fn launch_pack(
+        &self,
+        pack_name: &str,
+        params: &LaunchParams,
+    ) -> anyhow::Result<LaunchOutcome> {
         info!("Launching pack with params: '{:#?}'", params);
 
-        // On linux we need to have the load path be in the Arma directory.
-        let addon_paths = cfg_select! {
-            target_os = "linux" => self.get_linux_addon_paths(pack_name, params.disable_optionals),
-            _ => self.get_canonical_addon_paths(pack_name, params.disable_optionals)
-        }?;
+        // Absolute host paths on every platform. Canonicalizing resolves any
+        // symlinks along the way, which matters on Linux: a Flatpak filesystem
+        // grant has to cover a symlink's target, not the link.
+        let addon_paths = self.get_canonical_addon_paths(pack_name, params.disable_optionals)?;
 
         debug!(
             "Resolved {} addon path(s) for pack '{}'",
