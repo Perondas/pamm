@@ -234,7 +234,7 @@ mod tests {
         assert_eq!(setup.flatpak_override_command, None);
     }
 
-    // Spec §3.3 row 2: the Flatpak grant is needed, but no share — once granted,
+    // The Flatpak grant is needed, but no share — once granted,
     // the path lands under the sandbox's $HOME, which is shared by default.
     #[test]
     fn flatpak_with_mods_elsewhere_in_home_needs_a_grant_but_no_share() {
