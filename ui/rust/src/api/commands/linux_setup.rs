@@ -33,7 +33,9 @@ pub fn linux_setup_info(repo_dir: String) -> anyhow::Result<Option<LinuxSetupInf
         return Ok(None);
     }
 
-    let handle = ClientRepoHandle::open(Path::new(&repo_dir))?;
+    let handle = pamm_lib::handle::client_repo_handle::ClientRepoHandle::open(
+        std::path::Path::new(&repo_dir),
+    )?;
     let setup = handle.linux_launch_setup()?;
 
     Ok(Some(LinuxSetupInfo {
