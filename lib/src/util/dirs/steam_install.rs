@@ -2,7 +2,6 @@ use anyhow::{anyhow, bail};
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
-/// The Flathub application id of the Steam client.
 pub const STEAM_FLATPAK_ID: &str = "com.valvesoftware.Steam";
 
 /// How Steam is installed. This decides both how host paths map into the
@@ -87,12 +86,6 @@ impl SteamInstall {
     ///
     /// pressure-vessel already shares the sandbox's `$HOME` and every registered
     /// Steam library, so those need nothing. Everything else does.
-    ///
-    /// The comparison is against *container* paths, which is what collapses
-    /// spec §3.3 into two lines. In particular a granted path elsewhere under
-    /// `$HOME` needs no share under Flatpak: flatpak bind-mounts it at its host
-    /// spelling, and inside the sandbox `$HOME` *is* `/home/<user>`, so the
-    /// default home share already covers it.
     pub fn needs_pressure_vessel_share(&self, host: &Path, libraries: &[PathBuf]) -> bool {
         let container = self.container_path(host);
 
@@ -315,7 +308,7 @@ mod tests {
             Path::new("/home/bob/.var/app/com.valvesoftware.Steam/FPArma"),
             &libraries
         ));
-        // Spec §3.3 row 2: a grant is needed here, but no share. Once granted,
+        // A grant is needed here, but no share. Once granted,
         // the path keeps its spelling inside the sandbox, where it sits under
         // $HOME and is shared by default.
         assert!(!steam.needs_pressure_vessel_share(Path::new("/home/bob/FPArma"), &libraries));

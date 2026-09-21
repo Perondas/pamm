@@ -1,6 +1,4 @@
 use flutter_rust_bridge::for_generated::anyhow;
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-use std::path::Path;
 
 /// The one-time Steam setup a repo needs on Linux.
 ///
@@ -29,6 +27,7 @@ pub enum SteamFlavour {
 
 /// `Ok(None)` on platforms that need no setup, so the Dart side can render
 /// nothing without special-casing an error.
+#[cfg(target_os = "linux")]
 pub fn linux_setup_info(repo_dir: String) -> anyhow::Result<Option<LinuxSetupInfo>> {
     if !cfg!(target_os = "linux") {
         return Ok(None);
@@ -39,10 +38,8 @@ pub fn linux_setup_info(repo_dir: String) -> anyhow::Result<Option<LinuxSetupInf
 
     Ok(Some(LinuxSetupInfo {
         steam_flavour: match setup.flavour {
-            pamm_lib::handle::actions::launch::setup::SteamFlavour::Native => SteamFlavour::Native,
-            pamm_lib::handle::actions::launch::setup::SteamFlavour::Flatpak => {
-                SteamFlavour::Flatpak
-            }
+            pamm_lib::util::dirs::steam_install::SteamFlavour::Native => SteamFlavour::Native,
+            pamm_lib::util::dirs::steam_install::SteamFlavour::Flatpak => SteamFlavour::Flatpak,
         },
         arma_install_dir: setup.arma_install_dir,
         launch_options: setup.launch_options,
@@ -50,4 +47,9 @@ pub fn linux_setup_info(repo_dir: String) -> anyhow::Result<Option<LinuxSetupInf
         flatpak_roots: setup.flatpak_roots,
         flatpak_override_command: setup.flatpak_override_command,
     }))
+}
+
+#[cfg(not(target_os = "linux"))]
+pub fn linux_setup_info(_: String) -> anyhow::Result<Option<LinuxSetupInfo>> {
+    anyhow::bail!("linux_setup_info is only available on Linux");
 }

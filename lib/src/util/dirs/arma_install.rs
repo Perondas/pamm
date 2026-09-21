@@ -8,10 +8,10 @@ pub const ARMA_APP_ID: &str = "107410";
 
 #[derive(Debug, Clone)]
 pub struct ArmaInstall {
-    pub steam: SteamInstall,
     /// The Steam library that holds Arma.
-    pub library_path: PathBuf,
+    pub steam: SteamInstall,
     /// `<library>/steamapps/common/<installdir>`, absolute but not canonicalized.
+    pub library_path: PathBuf,
     pub install_dir: PathBuf,
     /// Every library registered with this Steam install. pressure-vessel shares
     /// these by default, so mods inside one need no extra plumbing.

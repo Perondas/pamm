@@ -1,7 +1,10 @@
 #[cfg(target_os = "linux")]
 pub mod arma_install;
+#[cfg(target_os = "linux")]
 pub mod container_path;
 #[cfg(target_os = "windows")]
 pub mod find_steam_dir;
+#[cfg(target_os = "linux")]
 pub mod linux_setup;
+#[cfg(target_os = "linux")]
 pub mod steam_install;
