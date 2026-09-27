@@ -37,7 +37,7 @@ impl ClientRepoHandle {
         params: &LaunchParams,
     ) -> anyhow::Result<LaunchOutcome> {
         info!("Launching pack with params: '{:#?}'", params);
-        
+
         let addon_paths = self.get_canonical_addon_paths(pack_name, params.disable_optionals)?;
 
         debug!(

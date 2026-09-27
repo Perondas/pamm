@@ -4,11 +4,6 @@ use std::path::Path;
 /// Renders a container-visible Unix path the way Arma's Windows binary needs to
 /// see it: the container root is mounted as `Z:`, so the path becomes `Z:` plus
 /// the same path with `/` swapped for `\`.
-///
-/// The input must already be a *container* path — see
-/// [`crate::util::dirs::steam_install::SteamInstall::container_path`]. Passing a
-/// host path works fine on native Steam and silently points at the wrong
-/// directory under Flatpak.
 pub fn to_arma_path(container: &Path) -> anyhow::Result<String> {
     let path = container
         .to_str()

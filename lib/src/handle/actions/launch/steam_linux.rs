@@ -11,10 +11,6 @@ use std::path::Path;
 impl ClientRepoHandle {
     /// Launches through Steam by writing a preset file and opening a
     /// `steam://run` URL that points at it.
-    ///
-    /// Nothing about Steam's own configuration is touched. Every launch flag
-    /// travels in the preset file, so the only thing the user may still have to
-    /// set up is filesystem access — see [`crate::util::dirs::linux_setup`].
     pub(super) fn launch_via_steam(
         &self,
         pack_name: &str,
@@ -24,7 +20,7 @@ impl ClientRepoHandle {
 
         let arma = find_arma_install().context("Failed to find the Arma 3 installation")?;
 
-        // Host paths are not what the game sees. Under Flatpak the persisted
+        // Host paths might not be what the game sees. Under Flatpak the persisted
         // home is mounted elsewhere, and a host path there would resolve
         // successfully to the wrong directory rather than failing loudly.
         let arma_mod_paths = addon_paths

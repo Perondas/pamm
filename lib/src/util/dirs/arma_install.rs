@@ -10,8 +10,7 @@ pub const ARMA_APP_ID: &str = "107410";
 pub struct ArmaInstall {
     /// The Steam library that holds Arma.
     pub steam: SteamInstall,
-    /// `<library>/steamapps/common/<installdir>`, absolute but not canonicalized.
-    pub library_path: PathBuf,
+    /// The Arma 3 installation itself, under `steamapps/common`.
     pub install_dir: PathBuf,
     /// Every library registered with this Steam install. pressure-vessel shares
     /// these by default, so mods inside one need no extra plumbing.
@@ -54,7 +53,6 @@ pub fn find_arma_install() -> anyhow::Result<ArmaInstall> {
 
         return Ok(ArmaInstall {
             steam,
-            library_path,
             install_dir,
             libraries: libraries.into_iter().map(|(path, _)| path).collect(),
         });
