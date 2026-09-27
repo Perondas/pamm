@@ -1,11 +1,5 @@
-use crate::io::files::file_names::keyed_file::KeyedFile;
-use crate::io::fs::fs_writable::SelfKeyedFSWritable;
-use crate::io::serialization::writable::Writable;
-use crate::models::pack::pack_config::PackConfig;
-use crate::models::self_keyed::SelfKeyed;
 use anyhow::Context;
 use std::fs::write;
-use std::io::Write;
 use std::path::{Path, PathBuf};
 
 const PRESET_PREFIX: &str = "pamm_";
@@ -29,7 +23,7 @@ impl Preset {
         let file_name = preset_file_name(&self.pack_name);
         let body = render_preset(&self.params, &self.arma_mod_paths);
 
-        let path = path.join(file_name);
+        let path = path.as_ref().join(file_name);
 
         log::debug!("Writing preset to {path:?}");
         write(&path, body).with_context(|| format!("Failed to write preset to {path:#?}"))?;
@@ -62,8 +56,6 @@ fn render_preset(params: &[String], arma_mod_paths: &[String]) -> String {
 
     format!("{}\n", lines.join("\n"))
 }
-
-/// Writes a preset into the Arma install directory and returns its full path.
 
 #[cfg(test)]
 mod tests {
@@ -115,19 +107,30 @@ mod tests {
     fn writes_the_preset_into_the_game_directory() {
         let dir = TestTempDir::new("pamm_write_preset");
 
-        let path = write_preset(&dir.0, "pamm_main.txt", "-skipIntro\n").unwrap();
+        let preset = Preset::new("main".to_string(), vec!["-skipIntro".to_string()], vec![]);
+        let path = preset.write_to(&dir.0).unwrap();
 
         assert_eq!(path, dir.0.join("pamm_main.txt"));
-        assert_eq!(std::fs::read_to_string(&path).unwrap(), "-skipIntro\n");
+        assert_eq!(
+            std::fs::read_to_string(&path).unwrap(),
+            "-noLauncher\n-skipIntro\n"
+        );
     }
 
     #[test]
     fn overwrites_a_stale_preset() {
         let dir = TestTempDir::new("pamm_overwrite_preset");
 
-        write_preset(&dir.0, "pamm_main.txt", "-old\n").unwrap();
-        let path = write_preset(&dir.0, "pamm_main.txt", "-new\n").unwrap();
+        Preset::new("main".to_string(), vec!["-old".to_string()], vec![])
+            .write_to(&dir.0)
+            .unwrap();
+        let path = Preset::new("main".to_string(), vec!["-new".to_string()], vec![])
+            .write_to(&dir.0)
+            .unwrap();
 
-        assert_eq!(std::fs::read_to_string(&path).unwrap(), "-new\n");
+        assert_eq!(
+            std::fs::read_to_string(&path).unwrap(),
+            "-noLauncher\n-new\n"
+        );
     }
 }
