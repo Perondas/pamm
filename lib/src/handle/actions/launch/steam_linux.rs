@@ -1,5 +1,7 @@
 use crate::handle::actions::launch::launch_pack::LaunchOutcome;
-use crate::handle::actions::launch::preset::{preset_file_name, render_preset, write_preset};
+use crate::handle::actions::launch::preset::{
+    Preset, preset_file_name, render_preset, write_preset,
+};
 use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::reading::get_pack::GetPack;
 use crate::util::dirs::arma_install::{ARMA_APP_ID, find_arma_install};
@@ -32,9 +34,7 @@ impl ClientRepoHandle {
             .map(|path| to_arma_path(&arma.steam.container_path(Path::new(path))))
             .collect::<anyhow::Result<Vec<_>>>()?;
 
-        // Earlier versions symlinked mods into <arma>/pamm/. Nothing reads that
-        // any more, but deleting a tree of symlinks inside the game directory
-        // is not something to do unasked.
+        // Earlier versions symlinked mods into <arma>/pamm/. Warn the user
         let legacy_dir = arma.install_dir.join("pamm");
         if legacy_dir.exists() {
             warn!(
@@ -46,15 +46,13 @@ impl ClientRepoHandle {
         let (pack_config, settings) = self.get_pack_with_settings(pack_name)?;
         let params = [pack_config.client_params, settings.launch_params].concat();
 
-        let file_name = preset_file_name(pack_name);
-        let preset_path = write_preset(
-            &arma.install_dir,
-            &file_name,
-            &render_preset(&params, &arma_mod_paths),
-        )?;
+        let preset = Preset::new(pack_name.to_string(), params, arma_mod_paths);
+
+        let preset_path = preset.write_to(&arma.install_dir)?;
+
         info!("Wrote preset to {preset_path:?}");
 
-        let launch_url = preset_launch_url(&file_name);
+        let launch_url = preset_launch_url(&preset_path);
 
         debug!("Steam launch URL: {launch_url}");
         open::that(launch_url).context("Failed to launch pack via Steam")?;
@@ -66,13 +64,12 @@ impl ClientRepoHandle {
 }
 
 /// The URL that launches Arma with a preset.
-///
-/// `run` rather than `rungameid`: the latter accepts no arguments.
-///
-/// `-par` is the only argument — every actual launch flag lives in the preset
-/// file it names. The filename is sanitised to `[A-Za-z0-9._-]`, so nothing
-/// here needs percent-encoding.
-fn preset_launch_url(file_name: &str) -> String {
+fn preset_launch_url(path_to_par: impl AsRef<Path>) -> String {
+    let file_name = path_to_par
+        .as_ref()
+        .file_name()
+        .expect("Somehow we have a file with no name?")
+        .to_string_lossy();
     format!("steam://run/{ARMA_APP_ID}//-par={file_name}/")
 }
 

@@ -1,22 +1,45 @@
+use crate::io::files::file_names::keyed_file::KeyedFile;
+use crate::io::fs::fs_writable::SelfKeyedFSWritable;
+use crate::io::serialization::writable::Writable;
+use crate::models::pack::pack_config::PackConfig;
+use crate::models::self_keyed::SelfKeyed;
 use anyhow::Context;
 use std::fs::write;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 
-/// Prefix on generated preset files, so they are recognisable among whatever
-/// else lives in the game directory.
 const PRESET_PREFIX: &str = "pamm_";
 
-/// Mandatory on every launch, vanilla included: Arma's .NET launcher fails
-/// under Proton with a `SteamLayerWrap` assembly error and stops the game
-/// starting.
-const NO_LAUNCHER: &str = "-noLauncher";
+pub(crate) struct Preset {
+    pack_name: String,
+    params: Vec<String>,
+    arma_mod_paths: Vec<String>,
+}
 
-/// Turns a pack name into a preset filename.
-///
-/// Restricted to `[A-Za-z0-9._-]` so that the `-par=` value stays a bare
-/// relative filename needing no percent-encoding in the `steam://` URL. A pack
-/// called `My Mods (v2)` would otherwise break the URL.
-pub(crate) fn preset_file_name(pack_name: &str) -> String {
+impl Preset {
+    pub fn new(pack_name: String, params: Vec<String>, arma_mod_paths: Vec<String>) -> Self {
+        Self {
+            pack_name,
+            params,
+            arma_mod_paths,
+        }
+    }
+
+    pub fn write_to(&self, path: impl AsRef<Path>) -> anyhow::Result<PathBuf> {
+        let file_name = preset_file_name(&self.pack_name);
+        let body = render_preset(&self.params, &self.arma_mod_paths);
+
+        let path = path.join(file_name);
+
+        log::debug!("Writing preset to {path:?}");
+        write(&path, body).with_context(|| format!("Failed to write preset to {path:#?}"))?;
+
+        Ok(path)
+    }
+}
+
+/// Cleans a pack name so that it does not cause trouble when passed via URL to steam
+fn preset_file_name(pack_name: &str) -> String {
     let sanitised: String = pack_name
         .chars()
         .map(|c| {
@@ -31,16 +54,8 @@ pub(crate) fn preset_file_name(pack_name: &str) -> String {
     format!("{PRESET_PREFIX}{sanitised}.txt")
 }
 
-/// Renders a preset: one startup parameter per line.
-///
-/// Every launch flag lives here, [`NO_LAUNCHER`] included, so that a launch
-/// depends on nothing the user had to type themselves.
-///
-/// One `-mod=` per line rather than a single combined directive, which avoids
-/// Arma's Linux semicolon-escaping entirely. Values are always quoted because
-/// mod paths may contain spaces.
-pub(crate) fn render_preset(params: &[String], arma_mod_paths: &[String]) -> String {
-    let mut lines: Vec<String> = vec![NO_LAUNCHER.to_string()];
+fn render_preset(params: &[String], arma_mod_paths: &[String]) -> String {
+    let mut lines: Vec<String> = vec!["-noLauncher".to_string()];
 
     lines.extend(params.iter().cloned());
     lines.extend(arma_mod_paths.iter().map(|path| format!("-mod=\"{path}\"")));
@@ -49,21 +64,6 @@ pub(crate) fn render_preset(params: &[String], arma_mod_paths: &[String]) -> Str
 }
 
 /// Writes a preset into the Arma install directory and returns its full path.
-///
-/// Presets live directly in the game directory so the `-par` value stays a bare
-/// relative filename, which Arma resolves against that directory.
-pub(crate) fn write_preset(
-    arma_install_dir: &Path,
-    file_name: &str,
-    body: &str,
-) -> anyhow::Result<PathBuf> {
-    let path = arma_install_dir.join(file_name);
-
-    log::debug!("Writing preset to {path:?}");
-    write(&path, body).with_context(|| format!("Failed to write preset to {path:#?}"))?;
-
-    Ok(path)
-}
 
 #[cfg(test)]
 mod tests {
