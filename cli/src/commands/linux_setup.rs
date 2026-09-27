@@ -1,19 +1,13 @@
 use clap::Args;
+use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
+use std::env::current_dir;
 
 /// Print the one-time Steam setup this repo needs on Linux
 #[derive(Debug, Args)]
 pub struct SetupArgs {}
 
 /// Prints the one-time Steam setup for this repo.
-///
-/// pamm deliberately does not apply any of this: it never writes Steam's
-/// configuration and never runs `flatpak`. The user pastes and runs these
-/// themselves, with Steam running — there is no close-Steam step.
-#[cfg(target_os = "linux")]
 pub fn setup_command(_args: SetupArgs) -> anyhow::Result<()> {
-    use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-    use std::env::current_dir;
-
     let handle = ClientRepoHandle::open(&current_dir()?)?;
     let setup = handle.linux_launch_setup()?;
 
@@ -40,17 +34,6 @@ pub fn setup_command(_args: SetupArgs) -> anyhow::Result<()> {
     }
 
     println!();
-
-    Ok(())
-}
-
-/// The setup this reports is entirely about getting mod directories across the
-/// Proton container and Flatpak sandbox boundaries, neither of which exists off
-/// Linux. Reporting that plainly beats erroring on a command the user can
-/// reasonably try.
-#[cfg(not(target_os = "linux"))]
-pub fn setup_command(_args: SetupArgs) -> anyhow::Result<()> {
-    println!("No setup is needed on this platform — Arma is launched directly.");
 
     Ok(())
 }

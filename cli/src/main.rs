@@ -12,7 +12,6 @@ use crate::commands::deploy::deploy_command;
 use crate::commands::init_remote::init_remote_command;
 use crate::commands::init_repo::init_repo_command;
 use crate::commands::launch::launch_command;
-use crate::commands::setup::setup_command;
 use crate::commands::sync_pack::sync_pack_command;
 use crate::commands::sync_this_only_pack::sync_this_only_pack_command;
 use crate::subcommands::externals::ExternalsSubcommand;
@@ -47,7 +46,8 @@ fn main() -> Result<()> {
         AppSubcommand::Sync(args) => sync_pack_command(args, log_wrapper),
         AppSubcommand::SyncThisOnly(args) => sync_this_only_pack_command(args, log_wrapper),
         AppSubcommand::Launch(args) => launch_command(args),
-        AppSubcommand::Setup(args) => setup_command(args),
+        #[cfg(target_os = "linux")]
+        AppSubcommand::Setup(args) => commands::linux_setup::setup_command(args),
         AppSubcommand::Externals(args) => match args.command {
             ExternalsSubcommand::Toggle(args) => toggle_externals_command(args),
             ExternalsSubcommand::Add(args) => add_external_command(args),

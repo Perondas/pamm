@@ -3,7 +3,6 @@ use crate::commands::build::BuildArgs;
 use crate::commands::deploy::DeployArgs;
 use crate::commands::init_remote::InitRemoteArgs;
 use crate::commands::launch::LaunchArgs;
-use crate::commands::setup::SetupArgs;
 use crate::commands::sync_pack::SyncPackArgs;
 use crate::commands::sync_this_only_pack::SyncThisOnlyPackArgs;
 use crate::subcommands::externals::ExternalsArgs;
@@ -32,7 +31,8 @@ pub enum AppSubcommand {
     Sync(SyncPackArgs),
     SyncThisOnly(SyncThisOnlyPackArgs),
     Launch(LaunchArgs),
-    Setup(SetupArgs),
+    #[cfg(target_os = "linux")]
+    Setup(crate::commands::linux_setup::SetupArgs),
     Optionals(OptionalArgs),
     Externals(ExternalsArgs),
     Local(LocalPacksArgs),
