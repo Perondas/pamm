@@ -21,13 +21,13 @@ pub struct LinuxLaunchSetup {
 /// Takes the Steam install and its libraries rather than an `ArmaInstall`, so
 /// that this stays free of the Linux-only VDF parsing and has a single
 /// definition on every platform.
-pub fn linux_launch_setup(
+pub fn compute_linux_launch_setup(
     steam: &SteamInstall,
     arma_install_dir: &Path,
     libraries: &[PathBuf],
     mod_roots: &[PathBuf],
 ) -> LinuxLaunchSetup {
-    let roots = collapse_roots(mod_roots);
+    let roots = collapse_paths(mod_roots);
 
     let pressure_vessel_roots: Vec<PathBuf> = roots
         .iter()
@@ -94,15 +94,14 @@ fn flatpak_override_command(flatpak_roots: &[PathBuf]) -> Option<String> {
     ))
 }
 
-/// Drops any root already contained in another, so a grant is never issued
-/// twice for the same tree.
-fn collapse_roots(mod_roots: &[PathBuf]) -> Vec<PathBuf> {
-    let mut roots: Vec<PathBuf> = mod_roots.to_vec();
+/// Collapses a list of paths to the outermost ones
+fn collapse_paths(paths: &[PathBuf]) -> Vec<PathBuf> {
+    let mut roots: Vec<PathBuf> = paths.to_vec();
 
     roots.sort();
     roots.dedup();
 
-    // Sorted, so any root nested inside another follows it directly or after
+    // Sorted, so any folder nested inside another follows it directly or after
     // its siblings; a linear scan keeping only the outermost is enough.
     let mut outermost: Vec<PathBuf> = Vec::new();
     for root in roots {
@@ -137,7 +136,7 @@ mod tests {
             }
         };
 
-        linux_launch_setup(
+        compute_linux_launch_setup(
             &SteamInstall::new(PathBuf::from(root), flavour, PathBuf::from("/home/bob")),
             Path::new(install_dir),
             &libraries.iter().map(PathBuf::from).collect::<Vec<_>>(),
@@ -147,7 +146,7 @@ mod tests {
 
     #[test]
     fn collapse_roots_keeps_only_the_outermost() {
-        let roots = collapse_roots(&[
+        let roots = collapse_paths(&[
             PathBuf::from("/mnt/games/FPArma"),
             PathBuf::from("/mnt/games/FPArma/externals"),
             PathBuf::from("/opt/mods"),
@@ -166,7 +165,7 @@ mod tests {
     // /mnt/a and must keep its own grant.
     #[test]
     fn collapse_roots_does_not_confuse_sibling_names() {
-        let roots = collapse_roots(&[PathBuf::from("/mnt/a"), PathBuf::from("/mnt/ab")]);
+        let roots = collapse_paths(&[PathBuf::from("/mnt/a"), PathBuf::from("/mnt/ab")]);
 
         assert_eq!(
             roots,
