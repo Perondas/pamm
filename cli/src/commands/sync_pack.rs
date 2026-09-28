@@ -16,6 +16,9 @@ pub struct SyncPackArgs {
     /// Discards indices, reads all addons from disk
     /// Does nothing for local packs
     pub force_refresh: bool,
+    #[arg(short, long)]
+    /// Assume "yes" as the answer to all prompts
+    pub yes: bool,
     /// Silent mode, minimal output
     #[arg(short, long, action)]
     pub silent: bool,
@@ -36,6 +39,10 @@ pub fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow:
         return Ok(());
     }
 
+    if args.yes {
+        println!("Skipping confirmation prompts.");
+    }
+
     repo_handle.sync_repo_config(&DialogerInteractor)?;
 
     let diffs = repo_handle.get_pack_and_parents_diffs(
@@ -51,21 +58,21 @@ pub fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow:
 
     println!("{}", diffs.to_pretty_string());
 
-    let options = ["Yes", "No", "Show details"];
-    let confirmed = loop {
-        let selection = dialoguer::Select::with_theme(&ColorfulTheme::default())
-            .with_prompt("Do you want to download these changes?")
-            .items(options)
-            .default(1)
-            .interact()?;
+    let confirmed = args.yes
+        || loop {
+            let selection = dialoguer::Select::with_theme(&ColorfulTheme::default())
+                .with_prompt("Do you want to download these changes?")
+                .items(["Yes", "No", "Show details"])
+                .default(1)
+                .interact()?;
 
-        match selection {
-            0 => break true,
-            1 => break false,
-            2 => println!("{}", multi_pack_details_string(&diffs)),
-            _ => unreachable!(),
-        }
-    };
+            match selection {
+                0 => break true,
+                1 => break false,
+                2 => println!("{}", multi_pack_details_string(&diffs)),
+                _ => unreachable!(),
+            }
+        };
 
     if !confirmed {
         println!("Aborting sync.");
