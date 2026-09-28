@@ -64,7 +64,7 @@ fn preset_launch_url(path_to_par: impl AsRef<Path>) -> String {
         .file_name()
         .expect("Somehow we have a file with no name?")
         .to_string_lossy();
-    format!("steam://run/{ARMA_APP_ID}//-par={file_name}/")
+    format!("steam://run/{ARMA_APP_ID}//-noLauncher -par={file_name}/")
 }
 
 #[cfg(test)]
@@ -75,7 +75,7 @@ mod tests {
     fn builds_the_preset_launch_url() {
         assert_eq!(
             preset_launch_url("pamm_core.txt"),
-            "steam://run/107410//-par=pamm_core.txt/"
+            "steam://run/107410//-noLauncher -par=pamm_core.txt/"
         );
     }
 }

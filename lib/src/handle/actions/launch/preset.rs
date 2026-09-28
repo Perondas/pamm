@@ -49,7 +49,7 @@ fn preset_file_name(pack_name: &str) -> String {
 }
 
 fn render_preset(params: &[String], arma_mod_paths: &[String]) -> String {
-    let mut lines: Vec<String> = vec!["-noLauncher".to_string()];
+    let mut lines: Vec<String> = Vec::with_capacity(params.len() + arma_mod_paths.len() + 1);
 
     lines.extend(params.iter().cloned());
     lines.extend(arma_mod_paths.iter().map(|path| format!("-mod=\"{path}\"")));
@@ -88,7 +88,7 @@ mod tests {
 
         assert_eq!(
             rendered,
-            "-noLauncher\n-name=FPArma\n-mod=\"Z:\\mnt\\games\\FPArma\\@CBA_A3\"\n-mod=\"Z:\\mnt\\games\\FPArma\\@ace\"\n"
+            "-name=FPArma\n-mod=\"Z:\\mnt\\games\\FPArma\\@CBA_A3\"\n-mod=\"Z:\\mnt\\games\\FPArma\\@ace\"\n"
         );
     }
 
@@ -96,10 +96,10 @@ mod tests {
     // launch path. It still carries -noLauncher, which every launch needs.
     #[test]
     fn renders_a_vanilla_preset_without_mods() {
-        assert_eq!(render_preset(&[], &[]), "-noLauncher\n");
+        assert_eq!(render_preset(&[], &[]), "\n");
         assert_eq!(
             render_preset(&["-skipIntro".to_string()], &[]),
-            "-noLauncher\n-skipIntro\n"
+            "-skipIntro\n"
         );
     }
 
@@ -111,10 +111,7 @@ mod tests {
         let path = preset.write_to(&dir.0).unwrap();
 
         assert_eq!(path, dir.0.join("pamm_main.txt"));
-        assert_eq!(
-            std::fs::read_to_string(&path).unwrap(),
-            "-noLauncher\n-skipIntro\n"
-        );
+        assert_eq!(std::fs::read_to_string(&path).unwrap(), "-skipIntro\n");
     }
 
     #[test]
@@ -128,9 +125,6 @@ mod tests {
             .write_to(&dir.0)
             .unwrap();
 
-        assert_eq!(
-            std::fs::read_to_string(&path).unwrap(),
-            "-noLauncher\n-new\n"
-        );
+        assert_eq!(std::fs::read_to_string(&path).unwrap(), "-new\n");
     }
 }
