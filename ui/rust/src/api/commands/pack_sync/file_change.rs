@@ -60,10 +60,9 @@ fn collect_modified_files(node: &NodeModification) -> Vec<FileChange> {
                     dl_size,
                     ..
                 } => (*new_length as i64 - *old_length as i64, *dl_size),
-                FileModification::Generic { new_length } => (
-                    *new_length as i64 - *old_length as i64,
-                    *new_length,
-                ),
+                FileModification::Generic { new_length } => {
+                    (*new_length as i64 - *old_length as i64, *new_length)
+                }
             };
 
             changes.push(FileChange {
