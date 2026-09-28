@@ -13,6 +13,9 @@ pub struct SyncThisOnlyPackArgs {
     pub name: String,
     #[arg(short, long, default_value_t = false)]
     pub force_refresh: bool,
+    #[arg(short, long)]
+    /// Assume "yes" as the answer to all prompts
+    pub yes: bool,
     /// Silent mode, minimal output
     #[arg(short, long, action)]
     pub silent: bool,
@@ -42,10 +45,11 @@ pub fn sync_this_only_pack_command(
 
     println!("{}", diff.to_pretty_string());
 
-    let outcome = dialoguer::Confirm::with_theme(&ColorfulTheme::default())
-        .with_prompt("Do you want to download these changes?")
-        .default(false)
-        .interact()?;
+    let outcome = args.yes
+        || dialoguer::Confirm::with_theme(&ColorfulTheme::default())
+            .with_prompt("Do you want to download these changes?")
+            .default(false)
+            .interact()?;
 
     if !outcome {
         println!("Aborting sync.");
