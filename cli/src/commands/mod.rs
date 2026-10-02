@@ -5,5 +5,7 @@ pub mod init_remote;
 pub mod init_repo;
 pub mod input;
 pub mod launch;
+#[cfg(target_os = "linux")]
+pub mod linux_setup;
 pub mod sync_pack;
 pub mod sync_this_only_pack;

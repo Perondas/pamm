@@ -31,6 +31,8 @@ pub enum AppSubcommand {
     Sync(SyncPackArgs),
     SyncThisOnly(SyncThisOnlyPackArgs),
     Launch(LaunchArgs),
+    #[cfg(target_os = "linux")]
+    Setup(crate::commands::linux_setup::SetupArgs),
     Optionals(OptionalArgs),
     Externals(ExternalsArgs),
     Local(LocalPacksArgs),

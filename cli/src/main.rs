@@ -46,6 +46,8 @@ fn main() -> Result<()> {
         AppSubcommand::Sync(args) => sync_pack_command(args, log_wrapper),
         AppSubcommand::SyncThisOnly(args) => sync_this_only_pack_command(args, log_wrapper),
         AppSubcommand::Launch(args) => launch_command(args),
+        #[cfg(target_os = "linux")]
+        AppSubcommand::Setup(args) => commands::linux_setup::setup_command(args),
         AppSubcommand::Externals(args) => match args.command {
             ExternalsSubcommand::Toggle(args) => toggle_externals_command(args),
             ExternalsSubcommand::Add(args) => add_external_command(args),
