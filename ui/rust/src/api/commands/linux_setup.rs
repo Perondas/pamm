@@ -29,10 +29,6 @@ pub enum SteamFlavour {
 /// nothing without special-casing an error.
 #[cfg(target_os = "linux")]
 pub fn linux_setup_info(repo_dir: String) -> anyhow::Result<Option<LinuxSetupInfo>> {
-    if !cfg!(target_os = "linux") {
-        return Ok(None);
-    }
-
     let handle = pamm_lib::handle::client_repo_handle::ClientRepoHandle::open(
         std::path::Path::new(&repo_dir),
     )?;
