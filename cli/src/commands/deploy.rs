@@ -2,6 +2,7 @@ use clap::Args;
 use pamm_lib::handle::server_repo_handle::ServerRepoHandle;
 use std::env::current_dir;
 
+/// Deploys a chosen pack to the server
 #[derive(Debug, Args)]
 pub struct DeployArgs {
     /// Pack name

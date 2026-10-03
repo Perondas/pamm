@@ -4,12 +4,14 @@ use pamm_lib::handle::externals::external_addon::ExternalAddon;
 use pamm_lib::handle::externals::load_externals::LoadExternals;
 use pamm_lib::handle::externals::save_externals::SaveExternals;
 
+/// Add an external addon to a pack
 #[derive(Debug, Args)]
 pub struct AddExternalArgs {
     /// Pack name
     #[arg()]
     pub name: String,
 
+    /// Path to the addon folder on disk
     #[arg()]
     pub path: String,
 }

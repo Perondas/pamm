@@ -4,6 +4,7 @@ use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use pamm_lib::handle::reading::get_repo_info::GetRepoInfo;
 use pamm_lib::models::pack::pack_config::PackConfig;
 
+/// Add a pack that only exists locally in your repository
 #[derive(Debug, Args)]
 pub struct AddLocalPackArgs;
 

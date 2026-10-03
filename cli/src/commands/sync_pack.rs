@@ -7,13 +7,14 @@ use pamm_lib::handle::actions::sync::config_sync_interactor::ConfigSyncInteracto
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use std::env::current_dir;
 
+/// Sync your local repo state with the remote repository
 #[derive(Debug, Args)]
 pub struct SyncPackArgs {
     #[arg()]
     /// Name of the pack to sync
     pub name: String,
     #[arg(short, long, default_value_t = false)]
-    /// Discards indices, reads all addons from disk
+    /// Discards indices, reads all addons from disk.
     /// Does nothing for local packs
     pub force_refresh: bool,
     #[arg(short, long)]

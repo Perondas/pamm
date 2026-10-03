@@ -24,6 +24,7 @@ pub struct Args {
 
 #[derive(Debug, Subcommand)]
 pub enum AppSubcommand {
+    /// Initialize a local repository
     Init,
     InitRemote(InitRemoteArgs),
     AddPack(AddPackArgs),

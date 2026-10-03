@@ -4,6 +4,7 @@ use pamm_lib::handle::reading::get_repo_info::GetRepoInfo;
 use pamm_lib::handle::server_repo_handle::ServerRepoHandle;
 use pamm_lib::models::pack::pack_config::PackConfig;
 
+/// Add a pack to a local repository
 #[derive(Debug, Args)]
 pub struct AddPackArgs;
 

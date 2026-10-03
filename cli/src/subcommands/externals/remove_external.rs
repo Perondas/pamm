@@ -4,6 +4,7 @@ use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use pamm_lib::handle::externals::load_externals::LoadExternals;
 use pamm_lib::handle::externals::save_externals::SaveExternals;
 
+/// Interactively remove an external addon from a pack
 #[derive(Debug, Args)]
 pub struct RemoveExternalArgs {
     /// Pack name

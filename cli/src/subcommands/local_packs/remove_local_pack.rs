@@ -1,8 +1,10 @@
 use clap::Args;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 
+/// Remove a local pack
 #[derive(Debug, Args)]
 pub struct RemoveLocalPackArgs {
+    /// Pack name
     name: String,
 }
 

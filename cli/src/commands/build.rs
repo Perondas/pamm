@@ -5,6 +5,7 @@ use pamm_lib::handle::actions::build::{BuildMode, BuildOptions};
 use pamm_lib::handle::server_repo_handle::ServerRepoHandle;
 use std::env::current_dir;
 
+/// Build a pack or the entire repository
 #[derive(Debug, Args)]
 pub struct BuildArgs {
     /// Pack name; if omitted, builds the entire repo.

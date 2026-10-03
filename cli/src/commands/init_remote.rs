@@ -3,6 +3,7 @@ use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use pamm_lib::handle::reading::get_repo_info::GetRepoInfo;
 use url::Url;
 
+/// Initialize a new client repository from a remote repository
 #[derive(Debug, Args)]
 pub struct InitRemoteArgs {
     /// The URL of the remote repository to initialize from

@@ -3,6 +3,7 @@ use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use pamm_lib::handle::optionals::SaveOptionals;
 use pamm_lib::handle::optionals::load_optionals::LoadOptionals;
 
+/// Interactively enable or disable optional addons of a pack
 #[derive(Debug, Args)]
 pub struct ToggleOptionalsArgs {
     /// Pack name
