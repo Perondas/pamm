@@ -9,6 +9,7 @@ import 'api/commands/externals/save_externals.dart';
 import 'api/commands/get_remote_repo_info.dart';
 import 'api/commands/init_from_remote.dart';
 import 'api/commands/launch.dart';
+import 'api/commands/linux_setup.dart';
 import 'api/commands/load_pack_display.dart';
 import 'api/commands/load_repo.dart';
 import 'api/commands/local_pack/add_local_pack.dart';
@@ -121,6 +122,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  LinuxSetupInfo dco_decode_box_autoadd_linux_setup_info(dynamic raw);
+
+  @protected
   (int, int, int, int) dco_decode_box_autoadd_record_u_32_u_32_u_32_u_32(
     dynamic raw,
   );
@@ -154,6 +158,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   LaunchType dco_decode_launch_type(dynamic raw);
+
+  @protected
+  LinuxSetupInfo dco_decode_linux_setup_info(dynamic raw);
 
   @protected
   List<OpaqueDiff>
@@ -190,6 +197,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   String? dco_decode_opt_String(dynamic raw);
 
   @protected
+  LinuxSetupInfo? dco_decode_opt_box_autoadd_linux_setup_info(dynamic raw);
+
+  @protected
   (int, int, int, int)? dco_decode_opt_box_autoadd_record_u_32_u_32_u_32_u_32(
     dynamic raw,
   );
@@ -216,6 +226,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   RepoCustomization dco_decode_repo_customization(dynamic raw);
+
+  @protected
+  SteamFlavour dco_decode_steam_flavour(dynamic raw);
 
   @protected
   int dco_decode_u_32(dynamic raw);
@@ -306,6 +319,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  LinuxSetupInfo sse_decode_box_autoadd_linux_setup_info(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   (int, int, int, int) sse_decode_box_autoadd_record_u_32_u_32_u_32_u_32(
     SseDeserializer deserializer,
   );
@@ -347,6 +365,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   LaunchType sse_decode_launch_type(SseDeserializer deserializer);
 
   @protected
+  LinuxSetupInfo sse_decode_linux_setup_info(SseDeserializer deserializer);
+
+  @protected
   List<OpaqueDiff>
   sse_decode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
     SseDeserializer deserializer,
@@ -385,6 +406,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   String? sse_decode_opt_String(SseDeserializer deserializer);
 
   @protected
+  LinuxSetupInfo? sse_decode_opt_box_autoadd_linux_setup_info(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   (int, int, int, int)? sse_decode_opt_box_autoadd_record_u_32_u_32_u_32_u_32(
     SseDeserializer deserializer,
   );
@@ -415,6 +441,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   RepoCustomization sse_decode_repo_customization(SseDeserializer deserializer);
+
+  @protected
+  SteamFlavour sse_decode_steam_flavour(SseDeserializer deserializer);
 
   @protected
   int sse_decode_u_32(SseDeserializer deserializer);
@@ -519,6 +548,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_linux_setup_info(
+    LinuxSetupInfo self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_record_u_32_u_32_u_32_u_32(
     (int, int, int, int) self,
     SseSerializer serializer,
@@ -562,6 +597,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_launch_type(LaunchType self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_linux_setup_info(
+    LinuxSetupInfo self,
+    SseSerializer serializer,
+  );
 
   @protected
   void
@@ -619,6 +660,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_opt_String(String? self, SseSerializer serializer);
 
   @protected
+  void sse_encode_opt_box_autoadd_linux_setup_info(
+    LinuxSetupInfo? self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_opt_box_autoadd_record_u_32_u_32_u_32_u_32(
     (int, int, int, int)? self,
     SseSerializer serializer,
@@ -659,6 +706,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     RepoCustomization self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_steam_flavour(SteamFlavour self, SseSerializer serializer);
 
   @protected
   void sse_encode_u_32(int self, SseSerializer serializer);

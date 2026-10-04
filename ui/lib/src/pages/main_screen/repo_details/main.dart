@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:open_folder/open_folder.dart';
 import 'package:pamm_ui/src/pages/main_screen/repo_details/add_local_pack_dialog.dart';
@@ -15,6 +17,7 @@ import 'package:pamm_ui/src/services/repo_state_store.dart';
 import 'package:pamm_ui/src/services/settings_service.dart';
 import 'package:pamm_ui/src/util/media.dart';
 import 'package:pamm_ui/src/widgets/confirm_dialog.dart';
+import 'package:pamm_ui/src/widgets/linux_setup_dialog.dart';
 import 'package:pamm_ui/src/widgets/media_icon.dart';
 
 class RepoDetails extends StatefulWidget {
@@ -55,6 +58,22 @@ class _RepoDetailsState extends State<RepoDetails> {
                 Text('Path:', style: TextStyle(fontWeight: FontWeight.bold)),
                 SelectableText(widget.selectedRepo.repoPath),
                 if (banner != null) ...[const SizedBox(height: 12), banner],
+                if (Platform.isLinux) ...[
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: OutlinedButton.icon(
+                      onPressed: () => showDialog<void>(
+                        context: context,
+                        builder: (_) => LinuxSetupDialog(
+                          repoPath: widget.selectedRepo.repoPath,
+                        ),
+                      ),
+                      icon: const Icon(Icons.settings_suggest),
+                      label: const Text("Steam setup"),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 12),
                 if (settingsService.settings.mmSettings.mmModeEnabled) ...[
                   Text(

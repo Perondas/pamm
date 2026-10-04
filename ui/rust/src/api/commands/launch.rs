@@ -14,7 +14,9 @@ pub fn launch(
 
     let launch_params = LaunchParams::new(launch_type.into(), disable_optionals);
 
-    handle.launch_pack(&pack_name, &launch_params)
+    handle.launch_pack(&pack_name, &launch_params)?;
+
+    Ok(())
 }
 
 pub enum LaunchType {

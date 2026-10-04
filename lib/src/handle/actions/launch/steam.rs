@@ -1,3 +1,4 @@
+use crate::handle::actions::launch::launch_pack::LaunchOutcome;
 use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::reading::get_pack::GetPack;
 use anyhow::Context;
@@ -8,7 +9,7 @@ impl ClientRepoHandle {
         &self,
         pack_name: &str,
         addon_paths: &[String],
-    ) -> anyhow::Result<()> {
+    ) -> anyhow::Result<LaunchOutcome> {
         info!("Launching pack '{}' via Steam", pack_name);
 
         let mut launch_url = String::from("steam://rungameid/107410// -nolauncher ");
@@ -30,6 +31,9 @@ impl ClientRepoHandle {
         launch_url.push_str(&urlencoding::encode(&addons_combined));
 
         debug!("Steam launch URL: {}", launch_url);
-        open::that(launch_url).context("Failed to launch pack via Steam")
+        open::that(launch_url).context("Failed to launch pack via Steam")?;
+
+        // No preset file on this platform: the mod list rides in the URL.
+        Ok(LaunchOutcome::default())
     }
 }
