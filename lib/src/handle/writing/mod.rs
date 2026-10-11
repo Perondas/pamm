@@ -23,22 +23,22 @@ use crate::models::repo::repo_version::RepoVersion;
 use crate::models::server_config::ServerConfig;
 
 impl RepoHandle {
-    pub(in crate::handle) fn write<T: FixedFsWritable + SelfIdentifiedFilePath>(
+    pub(in crate::handle) async fn write<T: FixedFsWritable + SelfIdentifiedFilePath>(
         &self,
         value: &T,
     ) -> anyhow::Result<()> {
         let path = value.file_path().with_base_path(&self.repo_path);
-        value.write_fixed(&path)
+        value.write_fixed(&path).await
     }
 
     #[cfg(feature = "client")]
-    pub(in crate::handle) fn write_keyed<T: FixedFsWritable + KeyedFilePath>(
+    pub(in crate::handle) async fn write_keyed<T: FixedFsWritable + KeyedFilePath>(
         &self,
         value: &T,
         key: &str,
     ) -> anyhow::Result<()> {
         let path = T::file_path(key).with_base_path(&self.repo_path);
-        value.write_fixed(&path)
+        value.write_fixed(&path).await
     }
 }
 

@@ -3,10 +3,10 @@ use pamm_lib::handle::server_repo_handle::ServerRepoHandle;
 use pamm_lib::models::repo::repo_config::RepoConfig;
 
 // TODO: Allow non interactive mode with args
-pub fn init_repo_command() -> anyhow::Result<()> {
+pub async fn init_repo_command() -> anyhow::Result<()> {
     let repo_config = RepoConfig::from_cli_input()?;
 
-    ServerRepoHandle::create(&std::env::current_dir()?, repo_config)?;
+    ServerRepoHandle::create(&std::env::current_dir()?, repo_config).await?;
 
     println!("Created repo");
 

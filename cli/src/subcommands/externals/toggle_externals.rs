@@ -4,10 +4,10 @@ use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use pamm_lib::handle::externals::load_externals::LoadExternals;
 use pamm_lib::handle::externals::save_externals::SaveExternals;
 
-pub fn toggle_externals_command(args: ToggleExternalsArgs) -> anyhow::Result<()> {
-    let handle = ClientRepoHandle::open(&std::env::current_dir()?)?;
+pub async fn toggle_externals_command(args: ToggleExternalsArgs) -> anyhow::Result<()> {
+    let handle = ClientRepoHandle::open(&std::env::current_dir()?).await?;
 
-    let mut externals = handle.load_externals(&args.name)?;
+    let mut externals = handle.load_externals(&args.name).await?;
 
     let selection = dialoguer::MultiSelect::new()
         .with_prompt("What externals to enable?")
@@ -19,5 +19,5 @@ pub fn toggle_externals_command(args: ToggleExternalsArgs) -> anyhow::Result<()>
         e.enabled = selection.contains(&i);
     });
 
-    handle.save_externals(&args.name, &externals)
+    handle.save_externals(&args.name, &externals).await
 }

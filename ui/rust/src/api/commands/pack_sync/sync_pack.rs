@@ -4,7 +4,7 @@ use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use pamm_lib::io::progress_reporting::progress_reporter::ProgressReporter;
 use std::path::Path;
 
-pub fn sync_pack(
+pub async fn sync_pack(
     pack_name: String,
     repo_path: String,
     dart_progress_reporter: DartProgressReporter,
@@ -18,9 +18,11 @@ pub fn sync_pack(
 
     let repo_dir = Path::new(&repo_path);
 
-    let handle = ClientRepoHandle::open(repo_dir)?;
+    let handle = ClientRepoHandle::open(repo_dir).await?;
 
-    handle.apply_pack_diff(&pack_name, dart_progress_reporter.clone(), diff)?;
+    handle
+        .apply_pack_diff(&pack_name, dart_progress_reporter.clone(), diff)
+        .await?;
 
     dart_progress_reporter.finish();
 

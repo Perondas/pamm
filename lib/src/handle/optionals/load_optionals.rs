@@ -3,31 +3,38 @@ use crate::handle::reading::get_pack::GetPack;
 
 impl<T> LoadOptionals for T
 where
-    T: GetPack,
+    T: GetPack + Sync,
 {
-    fn load_optionals(&self, pack_name: &str) -> anyhow::Result<Vec<OptionalAddon>> {
-        let (pack_config, settings) = self.get_pack_with_settings(pack_name)?;
+    async fn load_optionals(&self, pack_name: &str) -> anyhow::Result<Vec<OptionalAddon>> {
+        let mut optionals = Vec::new();
+        let mut current = Some(pack_name.to_string());
 
-        let parent_optionals = if let Some(parent) = &pack_config.parent {
-            self.load_optionals(parent)?
-        } else {
-            vec![]
-        };
+        // Own optionals first, then each ancestor's in turn.
+        while let Some(pack_name) = current {
+            let (pack_config, settings) = self.get_pack_with_settings(&pack_name).await?;
 
-        Ok(pack_config
-            .addons
-            .iter()
-            .filter(|(_, addon)| addon.is_optional)
-            .map(|(name, _)| {
-                OptionalAddon::new(name.clone(), settings.enabled_optionals.contains(name))
-            })
-            .chain(parent_optionals)
-            .collect())
+            optionals.extend(
+                pack_config
+                    .addons
+                    .iter()
+                    .filter(|(_, addon)| addon.is_optional)
+                    .map(|(name, _)| {
+                        OptionalAddon::new(name.clone(), settings.enabled_optionals.contains(name))
+                    }),
+            );
+
+            current = pack_config.parent;
+        }
+
+        Ok(optionals)
     }
 }
 
 pub trait LoadOptionals {
-    fn load_optionals(&self, pack_name: &str) -> anyhow::Result<Vec<OptionalAddon>>;
+    fn load_optionals(
+        &self,
+        pack_name: &str,
+    ) -> impl Future<Output = anyhow::Result<Vec<OptionalAddon>>> + Send;
 }
 
 #[cfg(test)]
@@ -35,8 +42,8 @@ mod tests {
     use super::*;
     use crate::handle::mock_handle::{MockHandle, MockHandleExt};
 
-    #[test]
-    fn test_load_optionals() {
+    #[tokio::test]
+    async fn test_load_optionals() {
         let mut mock_get_pack = MockHandle::new();
 
         mock_get_pack.mock_pack(
@@ -47,15 +54,15 @@ mod tests {
             &["@opt_addon"],
         );
 
-        let optionals = mock_get_pack.load_optionals("test_pack").unwrap();
+        let optionals = mock_get_pack.load_optionals("test_pack").await.unwrap();
 
         assert_eq!(optionals.len(), 1);
         assert_eq!(optionals[0].name, "@opt_addon");
         assert!(optionals[0].enabled);
     }
 
-    #[test]
-    fn test_load_optionals_with_parent() {
+    #[tokio::test]
+    async fn test_load_optionals_with_parent() {
         let mut mock_get_pack = MockHandle::new();
 
         mock_get_pack.mock_pack(
@@ -68,7 +75,7 @@ mod tests {
 
         mock_get_pack.mock_pack("parent_pack", None, &["@parent_opt"], &[], &[]);
 
-        let mut optionals = mock_get_pack.load_optionals("child_pack").unwrap();
+        let mut optionals = mock_get_pack.load_optionals("child_pack").await.unwrap();
 
         // Sort to ensure consistent order for assertions
         optionals.sort_by(|a, b| a.name.cmp(&b.name));

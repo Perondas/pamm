@@ -1,17 +1,18 @@
 use crate::io::files::name_consts::{ADDONS_DIR_NAME, INDEX_DIR_NAME, WWW_DIR_NAME};
 use crate::io::fs::fs_writable::FixedFsWritable;
+use crate::io::fs::util::path_checks::is_dir;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_user_settings::PackUserSettings;
-use std::fs;
 use std::path::Path;
+use tokio::fs;
 
 impl PackConfig {
     /// Lay out a new pack on the **server**: create the pack folder with its
     /// `addons/` directory and write the pack config into it. No client-only
     /// artifacts (pack settings) and no `indexes/` directory — indexes are
     /// produced into `www/` by the build.
-    pub fn init_source_on_fs(&self, parent_dir: &Path) -> anyhow::Result<()> {
-        if !parent_dir.is_dir() {
+    pub async fn init_source_on_fs(&self, parent_dir: &Path) -> anyhow::Result<()> {
+        if !is_dir(parent_dir).await {
             anyhow::bail!("{} is not a directory", parent_dir.display());
         }
         if self.name == WWW_DIR_NAME {
@@ -23,28 +24,28 @@ impl PackConfig {
 
         let addon_dir = parent_dir.join(&self.name);
 
-        fs::create_dir_all(addon_dir.join(ADDONS_DIR_NAME))?;
+        fs::create_dir_all(addon_dir.join(ADDONS_DIR_NAME)).await?;
 
-        self.write_fixed(addon_dir)
+        self.write_fixed(addon_dir).await
     }
 
     /// Lay out a new pack on the **client**: create the pack folder with its
     /// `addons/` and `indexes/` directories, write the default user settings,
     /// and write the (downloaded) pack config.
-    pub fn init_client_on_fs(&self, parent_dir: &Path) -> anyhow::Result<()> {
-        if !parent_dir.is_dir() {
+    pub async fn init_client_on_fs(&self, parent_dir: &Path) -> anyhow::Result<()> {
+        if !is_dir(parent_dir).await {
             anyhow::bail!("{} is not a directory", parent_dir.display());
         }
 
         let pack_dir = parent_dir.join(&self.name);
 
-        fs::create_dir_all(pack_dir.join(ADDONS_DIR_NAME))?;
-        fs::create_dir_all(pack_dir.join(INDEX_DIR_NAME))?;
+        fs::create_dir_all(pack_dir.join(ADDONS_DIR_NAME)).await?;
+        fs::create_dir_all(pack_dir.join(INDEX_DIR_NAME)).await?;
 
         let settings = PackUserSettings::default();
-        settings.write_fixed(&pack_dir)?;
+        settings.write_fixed(&pack_dir).await?;
 
-        self.write_fixed(pack_dir)
+        self.write_fixed(pack_dir).await
     }
 }
 
@@ -64,12 +65,12 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_init_client_on_fs() {
+    #[tokio::test]
+    async fn test_init_client_on_fs() {
         let temp = TestTempDir::new("pamm_test_init_client");
 
         let config = test_pack_config();
-        config.init_client_on_fs(temp.path()).unwrap();
+        config.init_client_on_fs(temp.path()).await.unwrap();
 
         let pack_dir = temp.path().join(&config.name);
         assert!(pack_dir.join("addons").is_dir());
@@ -81,12 +82,12 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_init_source_on_fs_uses_per_pack_layout() {
+    #[tokio::test]
+    async fn test_init_source_on_fs_uses_per_pack_layout() {
         let temp = TestTempDir::new("pamm_test_init_source");
 
         let config = test_pack_config();
-        config.init_source_on_fs(temp.path()).unwrap();
+        config.init_source_on_fs(temp.path()).await.unwrap();
 
         let pack_dir = temp.path().join(&config.name);
         assert!(pack_dir.join("addons").is_dir());
@@ -119,8 +120,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_init_source_on_fs_rejects_www_pack_name() {
+    #[tokio::test]
+    async fn test_init_source_on_fs_rejects_www_pack_name() {
         let temp = TestTempDir::new("pamm_test_init_source_www");
 
         let mut config = test_pack_config();
@@ -128,21 +129,22 @@ mod tests {
 
         let err = config
             .init_source_on_fs(temp.path())
+            .await
             .unwrap_err()
             .to_string();
         assert!(err.contains("www"), "unexpected error: {}", err);
     }
 
-    #[test]
-    fn test_init_source_on_fs_not_dir() {
+    #[tokio::test]
+    async fn test_init_source_on_fs_not_dir() {
         let temp = TestTempDir::new("pamm_test_init_source_not_dir");
 
         let config = test_pack_config();
 
         let file = temp.path().join("not_a_dir.txt");
-        fs::write(&file, b"test").unwrap();
+        std::fs::write(&file, b"test").unwrap();
 
-        let result = config.init_source_on_fs(&file);
+        let result = config.init_source_on_fs(&file).await;
         assert!(result.is_err());
         assert_eq!(
             result.unwrap_err().to_string(),

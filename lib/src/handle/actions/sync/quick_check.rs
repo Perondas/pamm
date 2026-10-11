@@ -11,14 +11,14 @@ use log::{debug, trace};
 use std::collections::HashSet;
 
 impl ClientRepoHandle {
-    pub fn quick_check_pack_up_to_date(&self, pack_name: &str) -> anyhow::Result<bool> {
+    pub async fn quick_check_pack_up_to_date(&self, pack_name: &str) -> anyhow::Result<bool> {
         self.ensure_not_local(pack_name)?;
 
         let index_rel = RelPath::new().push(pack_name).push(INDEX_DIR_NAME);
 
         let remote_url = self.remote().clone();
 
-        verify_remote_version(&remote_url)?;
+        verify_remote_version(&remote_url).await?;
 
         let index_url = index_rel.with_base_url(&remote_url);
 
@@ -28,11 +28,12 @@ impl ClientRepoHandle {
         );
 
         let remote_repo_config = ChecksumIndex::download_known(&index_url)
+            .await
             .context(anyhow!("Failed to download checksum index"))?;
 
         let index_dir = index_rel.with_base_path(&self.repo_path);
 
-        let local_checksum_index = match ChecksumIndex::read_from_known(&index_dir) {
+        let local_checksum_index = match ChecksumIndex::read_from_known(&index_dir).await {
             Ok(index) => index,
             Err(_) => {
                 debug!(
@@ -43,7 +44,7 @@ impl ClientRepoHandle {
             }
         };
 
-        let (mut local_config, settings) = self.get_pack_with_settings(pack_name)?;
+        let (mut local_config, settings) = self.get_pack_with_settings(pack_name).await?;
 
         local_config.remove_disabled_optionals(&settings);
 

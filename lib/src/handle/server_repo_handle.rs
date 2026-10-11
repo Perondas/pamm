@@ -18,12 +18,12 @@ pub struct ServerRepoHandle {
 }
 
 impl ServerRepoHandle {
-    pub fn open(repo_path: &Path) -> anyhow::Result<Self> {
-        let base = RepoHandle::open(repo_path)?;
-        let server_config = ServerConfig::read_from_known(repo_path)?;
+    pub async fn open(repo_path: &Path) -> anyhow::Result<Self> {
+        let base = RepoHandle::open(repo_path).await?;
+        let server_config = ServerConfig::read_from_known(repo_path).await?;
         // Only migrate once we know this really is a server repo (the server
         // config read above fails otherwise).
-        run_migrations::run_migrations(repo_path, &base.repo_config)?;
+        run_migrations::run_migrations(repo_path, &base.repo_config).await?;
 
         Ok(Self {
             base,
@@ -31,10 +31,10 @@ impl ServerRepoHandle {
         })
     }
 
-    pub fn create(parent_path: &Path, repo_config: RepoConfig) -> anyhow::Result<Self> {
-        let base = RepoHandle::create_repo_folder(parent_path, repo_config)?;
+    pub async fn create(parent_path: &Path, repo_config: RepoConfig) -> anyhow::Result<Self> {
+        let base = RepoHandle::create_repo_folder(parent_path, repo_config).await?;
         let server_config = ServerConfig::default();
-        server_config.write_fixed(&base.repo_path)?;
+        server_config.write_fixed(&base.repo_path).await?;
 
         Ok(Self {
             base,

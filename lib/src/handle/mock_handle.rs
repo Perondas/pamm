@@ -9,14 +9,14 @@ use std::path::Path;
 mockall::mock! {
     pub Handle {}
     impl GetPack for Handle {
-        fn get_pack(&self, pack_name: &str) -> anyhow::Result<PackConfig>;
-        fn get_pack_with_settings(
+        async fn get_pack(&self, pack_name: &str) -> anyhow::Result<PackConfig>;
+        async fn get_pack_with_settings(
             &self,
             pack_name: &str,
         ) -> anyhow::Result<(PackConfig, PackUserSettings)>;
     }
     impl SavePackSettings for Handle {
-        fn save_pack_settings(&self, pack_name: &str, settings: &PackUserSettings) -> anyhow::Result<()>;
+        async fn save_pack_settings(&self, pack_name: &str, settings: &PackUserSettings) -> anyhow::Result<()>;
     }
     impl GetRepoInfo for Handle {
         fn get_repo_path(&self) -> &Path;

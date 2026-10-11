@@ -8,11 +8,13 @@ use crate::io::fs::fs_readable::KnownFSReadable;
 use anyhow::{Context, anyhow};
 
 impl RepoHandle {
-    pub(in crate::handle) fn read_keyed<T: KnownFSReadable + KeyedFilePath>(
+    pub(in crate::handle) async fn read_keyed<T: KnownFSReadable + KeyedFilePath>(
         &self,
         key: &str,
     ) -> anyhow::Result<T> {
         let path = T::file_path(key).with_base_path(&self.repo_path);
-        T::read_from_known(path).context(anyhow!("reading {:?}", T::file_name()))
+        T::read_from_known(path)
+            .await
+            .context(anyhow!("reading {:?}", T::file_name()))
     }
 }

@@ -1,32 +1,33 @@
 use crate::io::progress_reporting::download_reporter::DownloadReporter;
+use bytes::Bytes;
+use futures::{Stream, StreamExt};
 use log::debug;
-use std::io::{Read, Write};
+use std::pin::pin;
+use tokio::io::{AsyncWrite, AsyncWriteExt};
 
-pub fn copy<R, W>(
-    reader: &mut R,
+/// Drain `stream` into `writer`, reporting each chunk as it lands.
+pub async fn copy<S, W>(
+    stream: S,
     writer: &mut W,
     reporter: &impl DownloadReporter,
-) -> std::io::Result<u64>
+) -> anyhow::Result<u64>
 where
-    R: Read + ?Sized,
-    W: Write + ?Sized,
+    S: Stream<Item = reqwest::Result<Bytes>>,
+    W: AsyncWrite + Unpin + ?Sized,
 {
-    // Read 1024 chunks and report them
+    let mut stream = pin!(stream);
     let mut total = 0;
-    let mut buffer = [0_u8; 1024];
 
-    loop {
-        let bytes_read = reader.read(&mut buffer)?;
-        total += bytes_read as u64;
-        if bytes_read == 0 {
-            debug!(
-                "Finished copying with progress report, total bytes copied: {}",
-                total
-            );
-            return Ok(total);
-        }
-
-        writer.write_all(&buffer[..bytes_read])?;
-        reporter.report_progress(bytes_read as u64);
+    while let Some(chunk) = stream.next().await {
+        let chunk = chunk?;
+        writer.write_all(&chunk).await?;
+        total += chunk.len() as u64;
+        reporter.report_progress(chunk.len() as u64);
     }
+
+    debug!(
+        "Finished copying with progress report, total bytes copied: {}",
+        total
+    );
+    Ok(total)
 }

@@ -3,6 +3,7 @@ use crate::io::files::file_paths::rel_path::RelPath;
 use crate::io::files::name_consts::CACHE_DB_DIR_NAME;
 use crate::io::fs::cache::file_cache_entry::FileCacheEntry;
 use crate::io::fs::cache::kv_cache::KVCache;
+use crate::io::fs::util::path_checks::is_dir;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 use crate::models::index::index_node::FileKind;
 use crate::models::index::index_node::IndexNode;
@@ -16,6 +17,9 @@ use std::fmt::Debug;
 use std::fs::{DirEntry, ReadDir};
 use std::path::{Path, PathBuf};
 
+/// Indexing hashes every file of a pack, so all of the real work runs on the
+/// blocking thread pool (and fans out further across rayon from there).
+#[derive(Clone)]
 pub struct IndexGenerator<P: ProgressReporter> {
     addon_dir: PathBuf,
     cache: KVCache,
@@ -24,15 +28,19 @@ pub struct IndexGenerator<P: ProgressReporter> {
 }
 
 impl<P: ProgressReporter> IndexGenerator<P> {
-    pub fn from_handle(handle: &RepoHandle, pack_name: &str, progress_reporter: P) -> Result<Self> {
+    pub async fn from_handle(
+        handle: &RepoHandle,
+        pack_name: &str,
+        progress_reporter: P,
+    ) -> Result<Self> {
         let addon_dir = handle.pack_addons_path(pack_name);
 
-        if !addon_dir.is_dir() {
+        if !is_dir(&addon_dir).await {
             anyhow::bail!("Path is not a directory: {:?}", addon_dir);
         }
 
         let cache_dir = addon_dir.join(CACHE_DB_DIR_NAME);
-        let cache = KVCache::new(cache_dir)?;
+        let cache = tokio::task::spawn_blocking(move || KVCache::new(cache_dir)).await??;
 
         Ok(Self {
             addon_dir,
@@ -42,11 +50,17 @@ impl<P: ProgressReporter> IndexGenerator<P> {
         })
     }
 
-    pub fn clear_cache(&self) -> Result<()> {
-        self.cache.remove_all()
+    pub async fn clear_cache(&self) -> Result<()> {
+        let cache = self.cache.clone();
+        tokio::task::spawn_blocking(move || cache.remove_all()).await?
     }
 
-    pub fn index_addons(&self) -> Result<PackIndex> {
+    pub async fn index_addons(&self) -> Result<PackIndex> {
+        let this = self.clone();
+        tokio::task::spawn_blocking(move || this.index_addons_blocking()).await?
+    }
+
+    fn index_addons_blocking(&self) -> Result<PackIndex> {
         let addon_folders = std::fs::read_dir(&self.addon_dir)?;
 
         let base_path = RelPath::new();

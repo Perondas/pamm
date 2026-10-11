@@ -4,14 +4,14 @@ use pamm_lib::handle::reading::get_repo_info::GetRepoInfo;
 use pamm_lib::handle::server_repo_handle::ServerRepoHandle;
 use pamm_lib::models::pack::pack_config::PackConfig;
 
-pub fn add_pack_command(_args: AddPackArgs) -> anyhow::Result<()> {
-    let mut repo_handle = ServerRepoHandle::open(&std::env::current_dir()?)?;
+pub async fn add_pack_command(_args: AddPackArgs) -> anyhow::Result<()> {
+    let mut repo_handle = ServerRepoHandle::open(&std::env::current_dir()?).await?;
 
     let repo_config = repo_handle.get_config();
 
     let pack_config = PackConfig::from_cli_input(repo_config)?;
 
-    repo_handle.add_pack(&pack_config)?;
+    repo_handle.add_pack(&pack_config).await?;
 
     println!("Pack added");
 

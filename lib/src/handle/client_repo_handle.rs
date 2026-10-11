@@ -5,6 +5,7 @@ use crate::handle::writing::save_pack_settings::SavePackSettings;
 use crate::io::files::file_names::fixed_file::FixedFile;
 use crate::io::fs::fs_readable::KnownFSReadable;
 use crate::io::fs::migration::run_migrations;
+use crate::io::fs::util::path_checks::is_dir;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use crate::models::repo::repo_config::RepoConfig;
@@ -22,26 +23,26 @@ pub struct ClientRepoHandle {
 }
 
 impl ClientRepoHandle {
-    pub fn open(repo_path: &Path) -> anyhow::Result<Self> {
-        let base = RepoHandle::open(repo_path)?;
+    pub async fn open(repo_path: &Path) -> anyhow::Result<Self> {
+        let base = RepoHandle::open(repo_path).await?;
         ensure!(
-            repo_path.join(RepoUserSettings::file_name()).exists(),
+            tokio::fs::try_exists(repo_path.join(RepoUserSettings::file_name())).await?,
             "Client repo at {:?} is missing user.repo.settings.json. \
              Did you mean to initialize from a remote via `init-remote`?",
             repo_path
         );
-        let user_settings = RepoUserSettings::read_from_known(repo_path)?;
-        run_migrations::run_migrations(repo_path, &base.repo_config)?;
+        let user_settings = RepoUserSettings::read_from_known(repo_path).await?;
+        run_migrations::run_migrations(repo_path, &base.repo_config).await?;
         Ok(Self {
             base,
             user_settings,
         })
     }
 
-    pub fn init_from_remote(dest_path: &Path, remote: &Url) -> anyhow::Result<Self> {
-        ensure!(dest_path.is_dir(), "Destination path is not a folder");
+    pub async fn init_from_remote(dest_path: &Path, remote: &Url) -> anyhow::Result<Self> {
+        ensure!(is_dir(dest_path).await, "Destination path is not a folder");
 
-        let (repo_config, user_settings) = RepoConfig::init_from_remote(dest_path, remote)?;
+        let (repo_config, user_settings) = RepoConfig::init_from_remote(dest_path, remote).await?;
 
         let repo_path = dest_path.join(&repo_config.name);
         let base = RepoHandle::from_parts(repo_path, repo_config);
@@ -60,9 +61,10 @@ impl ClientRepoHandle {
         self.user_settings.get_remote()
     }
 
-    pub fn update_settings(&mut self, settings: RepoUserSettings) -> anyhow::Result<()> {
+    pub async fn update_settings(&mut self, settings: RepoUserSettings) -> anyhow::Result<()> {
         self.user_settings = settings;
         self.write(&self.user_settings)
+            .await
             .context("Failed to write user settings")?;
         Ok(())
     }
@@ -114,38 +116,38 @@ impl GetRepoInfo for ClientRepoHandle {
 }
 
 impl GetPack for ClientRepoHandle {
-    fn get_pack(&self, pack_name: &str) -> anyhow::Result<PackConfig> {
+    async fn get_pack(&self, pack_name: &str) -> anyhow::Result<PackConfig> {
         // Local packs are absent from the repo config, so they have to bypass
         // its registry check; on disk they are laid out identically.
         if self.is_local_pack(pack_name) {
-            return self.base.read_pack_config(pack_name);
+            return self.base.read_pack_config(pack_name).await;
         }
 
-        self.base.get_pack(pack_name)
+        self.base.get_pack(pack_name).await
     }
 
-    fn get_pack_with_settings(
+    async fn get_pack_with_settings(
         &self,
         pack_name: &str,
     ) -> anyhow::Result<(PackConfig, PackUserSettings)> {
         if self.is_local_pack(pack_name) {
             return Ok((
-                self.base.read_pack_config(pack_name)?,
-                self.base.read_pack_settings(pack_name)?,
+                self.base.read_pack_config(pack_name).await?,
+                self.base.read_pack_settings(pack_name).await?,
             ));
         }
 
-        self.base.get_pack_with_settings(pack_name)
+        self.base.get_pack_with_settings(pack_name).await
     }
 }
 
 impl SavePackSettings for ClientRepoHandle {
-    fn save_pack_settings(
+    async fn save_pack_settings(
         &self,
         pack_name: &str,
         settings: &PackUserSettings,
     ) -> anyhow::Result<()> {
-        self.write_keyed(settings, pack_name)
+        self.write_keyed(settings, pack_name).await
     }
 }
 
@@ -159,8 +161,8 @@ mod tests {
 
     // Opening a legacy flat (v1) client repo migrates it to the per-pack
     // layout, including hoisting indexes/ out of the addon dir.
-    #[test]
-    fn open_migrates_v1_client_repo() {
+    #[tokio::test]
+    async fn open_migrates_v1_client_repo() {
         let tmp = TestTempDir::new("pamm_client_open_migrates_v1");
         let repo_path = tmp.path().join("repo");
         fs::create_dir_all(&repo_path).unwrap();
@@ -168,9 +170,13 @@ mod tests {
         let mut packs = HashSet::new();
         packs.insert("core".to_string());
         let repo_config = RepoConfig::new("repo".to_string(), "desc".to_string(), packs);
-        crate::io::fs::fs_writable::FixedFsWritable::write_fixed(&repo_config, &repo_path).unwrap();
+        crate::io::fs::fs_writable::FixedFsWritable::write_fixed(&repo_config, &repo_path)
+            .await
+            .unwrap();
         let settings = RepoUserSettings::new(Url::parse("http://localhost/").unwrap());
-        crate::io::fs::fs_writable::FixedFsWritable::write_fixed(&settings, &repo_path).unwrap();
+        crate::io::fs::fs_writable::FixedFsWritable::write_fixed(&settings, &repo_path)
+            .await
+            .unwrap();
 
         // Flat v1 client layout.
         fs::write(repo_path.join("core.pack.config.json"), b"{}").unwrap();
@@ -183,7 +189,7 @@ mod tests {
         )
         .unwrap();
 
-        ClientRepoHandle::open(&repo_path).unwrap();
+        ClientRepoHandle::open(&repo_path).await.unwrap();
 
         assert!(repo_path.join("core/pack.config.json").is_file());
         assert!(repo_path.join("core/pack.settings.json").is_file());
@@ -191,7 +197,7 @@ mod tests {
         assert!(repo_path.join("core/indexes/checksum_index.pamm").is_file());
         assert!(!repo_path.join("core_pack_addons").exists());
         assert_eq!(
-            RepoVersion::read_or_v1(&repo_path).unwrap(),
+            RepoVersion::read_or_v1(&repo_path).await.unwrap(),
             RepoVersion::current()
         );
     }
@@ -223,7 +229,7 @@ mod local_pack_tests {
     /// A client repo holding remote pack `core` with `@core_addon`, plus a local
     /// pack `my_mission` parented on it with `@mission_addon`. Both addon folders
     /// exist on disk, as they would after a sync.
-    fn repo_with_local_pack(key: &str) -> (TestTempDir, PathBuf, ClientRepoHandle) {
+    async fn repo_with_local_pack(key: &str) -> (TestTempDir, PathBuf, ClientRepoHandle) {
         let tmp = TestTempDir::new(key);
         let repo_path = tmp.path().join("repo");
         fs::create_dir_all(&repo_path).unwrap();
@@ -233,21 +239,25 @@ mod local_pack_tests {
             "desc".to_string(),
             HashSet::from(["core".to_string()]),
         );
-        repo_config.write_fixed(&repo_path).unwrap();
+        repo_config.write_fixed(&repo_path).await.unwrap();
         RepoUserSettings::new(Url::parse("http://localhost/").unwrap())
             .write_fixed(&repo_path)
+            .await
             .unwrap();
-        RepoVersion::current().write_fixed(&repo_path).unwrap();
+        RepoVersion::current()
+            .write_fixed(&repo_path)
+            .await
+            .unwrap();
 
         let mut core = PackConfig::new("core".to_string(), "d".to_string(), vec![], None);
         core.addons.insert(
             "@core_addon".to_string(),
             AddonSettings { is_optional: false },
         );
-        core.init_client_on_fs(&repo_path).unwrap();
+        core.init_client_on_fs(&repo_path).await.unwrap();
         fs::create_dir_all(repo_path.join("core/addons/@core_addon")).unwrap();
 
-        let mut handle = ClientRepoHandle::open(&repo_path).unwrap();
+        let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
 
         let mut mission = PackConfig::new(
             "my_mission".to_string(),
@@ -259,7 +269,7 @@ mod local_pack_tests {
             "@mission_addon".to_string(),
             AddonSettings { is_optional: false },
         );
-        handle.add_local_pack(&mission).unwrap();
+        handle.add_local_pack(&mission).await.unwrap();
         fs::create_dir_all(repo_path.join("my_mission/addons/@mission_addon")).unwrap();
 
         (tmp, repo_path, handle)
@@ -267,13 +277,14 @@ mod local_pack_tests {
 
     // The whole point of a local pack: it can be launched, inheriting its remote
     // parent's addons exactly as a normal child pack would.
-    #[test]
-    fn a_local_pack_resolves_its_own_and_its_remote_parents_addons() {
+    #[tokio::test]
+    async fn a_local_pack_resolves_its_own_and_its_remote_parents_addons() {
         let (_tmp, repo_path, handle) =
-            repo_with_local_pack("pamm_local_pack_canonical_addon_paths");
+            repo_with_local_pack("pamm_local_pack_canonical_addon_paths").await;
 
         let paths = handle
             .get_canonical_addon_paths("my_mission", false)
+            .await
             .unwrap();
 
         let clean = |rel: &str| {
@@ -295,27 +306,31 @@ mod local_pack_tests {
     // Local packs exist on this machine only, so every remote-facing operation
     // has to refuse them rather than 404 against a URL that cannot exist. The
     // guards run before any network access, so these need no server.
-    #[test]
-    fn remote_operations_refuse_a_local_pack() {
-        let (_tmp, _repo_path, handle) = repo_with_local_pack("pamm_local_pack_refuses_remote");
+    #[tokio::test]
+    async fn remote_operations_refuse_a_local_pack() {
+        let (_tmp, _repo_path, handle) =
+            repo_with_local_pack("pamm_local_pack_refuses_remote").await;
 
         let errors = [
             format!(
                 "{:#}",
                 handle
                     .quick_check_pack_up_to_date("my_mission")
+                    .await
                     .unwrap_err()
             ),
             format!(
                 "{:#}",
                 handle
                     .get_pack_diff("my_mission", NoopProgress, false)
+                    .await
                     .unwrap_err()
             ),
             format!(
                 "{:#}",
                 handle
                     .get_pack_and_parents_diffs("my_mission", NoopProgress, false)
+                    .await
                     .unwrap_err()
             ),
         ];

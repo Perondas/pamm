@@ -5,8 +5,8 @@ use pamm_lib::handle::actions::build::{BuildMode, BuildOptions};
 use pamm_lib::handle::server_repo_handle::ServerRepoHandle;
 use std::env::current_dir;
 
-pub fn build_command(args: BuildArgs, log_wrapper: LogWrapper) -> anyhow::Result<()> {
-    let handle = ServerRepoHandle::open(&current_dir()?)?;
+pub async fn build_command(args: BuildArgs, log_wrapper: LogWrapper) -> anyhow::Result<()> {
+    let handle = ServerRepoHandle::open(&current_dir()?).await?;
 
     let mode = if args.copy {
         BuildMode::Copy
@@ -27,14 +27,14 @@ pub fn build_command(args: BuildArgs, log_wrapper: LogWrapper) -> anyhow::Result
 
     match args.name {
         Some(pack) => {
-            let report = handle.build_pack(&pack, opts, &progress_reporter)?;
+            let report = handle.build_pack(&pack, opts, &progress_reporter).await?;
             println!(
                 "Built pack '{}' ({} files, mode {:?}).",
                 pack, report.files_materialized, report.mode,
             );
         }
         None => {
-            let report = handle.build(opts, progress_reporter)?;
+            let report = handle.build(opts, progress_reporter).await?;
 
             println!(
                 "Built {} files, {} stale entries removed, mode {:?}.",

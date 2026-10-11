@@ -4,15 +4,23 @@ use crate::handle::writing::save_pack_settings::SavePackSettings;
 use std::collections::HashSet;
 
 pub trait SaveExternals {
-    fn save_externals(&self, pack_name: &str, externals: &[ExternalAddon]) -> anyhow::Result<()>;
+    fn save_externals(
+        &self,
+        pack_name: &str,
+        externals: &[ExternalAddon],
+    ) -> impl Future<Output = anyhow::Result<()>> + Send;
 }
 
 impl<T> SaveExternals for T
 where
-    T: GetPack + SavePackSettings,
+    T: GetPack + SavePackSettings + Sync,
 {
-    fn save_externals(&self, pack_name: &str, externals: &[ExternalAddon]) -> anyhow::Result<()> {
-        let (_, mut settings) = self.get_pack_with_settings(pack_name)?;
+    async fn save_externals(
+        &self,
+        pack_name: &str,
+        externals: &[ExternalAddon],
+    ) -> anyhow::Result<()> {
+        let (_, mut settings) = self.get_pack_with_settings(pack_name).await?;
 
         settings.external_addons = externals
             .iter()
@@ -23,7 +31,7 @@ where
             })
             .collect::<anyhow::Result<HashSet<_>>>()?;
 
-        self.save_pack_settings(pack_name, &settings)
+        self.save_pack_settings(pack_name, &settings).await
     }
 }
 
@@ -32,8 +40,8 @@ mod tests {
     use super::*;
     use crate::handle::mock_handle::{MockHandle, MockHandleExt};
 
-    #[test]
-    fn test_save_externals() {
+    #[tokio::test]
+    async fn test_save_externals() {
         let mut mock = MockHandle::new();
 
         mock.mock_pack("test_pack", None, &[], &[], &[]);
@@ -51,11 +59,11 @@ mod tests {
             enabled: true,
         };
 
-        mock.save_externals("test_pack", &[external]).unwrap();
+        mock.save_externals("test_pack", &[external]).await.unwrap();
     }
 
-    #[test]
-    fn test_save_externals_invalid_path() {
+    #[tokio::test]
+    async fn test_save_externals_invalid_path() {
         let mut mock = MockHandle::new();
 
         mock.mock_pack("test_pack", None, &[], &[], &[]);
@@ -66,15 +74,15 @@ mod tests {
             enabled: true,
         };
 
-        let result = mock.save_externals("test_pack", &[external]);
+        let result = mock.save_externals("test_pack", &[external]).await;
         assert!(
             result.is_err(),
             "Expected save_externals to fail due to invalid add-on path"
         );
     }
 
-    #[test]
-    fn test_save_externals_resolves_name() {
+    #[tokio::test]
+    async fn test_save_externals_resolves_name() {
         use crate::util::test_utils::TestTempDir;
         let temp_dir = TestTempDir::new("pamm_test_save_externals");
         let addon_dir = temp_dir.path().join("my_dummy_mod");
@@ -104,6 +112,6 @@ mod tests {
             enabled: true,
         };
 
-        mock.save_externals("test_pack", &[external]).unwrap();
+        mock.save_externals("test_pack", &[external]).await.unwrap();
     }
 }

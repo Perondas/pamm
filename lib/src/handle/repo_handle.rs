@@ -2,6 +2,7 @@ use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::io::files::file_names::fixed_file::FixedFile;
 use crate::io::files::name_consts::ADDONS_DIR_NAME;
 use crate::io::fs::fs_readable::KnownFSReadable;
+use crate::io::fs::util::path_checks::{is_dir, is_file};
 use crate::models::repo::repo_config::RepoConfig;
 use anyhow::{Context, ensure};
 use std::path::{Path, PathBuf};
@@ -13,10 +14,10 @@ pub struct RepoHandle {
 }
 
 impl RepoHandle {
-    pub fn open(repo_path: &Path) -> anyhow::Result<Self> {
-        check_repo(repo_path).context("Could not find repo files. Are you sure you are running the command in the right folder?")?;
+    pub async fn open(repo_path: &Path) -> anyhow::Result<Self> {
+        check_repo(repo_path).await.context("Could not find repo files. Are you sure you are running the command in the right folder?")?;
 
-        let repo_config = RepoConfig::read_from_known(repo_path)?;
+        let repo_config = RepoConfig::read_from_known(repo_path).await?;
 
         Ok(Self {
             repo_path: repo_path.to_path_buf(),
@@ -25,8 +26,11 @@ impl RepoHandle {
     }
 
     #[cfg(feature = "server")]
-    pub fn create_repo_folder(parent_path: &Path, repo_config: RepoConfig) -> anyhow::Result<Self> {
-        let repo_path = repo_config.init_blank_on_fs(parent_path)?;
+    pub async fn create_repo_folder(
+        parent_path: &Path,
+        repo_config: RepoConfig,
+    ) -> anyhow::Result<Self> {
+        let repo_path = repo_config.init_blank_on_fs(parent_path).await?;
 
         Ok(Self {
             repo_path: repo_path.to_path_buf(),
@@ -58,13 +62,22 @@ impl GetRepoInfo for RepoHandle {
     }
 }
 
-fn check_repo(repo_path: &Path) -> anyhow::Result<()> {
-    ensure!(repo_path.exists(), "Repo path does not exist");
-    ensure!(repo_path.is_dir(), "Repo path is not a directory");
+async fn check_repo(repo_path: &Path) -> anyhow::Result<()> {
+    ensure!(
+        tokio::fs::try_exists(repo_path).await?,
+        "Repo path does not exist"
+    );
+    ensure!(is_dir(repo_path).await, "Repo path is not a directory");
 
     let config_path = repo_path.join(RepoConfig::file_name());
-    ensure!(config_path.exists(), "Repo config file does not exist");
-    ensure!(config_path.is_file(), "Repo config path is not a file");
+    ensure!(
+        tokio::fs::try_exists(&config_path).await?,
+        "Repo config file does not exist"
+    );
+    ensure!(
+        is_file(&config_path).await,
+        "Repo config path is not a file"
+    );
 
     Ok(())
 }

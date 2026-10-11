@@ -55,14 +55,14 @@ fn wire__crate__api__commands__local_pack__add_local_pack__add_local_pack_impl(
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec,_,_>(flutter_rust_bridge::for_generated::TaskInfo{ debug_name: "add_local_pack", port: Some(port_), mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal }, move || {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec,_,_,_>(flutter_rust_bridge::for_generated::TaskInfo{ debug_name: "add_local_pack", port: Some(port_), mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal }, move || {
             let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
             let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_repo_path = <String>::sse_decode(&mut deserializer);
-let api_config = <crate::api::commands::local_pack::add_local_pack::FlutterLocalPackConfig>::sse_decode(&mut deserializer);deserializer.end(); move |context|  {
-                    transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move ||  {
-                         let output_ok = crate::api::commands::local_pack::add_local_pack::add_local_pack(api_repo_path, api_config)?;   std::result::Result::Ok(output_ok)
-                    })())
+let api_config = <crate::api::commands::local_pack::add_local_pack::FlutterLocalPackConfig>::sse_decode(&mut deserializer);deserializer.end(); move |context| async move {
+                    transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move || async move {
+                         let output_ok = crate::api::commands::local_pack::add_local_pack::add_local_pack(api_repo_path, api_config).await?;   std::result::Result::Ok(output_ok)
+                    })().await)
                 } })
 }
 fn wire__crate__api__progress_reporting__create_dart_progress_reporter_impl(
@@ -112,7 +112,7 @@ fn wire__crate__api__commands__pack_sync__get_diff__get_diff_impl(
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "get_diff",
             port: Some(port_),
@@ -135,9 +135,9 @@ fn wire__crate__api__commands__pack_sync__get_diff__get_diff_impl(
             >>::sse_decode(&mut deserializer);
             let api_clear_cache = <bool>::sse_decode(&mut deserializer);
             deserializer.end();
-            move |context| {
+            move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
+                    (move || async move {
                         let mut api_dart_progress_reporter_guard = None;
                         let decode_indices_ =
                             flutter_rust_bridge::for_generated::lockable_compute_decode_order(
@@ -150,8 +150,11 @@ fn wire__crate__api__commands__pack_sync__get_diff__get_diff_impl(
                         for i in decode_indices_ {
                             match i {
                                 0 => {
-                                    api_dart_progress_reporter_guard =
-                                        Some(api_dart_progress_reporter.lockable_decode_sync_ref())
+                                    api_dart_progress_reporter_guard = Some(
+                                        api_dart_progress_reporter
+                                            .lockable_decode_async_ref()
+                                            .await,
+                                    )
                                 }
                                 _ => unreachable!(),
                             }
@@ -163,9 +166,11 @@ fn wire__crate__api__commands__pack_sync__get_diff__get_diff_impl(
                             api_repo_path,
                             &*api_dart_progress_reporter_guard,
                             api_clear_cache,
-                        )?;
+                        )
+                        .await?;
                         std::result::Result::Ok(output_ok)
-                    })(),
+                    })()
+                    .await,
                 )
             }
         },
@@ -177,25 +182,25 @@ fn wire__crate__api__commands__pack_sync__get_diffs_with_parents__get_diff_with_
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec,_,_>(flutter_rust_bridge::for_generated::TaskInfo{ debug_name: "get_diff_with_parents", port: Some(port_), mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal }, move || {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec,_,_,_>(flutter_rust_bridge::for_generated::TaskInfo{ debug_name: "get_diff_with_parents", port: Some(port_), mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal }, move || {
             let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
             let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_pack_name = <String>::sse_decode(&mut deserializer);
 let api_repo_path = <String>::sse_decode(&mut deserializer);
 let api_dart_progress_reporter = <RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DartProgressReporter>>>::sse_decode(&mut deserializer);
-let api_clear_cache = <bool>::sse_decode(&mut deserializer);deserializer.end(); move |context|  {
-                    transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move ||  {
+let api_clear_cache = <bool>::sse_decode(&mut deserializer);deserializer.end(); move |context| async move {
+                    transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move || async move {
                         let mut api_dart_progress_reporter_guard = None;
 let decode_indices_ = flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(&api_dart_progress_reporter, 0, false)]);
         for i in decode_indices_ {
             match i {
-                0 => api_dart_progress_reporter_guard = Some(api_dart_progress_reporter.lockable_decode_sync_ref()),
+                0 => api_dart_progress_reporter_guard = Some(api_dart_progress_reporter.lockable_decode_async_ref().await),
                 _ => unreachable!(),
             }
         }
         let api_dart_progress_reporter_guard = api_dart_progress_reporter_guard.unwrap();
- let output_ok = crate::api::commands::pack_sync::get_diffs_with_parents::get_diff_with_parents(api_pack_name, api_repo_path, &*api_dart_progress_reporter_guard, api_clear_cache)?;   std::result::Result::Ok(output_ok)
-                    })())
+ let output_ok = crate::api::commands::pack_sync::get_diffs_with_parents::get_diff_with_parents(api_pack_name, api_repo_path, &*api_dart_progress_reporter_guard, api_clear_cache).await?;   std::result::Result::Ok(output_ok)
+                    })().await)
                 } })
 }
 fn wire__crate__api__commands__params__get_launch_params_impl(
@@ -204,7 +209,7 @@ fn wire__crate__api__commands__params__get_launch_params_impl(
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "get_launch_params",
             port: Some(port_),
@@ -223,15 +228,17 @@ fn wire__crate__api__commands__params__get_launch_params_impl(
             let api_repot_path = <String>::sse_decode(&mut deserializer);
             let api_pack_name = <String>::sse_decode(&mut deserializer);
             deserializer.end();
-            move |context| {
+            move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
+                    (move || async move {
                         let output_ok = crate::api::commands::params::get_launch_params(
                             api_repot_path,
                             api_pack_name,
-                        )?;
+                        )
+                        .await?;
                         std::result::Result::Ok(output_ok)
-                    })(),
+                    })()
+                    .await,
                 )
             }
         },
@@ -243,7 +250,7 @@ fn wire__crate__api__commands__get_remote_repo_info__get_remote_repo_info_impl(
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "get_remote_repo_info",
             port: Some(port_),
@@ -261,15 +268,17 @@ fn wire__crate__api__commands__get_remote_repo_info__get_remote_repo_info_impl(
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_remote = <String>::sse_decode(&mut deserializer);
             deserializer.end();
-            move |context| {
+            move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
+                    (move || async move {
                         let output_ok =
                             crate::api::commands::get_remote_repo_info::get_remote_repo_info(
                                 &api_remote,
-                            )?;
+                            )
+                            .await?;
                         std::result::Result::Ok(output_ok)
-                    })(),
+                    })()
+                    .await,
                 )
             }
         },
@@ -281,7 +290,7 @@ fn wire__crate__api__commands__params__get_server_launch_params_impl(
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "get_server_launch_params",
             port: Some(port_),
@@ -300,15 +309,17 @@ fn wire__crate__api__commands__params__get_server_launch_params_impl(
             let api_repot_path = <String>::sse_decode(&mut deserializer);
             let api_pack_name = <String>::sse_decode(&mut deserializer);
             deserializer.end();
-            move |context| {
+            move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
+                    (move || async move {
                         let output_ok = crate::api::commands::params::get_server_launch_params(
                             api_repot_path,
                             api_pack_name,
-                        )?;
+                        )
+                        .await?;
                         std::result::Result::Ok(output_ok)
-                    })(),
+                    })()
+                    .await,
                 )
             }
         },
@@ -351,7 +362,7 @@ fn wire__crate__api__commands__init_from_remote__init_from_remote_impl(
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "init_from_remote",
             port: Some(port_),
@@ -370,15 +381,17 @@ fn wire__crate__api__commands__init_from_remote__init_from_remote_impl(
             let api_remote = <String>::sse_decode(&mut deserializer);
             let api_target_dir = <String>::sse_decode(&mut deserializer);
             deserializer.end();
-            move |context| {
+            move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
+                    (move || async move {
                         let output_ok = crate::api::commands::init_from_remote::init_from_remote(
                             &api_remote,
                             &api_target_dir,
-                        )?;
+                        )
+                        .await?;
                         std::result::Result::Ok(output_ok)
-                    })(),
+                    })()
+                    .await,
                 )
             }
         },
@@ -426,7 +439,7 @@ fn wire__crate__api__commands__launch__launch_impl(
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "launch",
             port: Some(port_),
@@ -448,17 +461,19 @@ fn wire__crate__api__commands__launch__launch_impl(
                 <crate::api::commands::launch::LaunchType>::sse_decode(&mut deserializer);
             let api_disable_optionals = <bool>::sse_decode(&mut deserializer);
             deserializer.end();
-            move |context| {
+            move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
+                    (move || async move {
                         let output_ok = crate::api::commands::launch::launch(
                             api_repo_dir,
                             api_pack_name,
                             api_launch_type,
                             api_disable_optionals,
-                        )?;
+                        )
+                        .await?;
                         std::result::Result::Ok(output_ok)
-                    })(),
+                    })()
+                    .await,
                 )
             }
         },
@@ -470,7 +485,7 @@ fn wire__crate__api__commands__linux_setup__linux_setup_info_impl(
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "linux_setup_info",
             port: Some(port_),
@@ -488,13 +503,15 @@ fn wire__crate__api__commands__linux_setup__linux_setup_info_impl(
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_repo_dir = <String>::sse_decode(&mut deserializer);
             deserializer.end();
-            move |context| {
+            move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
+                    (move || async move {
                         let output_ok =
-                            crate::api::commands::linux_setup::linux_setup_info(api_repo_dir)?;
+                            crate::api::commands::linux_setup::linux_setup_info(api_repo_dir)
+                                .await?;
                         std::result::Result::Ok(output_ok)
-                    })(),
+                    })()
+                    .await,
                 )
             }
         },
@@ -506,7 +523,7 @@ fn wire__crate__api__commands__externals__load_externals__load_externals_impl(
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "load_externals",
             port: Some(port_),
@@ -525,16 +542,18 @@ fn wire__crate__api__commands__externals__load_externals__load_externals_impl(
             let api_repot_path = <String>::sse_decode(&mut deserializer);
             let api_pack_name = <String>::sse_decode(&mut deserializer);
             deserializer.end();
-            move |context| {
+            move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
+                    (move || async move {
                         let output_ok =
                             crate::api::commands::externals::load_externals::load_externals(
                                 api_repot_path,
                                 api_pack_name,
-                            )?;
+                            )
+                            .await?;
                         std::result::Result::Ok(output_ok)
-                    })(),
+                    })()
+                    .await,
                 )
             }
         },
@@ -546,7 +565,7 @@ fn wire__crate__api__commands__optionals__load_optionals__load_optionals_impl(
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "load_optionals",
             port: Some(port_),
@@ -565,16 +584,18 @@ fn wire__crate__api__commands__optionals__load_optionals__load_optionals_impl(
             let api_repot_path = <String>::sse_decode(&mut deserializer);
             let api_pack_name = <String>::sse_decode(&mut deserializer);
             deserializer.end();
-            move |context| {
+            move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
+                    (move || async move {
                         let output_ok =
                             crate::api::commands::optionals::load_optionals::load_optionals(
                                 api_repot_path,
                                 api_pack_name,
-                            )?;
+                            )
+                            .await?;
                         std::result::Result::Ok(output_ok)
-                    })(),
+                    })()
+                    .await,
                 )
             }
         },
@@ -586,7 +607,7 @@ fn wire__crate__api__commands__load_pack_display__load_pack_display_impl(
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "load_pack_display",
             port: Some(port_),
@@ -605,15 +626,17 @@ fn wire__crate__api__commands__load_pack_display__load_pack_display_impl(
             let api_repo_path = <String>::sse_decode(&mut deserializer);
             let api_pack_name = <String>::sse_decode(&mut deserializer);
             deserializer.end();
-            move |context| {
+            move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
+                    (move || async move {
                         let output_ok = crate::api::commands::load_pack_display::load_pack_display(
                             api_repo_path,
                             api_pack_name,
-                        )?;
+                        )
+                        .await?;
                         std::result::Result::Ok(output_ok)
-                    })(),
+                    })()
+                    .await,
                 )
             }
         },
@@ -625,7 +648,7 @@ fn wire__crate__api__commands__load_repo__load_repo_impl(
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "load_repo",
             port: Some(port_),
@@ -643,12 +666,14 @@ fn wire__crate__api__commands__load_repo__load_repo_impl(
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_repo_path = <String>::sse_decode(&mut deserializer);
             deserializer.end();
-            move |context| {
+            move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let output_ok = crate::api::commands::load_repo::load_repo(api_repo_path)?;
+                    (move || async move {
+                        let output_ok =
+                            crate::api::commands::load_repo::load_repo(api_repo_path).await?;
                         std::result::Result::Ok(output_ok)
-                    })(),
+                    })()
+                    .await,
                 )
             }
         },
@@ -660,7 +685,7 @@ fn wire__crate__api__commands__user_repo_settings__load_settings__load_settings_
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "load_settings",
             port: Some(port_),
@@ -678,15 +703,17 @@ fn wire__crate__api__commands__user_repo_settings__load_settings__load_settings_
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_repo_path = <String>::sse_decode(&mut deserializer);
             deserializer.end();
-            move |context| {
+            move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
+                    (move || async move {
                         let output_ok =
                             crate::api::commands::user_repo_settings::load_settings::load_settings(
                                 api_repo_path,
-                            )?;
+                            )
+                            .await?;
                         std::result::Result::Ok(output_ok)
-                    })(),
+                    })()
+                    .await,
                 )
             }
         },
@@ -875,7 +902,7 @@ fn wire__crate__api__commands__pack_sync__quick_check__quick_check_impl(
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "quick_check",
             port: Some(port_),
@@ -894,15 +921,17 @@ fn wire__crate__api__commands__pack_sync__quick_check__quick_check_impl(
             let api_pack_name = <String>::sse_decode(&mut deserializer);
             let api_repo_path = <String>::sse_decode(&mut deserializer);
             deserializer.end();
-            move |context| {
+            move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
+                    (move || async move {
                         let output_ok = crate::api::commands::pack_sync::quick_check::quick_check(
                             api_pack_name,
                             api_repo_path,
-                        )?;
+                        )
+                        .await?;
                         std::result::Result::Ok(output_ok)
-                    })(),
+                    })()
+                    .await,
                 )
             }
         },
@@ -914,7 +943,7 @@ fn wire__crate__api__commands__local_pack__remove_local_pack__remove_local_pack_
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "remove_local_pack",
             port: Some(port_),
@@ -933,16 +962,18 @@ fn wire__crate__api__commands__local_pack__remove_local_pack__remove_local_pack_
             let api_repo_path = <String>::sse_decode(&mut deserializer);
             let api_pack_name = <String>::sse_decode(&mut deserializer);
             deserializer.end();
-            move |context| {
+            move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
+                    (move || async move {
                         let output_ok =
                             crate::api::commands::local_pack::remove_local_pack::remove_local_pack(
                                 api_repo_path,
                                 api_pack_name,
-                            )?;
+                            )
+                            .await?;
                         std::result::Result::Ok(output_ok)
-                    })(),
+                    })()
+                    .await,
                 )
             }
         },
@@ -954,7 +985,7 @@ fn wire__crate__api__commands__externals__save_externals__save_externals_impl(
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "save_externals",
             port: Some(port_),
@@ -977,17 +1008,19 @@ fn wire__crate__api__commands__externals__save_externals__save_externals_impl(
                     &mut deserializer,
                 );
             deserializer.end();
-            move |context| {
+            move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
+                    (move || async move {
                         let output_ok =
                             crate::api::commands::externals::save_externals::save_externals(
                                 api_repo_path,
                                 api_pack_name,
                                 api_externals,
-                            )?;
+                            )
+                            .await?;
                         std::result::Result::Ok(output_ok)
-                    })(),
+                    })()
+                    .await,
                 )
             }
         },
@@ -999,7 +1032,7 @@ fn wire__crate__api__commands__optionals__save_optionals__save_optionals_impl(
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "save_optionals",
             port: Some(port_),
@@ -1022,17 +1055,19 @@ fn wire__crate__api__commands__optionals__save_optionals__save_optionals_impl(
                     &mut deserializer,
                 );
             deserializer.end();
-            move |context| {
+            move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
+                    (move || async move {
                         let output_ok =
                             crate::api::commands::optionals::save_optionals::save_optionals(
                                 api_repo_path,
                                 api_pack_name,
                                 api_optionals,
-                            )?;
+                            )
+                            .await?;
                         std::result::Result::Ok(output_ok)
-                    })(),
+                    })()
+                    .await,
                 )
             }
         },
@@ -1044,7 +1079,7 @@ fn wire__crate__api__commands__user_repo_settings__save_settings__save_settings_
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "save_settings",
             port: Some(port_),
@@ -1066,16 +1101,18 @@ fn wire__crate__api__commands__user_repo_settings__save_settings__save_settings_
                     &mut deserializer,
                 );
             deserializer.end();
-            move |context| {
+            move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
+                    (move || async move {
                         let output_ok =
                             crate::api::commands::user_repo_settings::save_settings::save_settings(
                                 api_repo_path,
                                 api_setting,
-                            )?;
+                            )
+                            .await?;
                         std::result::Result::Ok(output_ok)
-                    })(),
+                    })()
+                    .await,
                 )
             }
         },
@@ -1087,7 +1124,7 @@ fn wire__crate__api__commands__params__set_launch_params_impl(
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "set_launch_params",
             port: Some(port_),
@@ -1107,16 +1144,18 @@ fn wire__crate__api__commands__params__set_launch_params_impl(
             let api_pack_name = <String>::sse_decode(&mut deserializer);
             let api_launch_params = <Vec<String>>::sse_decode(&mut deserializer);
             deserializer.end();
-            move |context| {
+            move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
+                    (move || async move {
                         let output_ok = crate::api::commands::params::set_launch_params(
                             api_repot_path,
                             api_pack_name,
                             api_launch_params,
-                        )?;
+                        )
+                        .await?;
                         std::result::Result::Ok(output_ok)
-                    })(),
+                    })()
+                    .await,
                 )
             }
         },
@@ -1160,7 +1199,7 @@ fn wire__crate__api__commands__sync_config__sync_config_impl(
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "sync_config",
             port: Some(port_),
@@ -1178,13 +1217,14 @@ fn wire__crate__api__commands__sync_config__sync_config_impl(
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_repo_path = <String>::sse_decode(&mut deserializer);
             deserializer.end();
-            move |context| {
+            move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
+                    (move || async move {
                         let output_ok =
-                            crate::api::commands::sync_config::sync_config(api_repo_path)?;
+                            crate::api::commands::sync_config::sync_config(api_repo_path).await?;
                         std::result::Result::Ok(output_ok)
-                    })(),
+                    })()
+                    .await,
                 )
             }
         },
@@ -1196,7 +1236,7 @@ fn wire__crate__api__commands__local_pack__sync_local_pack__sync_local_pack_impl
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "sync_local_pack",
             port: Some(port_),
@@ -1215,16 +1255,18 @@ fn wire__crate__api__commands__local_pack__sync_local_pack__sync_local_pack_impl
             let api_pack_name = <String>::sse_decode(&mut deserializer);
             let api_repo_path = <String>::sse_decode(&mut deserializer);
             deserializer.end();
-            move |context| {
+            move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
+                    (move || async move {
                         let output_ok =
                             crate::api::commands::local_pack::sync_local_pack::sync_local_pack(
                                 api_pack_name,
                                 api_repo_path,
-                            )?;
+                            )
+                            .await?;
                         std::result::Result::Ok(output_ok)
-                    })(),
+                    })()
+                    .await,
                 )
             }
         },
@@ -1236,7 +1278,7 @@ fn wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "sync_pack",
             port: Some(port_),
@@ -1257,17 +1299,19 @@ fn wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(
             let api_dart_progress_reporter = <DartProgressReporter>::sse_decode(&mut deserializer);
             let api_diff = <OpaqueDiff>::sse_decode(&mut deserializer);
             deserializer.end();
-            move |context| {
+            move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
+                    (move || async move {
                         let output_ok = crate::api::commands::pack_sync::sync_pack::sync_pack(
                             api_pack_name,
                             api_repo_path,
                             api_dart_progress_reporter,
                             api_diff,
-                        )?;
+                        )
+                        .await?;
                         std::result::Result::Ok(output_ok)
-                    })(),
+                    })()
+                    .await,
                 )
             }
         },
@@ -1279,15 +1323,15 @@ fn wire__crate__api__commands__pack_sync__sync_pack_with_parents__sync_pack_with
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec,_,_>(flutter_rust_bridge::for_generated::TaskInfo{ debug_name: "sync_pack_with_parents", port: Some(port_), mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal }, move || {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec,_,_,_>(flutter_rust_bridge::for_generated::TaskInfo{ debug_name: "sync_pack_with_parents", port: Some(port_), mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal }, move || {
             let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
             let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_repo_path = <String>::sse_decode(&mut deserializer);
 let api_dart_progress_reporter = <DartProgressReporter>::sse_decode(&mut deserializer);
-let api_diffs = <Vec<OpaqueDiff>>::sse_decode(&mut deserializer);deserializer.end(); move |context|  {
-                    transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move ||  {
-                         let output_ok = crate::api::commands::pack_sync::sync_pack_with_parents::sync_pack_with_parents(api_repo_path, api_dart_progress_reporter, api_diffs)?;   std::result::Result::Ok(output_ok)
-                    })())
+let api_diffs = <Vec<OpaqueDiff>>::sse_decode(&mut deserializer);deserializer.end(); move |context| async move {
+                    transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move || async move {
+                         let output_ok = crate::api::commands::pack_sync::sync_pack_with_parents::sync_pack_with_parents(api_repo_path, api_dart_progress_reporter, api_diffs).await?;   std::result::Result::Ok(output_ok)
+                    })().await)
                 } })
 }
 

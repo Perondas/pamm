@@ -5,49 +5,44 @@ use std::path::PathBuf;
 
 impl<T> GetOptionalsPaths for T
 where
-    T: GetPack,
+    T: GetPack + Sync,
 {
     /// Returns relative paths of the form `<pack>/addons/<addon>`, relative to
     /// the repo root (join with the repo path to get usable filesystem paths).
-    fn get_optional_paths(&self, pack_name: &str) -> anyhow::Result<Vec<PathBuf>> {
-        let (config, settings) = self.get_pack_with_settings(pack_name)?;
-
+    async fn get_optional_paths(&self, pack_name: &str) -> anyhow::Result<Vec<PathBuf>> {
         let mut res = Vec::new();
+        let mut current = Some(pack_name.to_string());
 
-        let addon_dir = PathBuf::from(pack_name).join(ADDONS_DIR_NAME);
+        // Own optionals first, then each ancestor's in turn.
+        while let Some(pack_name) = current {
+            let (config, settings) = self.get_pack_with_settings(&pack_name).await?;
 
-        for optional in &settings.enabled_optionals {
-            if config
-                .addons
-                .get(optional)
-                .is_some_and(|addon| addon.is_optional)
-            {
-                trace!(
-                    "Optional addon '{}' is enabled for pack '{}'",
-                    optional, config.name
-                );
-                let optional_path = addon_dir.join(optional);
-                res.push(optional_path);
+            let addon_dir = PathBuf::from(&pack_name).join(ADDONS_DIR_NAME);
+            let start = res.len();
+
+            for optional in &settings.enabled_optionals {
+                if config
+                    .addons
+                    .get(optional)
+                    .is_some_and(|addon| addon.is_optional)
+                {
+                    trace!(
+                        "Optional addon '{}' is enabled for pack '{}'",
+                        optional, config.name
+                    );
+                    let optional_path = addon_dir.join(optional);
+                    res.push(optional_path);
+                }
             }
+
+            debug!(
+                "Optional addon paths for pack '{}': {:#?}",
+                config.name,
+                &res[start..]
+            );
+
+            current = config.parent;
         }
-
-        debug!(
-            "Optional addon paths for pack '{}': {:#?}",
-            config.name, res
-        );
-
-        let mut others = if let Some(parent) = config.parent {
-            self.get_optional_paths(&parent)?
-        } else {
-            vec![]
-        };
-
-        debug!(
-            "Parent optional addon paths for pack '{}': {:#?}",
-            config.name, others
-        );
-
-        res.append(&mut others);
 
         Ok(res)
     }
@@ -57,7 +52,10 @@ pub trait GetOptionalsPaths {
     /// Gets the paths to the enabled optional addons (including inherited ones).
     /// The returned paths are relative to the repo root, e.g.
     /// `<pack>/addons/<addon>`.
-    fn get_optional_paths(&self, pack_name: &str) -> anyhow::Result<Vec<PathBuf>>;
+    fn get_optional_paths(
+        &self,
+        pack_name: &str,
+    ) -> impl Future<Output = anyhow::Result<Vec<PathBuf>>> + Send;
 }
 
 #[cfg(test)]
@@ -66,8 +64,8 @@ mod tests {
     use crate::handle::mock_handle::{MockHandle, MockHandleExt};
     use std::path::PathBuf;
 
-    #[test]
-    fn test_get_optional_paths() {
+    #[tokio::test]
+    async fn test_get_optional_paths() {
         let mut mock = MockHandle::new();
 
         mock.mock_pack(
@@ -78,7 +76,7 @@ mod tests {
             &["@opt_addon", "@req_addon"],
         );
 
-        let paths = mock.get_optional_paths("test_pack").unwrap();
+        let paths = mock.get_optional_paths("test_pack").await.unwrap();
 
         assert_eq!(paths.len(), 1);
         assert_eq!(
@@ -87,8 +85,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_get_optional_paths_with_parent() {
+    #[tokio::test]
+    async fn test_get_optional_paths_with_parent() {
         let mut mock = MockHandle::new();
 
         mock.mock_pack(
@@ -101,7 +99,7 @@ mod tests {
 
         mock.mock_pack("parent_pack", None, &["@parent_opt"], &[], &["@parent_opt"]);
 
-        let mut paths = mock.get_optional_paths("child_pack").unwrap();
+        let mut paths = mock.get_optional_paths("child_pack").await.unwrap();
 
         // Sort to ensure consistent order for assertions
         paths.sort();

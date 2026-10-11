@@ -8,7 +8,7 @@ use std::os::windows::process::CommandExt;
 use std::process::Command;
 
 impl ClientRepoHandle {
-    pub(super) fn launch_via_executable(
+    pub(super) async fn launch_via_executable(
         &self,
         pack_name: &str,
         addon_paths: &[String],
@@ -19,6 +19,8 @@ impl ClientRepoHandle {
             .context("Failed to find Arma install directory")?
             .join("steam.exe");
 
+        let (pack_config, settings) = self.get_pack_with_settings(pack_name).await?;
+
         let mut command = Command::new(steam_executable);
 
         // Start arma as a new process group
@@ -28,8 +30,6 @@ impl ClientRepoHandle {
         command.arg("-applaunch");
         command.arg("107410"); // Arma 3 Steam App ID
         command.arg("-nolauncher");
-
-        let (pack_config, settings) = self.get_pack_with_settings(pack_name)?;
 
         for param in pack_config.client_params {
             command.arg(param);

@@ -4,12 +4,12 @@ use pamm_lib::handle::reading::get_repo_info::GetRepoInfo;
 use pamm_lib::models::repo::repo_config::RepoConfig;
 use std::path::Path;
 
-pub fn sync_config(repo_path: String) -> anyhow::Result<RepoConfig> {
+pub async fn sync_config(repo_path: String) -> anyhow::Result<RepoConfig> {
     let repo_path = Path::new(&repo_path);
 
-    let mut handle = ClientRepoHandle::open(repo_path)?;
+    let mut handle = ClientRepoHandle::open(repo_path).await?;
 
-    handle.sync_repo_config(&DummyConfigSyncInteractor)?;
+    handle.sync_repo_config(&DummyConfigSyncInteractor).await?;
 
     Ok(handle.get_config().to_owned())
 }

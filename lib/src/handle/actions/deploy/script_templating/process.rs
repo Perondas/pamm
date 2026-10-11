@@ -7,11 +7,11 @@ use crate::handle::server_repo_handle::ServerRepoHandle;
 use anyhow::{Context, anyhow};
 use log::debug;
 use std::fmt::Debug;
-use std::fs;
 use std::path::Path;
+use tokio::fs;
 
 impl ServerRepoHandle {
-    pub(crate) fn process_script_templates(
+    pub(crate) async fn process_script_templates(
         &self,
         pack_name: &str,
         mod_launch_param: &str,
@@ -31,9 +31,10 @@ impl ServerRepoHandle {
             render_script_template(&context, &mut script_content, &strategies);
 
             fs::write(path, &script_content)
+                .await
                 .context(anyhow!("Failed to write script file at {:?}", path))?;
 
-            self.make_executable(path).context(anyhow!(
+            self.make_executable(path).await.context(anyhow!(
                 "Failed to make script file executable at {:?}",
                 path
             ))?;
@@ -47,12 +48,13 @@ impl ServerRepoHandle {
     }
 
     #[cfg(unix)]
-    fn make_executable(&self, path: impl AsRef<Path> + Debug) -> anyhow::Result<()> {
+    async fn make_executable(&self, path: impl AsRef<Path> + Debug) -> anyhow::Result<()> {
         use std::os::unix::fs::PermissionsExt;
 
         debug!("Making script {:#?} executable", path);
 
         let mut perms = fs::metadata(&path)
+            .await
             .context(anyhow!(
                 "Failed to get metadata for script file at {:?}",
                 path
@@ -61,7 +63,9 @@ impl ServerRepoHandle {
 
         perms.set_mode(perms.mode() | 0o111); // Add execute permissions for user, group, and others
 
-        fs::set_permissions(&path, perms).context(anyhow!("Failed to set mode for {:?}", path))?;
+        fs::set_permissions(&path, perms)
+            .await
+            .context(anyhow!("Failed to set mode for {:?}", path))?;
 
         std::os::unix::fs::chown(
             &path,
@@ -72,7 +76,7 @@ impl ServerRepoHandle {
     }
 
     #[cfg(windows)]
-    fn make_executable(&self, _path: impl AsRef<Path> + Debug) -> anyhow::Result<()> {
+    async fn make_executable(&self, _path: impl AsRef<Path> + Debug) -> anyhow::Result<()> {
         // Do nothing
         Ok(())
     }

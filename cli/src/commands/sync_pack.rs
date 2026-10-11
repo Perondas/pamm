@@ -7,8 +7,8 @@ use pamm_lib::handle::actions::sync::config_sync_interactor::ConfigSyncInteracto
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use std::env::current_dir;
 
-pub fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow::Result<()> {
-    let mut repo_handle = ClientRepoHandle::open(&current_dir()?)?;
+pub async fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow::Result<()> {
+    let mut repo_handle = ClientRepoHandle::open(&current_dir()?).await?;
 
     let progress_reporter = if args.silent {
         IndicatifProgressReporter::disabled(log_wrapper)
@@ -18,7 +18,9 @@ pub fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow:
 
     if repo_handle.is_local_pack(&args.name) {
         println!("Syncing local pack '{}'", args.name);
-        repo_handle.sync_local_pack(&args.name, &progress_reporter)?;
+        repo_handle
+            .sync_local_pack(&args.name, &progress_reporter)
+            .await?;
         return Ok(());
     }
 
@@ -26,13 +28,11 @@ pub fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow:
         println!("Skipping confirmation prompts.");
     }
 
-    repo_handle.sync_repo_config(&DialogerInteractor)?;
+    repo_handle.sync_repo_config(&DialogerInteractor).await?;
 
-    let diffs = repo_handle.get_pack_and_parents_diffs(
-        &args.name,
-        progress_reporter.clone(),
-        args.force_refresh,
-    )?;
+    let diffs = repo_handle
+        .get_pack_and_parents_diffs(&args.name, progress_reporter.clone(), args.force_refresh)
+        .await?;
 
     if diffs.iter().all(|d| !d.has_changes()) {
         println!("No changes found.");
@@ -62,7 +62,9 @@ pub fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow:
         return Ok(());
     }
 
-    repo_handle.apply_pack_and_parents_diffs(progress_reporter, diffs)?;
+    repo_handle
+        .apply_pack_and_parents_diffs(progress_reporter, diffs)
+        .await?;
 
     println!("Pack synchronized successfully.");
 

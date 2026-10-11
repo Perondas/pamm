@@ -13,7 +13,7 @@ impl RepoHandle {
     /// `repo.config.json`, and write the pack config. Does NOT lay out the on-disk
     /// addon directory — callers do that with the layout that suits their role
     /// (server vs client), since the two differ (client also writes user settings).
-    pub(in crate::handle) fn register_pack(
+    pub(in crate::handle) async fn register_pack(
         &mut self,
         pack_config: &PackConfig,
     ) -> anyhow::Result<()> {
@@ -39,7 +39,7 @@ impl RepoHandle {
         }
 
         self.repo_config.packs.insert(pack_config.name.clone());
-        self.write(&self.repo_config)
+        self.write(&self.repo_config).await
     }
 }
 
@@ -47,9 +47,9 @@ impl RepoHandle {
 impl ServerRepoHandle {
     /// Add a pack to the server repo: register it and lay out the source addon
     /// directory. No client-only settings file is created.
-    pub fn add_pack(&mut self, pack_config: &PackConfig) -> anyhow::Result<()> {
-        self.register_pack(pack_config)?;
-        pack_config.init_source_on_fs(&self.repo_path)
+    pub async fn add_pack(&mut self, pack_config: &PackConfig) -> anyhow::Result<()> {
+        self.register_pack(pack_config).await?;
+        pack_config.init_source_on_fs(&self.repo_path).await
     }
 }
 
@@ -57,9 +57,9 @@ impl ServerRepoHandle {
 impl ClientRepoHandle {
     /// Add a pack to the client repo: register it and lay out the client addon
     /// directory (including the default user settings).
-    pub fn add_pack(&mut self, pack_config: &PackConfig) -> anyhow::Result<()> {
-        self.register_pack(pack_config)?;
-        pack_config.init_client_on_fs(&self.repo_path)
+    pub async fn add_pack(&mut self, pack_config: &PackConfig) -> anyhow::Result<()> {
+        self.register_pack(pack_config).await?;
+        pack_config.init_client_on_fs(&self.repo_path).await
     }
 }
 
@@ -72,14 +72,16 @@ mod tests {
     use crate::util::test_utils::TestTempDir;
     use std::collections::HashSet;
 
-    #[test]
-    fn server_add_pack_lays_out_per_pack_folder_without_settings() {
+    #[tokio::test]
+    async fn server_add_pack_lays_out_per_pack_folder_without_settings() {
         let tmp = TestTempDir::new("pamm_server_add_pack_no_settings");
         let repo_config = RepoConfig::new("repo".to_string(), "desc".to_string(), HashSet::new());
-        let mut server = ServerRepoHandle::create(tmp.path(), repo_config).unwrap();
+        let mut server = ServerRepoHandle::create(tmp.path(), repo_config)
+            .await
+            .unwrap();
 
         let pack = PackConfig::new("core".to_string(), "c".to_string(), vec![], None);
-        server.add_pack(&pack).unwrap();
+        server.add_pack(&pack).await.unwrap();
 
         let repo_path = server.get_repo_path().to_path_buf();
         assert!(server.get_config().packs.contains("core"));

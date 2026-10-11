@@ -28,11 +28,12 @@ pub enum SteamFlavour {
 /// `Ok(None)` on platforms that need no setup, so the Dart side can render
 /// nothing without special-casing an error.
 #[cfg(target_os = "linux")]
-pub fn linux_setup_info(repo_dir: String) -> anyhow::Result<Option<LinuxSetupInfo>> {
+pub async fn linux_setup_info(repo_dir: String) -> anyhow::Result<Option<LinuxSetupInfo>> {
     let handle = pamm_lib::handle::client_repo_handle::ClientRepoHandle::open(
         std::path::Path::new(&repo_dir),
-    )?;
-    let setup = handle.linux_launch_setup()?;
+    )
+    .await?;
+    let setup = handle.linux_launch_setup().await?;
 
     Ok(Some(LinuxSetupInfo {
         steam_flavour: match setup.flavour {
@@ -48,6 +49,6 @@ pub fn linux_setup_info(repo_dir: String) -> anyhow::Result<Option<LinuxSetupInf
 }
 
 #[cfg(not(target_os = "linux"))]
-pub fn linux_setup_info(_: String) -> anyhow::Result<Option<LinuxSetupInfo>> {
+pub async fn linux_setup_info(_: String) -> anyhow::Result<Option<LinuxSetupInfo>> {
     anyhow::bail!("linux_setup_info is only available on Linux");
 }

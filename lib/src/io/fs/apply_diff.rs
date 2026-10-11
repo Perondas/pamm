@@ -8,12 +8,15 @@ use crate::models::index::node_diff::{ModifiedNodeKind, NodeDiff, NodeModificati
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_diff::PackDiff;
 use anyhow::Context;
-use rayon::iter::ParallelIterator;
-use rayon::prelude::IntoParallelIterator;
+use futures::future::BoxFuture;
+use futures::{FutureExt, StreamExt, stream};
 use std::cmp::Ordering;
-use std::fs;
 use std::path::PathBuf;
+use tokio::fs;
 use url::Url;
+
+/// How many addons are synced at once. Each one downloads its files in turn.
+const CONCURRENT_ADDON_SYNCS: usize = 8;
 
 pub struct DiffApplier<P: ProgressReporter> {
     addon_dir: PathBuf,
@@ -48,7 +51,7 @@ impl<P: ProgressReporter> DiffApplier<P> {
         }
     }
 
-    pub fn apply(&self, diff: PackDiff) -> anyhow::Result<()> {
+    pub async fn apply(&self, diff: PackDiff) -> anyhow::Result<()> {
         let PackDiff {
             addon_diffs: node_diffs,
             ..
@@ -64,10 +67,11 @@ impl<P: ProgressReporter> DiffApplier<P> {
         self.progress_reporter.start_for_download(total_dl_size);
         self.progress_reporter.report_message("Applying diff...");
 
-        let res = node_diffs
-            .into_par_iter()
-            .map(move |diff| self.apply_node_diff(diff, RelPath::new()))
-            .collect::<Vec<_>>();
+        let res = stream::iter(node_diffs)
+            .map(|diff| self.apply_node_diff(diff, RelPath::new()))
+            .buffer_unordered(CONCURRENT_ADDON_SYNCS)
+            .collect::<Vec<_>>()
+            .await;
 
         self.progress_reporter.finish();
 
@@ -91,22 +95,26 @@ impl<P: ProgressReporter> DiffApplier<P> {
         Ok(())
     }
 
-    fn apply_node_diff(&self, node_diff: NodeDiff, parent_path: RelPath) -> anyhow::Result<()> {
-        /*  self.progress_reporter.report_message(&format!(
-            "Applying node diff:{:#?} to {:?}",
-            node_diff,
-            parent_path.with_base_path(&self.addon_dir)
-        ));*/
-
-        match node_diff {
-            NodeDiff::Created(node) => self.create_node(node, parent_path),
-            NodeDiff::Deleted { name, .. } => self.delete_node(name, parent_path),
-            NodeDiff::Modified(modification) => self.apply_modification(modification, parent_path),
-            NodeDiff::None(_) => Ok(()),
+    // Boxed because folders recurse into their children.
+    fn apply_node_diff(
+        &self,
+        node_diff: NodeDiff,
+        parent_path: RelPath,
+    ) -> BoxFuture<'_, anyhow::Result<()>> {
+        async move {
+            match node_diff {
+                NodeDiff::Created(node) => self.create_node(node, parent_path).await,
+                NodeDiff::Deleted { name, .. } => self.delete_node(name, parent_path).await,
+                NodeDiff::Modified(modification) => {
+                    self.apply_modification(modification, parent_path).await
+                }
+                NodeDiff::None(_) => Ok(()),
+            }
         }
+        .boxed()
     }
 
-    fn delete_node(&self, name: String, parent_path: RelPath) -> anyhow::Result<()> {
+    async fn delete_node(&self, name: String, parent_path: RelPath) -> anyhow::Result<()> {
         let path = parent_path.push(&name);
         let full_path = path.with_base_path(&self.addon_dir);
 
@@ -114,10 +122,18 @@ impl<P: ProgressReporter> DiffApplier<P> {
         self.progress_reporter
             .report_message(&format!("Deleting {}", path));
 
-        if full_path.is_dir() {
-            fs::remove_dir_all(&full_path).context("Failed to delete directory")
-        } else if full_path.is_file() {
-            fs::remove_file(&full_path).context("Failed to delete file")
+        let metadata = fs::metadata(&full_path)
+            .await
+            .with_context(|| format!("Failed to inspect {:?} for deletion", full_path))?;
+
+        if metadata.is_dir() {
+            fs::remove_dir_all(&full_path)
+                .await
+                .context("Failed to delete directory")
+        } else if metadata.is_file() {
+            fs::remove_file(&full_path)
+                .await
+                .context("Failed to delete file")
         } else {
             unreachable!(
                 "Path to delete is neither file nor directory: {:?}",
@@ -126,40 +142,47 @@ impl<P: ProgressReporter> DiffApplier<P> {
         }
     }
 
-    fn create_node(&self, node: IndexNode, parent_path: RelPath) -> anyhow::Result<()> {
-        let path = parent_path.push(&node.name);
+    // Boxed because folders recurse into their children.
+    fn create_node(
+        &self,
+        node: IndexNode,
+        parent_path: RelPath,
+    ) -> BoxFuture<'_, anyhow::Result<()>> {
+        async move {
+            let path = parent_path.push(&node.name);
 
-        match node.kind {
-            NodeKind::File { length, .. } => {
-                log::debug!("Creating file {} ({} bytes)", path, length);
-                self.remote_patcher.create_file(
-                    &path,
-                    &path.with_base_path(&self.addon_dir),
-                    length,
-                )?;
+            match node.kind {
+                NodeKind::File { length, .. } => {
+                    log::debug!("Creating file {} ({} bytes)", path, length);
+                    self.remote_patcher
+                        .create_file(&path, &path.with_base_path(&self.addon_dir), length)
+                        .await?;
 
-                self.progress_reporter
-                    .report_message(&format!("Downloaded file {}", path));
+                    self.progress_reporter
+                        .report_message(&format!("Downloaded file {}", path));
 
-                Ok(())
-            }
-            NodeKind::Folder(children) => {
-                let dir_path = path.with_base_path(&self.addon_dir);
-                log::debug!("Creating directory {}", path);
-                self.progress_reporter
-                    .report_message(&format!("Creating directory {}", path));
-                fs::create_dir(&dir_path)
-                    .with_context(|| format!("Failed to create directory {:?}", dir_path))?;
-
-                for child in children {
-                    self.create_node(child, path.clone())?;
+                    Ok(())
                 }
-                Ok(())
+                NodeKind::Folder(children) => {
+                    let dir_path = path.with_base_path(&self.addon_dir);
+                    log::debug!("Creating directory {}", path);
+                    self.progress_reporter
+                        .report_message(&format!("Creating directory {}", path));
+                    fs::create_dir(&dir_path)
+                        .await
+                        .with_context(|| format!("Failed to create directory {:?}", dir_path))?;
+
+                    for child in children {
+                        self.create_node(child, path.clone()).await?;
+                    }
+                    Ok(())
+                }
             }
         }
+        .boxed()
     }
 
-    fn apply_modification(
+    async fn apply_modification(
         &self,
         modification: NodeModification,
         parent_path: RelPath,
@@ -181,7 +204,7 @@ impl<P: ProgressReporter> DiffApplier<P> {
                 });
 
                 for child in children {
-                    self.apply_node_diff(child, path.clone())?;
+                    self.apply_node_diff(child, path.clone()).await?;
                 }
             }
             ModifiedNodeKind::File { modification, .. } => {
@@ -191,6 +214,7 @@ impl<P: ProgressReporter> DiffApplier<P> {
                     .report_message(&format!("Modifying file {}", path));
                 self.remote_patcher
                     .patch_file(&path, &file_path, modification)
+                    .await
                     .context(format!("Failed to patch: {}", path))?;
             }
         }

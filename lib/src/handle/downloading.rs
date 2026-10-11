@@ -5,13 +5,13 @@ use anyhow::Context;
 use url::Url;
 
 impl ClientRepoHandle {
-    pub(super) fn download_keyed<T: KnownDownloadable + KeyedFilePath>(
+    pub(super) async fn download_keyed<T: KnownDownloadable + KeyedFilePath>(
         &self,
         key: &str,
     ) -> anyhow::Result<T> {
         let url = T::file_path(key).with_base_url(self.get_remote_url());
 
-        T::download_known(&url).with_context(|| {
+        T::download_known(&url).await.with_context(|| {
             format!(
                 "Failed to download named file '{}' from repository",
                 T::file_name()

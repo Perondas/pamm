@@ -13,10 +13,10 @@ fn to_lib_mode(mode: LaunchMode) -> pamm_lib::handle::actions::launch::launch_pa
     }
 }
 
-pub fn launch_command(args: LaunchArgs) -> anyhow::Result<()> {
-    let handle = ClientRepoHandle::open(&current_dir()?)?;
+pub async fn launch_command(args: LaunchArgs) -> anyhow::Result<()> {
+    let handle = ClientRepoHandle::open(&current_dir()?).await?;
     let launch_params = LaunchParams::new(to_lib_mode(args.launch_type), args.no_optionals);
-    let outcome = handle.launch_pack(&args.name, &launch_params)?;
+    let outcome = handle.launch_pack(&args.name, &launch_params).await?;
 
     if let Some(preset_path) = outcome.preset_path {
         println!("Wrote preset to {preset_path}");
