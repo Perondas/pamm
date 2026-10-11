@@ -1,6 +1,6 @@
 use crate::subcommands::linux::proton::detect_proton;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-use pamm_lib::util::proton::teamspeak::find_teamspeak;
+use pamm_lib::util::proton::teamspeak::{TEAMSPEAK_DOWNLOAD_URL, find_teamspeak};
 use std::env::current_dir;
 
 /// Prints the one-time Steam setup for this repo, and the state of Arma's
@@ -58,6 +58,10 @@ fn print_proton_status() {
 
     match find_teamspeak(&proton.prefix()) {
         Some(exe) => println!("TeamSpeak:      installed ({})", exe.display()),
-        None => println!("TeamSpeak:      not installed"),
+        None => {
+            println!("TeamSpeak:      not installed");
+            println!("                Download the Windows version from {TEAMSPEAK_DOWNLOAD_URL}");
+            println!("                and install it with `linux install-teamspeak <installer>`.");
+        }
     }
 }

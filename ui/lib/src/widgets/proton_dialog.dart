@@ -2,6 +2,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:pamm_ui/src/rust/api/commands/proton.dart';
 import 'package:pamm_ui/src/widgets/confirm_dialog.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+const _teamspeakDownloadUrl = "https://www.teamspeak.com/en/downloads";
 
 /// Runs Windows programs in Arma's Proton prefix on Linux: installing and
 /// launching TeamSpeak, browsing files, and stopping everything.
@@ -145,6 +148,17 @@ class _ProtonDialogState extends State<ProtonDialog> {
                 : "Installed at $teamspeakExe",
             style: theme.textTheme.bodySmall,
           ),
+          if (teamspeakExe == null)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () => launchUrl(Uri.parse(_teamspeakDownloadUrl)),
+                icon: const Icon(Icons.open_in_new, size: 18),
+                label: const Text(
+                  "Download TeamSpeak 3 (pick the Windows version)",
+                ),
+              ),
+            ),
           const SizedBox(height: 8),
           Row(
             children: [

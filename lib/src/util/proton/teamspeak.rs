@@ -4,6 +4,10 @@ use anyhow::{Context, bail};
 use std::path::{Path, PathBuf};
 use std::process::Child;
 
+/// Where to get the installer. The Windows version is the one that runs in
+/// the prefix.
+pub const TEAMSPEAK_DOWNLOAD_URL: &str = "https://www.teamspeak.com/en/downloads";
+
 /// TeamSpeak registers itself as the handler for these links on install.
 const TS3_HANDLER_KEY: &str = r"ts3server\\shell\\open\\command";
 
