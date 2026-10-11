@@ -1,33 +1,9 @@
 use crate::log_wrapper::LogWrapper;
 use crate::progress_reporting::IndicatifProgressReporter;
-use clap::Args;
+use pamm_cli_args::commands::build::BuildArgs;
 use pamm_lib::handle::actions::build::{BuildMode, BuildOptions};
 use pamm_lib::handle::server_repo_handle::ServerRepoHandle;
 use std::env::current_dir;
-
-/// Build a pack or the entire repository
-#[derive(Debug, Args)]
-pub struct BuildArgs {
-    /// Pack name; if omitted, builds the entire repo.
-    #[arg()]
-    pub name: Option<String>,
-
-    /// Materialize files in `www/` as copies instead of symlinks.
-    #[arg(long, action, conflicts_with = "symlink")]
-    pub copy: bool,
-
-    /// Materialize files in `www/` as symlinks (default).
-    #[arg(long, action)]
-    pub symlink: bool,
-
-    /// Re-index everything from scratch, ignoring the cache.
-    #[arg(short, long, action)]
-    pub force_refresh: bool,
-
-    /// Silent mode, minimal output.
-    #[arg(short, long, action)]
-    pub silent: bool,
-}
 
 pub fn build_command(args: BuildArgs, log_wrapper: LogWrapper) -> anyhow::Result<()> {
     let handle = ServerRepoHandle::open(&current_dir()?)?;

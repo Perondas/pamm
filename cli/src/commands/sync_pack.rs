@@ -1,29 +1,11 @@
 use crate::log_wrapper::LogWrapper;
 use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::{ToPrettyString, multi_pack_details_string};
-use clap::Args;
 use dialoguer::theme::ColorfulTheme;
+use pamm_cli_args::commands::sync_pack::SyncPackArgs;
 use pamm_lib::handle::actions::sync::config_sync_interactor::ConfigSyncInteractor;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use std::env::current_dir;
-
-/// Sync your local repo state with the remote repository
-#[derive(Debug, Args)]
-pub struct SyncPackArgs {
-    #[arg()]
-    /// Name of the pack to sync
-    pub name: String,
-    #[arg(short, long, default_value_t = false)]
-    /// Discards indices, reads all addons from disk.
-    /// Does nothing for local packs
-    pub force_refresh: bool,
-    #[arg(short, long)]
-    /// Assume "yes" as the answer to all prompts
-    pub yes: bool,
-    /// Silent mode, minimal output
-    #[arg(short, long, action)]
-    pub silent: bool,
-}
 
 pub fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow::Result<()> {
     let mut repo_handle = ClientRepoHandle::open(&current_dir()?)?;

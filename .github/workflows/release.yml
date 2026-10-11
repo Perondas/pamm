@@ -48,7 +48,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v2
       - name: Set version
         shell: bash
-        run: sed -i "s/^version = \".*\"/version = \"${GITHUB_REF_NAME#v}\"/" cli/Cargo.toml
+        run: sed -i "s/^version = \".*\"/version = \"${GITHUB_REF_NAME#v}\"/" cli/Cargo.toml cli_args/Cargo.toml
       - name: Build and upload binaries
         uses: taiki-e/upload-rust-binary-action@v1
         with:
@@ -90,7 +90,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v2
       - name: Set version
         shell: bash
-        run: sed -i "s/^version = \".*\"/version = \"${GITHUB_REF_NAME#v}\"/" cli/Cargo.toml
+        run: sed -i "s/^version = \".*\"/version = \"${GITHUB_REF_NAME#v}\"/" cli/Cargo.toml cli_args/Cargo.toml
       - name: Install cargo-deb
         run: cargo install cargo-deb
       - name: Install rpm-build

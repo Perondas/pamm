@@ -1,11 +1,7 @@
 use crate::subcommands::linux::proton::detect_proton;
 use anyhow::Context;
-use clap::Args;
+use pamm_cli_args::subcommands::linux::launch_teamspeak::LaunchTeamspeakArgs;
 use pamm_lib::util::proton::teamspeak::{TEAMSPEAK_DOWNLOAD_URL, find_teamspeak, launch_teamspeak};
-
-/// Launch TeamSpeak inside Arma's Proton prefix
-#[derive(Debug, Args)]
-pub struct LaunchTeamspeakArgs {}
 
 pub fn launch_teamspeak_command(_args: LaunchTeamspeakArgs) -> anyhow::Result<()> {
     let proton = detect_proton()?;

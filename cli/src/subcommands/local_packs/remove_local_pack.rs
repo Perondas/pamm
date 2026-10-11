@@ -1,12 +1,5 @@
-use clap::Args;
+use pamm_cli_args::subcommands::local_packs::remove_local_pack::RemoveLocalPackArgs;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-
-/// Remove a local pack
-#[derive(Debug, Args)]
-pub struct RemoveLocalPackArgs {
-    /// Pack name
-    name: String,
-}
 
 pub fn remove_local_pack_command(args: RemoveLocalPackArgs) -> anyhow::Result<()> {
     let mut repo_handle = ClientRepoHandle::open(&std::env::current_dir()?)?;

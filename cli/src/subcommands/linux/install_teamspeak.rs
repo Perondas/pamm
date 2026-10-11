@@ -1,20 +1,7 @@
 use crate::subcommands::linux::proton::detect_proton;
 use anyhow::{anyhow, bail};
-use clap::Args;
+use pamm_cli_args::subcommands::linux::install_teamspeak::InstallTeamspeakArgs;
 use pamm_lib::util::proton::teamspeak::{find_teamspeak, install_teamspeak};
-use std::path::PathBuf;
-
-/// Install TeamSpeak into Arma's Proton prefix
-#[derive(Debug, Args)]
-pub struct InstallTeamspeakArgs {
-    /// Path to the TeamSpeak 3 installer
-    #[arg()]
-    pub installer: PathBuf,
-
-    /// Show the installer wizard. Detaults to false
-    #[arg(long, default_value = "false")]
-    pub interactive: bool,
-}
 
 pub fn install_teamspeak_command(args: InstallTeamspeakArgs) -> anyhow::Result<()> {
     if args

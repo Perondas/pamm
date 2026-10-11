@@ -1,15 +1,7 @@
-use clap::Args;
+use pamm_cli_args::subcommands::optionals::toggle_optionals::ToggleOptionalsArgs;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use pamm_lib::handle::optionals::SaveOptionals;
 use pamm_lib::handle::optionals::load_optionals::LoadOptionals;
-
-/// Interactively enable or disable optional addons of a pack
-#[derive(Debug, Args)]
-pub struct ToggleOptionalsArgs {
-    /// Pack name
-    #[arg()]
-    pub name: String,
-}
 
 pub fn toggle_optionals_command(args: ToggleOptionalsArgs) -> anyhow::Result<()> {
     let handle = ClientRepoHandle::open(&std::env::current_dir()?)?;
