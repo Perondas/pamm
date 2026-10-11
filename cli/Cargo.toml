@@ -8,6 +8,7 @@ license = "GPL-3"
 
 [dependencies]
 pamm_lib = { path = "../lib", features = ["client", "server", "deploy"] }
+pamm_cli_args = { path = "../cli_args" }
 clap = { version = "4.6.1", features = ["derive"] }
 anyhow = "1.0.102"
 dialoguer = "0.12.0"
@@ -17,7 +18,8 @@ log = "0.4.29"
 env_logger = "0.11.11"
 
 [build-dependencies]
-clap = { version = "4.6.1" }
+pamm_cli_args = { path = "../cli_args" }
+clap = "4.6.1"
 clap_mangen = "0.3.3"
 
 [package.metadata.deb]
@@ -26,6 +28,8 @@ copyright = "2026, Perondas"
 license-file = ["../LICENSE"]
 assets = [
     ["target/release/pamm_cli", "usr/bin/", "755"],
+    # Rendered by build.rs. Left uncompressed: cargo-deb only gzips non-built assets.
+    ["target/release/man/*", "usr/share/man/man1/", "644"],
 ]
 
 [package.metadata.rpm]
@@ -36,3 +40,7 @@ buildflags = ["--release"]
 
 [package.metadata.rpm.targets]
 pamm_cli = { path = "/usr/bin/pamm_cli" }
+
+# Rendered by build.rs. Relative to `.rpm`; the spec's brp-compress gzips them.
+[package.metadata.rpm.files]
+"../../target/release/man" = { path = "/usr/share/man/man1" }

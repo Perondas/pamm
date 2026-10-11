@@ -1,12 +1,8 @@
 use crate::commands::input::from_cli_input::FromCliInputWithContext;
-use clap::Args;
+use pamm_cli_args::subcommands::local_packs::add_local_pack::AddLocalPackArgs;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use pamm_lib::handle::reading::get_repo_info::GetRepoInfo;
 use pamm_lib::models::pack::pack_config::PackConfig;
-
-/// Add a pack that only exists locally in your repository
-#[derive(Debug, Args)]
-pub struct AddLocalPackArgs;
 
 pub fn add_local_pack_command(_args: AddLocalPackArgs) -> anyhow::Result<()> {
     let mut repo_handle = ClientRepoHandle::open(&std::env::current_dir()?)?;

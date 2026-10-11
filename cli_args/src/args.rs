@@ -12,7 +12,7 @@ use clap::{Parser, Subcommand};
 
 /// Personal ARMA mod manager CLI
 #[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
+#[command(name = "pamm_cli", author, version, about, long_about = None)]
 pub struct Args {
     #[clap(subcommand)]
     pub command: AppSubcommand,

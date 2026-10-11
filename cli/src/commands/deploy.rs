@@ -1,14 +1,6 @@
-use clap::Args;
+use pamm_cli_args::commands::deploy::DeployArgs;
 use pamm_lib::handle::server_repo_handle::ServerRepoHandle;
 use std::env::current_dir;
-
-/// Deploys a chosen pack to the server
-#[derive(Debug, Args)]
-pub struct DeployArgs {
-    /// Pack name
-    #[arg()]
-    pub name: String,
-}
 
 pub fn deploy_command(args: DeployArgs) -> anyhow::Result<()> {
     let handle = ServerRepoHandle::open(&current_dir()?)?;

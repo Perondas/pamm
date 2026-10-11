@@ -1462,7 +1462,16 @@ dependencies = [
  "env_logger",
  "indicatif",
  "log",
+ "pamm_cli_args",
  "pamm_lib",
+ "url",
+]
+
+[[package]]
+name = "pamm_cli_args"
+version = "0.0.0-local"
+dependencies = [
+ "clap",
  "url",
 ]
 

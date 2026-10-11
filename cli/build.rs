@@ -1,13 +1,28 @@
+use clap::CommandFactory;
+use pamm_cli_args::args::Args;
+use std::path::PathBuf;
+
+/// Renders a man page for every command into `target/<profile>/man`, where
+/// the deb and rpm packaging pick them up.
+///
+/// Writing outside `OUT_DIR` is deliberate: `OUT_DIR` carries a hash, so
+/// packaging could not name it.
 fn main() -> std::io::Result<()> {
-    let out_dir = std::path::PathBuf::from(std::env::var_os("OUT_DIR").ok_or(std::io::ErrorKind::NotFound)?);
+    println!("cargo:rerun-if-changed=build.rs");
 
-    let cmd = crate::args::Args::command();
+    let out_dir = PathBuf::from(std::env::var_os("OUT_DIR").ok_or(std::io::ErrorKind::NotFound)?);
 
-    let man = clap_mangen::Man::new(cmd);
-    let mut buffer: Vec<u8> = Default::default();
-    man.render(&mut buffer)?;
+    // OUT_DIR is target/<profile>/build/pamm_cli-<hash>/out.
+    let man_dir = out_dir
+        .ancestors()
+        .nth(3)
+        .ok_or(std::io::ErrorKind::NotFound)?
+        .join("man");
 
-    std::fs::write(out_dir.join("mybin.1"), buffer)?;
-
-    Ok(())
+    // Start clean, so pages of removed commands do not linger.
+    if man_dir.exists() {
+        std::fs::remove_dir_all(&man_dir)?;
+    }
+    std::fs::create_dir_all(&man_dir)?;
+    clap_mangen::generate_to(Args::command(), &man_dir)
 }

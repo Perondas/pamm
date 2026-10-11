@@ -1,12 +1,8 @@
 use crate::commands::input::from_cli_input::FromCliInputWithContext;
-use clap::Args;
+use pamm_cli_args::commands::add_pack::AddPackArgs;
 use pamm_lib::handle::reading::get_repo_info::GetRepoInfo;
 use pamm_lib::handle::server_repo_handle::ServerRepoHandle;
 use pamm_lib::models::pack::pack_config::PackConfig;
-
-/// Add a pack to a local repository
-#[derive(Debug, Args)]
-pub struct AddPackArgs;
 
 pub fn add_pack_command(_args: AddPackArgs) -> anyhow::Result<()> {
     let mut repo_handle = ServerRepoHandle::open(&std::env::current_dir()?)?;

@@ -1,0 +1,13 @@
+[package]
+name = "pamm_cli_args"
+# `pamm_cli --version` and `--help` are read from this crate, so version and
+# description are kept in step with pamm_cli.
+version = "0.0.0-local"
+edition = "2024"
+authors = ["Perondas <thomas@perondas.dev>"]
+description = "A command-line interface for pamm, a arma 3 mod manager."
+license = "GPL-3"
+
+[dependencies]
+clap = { version = "4.6.1", features = ["derive"] }
+url = "2.5.8"
