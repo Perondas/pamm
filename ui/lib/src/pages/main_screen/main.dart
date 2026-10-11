@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:pamm_ui/src/pages/main_screen/repo_details/main.dart';
 import 'package:pamm_ui/src/pages/main_screen/repo_list/main.dart';
 import 'package:pamm_ui/src/pages/settings_screen/main.dart';
 import 'package:pamm_ui/src/services/repo_state_store.dart';
 import 'package:pamm_ui/src/services/theme_service.dart';
+import 'package:pamm_ui/src/widgets/proton_dialog.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -35,13 +38,29 @@ class _MainScreenState extends State<MainScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: IconButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => SettingsScreen()),
-                    );
-                  },
-                  icon: Icon(Icons.settings),
+                child: Row(
+                  children: [
+                    IconButton(
+                      tooltip: "Settings",
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => SettingsScreen(),
+                          ),
+                        );
+                      },
+                      icon: Icon(Icons.settings),
+                    ),
+                    if (Platform.isLinux)
+                      IconButton(
+                        tooltip: "Proton",
+                        onPressed: () => showDialog<void>(
+                          context: context,
+                          builder: (_) => const ProtonDialog(),
+                        ),
+                        icon: const Icon(Icons.wine_bar),
+                      ),
+                  ],
                 ),
               ),
             ],

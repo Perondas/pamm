@@ -19,7 +19,7 @@ import 'package:pamm_ui/src/util/media.dart';
 import 'package:pamm_ui/src/widgets/confirm_dialog.dart';
 import 'package:pamm_ui/src/widgets/linux_setup_dialog.dart';
 import 'package:pamm_ui/src/widgets/media_icon.dart';
-import 'package:pamm_ui/src/widgets/proton_dialog.dart';
+import 'package:pamm_ui/src/widgets/launch_teamspeak_button.dart';
 
 class RepoDetails extends StatefulWidget {
   const RepoDetails(this.selectedRepo, {super.key});
@@ -74,14 +74,7 @@ class _RepoDetailsState extends State<RepoDetails> {
                         icon: const Icon(Icons.settings_suggest),
                         label: const Text("Steam setup"),
                       ),
-                      OutlinedButton.icon(
-                        onPressed: () => showDialog<void>(
-                          context: context,
-                          builder: (_) => const ProtonDialog(),
-                        ),
-                        icon: const Icon(Icons.wine_bar),
-                        label: const Text("Proton"),
-                      ),
+                      const LaunchTeamspeakButton(),
                     ],
                   ),
                 ],
