@@ -27,6 +27,7 @@
 
 // Section: imports
 
+use crate::api::commands::pack_sync::cancellation::*;
 use crate::api::commands::pack_sync::get_diff::*;
 use crate::api::progress_reporting::*;
 use flutter_rust_bridge::for_generated::byteorder::{NativeEndian, ReadBytesExt, WriteBytesExt};
@@ -41,7 +42,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -585565756;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1091330654;
 
 // Section: executor
 
@@ -49,6 +50,56 @@ flutter_rust_bridge::frb_generated_default_handler!();
 
 // Section: wire_funcs
 
+fn wire__crate__api__commands__pack_sync__cancellation__DownloadCancelToken_cancel_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "DownloadCancelToken_cancel",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_that = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DownloadCancelToken>,
+            >>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let mut api_that_guard = None;
+                let decode_indices_ =
+                    flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                            &api_that, 0, false,
+                        ),
+                    ]);
+                for i in decode_indices_ {
+                    match i {
+                        0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                        _ => unreachable!(),
+                    }
+                }
+                let api_that_guard = api_that_guard.unwrap();
+                let output_ok = Ok::<_, ()>({
+                    crate::api::commands::pack_sync::cancellation::DownloadCancelToken::cancel(
+                        &*api_that_guard,
+                    );
+                })?;
+                std::result::Result::Ok(output_ok)
+            })())
+        },
+    )
+}
 fn wire__crate__api__commands__local_pack__add_local_pack__add_local_pack_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -100,6 +151,37 @@ fn wire__crate__api__progress_reporting__create_dart_progress_reporter_impl(
                     crate::api::progress_reporting::create_dart_progress_reporter(
                         api_sink, api__dummy,
                     ),
+                )?;
+                std::result::Result::Ok(output_ok)
+            })())
+        },
+    )
+}
+fn wire__crate__api__commands__pack_sync__cancellation__create_download_cancel_token_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "create_download_cancel_token",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok = Ok::<_, ()>(
+                    crate::api::commands::pack_sync::cancellation::create_download_cancel_token(),
                 )?;
                 std::result::Result::Ok(output_ok)
             })())
@@ -1298,15 +1380,38 @@ fn wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(
             let api_repo_path = <String>::sse_decode(&mut deserializer);
             let api_dart_progress_reporter = <DartProgressReporter>::sse_decode(&mut deserializer);
             let api_diff = <OpaqueDiff>::sse_decode(&mut deserializer);
+            let api_cancel_token = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DownloadCancelToken>,
+            >>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || async move {
+                        let mut api_cancel_token_guard = None;
+                        let decode_indices_ =
+                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
+                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                    &api_cancel_token,
+                                    0,
+                                    false,
+                                )],
+                            );
+                        for i in decode_indices_ {
+                            match i {
+                                0 => {
+                                    api_cancel_token_guard =
+                                        Some(api_cancel_token.lockable_decode_async_ref().await)
+                                }
+                                _ => unreachable!(),
+                            }
+                        }
+                        let api_cancel_token_guard = api_cancel_token_guard.unwrap();
                         let output_ok = crate::api::commands::pack_sync::sync_pack::sync_pack(
                             api_pack_name,
                             api_repo_path,
                             api_dart_progress_reporter,
                             api_diff,
+                            &*api_cancel_token_guard,
                         )
                         .await?;
                         std::result::Result::Ok(output_ok)
@@ -1328,9 +1433,19 @@ fn wire__crate__api__commands__pack_sync__sync_pack_with_parents__sync_pack_with
             let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_repo_path = <String>::sse_decode(&mut deserializer);
 let api_dart_progress_reporter = <DartProgressReporter>::sse_decode(&mut deserializer);
-let api_diffs = <Vec<OpaqueDiff>>::sse_decode(&mut deserializer);deserializer.end(); move |context| async move {
+let api_diffs = <Vec<OpaqueDiff>>::sse_decode(&mut deserializer);
+let api_cancel_token = <RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DownloadCancelToken>>>::sse_decode(&mut deserializer);deserializer.end(); move |context| async move {
                     transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move || async move {
-                         let output_ok = crate::api::commands::pack_sync::sync_pack_with_parents::sync_pack_with_parents(api_repo_path, api_dart_progress_reporter, api_diffs).await?;   std::result::Result::Ok(output_ok)
+                        let mut api_cancel_token_guard = None;
+let decode_indices_ = flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(&api_cancel_token, 0, false)]);
+        for i in decode_indices_ {
+            match i {
+                0 => api_cancel_token_guard = Some(api_cancel_token.lockable_decode_async_ref().await),
+                _ => unreachable!(),
+            }
+        }
+        let api_cancel_token_guard = api_cancel_token_guard.unwrap();
+ let output_ok = crate::api::commands::pack_sync::sync_pack_with_parents::sync_pack_with_parents(api_repo_path, api_dart_progress_reporter, api_diffs, &*api_cancel_token_guard).await?;   std::result::Result::Ok(output_ok)
                     })().await)
                 } })
 }
@@ -1375,6 +1490,9 @@ flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
     flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DartProgressReporter>
 );
 flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
+    flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DownloadCancelToken>
+);
+flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
     flutter_rust_bridge::for_generated::RustAutoOpaqueInner<OpaqueDiff>
 );
 
@@ -1408,6 +1526,16 @@ impl SseDecode for DartProgressReporter {
     }
 }
 
+impl SseDecode for DownloadCancelToken {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <RustOpaqueMoi<
+            flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DownloadCancelToken>,
+        >>::sse_decode(deserializer);
+        return flutter_rust_bridge::for_generated::rust_auto_opaque_decode_owned(inner);
+    }
+}
+
 impl SseDecode for OpaqueDiff {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1436,6 +1564,16 @@ impl SseDecode
 
 impl SseDecode
     for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DartProgressReporter>>
+{
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <usize>::sse_decode(deserializer);
+        return decode_rust_opaque_moi(inner);
+    }
+}
+
+impl SseDecode
+    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DownloadCancelToken>>
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1543,6 +1681,18 @@ impl SseDecode for crate::api::commands::pack_sync::get_diff::DiffResult {
             total_dl_size: var_totalDlSize,
             total_size_change: var_totalSizeChange,
             file_changes: var_fileChanges,
+        };
+    }
+}
+
+impl SseDecode for crate::api::commands::pack_sync::cancellation::DownloadOutcome {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::commands::pack_sync::cancellation::DownloadOutcome::Completed,
+            1 => crate::api::commands::pack_sync::cancellation::DownloadOutcome::Cancelled,
+            _ => unreachable!("Invalid variant for DownloadOutcome: {}", inner),
         };
     }
 }
@@ -1988,35 +2138,35 @@ fn pde_ffi_dispatcher_primary_impl(
 ) {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-                        1 => wire__crate__api__commands__local_pack__add_local_pack__add_local_pack_impl(port, ptr, rust_vec_len, data_len),
-3 => wire__crate__api__commands__pack_sync__get_diff__get_diff_impl(port, ptr, rust_vec_len, data_len),
-4 => wire__crate__api__commands__pack_sync__get_diffs_with_parents__get_diff_with_parents_impl(port, ptr, rust_vec_len, data_len),
-5 => wire__crate__api__commands__params__get_launch_params_impl(port, ptr, rust_vec_len, data_len),
-6 => wire__crate__api__commands__get_remote_repo_info__get_remote_repo_info_impl(port, ptr, rust_vec_len, data_len),
-7 => wire__crate__api__commands__params__get_server_launch_params_impl(port, ptr, rust_vec_len, data_len),
-9 => wire__crate__api__commands__init_from_remote__init_from_remote_impl(port, ptr, rust_vec_len, data_len),
-11 => wire__crate__api__commands__launch__launch_impl(port, ptr, rust_vec_len, data_len),
-12 => wire__crate__api__commands__linux_setup__linux_setup_info_impl(port, ptr, rust_vec_len, data_len),
-13 => wire__crate__api__commands__externals__load_externals__load_externals_impl(port, ptr, rust_vec_len, data_len),
-14 => wire__crate__api__commands__optionals__load_optionals__load_optionals_impl(port, ptr, rust_vec_len, data_len),
-15 => wire__crate__api__commands__load_pack_display__load_pack_display_impl(port, ptr, rust_vec_len, data_len),
-16 => wire__crate__api__commands__load_repo__load_repo_impl(port, ptr, rust_vec_len, data_len),
-17 => wire__crate__api__commands__user_repo_settings__load_settings__load_settings_impl(port, ptr, rust_vec_len, data_len),
-18 => wire__crate__api__commands__proton__proton_info_impl(port, ptr, rust_vec_len, data_len),
-19 => wire__crate__api__commands__proton__proton_install_teamspeak_impl(port, ptr, rust_vec_len, data_len),
-20 => wire__crate__api__commands__proton__proton_kill_all_impl(port, ptr, rust_vec_len, data_len),
-21 => wire__crate__api__commands__proton__proton_launch_teamspeak_impl(port, ptr, rust_vec_len, data_len),
-22 => wire__crate__api__commands__proton__proton_open_explorer_impl(port, ptr, rust_vec_len, data_len),
-23 => wire__crate__api__commands__pack_sync__quick_check__quick_check_impl(port, ptr, rust_vec_len, data_len),
-24 => wire__crate__api__commands__local_pack__remove_local_pack__remove_local_pack_impl(port, ptr, rust_vec_len, data_len),
-25 => wire__crate__api__commands__externals__save_externals__save_externals_impl(port, ptr, rust_vec_len, data_len),
-26 => wire__crate__api__commands__optionals__save_optionals__save_optionals_impl(port, ptr, rust_vec_len, data_len),
-27 => wire__crate__api__commands__user_repo_settings__save_settings__save_settings_impl(port, ptr, rust_vec_len, data_len),
-28 => wire__crate__api__commands__params__set_launch_params_impl(port, ptr, rust_vec_len, data_len),
-30 => wire__crate__api__commands__sync_config__sync_config_impl(port, ptr, rust_vec_len, data_len),
-31 => wire__crate__api__commands__local_pack__sync_local_pack__sync_local_pack_impl(port, ptr, rust_vec_len, data_len),
-32 => wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(port, ptr, rust_vec_len, data_len),
-33 => wire__crate__api__commands__pack_sync__sync_pack_with_parents__sync_pack_with_parents_impl(port, ptr, rust_vec_len, data_len),
+                        2 => wire__crate__api__commands__local_pack__add_local_pack__add_local_pack_impl(port, ptr, rust_vec_len, data_len),
+5 => wire__crate__api__commands__pack_sync__get_diff__get_diff_impl(port, ptr, rust_vec_len, data_len),
+6 => wire__crate__api__commands__pack_sync__get_diffs_with_parents__get_diff_with_parents_impl(port, ptr, rust_vec_len, data_len),
+7 => wire__crate__api__commands__params__get_launch_params_impl(port, ptr, rust_vec_len, data_len),
+8 => wire__crate__api__commands__get_remote_repo_info__get_remote_repo_info_impl(port, ptr, rust_vec_len, data_len),
+9 => wire__crate__api__commands__params__get_server_launch_params_impl(port, ptr, rust_vec_len, data_len),
+11 => wire__crate__api__commands__init_from_remote__init_from_remote_impl(port, ptr, rust_vec_len, data_len),
+13 => wire__crate__api__commands__launch__launch_impl(port, ptr, rust_vec_len, data_len),
+14 => wire__crate__api__commands__linux_setup__linux_setup_info_impl(port, ptr, rust_vec_len, data_len),
+15 => wire__crate__api__commands__externals__load_externals__load_externals_impl(port, ptr, rust_vec_len, data_len),
+16 => wire__crate__api__commands__optionals__load_optionals__load_optionals_impl(port, ptr, rust_vec_len, data_len),
+17 => wire__crate__api__commands__load_pack_display__load_pack_display_impl(port, ptr, rust_vec_len, data_len),
+18 => wire__crate__api__commands__load_repo__load_repo_impl(port, ptr, rust_vec_len, data_len),
+19 => wire__crate__api__commands__user_repo_settings__load_settings__load_settings_impl(port, ptr, rust_vec_len, data_len),
+20 => wire__crate__api__commands__proton__proton_info_impl(port, ptr, rust_vec_len, data_len),
+21 => wire__crate__api__commands__proton__proton_install_teamspeak_impl(port, ptr, rust_vec_len, data_len),
+22 => wire__crate__api__commands__proton__proton_kill_all_impl(port, ptr, rust_vec_len, data_len),
+23 => wire__crate__api__commands__proton__proton_launch_teamspeak_impl(port, ptr, rust_vec_len, data_len),
+24 => wire__crate__api__commands__proton__proton_open_explorer_impl(port, ptr, rust_vec_len, data_len),
+25 => wire__crate__api__commands__pack_sync__quick_check__quick_check_impl(port, ptr, rust_vec_len, data_len),
+26 => wire__crate__api__commands__local_pack__remove_local_pack__remove_local_pack_impl(port, ptr, rust_vec_len, data_len),
+27 => wire__crate__api__commands__externals__save_externals__save_externals_impl(port, ptr, rust_vec_len, data_len),
+28 => wire__crate__api__commands__optionals__save_optionals__save_optionals_impl(port, ptr, rust_vec_len, data_len),
+29 => wire__crate__api__commands__user_repo_settings__save_settings__save_settings_impl(port, ptr, rust_vec_len, data_len),
+30 => wire__crate__api__commands__params__set_launch_params_impl(port, ptr, rust_vec_len, data_len),
+32 => wire__crate__api__commands__sync_config__sync_config_impl(port, ptr, rust_vec_len, data_len),
+33 => wire__crate__api__commands__local_pack__sync_local_pack__sync_local_pack_impl(port, ptr, rust_vec_len, data_len),
+34 => wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(port, ptr, rust_vec_len, data_len),
+35 => wire__crate__api__commands__pack_sync__sync_pack_with_parents__sync_pack_with_parents_impl(port, ptr, rust_vec_len, data_len),
                         _ => unreachable!(),
                     }
 }
@@ -2029,14 +2179,26 @@ fn pde_ffi_dispatcher_sync_impl(
 ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        2 => wire__crate__api__progress_reporting__create_dart_progress_reporter_impl(
+        1 => wire__crate__api__commands__pack_sync__cancellation__DownloadCancelToken_cancel_impl(
             ptr,
             rust_vec_len,
             data_len,
         ),
-        8 => wire__crate__api__init_app_impl(ptr, rust_vec_len, data_len),
-        10 => wire__crate__api__logging__init_rust_logger_impl(ptr, rust_vec_len, data_len),
-        29 => wire__crate__api__logging__set_rust_log_level_impl(ptr, rust_vec_len, data_len),
+        3 => wire__crate__api__progress_reporting__create_dart_progress_reporter_impl(
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
+        4 => {
+            wire__crate__api__commands__pack_sync__cancellation__create_download_cancel_token_impl(
+                ptr,
+                rust_vec_len,
+                data_len,
+            )
+        }
+        10 => wire__crate__api__init_app_impl(ptr, rust_vec_len, data_len),
+        12 => wire__crate__api__logging__init_rust_logger_impl(ptr, rust_vec_len, data_len),
+        31 => wire__crate__api__logging__set_rust_log_level_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -2057,6 +2219,24 @@ impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
 
 impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<DartProgressReporter>> for DartProgressReporter {
     fn into_into_dart(self) -> FrbWrapper<DartProgressReporter> {
+        self.into()
+    }
+}
+
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<DownloadCancelToken> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self.0)
+            .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<DownloadCancelToken>
+{
+}
+
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<DownloadCancelToken>> for DownloadCancelToken {
+    fn into_into_dart(self) -> FrbWrapper<DownloadCancelToken> {
         self.into()
     }
 }
@@ -2135,6 +2315,31 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::pack_sync::get_diff
     for crate::api::commands::pack_sync::get_diff::DiffResult
 {
     fn into_into_dart(self) -> crate::api::commands::pack_sync::get_diff::DiffResult {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart
+    for crate::api::commands::pack_sync::cancellation::DownloadOutcome
+{
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::Completed => 0.into_dart(),
+            Self::Cancelled => 1.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::commands::pack_sync::cancellation::DownloadOutcome
+{
+}
+impl
+    flutter_rust_bridge::IntoIntoDart<
+        crate::api::commands::pack_sync::cancellation::DownloadOutcome,
+    > for crate::api::commands::pack_sync::cancellation::DownloadOutcome
+{
+    fn into_into_dart(self) -> crate::api::commands::pack_sync::cancellation::DownloadOutcome {
         self
     }
 }
@@ -2490,6 +2695,13 @@ impl SseEncode for DartProgressReporter {
     }
 }
 
+impl SseEncode for DownloadCancelToken {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DownloadCancelToken>>>::sse_encode(flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self), serializer);
+    }
+}
+
 impl SseEncode for OpaqueDiff {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -2514,6 +2726,17 @@ impl SseEncode
 
 impl SseEncode
     for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DartProgressReporter>>
+{
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        let (ptr, size) = self.sse_encode_raw();
+        <usize>::sse_encode(ptr, serializer);
+        <i32>::sse_encode(size, serializer);
+    }
+}
+
+impl SseEncode
+    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DownloadCancelToken>>
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -2608,6 +2831,22 @@ impl SseEncode for crate::api::commands::pack_sync::get_diff::DiffResult {
             String,
             Vec<crate::api::commands::pack_sync::file_change::FileChange>,
         >>::sse_encode(self.file_changes, serializer);
+    }
+}
+
+impl SseEncode for crate::api::commands::pack_sync::cancellation::DownloadOutcome {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::commands::pack_sync::cancellation::DownloadOutcome::Completed => 0,
+                crate::api::commands::pack_sync::cancellation::DownloadOutcome::Cancelled => 1,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
     }
 }
 
@@ -2976,6 +3215,7 @@ mod io {
     // Section: imports
 
     use super::*;
+    use crate::api::commands::pack_sync::cancellation::*;
     use crate::api::commands::pack_sync::get_diff::*;
     use crate::api::progress_reporting::*;
     use flutter_rust_bridge::for_generated::byteorder::{
@@ -3000,6 +3240,20 @@ mod io {
         ptr: *const std::ffi::c_void,
     ) {
         MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DartProgressReporter>>::decrement_strong_count(ptr as _);
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_pamm_ui_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelToken(
+        ptr: *const std::ffi::c_void,
+    ) {
+        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DownloadCancelToken>>::increment_strong_count(ptr as _);
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_pamm_ui_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelToken(
+        ptr: *const std::ffi::c_void,
+    ) {
+        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DownloadCancelToken>>::decrement_strong_count(ptr as _);
     }
 
     #[unsafe(no_mangle)]
@@ -3028,6 +3282,7 @@ mod web {
     // Section: imports
 
     use super::*;
+    use crate::api::commands::pack_sync::cancellation::*;
     use crate::api::commands::pack_sync::get_diff::*;
     use crate::api::progress_reporting::*;
     use flutter_rust_bridge::for_generated::byteorder::{
@@ -3054,6 +3309,20 @@ mod web {
         ptr: *const std::ffi::c_void,
     ) {
         MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DartProgressReporter>>::decrement_strong_count(ptr as _);
+    }
+
+    #[wasm_bindgen]
+    pub fn rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelToken(
+        ptr: *const std::ffi::c_void,
+    ) {
+        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DownloadCancelToken>>::increment_strong_count(ptr as _);
+    }
+
+    #[wasm_bindgen]
+    pub fn rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelToken(
+        ptr: *const std::ffi::c_void,
+    ) {
+        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DownloadCancelToken>>::decrement_strong_count(ptr as _);
     }
 
     #[wasm_bindgen]

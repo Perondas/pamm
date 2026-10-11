@@ -1,3 +1,4 @@
+pub mod cancellation;
 pub mod file_change;
 pub mod get_diff;
 pub mod get_diffs_with_parents;

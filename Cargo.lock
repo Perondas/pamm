@@ -2351,6 +2351,8 @@ dependencies = [
  "log",
  "pamm_lib",
  "serde_json",
+ "tokio",
+ "tokio-util",
  "url",
 ]
 

@@ -5,17 +5,20 @@
 
 import '../../../frb_generated.dart';
 import '../../progress_reporting.dart';
+import 'cancellation.dart';
 import 'get_diff.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-Future<void> syncPack({
+Future<DownloadOutcome> syncPack({
   required String packName,
   required String repoPath,
   required DartProgressReporter dartProgressReporter,
   required OpaqueDiff diff,
+  required DownloadCancelToken cancelToken,
 }) => RustLib.instance.api.crateApiCommandsPackSyncSyncPackSyncPack(
   packName: packName,
   repoPath: repoPath,
   dartProgressReporter: dartProgressReporter,
   diff: diff,
+  cancelToken: cancelToken,
 );
