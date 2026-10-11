@@ -1,5 +1,4 @@
-use anyhow::{anyhow, bail};
-use std::collections::HashSet;
+use anyhow::{Context, anyhow, bail};
 use std::path::{Path, PathBuf};
 
 pub const STEAM_FLATPAK_ID: &str = "com.valvesoftware.Steam";
@@ -38,10 +37,6 @@ impl SteamInstall {
 
     pub fn flavour(&self) -> SteamFlavour {
         self.flavour
-    }
-
-    pub fn library_folders_path(&self) -> PathBuf {
-        self.root.join("steamapps").join("libraryfolders.vdf")
     }
 
     /// The host directory the sandbox presents to the game as `$HOME`.
@@ -128,97 +123,49 @@ impl SteamInstall {
     }
 }
 
-/// Steam roots relative to `$HOME`, in order of preference, paired with the
-/// flavour that root implies.
-const STEAM_ROOT_CANDIDATES: &[(&str, SteamFlavour)] = &[
-    (".steam/root", SteamFlavour::Native),
-    (".steam/steam", SteamFlavour::Native),
-    (".local/share/Steam", SteamFlavour::Native),
-    (
-        ".var/app/com.valvesoftware.Steam/.local/share/Steam",
-        SteamFlavour::Flatpak,
-    ),
-    (
-        ".var/app/com.valvesoftware.Steam/data/Steam",
-        SteamFlavour::Flatpak,
-    ),
-    // Snap is out of scope for the Flatpak/pressure-vessel handling below, but
-    // it is still a place Steam can be, so keep finding it.
-    ("snap/steam/common/.local/share/Steam", SteamFlavour::Native),
-];
-
 fn home_dir() -> anyhow::Result<PathBuf> {
     std::env::home_dir().ok_or_else(|| anyhow!("Unable to find home directory"))
 }
 
-/// Every Steam root candidate we know of, tagged with its flavour. Explicit
-/// environment overrides win; their flavour is inferred from the path.
-fn candidate_roots(home: &Path) -> Vec<(PathBuf, SteamFlavour)> {
-    let flatpak_marker = home.join(".var").join("app").join(STEAM_FLATPAK_ID);
-    let flavour_of = |root: &Path| {
-        if root.starts_with(&flatpak_marker) {
-            SteamFlavour::Flatpak
-        } else {
-            SteamFlavour::Native
-        }
-    };
-
-    let mut roots: Vec<(PathBuf, SteamFlavour)> = Vec::new();
-
-    if let Some(root) = std::env::var_os("STEAM_ROOT") {
-        let root = PathBuf::from(root);
-        let flavour = flavour_of(&root);
-        roots.push((root, flavour));
+/// Flatpak Steam lives under its persisted home, everything else is native.
+fn flavour_of(root: &Path, home: &Path) -> SteamFlavour {
+    if root.starts_with(home.join(".var").join("app").join(STEAM_FLATPAK_ID)) {
+        SteamFlavour::Flatpak
+    } else {
+        SteamFlavour::Native
     }
-    if let Some(data_home) = std::env::var_os("XDG_DATA_HOME") {
-        let root = Path::new(&data_home).join("Steam");
-        let flavour = flavour_of(&root);
-        roots.push((root, flavour));
-    }
-
-    roots.extend(
-        STEAM_ROOT_CANDIDATES
-            .iter()
-            .map(|(rel, flavour)| (home.join(rel), *flavour)),
-    );
-
-    roots
 }
 
 /// Every Steam installation on this machine that has a `libraryfolders.vdf`,
-/// deduplicated.
+/// native installs first.
 pub fn find_steam_installs() -> anyhow::Result<Vec<SteamInstall>> {
     let home = home_dir()?;
     log::trace!("Found home directory: {home:?}");
 
-    let candidates = candidate_roots(&home);
-    let mut found = Vec::new();
-    let mut seen = HashSet::new();
-
-    for (root, flavour) in &candidates {
-        let manifest = root.join("steamapps").join("libraryfolders.vdf");
-        if !manifest.is_file() {
-            log::trace!("No libraryfolders.vdf at {manifest:?}");
-            continue;
-        }
-        // ~/.steam/root, ~/.steam/steam and ~/.local/share/Steam are usually
-        // symlinks onto the same directory, so canonicalize before deduping.
-        let key = manifest.canonicalize().unwrap_or_else(|_| manifest.clone());
-        if seen.insert(key) {
+    let mut found: Vec<SteamInstall> = steamlocate::locate_all()
+        .context("Failed to locate Steam")?
+        .into_iter()
+        .map(|dir| dir.path().to_path_buf())
+        .filter(|root| {
+            let manifest = root.join("steamapps").join("libraryfolders.vdf");
+            let exists = manifest.is_file();
+            if !exists {
+                log::trace!("No libraryfolders.vdf at {manifest:?}");
+            }
+            exists
+        })
+        .map(|root| {
+            let flavour = flavour_of(&root, &home);
             log::debug!("Found {flavour:?} Steam install at {root:?}");
-            found.push(SteamInstall::new(root.clone(), *flavour, home.clone()));
-        } else {
-            log::trace!("Skipping {root:?}, duplicate of an earlier candidate");
-        }
-    }
+            SteamInstall::new(root, flavour, home.clone())
+        })
+        .collect();
+
+    // steamlocate lists Flatpak first; prefer native when both hold Arma.
+    found.sort_by_key(|install| install.flavour() == SteamFlavour::Flatpak);
 
     if found.is_empty() {
-        let tried = candidates
-            .iter()
-            .map(|(root, _)| format!("  {}", root.display()))
-            .collect::<Vec<_>>()
-            .join("\n");
-        bail!("No Steam installation found in any known location. Tried:\n{tried}");
+        bail!("No Steam installation found in any known location");
     }
 
     Ok(found)
@@ -358,26 +305,19 @@ mod tests {
     }
 
     #[test]
-    fn candidate_roots_tag_flatpak_paths_as_flatpak() {
+    fn flatpak_roots_are_tagged_as_flatpak() {
         let home = PathBuf::from("/home/bob");
-        let candidates = candidate_roots(&home);
-
-        let flatpak_root = home.join(".var/app/com.valvesoftware.Steam/.local/share/Steam");
-        let native_root = home.join(".local/share/Steam");
 
         assert_eq!(
-            candidates
-                .iter()
-                .find(|(root, _)| *root == flatpak_root)
-                .map(|(_, flavour)| *flavour),
-            Some(SteamFlavour::Flatpak)
+            flavour_of(
+                &home.join(".var/app/com.valvesoftware.Steam/.local/share/Steam"),
+                &home
+            ),
+            SteamFlavour::Flatpak
         );
         assert_eq!(
-            candidates
-                .iter()
-                .find(|(root, _)| *root == native_root)
-                .map(|(_, flavour)| *flavour),
-            Some(SteamFlavour::Native)
+            flavour_of(&home.join(".local/share/Steam"), &home),
+            SteamFlavour::Native
         );
     }
 }
