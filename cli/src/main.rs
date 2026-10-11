@@ -47,7 +47,20 @@ fn main() -> Result<()> {
         AppSubcommand::SyncThisOnly(args) => sync_this_only_pack_command(args, log_wrapper),
         AppSubcommand::Launch(args) => launch_command(args),
         #[cfg(target_os = "linux")]
-        AppSubcommand::Setup(args) => commands::linux_setup::setup_command(args),
+        AppSubcommand::Linux(args) => {
+            use subcommands::linux::*;
+            match args.command {
+                None => status::status_command(),
+                Some(LinuxSubcommand::InstallTeamspeak(args)) => {
+                    install_teamspeak::install_teamspeak_command(args)
+                }
+                Some(LinuxSubcommand::Teamspeak(args)) => {
+                    launch_teamspeak::launch_teamspeak_command(args)
+                }
+                Some(LinuxSubcommand::Explorer(args)) => explorer::explorer_command(args),
+                Some(LinuxSubcommand::Kill(args)) => kill::kill_command(args),
+            }
+        }
         AppSubcommand::Externals(args) => match args.command {
             ExternalsSubcommand::Toggle(args) => toggle_externals_command(args),
             ExternalsSubcommand::Add(args) => add_external_command(args),

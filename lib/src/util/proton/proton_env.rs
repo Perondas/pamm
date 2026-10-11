@@ -4,7 +4,9 @@
 //! programs started by pamm share the game's wineserver.
 
 use crate::util::dirs::arma_install::ArmaInstall;
-use crate::util::proton::paths::{compat_data_dir, proton_dir_from_config_info, wine_prefix};
+use crate::util::proton::paths::{
+    compat_data_dir, proton_dir_from_config_info, proton_version, wine_prefix,
+};
 use anyhow::{Context, bail};
 use std::path::PathBuf;
 use std::process::{Child, Command, ExitStatus, Stdio};
@@ -43,6 +45,10 @@ impl Proton {
 
     pub fn prefix(&self) -> PathBuf {
         wine_prefix(&self.compat_data)
+    }
+
+    pub fn version(&self) -> anyhow::Result<String> {
+        proton_version(&self.compat_data)
     }
 
     /// `proton run <program> <args>`, with the environment Proton needs.

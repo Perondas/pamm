@@ -49,6 +49,21 @@ pub fn proton_dir_from_config_info(
     })
 }
 
+/// The Proton version that set up the prefix, from the first line of
+/// `config_info`.
+pub fn proton_version(compat_data: &Path) -> anyhow::Result<String> {
+    let config_info_path = compat_data.join("config_info");
+    let config_info = std::fs::read_to_string(&config_info_path)
+        .with_context(|| format!("Failed to read {config_info_path:?}"))?;
+
+    config_info
+        .lines()
+        .next()
+        .map(|line| line.trim().to_string())
+        .filter(|line| !line.is_empty())
+        .with_context(|| format!("{config_info_path:?} is empty"))
+}
+
 /// Maps a Windows `C:\...` path to its location inside the prefix.
 pub fn windows_to_prefix_path(prefix: &Path, windows_path: &str) -> Option<PathBuf> {
     let (drive, rest) = windows_path.split_once(":\\")?;
