@@ -46,7 +46,7 @@ pub fn launch_command(args: LaunchArgs) -> anyhow::Result<()> {
 
     if let Some(preset_path) = outcome.preset_path {
         println!("Wrote preset to {preset_path}");
-        println!("If Arma starts without mods, check `pamm setup`.");
+        println!("If Arma starts without mods, check `pamm linux`.");
     }
 
     Ok(())

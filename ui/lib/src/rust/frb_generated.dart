@@ -24,6 +24,7 @@ import 'api/commands/pack_sync/quick_check.dart';
 import 'api/commands/pack_sync/sync_pack.dart';
 import 'api/commands/pack_sync/sync_pack_with_parents.dart';
 import 'api/commands/params.dart';
+import 'api/commands/proton.dart';
 import 'api/commands/sync_config.dart';
 import 'api/commands/user_repo_settings.dart';
 import 'api/commands/user_repo_settings/load_settings.dart';
@@ -90,7 +91,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.13.0';
 
   @override
-  int get rustContentHash => 320472387;
+  int get rustContentHash => -585565756;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -186,6 +187,19 @@ abstract class RustLibApi extends BaseApi {
   crateApiCommandsUserRepoSettingsLoadSettingsLoadSettings({
     required String repoPath,
   });
+
+  Future<ProtonInfo> crateApiCommandsProtonProtonInfo();
+
+  Future<void> crateApiCommandsProtonProtonInstallTeamspeak({
+    required String installer,
+    required bool silent,
+  });
+
+  Future<void> crateApiCommandsProtonProtonKillAll();
+
+  Future<void> crateApiCommandsProtonProtonLaunchTeamspeak();
+
+  Future<void> crateApiCommandsProtonProtonOpenExplorer({String? path});
 
   Future<bool> crateApiCommandsPackSyncQuickCheckQuickCheck({
     required String packName,
@@ -870,6 +884,153 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "load_settings", argNames: ["repoPath"]);
 
   @override
+  Future<ProtonInfo> crateApiCommandsProtonProtonInfo() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 18,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_proton_info,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiCommandsProtonProtonInfoConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiCommandsProtonProtonInfoConstMeta =>
+      const TaskConstMeta(debugName: "proton_info", argNames: []);
+
+  @override
+  Future<void> crateApiCommandsProtonProtonInstallTeamspeak({
+    required String installer,
+    required bool silent,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(installer, serializer);
+          sse_encode_bool(silent, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 19,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiCommandsProtonProtonInstallTeamspeakConstMeta,
+        argValues: [installer, silent],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiCommandsProtonProtonInstallTeamspeakConstMeta =>
+      const TaskConstMeta(
+        debugName: "proton_install_teamspeak",
+        argNames: ["installer", "silent"],
+      );
+
+  @override
+  Future<void> crateApiCommandsProtonProtonKillAll() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 20,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiCommandsProtonProtonKillAllConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiCommandsProtonProtonKillAllConstMeta =>
+      const TaskConstMeta(debugName: "proton_kill_all", argNames: []);
+
+  @override
+  Future<void> crateApiCommandsProtonProtonLaunchTeamspeak() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 21,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiCommandsProtonProtonLaunchTeamspeakConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiCommandsProtonProtonLaunchTeamspeakConstMeta =>
+      const TaskConstMeta(debugName: "proton_launch_teamspeak", argNames: []);
+
+  @override
+  Future<void> crateApiCommandsProtonProtonOpenExplorer({String? path}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_opt_String(path, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 22,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiCommandsProtonProtonOpenExplorerConstMeta,
+        argValues: [path],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiCommandsProtonProtonOpenExplorerConstMeta =>
+      const TaskConstMeta(
+        debugName: "proton_open_explorer",
+        argNames: ["path"],
+      );
+
+  @override
   Future<bool> crateApiCommandsPackSyncQuickCheckQuickCheck({
     required String packName,
     required String repoPath,
@@ -883,7 +1044,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 18,
+            funcId: 23,
             port: port_,
           );
         },
@@ -918,7 +1079,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 19,
+            funcId: 24,
             port: port_,
           );
         },
@@ -957,7 +1118,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 20,
+            funcId: 25,
             port: port_,
           );
         },
@@ -996,7 +1157,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 21,
+            funcId: 26,
             port: port_,
           );
         },
@@ -1036,7 +1197,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 22,
+            funcId: 27,
             port: port_,
           );
         },
@@ -1075,7 +1236,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 23,
+            funcId: 28,
             port: port_,
           );
         },
@@ -1103,7 +1264,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(level, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 24)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 29)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -1131,7 +1292,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 25,
+            funcId: 30,
             port: port_,
           );
         },
@@ -1163,7 +1324,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 26,
+            funcId: 31,
             port: port_,
           );
         },
@@ -1210,7 +1371,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 27,
+            funcId: 32,
             port: port_,
           );
         },
@@ -1253,7 +1414,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 28,
+            funcId: 33,
             port: port_,
           );
         },
@@ -1679,6 +1840,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       name: dco_decode_String(arr[0]),
       description: dco_decode_String(arr[1]),
       icon: dco_decode_opt_String(arr[2]),
+    );
+  }
+
+  @protected
+  ProtonInfo dco_decode_proton_info(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 3)
+      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+    return ProtonInfo(
+      version: dco_decode_opt_String(arr[0]),
+      protonDir: dco_decode_String(arr[1]),
+      teamspeakExe: dco_decode_opt_String(arr[2]),
     );
   }
 
@@ -2258,6 +2432,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  ProtonInfo sse_decode_proton_info(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_version = sse_decode_opt_String(deserializer);
+    var var_protonDir = sse_decode_String(deserializer);
+    var var_teamspeakExe = sse_decode_opt_String(deserializer);
+    return ProtonInfo(
+      version: var_version,
+      protonDir: var_protonDir,
+      teamspeakExe: var_teamspeakExe,
+    );
+  }
+
+  @protected
   (String, List<FileChange>) sse_decode_record_string_list_file_change(
     SseDeserializer deserializer,
   ) {
@@ -2820,6 +3007,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_String(self.name, serializer);
     sse_encode_String(self.description, serializer);
     sse_encode_opt_String(self.icon, serializer);
+  }
+
+  @protected
+  void sse_encode_proton_info(ProtonInfo self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_opt_String(self.version, serializer);
+    sse_encode_String(self.protonDir, serializer);
+    sse_encode_opt_String(self.teamspeakExe, serializer);
   }
 
   @protected

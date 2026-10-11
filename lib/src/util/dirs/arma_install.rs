@@ -1,10 +1,9 @@
 use crate::util::dirs::steam_install::{SteamInstall, find_steam_installs};
-use anyhow::{Context, anyhow, bail};
-use std::fs::read_to_string;
-use std::path::{Path, PathBuf};
-use steam_vdf_parser::{Value, parse_text};
+use anyhow::{Context, bail};
+use std::path::PathBuf;
+use steamlocate::{Library, SteamDir};
 
-pub const ARMA_APP_ID: &str = "107410";
+pub const ARMA_APP_ID: u32 = 107_410;
 
 #[derive(Debug, Clone)]
 pub struct ArmaInstall {
@@ -34,27 +33,18 @@ pub fn find_arma_install() -> anyhow::Result<ArmaInstall> {
             }
         };
 
-        let Some(library_path) = libraries
-            .iter()
-            .find(|(_, has_arma)| *has_arma)
-            .map(|(path, _)| path.clone())
-        else {
+        let Some(install_dir) = find_arma_in(&libraries)? else {
             log::debug!("No Arma in the Steam install at {:?}", steam.root());
             tried.push(format!("  {} (no Arma 3)", steam.root().display()));
             continue;
         };
-
-        let install_dir = library_path
-            .join("steamapps")
-            .join("common")
-            .join(read_install_dir_name(&library_path)?);
 
         log::debug!("Resolved Arma install: {install_dir:?}");
 
         return Ok(ArmaInstall {
             steam,
             install_dir,
-            libraries: libraries.into_iter().map(|(path, _)| path).collect(),
+            libraries,
         });
     }
 
@@ -64,59 +54,34 @@ pub fn find_arma_install() -> anyhow::Result<ArmaInstall> {
     );
 }
 
-/// Every library folder registered with this Steam install, each flagged with
-/// whether it holds Arma.
-fn read_libraries(steam: &SteamInstall) -> anyhow::Result<Vec<(PathBuf, bool)>> {
-    let manifest_path = steam.library_folders_path();
-    log::trace!("Reading libraryfolders from {manifest_path:?}");
+/// Every library folder registered with this Steam install.
+fn read_libraries(steam: &SteamInstall) -> anyhow::Result<Vec<PathBuf>> {
+    let paths = SteamDir::from_dir(steam.root())
+        .context("Invalid Steam directory")?
+        .library_paths()
+        .context("Unable to read libraryfolders")?;
 
-    let manifest = read_to_string(&manifest_path)
-        .context(anyhow!("Unable to read libraryfolders from path"))?;
-    let manifest = parse_text(&manifest).context(anyhow!("Failed to parse libraryfolders"))?;
-
-    manifest
-        .as_obj()
-        .context(anyhow!("libraryfolders is not an object"))?
-        .iter()
-        .map(|(_, entry)| {
-            let path = entry
-                .get("path")
-                .context(anyhow!("libraryfolders entry does not contain 'path'"))?
-                .as_str()
-                .map(PathBuf::from)
-                .context(anyhow!("libraryfolders path is not a string"))?;
-
-            // Flatpak Steam records these from inside the sandbox, so they need
-            // translating back before we can open them.
-            Ok((steam.host_path(&path), arma_in_location(entry)))
-        })
-        .collect()
+    Ok(paths.iter().map(|path| steam.host_path(path)).collect())
 }
 
-fn arma_in_location(entry: &Value) -> bool {
-    entry
-        .get("apps")
-        .and_then(|apps| apps.get(ARMA_APP_ID))
-        .is_some()
-}
+/// Arma's installation directory, from whichever library holds it.
+fn find_arma_in(libraries: &[PathBuf]) -> anyhow::Result<Option<PathBuf>> {
+    for path in libraries {
+        // A library on an unmounted drive is not an error, it just isn't
+        // where Arma is.
+        let library = match Library::from_dir(path) {
+            Ok(library) => library,
+            Err(e) => {
+                log::trace!("Skipping unreadable library at {path:?}: {e}");
+                continue;
+            }
+        };
 
-/// Arma's folder name under `steamapps/common`, from its app manifest.
-fn read_install_dir_name(library_path: &Path) -> anyhow::Result<PathBuf> {
-    let manifest_path = library_path
-        .join("steamapps")
-        .join(format!("appmanifest_{ARMA_APP_ID}.acf"));
-    log::trace!("Reading appmanifest from {manifest_path:?}");
+        if let Some(app) = library.app(ARMA_APP_ID) {
+            let app = app.context("Failed to read Arma's appmanifest")?;
+            return Ok(Some(library.resolve_app_dir(&app)));
+        }
+    }
 
-    let manifest =
-        read_to_string(&manifest_path).context(anyhow!("Unable to read appmanifest from path"))?;
-    let manifest = parse_text(&manifest).context(anyhow!("Failed to parse appmanifest"))?;
-
-    manifest
-        .as_obj()
-        .context(anyhow!("appmanifest is not an object"))?
-        .get("installdir")
-        .context(anyhow!("appmanifest does not contain 'installdir'"))?
-        .as_str()
-        .map(PathBuf::from)
-        .context(anyhow!("installdir is not a string"))
+    Ok(None)
 }

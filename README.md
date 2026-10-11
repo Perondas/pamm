@@ -30,11 +30,48 @@ It is NOT compatible with other mod managers.
     - Perfect fit for one time use mod packs (like event specific mods)
 - Cross-platform
     - Windows
-    - Linux
+    - Linux, through Steam and Proton (native and Flatpak Steam), see [Linux](#linux)
 - GUI     
 
 ## Planned Features
 Are tracked in the issues tab
+
+## Linux
+
+On Linux, pamm launches the Windows version of Arma 3 through Steam and Proton. Native and Flatpak Steam are both
+supported, and Arma can live in any of your Steam libraries.
+
+### One-time Steam setup
+
+Depending on where your mods are stored, Steam may need a little setup before Arma can see them. Run `pamm linux`
+inside a repo, or click **Steam setup** on the repo page in the GUI, to see exactly what is needed:
+
+- **Mods in your home directory or a Steam library:** nothing to do.
+- **Mods on another drive:** paste the `PRESSURE_VESSEL_FILESYSTEMS_RW=... %command%` line it prints into
+  Arma 3's Steam launch options (right-click Arma 3 → Properties → Launch Options).
+- **Flatpak Steam with mods outside its sandbox:** run the `flatpak override` command it prints, then restart Steam.
+
+pamm never changes Steam's configuration itself, it only tells you what to set.
+
+### Proton tools
+
+Arma has to be started through Steam once so Proton creates its prefix. After that, pamm can run Windows
+programs in the same prefix as the game, using the same Proton version:
+
+```
+pamm linux                                # Steam setup, Proton version, and whether TeamSpeak is installed
+pamm linux install-teamspeak <installer>  # install TeamSpeak into Arma's prefix (silent, add --interactive for the wizard)
+pamm linux teamspeak                      # launch TeamSpeak
+pamm linux explorer [path]                # open a file browser in the prefix, e.g. at C:\ or Z:\home
+pamm linux kill                           # stop everything in the prefix, including the game
+```
+
+Download the **Windows** version of TeamSpeak 3 from the [TeamSpeak downloads page](https://www.teamspeak.com/en/downloads).
+The same actions are available in the GUI under the **Proton** button next to the settings button, and the repo page
+has a **Launch TeamSpeak** button once it is installed.
+
+pamm finds the Proton version again every time, so switching Arma to a different Proton version in Steam just
+works. Arma needs to be launched once after a switch, so Proton can update the prefix.
 
 ## Hosting a repo
 
