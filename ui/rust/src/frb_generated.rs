@@ -41,7 +41,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 320472387;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -585565756;
 
 // Section: executor
 
@@ -685,6 +685,183 @@ fn wire__crate__api__commands__user_repo_settings__load_settings__load_settings_
                             crate::api::commands::user_repo_settings::load_settings::load_settings(
                                 api_repo_path,
                             )?;
+                        std::result::Result::Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__commands__proton__proton_info_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "proton_info",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::api::commands::proton::proton_info()?;
+                        std::result::Result::Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__commands__proton__proton_install_teamspeak_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "proton_install_teamspeak",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_installer = <String>::sse_decode(&mut deserializer);
+            let api_silent = <bool>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::api::commands::proton::proton_install_teamspeak(
+                            api_installer,
+                            api_silent,
+                        )?;
+                        std::result::Result::Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__commands__proton__proton_kill_all_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "proton_kill_all",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::api::commands::proton::proton_kill_all()?;
+                        std::result::Result::Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__commands__proton__proton_launch_teamspeak_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "proton_launch_teamspeak",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::api::commands::proton::proton_launch_teamspeak()?;
+                        std::result::Result::Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__commands__proton__proton_open_explorer_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "proton_open_explorer",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_path = <Option<String>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok =
+                            crate::api::commands::proton::proton_open_explorer(api_path)?;
                         std::result::Result::Ok(output_ok)
                     })(),
                 )
@@ -1639,6 +1816,20 @@ impl SseDecode for crate::api::commands::load_pack_display::PackDisplayInfo {
     }
 }
 
+impl SseDecode for crate::api::commands::proton::ProtonInfo {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_version = <Option<String>>::sse_decode(deserializer);
+        let mut var_protonDir = <String>::sse_decode(deserializer);
+        let mut var_teamspeakExe = <Option<String>>::sse_decode(deserializer);
+        return crate::api::commands::proton::ProtonInfo {
+            version: var_version,
+            proton_dir: var_protonDir,
+            teamspeak_exe: var_teamspeakExe,
+        };
+    }
+}
+
 impl SseDecode
     for (
         String,
@@ -1767,16 +1958,21 @@ fn pde_ffi_dispatcher_primary_impl(
 15 => wire__crate__api__commands__load_pack_display__load_pack_display_impl(port, ptr, rust_vec_len, data_len),
 16 => wire__crate__api__commands__load_repo__load_repo_impl(port, ptr, rust_vec_len, data_len),
 17 => wire__crate__api__commands__user_repo_settings__load_settings__load_settings_impl(port, ptr, rust_vec_len, data_len),
-18 => wire__crate__api__commands__pack_sync__quick_check__quick_check_impl(port, ptr, rust_vec_len, data_len),
-19 => wire__crate__api__commands__local_pack__remove_local_pack__remove_local_pack_impl(port, ptr, rust_vec_len, data_len),
-20 => wire__crate__api__commands__externals__save_externals__save_externals_impl(port, ptr, rust_vec_len, data_len),
-21 => wire__crate__api__commands__optionals__save_optionals__save_optionals_impl(port, ptr, rust_vec_len, data_len),
-22 => wire__crate__api__commands__user_repo_settings__save_settings__save_settings_impl(port, ptr, rust_vec_len, data_len),
-23 => wire__crate__api__commands__params__set_launch_params_impl(port, ptr, rust_vec_len, data_len),
-25 => wire__crate__api__commands__sync_config__sync_config_impl(port, ptr, rust_vec_len, data_len),
-26 => wire__crate__api__commands__local_pack__sync_local_pack__sync_local_pack_impl(port, ptr, rust_vec_len, data_len),
-27 => wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(port, ptr, rust_vec_len, data_len),
-28 => wire__crate__api__commands__pack_sync__sync_pack_with_parents__sync_pack_with_parents_impl(port, ptr, rust_vec_len, data_len),
+18 => wire__crate__api__commands__proton__proton_info_impl(port, ptr, rust_vec_len, data_len),
+19 => wire__crate__api__commands__proton__proton_install_teamspeak_impl(port, ptr, rust_vec_len, data_len),
+20 => wire__crate__api__commands__proton__proton_kill_all_impl(port, ptr, rust_vec_len, data_len),
+21 => wire__crate__api__commands__proton__proton_launch_teamspeak_impl(port, ptr, rust_vec_len, data_len),
+22 => wire__crate__api__commands__proton__proton_open_explorer_impl(port, ptr, rust_vec_len, data_len),
+23 => wire__crate__api__commands__pack_sync__quick_check__quick_check_impl(port, ptr, rust_vec_len, data_len),
+24 => wire__crate__api__commands__local_pack__remove_local_pack__remove_local_pack_impl(port, ptr, rust_vec_len, data_len),
+25 => wire__crate__api__commands__externals__save_externals__save_externals_impl(port, ptr, rust_vec_len, data_len),
+26 => wire__crate__api__commands__optionals__save_optionals__save_optionals_impl(port, ptr, rust_vec_len, data_len),
+27 => wire__crate__api__commands__user_repo_settings__save_settings__save_settings_impl(port, ptr, rust_vec_len, data_len),
+28 => wire__crate__api__commands__params__set_launch_params_impl(port, ptr, rust_vec_len, data_len),
+30 => wire__crate__api__commands__sync_config__sync_config_impl(port, ptr, rust_vec_len, data_len),
+31 => wire__crate__api__commands__local_pack__sync_local_pack__sync_local_pack_impl(port, ptr, rust_vec_len, data_len),
+32 => wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(port, ptr, rust_vec_len, data_len),
+33 => wire__crate__api__commands__pack_sync__sync_pack_with_parents__sync_pack_with_parents_impl(port, ptr, rust_vec_len, data_len),
                         _ => unreachable!(),
                     }
 }
@@ -1796,7 +1992,7 @@ fn pde_ffi_dispatcher_sync_impl(
         ),
         8 => wire__crate__api__init_app_impl(ptr, rust_vec_len, data_len),
         10 => wire__crate__api__logging__init_rust_logger_impl(ptr, rust_vec_len, data_len),
-        24 => wire__crate__api__logging__set_rust_log_level_impl(ptr, rust_vec_len, data_len),
+        29 => wire__crate__api__logging__set_rust_log_level_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -2122,6 +2318,28 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::load_pack_display::
     for crate::api::commands::load_pack_display::PackDisplayInfo
 {
     fn into_into_dart(self) -> crate::api::commands::load_pack_display::PackDisplayInfo {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::commands::proton::ProtonInfo {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.version.into_into_dart().into_dart(),
+            self.proton_dir.into_into_dart().into_dart(),
+            self.teamspeak_exe.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::commands::proton::ProtonInfo
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::proton::ProtonInfo>
+    for crate::api::commands::proton::ProtonInfo
+{
+    fn into_into_dart(self) -> crate::api::commands::proton::ProtonInfo {
         self
     }
 }
@@ -2595,6 +2813,15 @@ impl SseEncode for crate::api::commands::load_pack_display::PackDisplayInfo {
         <String>::sse_encode(self.name, serializer);
         <String>::sse_encode(self.description, serializer);
         <Option<String>>::sse_encode(self.icon, serializer);
+    }
+}
+
+impl SseEncode for crate::api::commands::proton::ProtonInfo {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <Option<String>>::sse_encode(self.version, serializer);
+        <String>::sse_encode(self.proton_dir, serializer);
+        <Option<String>>::sse_encode(self.teamspeak_exe, serializer);
     }
 }
 

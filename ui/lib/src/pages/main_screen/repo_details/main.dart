@@ -19,6 +19,7 @@ import 'package:pamm_ui/src/util/media.dart';
 import 'package:pamm_ui/src/widgets/confirm_dialog.dart';
 import 'package:pamm_ui/src/widgets/linux_setup_dialog.dart';
 import 'package:pamm_ui/src/widgets/media_icon.dart';
+import 'package:pamm_ui/src/widgets/proton_dialog.dart';
 
 class RepoDetails extends StatefulWidget {
   const RepoDetails(this.selectedRepo, {super.key});
@@ -60,18 +61,28 @@ class _RepoDetailsState extends State<RepoDetails> {
                 if (banner != null) ...[const SizedBox(height: 12), banner],
                 if (Platform.isLinux) ...[
                   const SizedBox(height: 12),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: OutlinedButton.icon(
-                      onPressed: () => showDialog<void>(
-                        context: context,
-                        builder: (_) => LinuxSetupDialog(
-                          repoPath: widget.selectedRepo.repoPath,
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: () => showDialog<void>(
+                          context: context,
+                          builder: (_) => LinuxSetupDialog(
+                            repoPath: widget.selectedRepo.repoPath,
+                          ),
                         ),
+                        icon: const Icon(Icons.settings_suggest),
+                        label: const Text("Steam setup"),
                       ),
-                      icon: const Icon(Icons.settings_suggest),
-                      label: const Text("Steam setup"),
-                    ),
+                      OutlinedButton.icon(
+                        onPressed: () => showDialog<void>(
+                          context: context,
+                          builder: (_) => const ProtonDialog(),
+                        ),
+                        icon: const Icon(Icons.wine_bar),
+                        label: const Text("Proton"),
+                      ),
+                    ],
                   ),
                 ],
                 const SizedBox(height: 12),

@@ -9,5 +9,6 @@ pub mod local_pack;
 pub mod optionals;
 pub mod pack_sync;
 pub mod params;
+pub mod proton;
 pub mod sync_config;
 pub mod user_repo_settings;

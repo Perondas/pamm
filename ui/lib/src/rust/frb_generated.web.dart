@@ -27,6 +27,7 @@ import 'api/commands/pack_sync/quick_check.dart';
 import 'api/commands/pack_sync/sync_pack.dart';
 import 'api/commands/pack_sync/sync_pack_with_parents.dart';
 import 'api/commands/params.dart';
+import 'api/commands/proton.dart';
 import 'api/commands/sync_config.dart';
 import 'api/commands/user_repo_settings.dart';
 import 'api/commands/user_repo_settings/load_settings.dart';
@@ -214,6 +215,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   PackDisplayInfo dco_decode_pack_display_info(dynamic raw);
+
+  @protected
+  ProtonInfo dco_decode_proton_info(dynamic raw);
 
   @protected
   (String, List<FileChange>) dco_decode_record_string_list_file_change(
@@ -427,6 +431,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   PackDisplayInfo sse_decode_pack_display_info(SseDeserializer deserializer);
+
+  @protected
+  ProtonInfo sse_decode_proton_info(SseDeserializer deserializer);
 
   @protected
   (String, List<FileChange>) sse_decode_record_string_list_file_change(
@@ -687,6 +694,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     PackDisplayInfo self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_proton_info(ProtonInfo self, SseSerializer serializer);
 
   @protected
   void sse_encode_record_string_list_file_change(
