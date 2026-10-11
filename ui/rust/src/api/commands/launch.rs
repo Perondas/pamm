@@ -2,7 +2,7 @@ use pamm_lib::handle::actions::launch::launch_pack::{LaunchMode, LaunchParams};
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use std::path::Path;
 
-pub fn launch(
+pub async fn launch(
     repo_dir: String,
     pack_name: String,
     launch_type: LaunchType,
@@ -10,11 +10,11 @@ pub fn launch(
 ) -> anyhow::Result<()> {
     let repo_dir = Path::new(&repo_dir);
 
-    let handle = ClientRepoHandle::open(repo_dir)?;
+    let handle = ClientRepoHandle::open(repo_dir).await?;
 
     let launch_params = LaunchParams::new(launch_type.into(), disable_optionals);
 
-    handle.launch_pack(&pack_name, &launch_params)?;
+    handle.launch_pack(&pack_name, &launch_params).await?;
 
     Ok(())
 }

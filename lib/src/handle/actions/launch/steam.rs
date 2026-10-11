@@ -5,7 +5,7 @@ use anyhow::Context;
 use log::{debug, info};
 
 impl ClientRepoHandle {
-    pub(super) fn launch_via_steam(
+    pub(super) async fn launch_via_steam(
         &self,
         pack_name: &str,
         addon_paths: &[String],
@@ -14,7 +14,7 @@ impl ClientRepoHandle {
 
         let mut launch_url = String::from("steam://rungameid/107410// -nolauncher ");
 
-        let (pack_config, settings) = self.get_pack_with_settings(pack_name)?;
+        let (pack_config, settings) = self.get_pack_with_settings(pack_name).await?;
 
         for param in pack_config.client_params {
             launch_url.push_str(&param);

@@ -14,18 +14,20 @@ use anyhow::{Context, anyhow, ensure};
 use log::debug;
 
 impl ClientRepoHandle {
-    pub fn sync_repo_config(
+    pub async fn sync_repo_config(
         &mut self,
         interactor: &impl ConfigSyncInteractor,
     ) -> anyhow::Result<()> {
         let remote_url = self.remote().clone();
 
-        verify_remote_version(&remote_url)?;
+        verify_remote_version(&remote_url).await?;
 
-        let remote_repo_config = RepoConfig::download_known(&remote_url).context(anyhow!(
-            "Failed to download remote config from {}",
-            remote_url
-        ))?;
+        let remote_repo_config = RepoConfig::download_known(&remote_url)
+            .await
+            .context(anyhow!(
+                "Failed to download remote config from {}",
+                remote_url
+            ))?;
 
         // A local pack owns its folder outright. If the remote starts publishing a
         // pack of the same name, the `added` loop below would lay a downloaded
@@ -53,7 +55,7 @@ impl ClientRepoHandle {
         for pack in removed {
             debug!("Pack '{}' has been removed from remote repository.", pack);
             let outcome = interactor.confirm_pack_removal(pack)?;
-            self.delete_pack(pack, outcome)?;
+            self.delete_pack(pack, outcome).await?;
         }
 
         let added = remote_repo_config
@@ -67,9 +69,10 @@ impl ClientRepoHandle {
         for pack in added {
             let path = PackConfig::file_path(pack);
             let pack_config = PackConfig::download_known(&path.with_base_url(&remote_url))
+                .await
                 .context(format!("Failed to download pack {} configuration", pack))?;
 
-            self.add_pack(&pack_config)?;
+            self.add_pack(&pack_config).await?;
 
             interactor.notify_pack_added(pack)?;
             pack_configs.push(pack_config);
@@ -83,21 +86,22 @@ impl ClientRepoHandle {
 
         for pack in existing {
             let path = PackConfig::file_path(pack);
-            let remote_pack_config =
-                PackConfig::download_known(&path.with_base_url(&remote_url))
-                    .context(format!("Failed to download pack {} configuration", pack))?;
-            self.update_pack(&remote_pack_config)?;
+            let remote_pack_config = PackConfig::download_known(&path.with_base_url(&remote_url))
+                .await
+                .context(format!("Failed to download pack {} configuration", pack))?;
+            self.update_pack(&remote_pack_config).await?;
             pack_configs.push(remote_pack_config);
         }
 
-        self.update_repo_config(remote_repo_config.clone())?;
+        self.update_repo_config(remote_repo_config.clone()).await?;
 
         download_referenced_media(
             self.get_repo_path(),
             &remote_url,
             &remote_repo_config,
             &pack_configs,
-        );
+        )
+        .await;
 
         Ok(())
     }

@@ -12,8 +12,8 @@ use url::Url;
 /// instead of a confusing 404 later. To tell "missing version file" apart from
 /// "remote unreachable", the repo config is probed as a fallback before
 /// blaming the layout.
-pub(crate) fn verify_remote_version(remote: &Url) -> anyhow::Result<()> {
-    match RepoVersion::download_known(remote) {
+pub(crate) async fn verify_remote_version(remote: &Url) -> anyhow::Result<()> {
+    match RepoVersion::download_known(remote).await {
         Ok(RepoVersion(CURRENT_REPO_VERSION)) => Ok(()),
         Ok(RepoVersion(version)) if version > CURRENT_REPO_VERSION => bail!(
             "Remote repo at {} has layout version {} but this pamm only supports up to {}; \
@@ -29,7 +29,7 @@ pub(crate) fn verify_remote_version(remote: &Url) -> anyhow::Result<()> {
             version
         ),
         Err(version_err) => {
-            if RepoConfig::download_known(remote).is_ok() {
+            if RepoConfig::download_known(remote).await.is_ok() {
                 bail!(
                     "Remote repo at {} has no {} — it still uses the old v1 layout; rebuild \
                      the server repo with a current pamm version",

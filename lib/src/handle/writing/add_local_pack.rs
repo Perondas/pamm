@@ -13,8 +13,8 @@ impl ClientRepoHandle {
     /// recorded in `user.repo.settings.json` rather than `repo.config.json`, so
     /// config sync never sees it and can never delete it. Its parent, if any, may
     /// be a normal or another local pack.
-    pub fn add_local_pack(&mut self, pack_config: &PackConfig) -> anyhow::Result<()> {
-        self.validate_new_local_pack(pack_config)?;
+    pub async fn add_local_pack(&mut self, pack_config: &PackConfig) -> anyhow::Result<()> {
+        self.validate_new_local_pack(pack_config).await?;
 
         // Lay out the folder before recording the name. Neither order is atomic;
         // this way a failed settings write leaves an inert unclaimed folder that
@@ -22,15 +22,16 @@ impl ClientRepoHandle {
         // pointing at nothing.
         pack_config
             .init_client_on_fs(&self.repo_path)
+            .await
             .context("Failed to lay out the local pack on disk")?;
 
         let mut settings = self.user_settings().clone();
         settings.local_packs.push(pack_config.name.clone());
 
-        self.update_settings(settings)
+        self.update_settings(settings).await
     }
 
-    fn validate_new_local_pack(&self, pack_config: &PackConfig) -> anyhow::Result<()> {
+    async fn validate_new_local_pack(&self, pack_config: &PackConfig) -> anyhow::Result<()> {
         let name = &pack_config.name;
 
         ensure!(!name.is_empty(), "Pack name must not be empty");
@@ -89,7 +90,7 @@ impl ClientRepoHandle {
         }
 
         ensure!(
-            !self.repo_path.join(name).exists(),
+            !tokio::fs::try_exists(self.repo_path.join(name)).await?,
             "A file or folder named '{}' already exists in the repo",
             name
         );
@@ -97,7 +98,7 @@ impl ClientRepoHandle {
         if let Some(parent) = &pack_config.parent {
             // Resolves both normal and local packs, so a local pack may parent
             // another. No cycle is possible: the new name is not yet in any chain.
-            self.get_pack(parent).context(format!(
+            self.get_pack(parent).await.context(format!(
                 "Parent pack '{}' of new local pack '{}' does not exist",
                 parent, name
             ))?;
@@ -124,23 +125,28 @@ mod tests {
     /// A client repo at layout v2 holding the remote packs named in `remote_packs`,
     /// each laid out on disk. Written through the real writers so `open` sees a
     /// well-formed repo and its migration pass is a no-op.
-    fn client_repo(key: &str, remote_packs: &[&str]) -> (TestTempDir, PathBuf) {
+    async fn client_repo(key: &str, remote_packs: &[&str]) -> (TestTempDir, PathBuf) {
         let tmp = TestTempDir::new(key);
         let repo_path = tmp.path().join("repo");
         fs::create_dir_all(&repo_path).unwrap();
 
         let packs: HashSet<String> = remote_packs.iter().map(|p| p.to_string()).collect();
         let repo_config = RepoConfig::new("repo".to_string(), "desc".to_string(), packs);
-        repo_config.write_fixed(&repo_path).unwrap();
+        repo_config.write_fixed(&repo_path).await.unwrap();
 
         RepoUserSettings::new(Url::parse("http://localhost/").unwrap())
             .write_fixed(&repo_path)
+            .await
             .unwrap();
-        RepoVersion::current().write_fixed(&repo_path).unwrap();
+        RepoVersion::current()
+            .write_fixed(&repo_path)
+            .await
+            .unwrap();
 
         for pack in remote_packs {
             PackConfig::new(pack.to_string(), "d".to_string(), vec![], None)
                 .init_client_on_fs(&repo_path)
+                .await
                 .unwrap();
         }
 
@@ -156,13 +162,14 @@ mod tests {
         )
     }
 
-    #[test]
-    fn lays_out_the_client_layout_and_records_the_name_outside_the_repo_config() {
-        let (_tmp, repo_path) = client_repo("pamm_add_local_pack_layout", &["core"]);
-        let mut handle = ClientRepoHandle::open(&repo_path).unwrap();
+    #[tokio::test]
+    async fn lays_out_the_client_layout_and_records_the_name_outside_the_repo_config() {
+        let (_tmp, repo_path) = client_repo("pamm_add_local_pack_layout", &["core"]).await;
+        let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
 
         handle
             .add_local_pack(&pack("my_mission", Some("core")))
+            .await
             .unwrap();
 
         // Identical on-disk shape to a synced pack.
@@ -174,70 +181,78 @@ mod tests {
 
         // Recorded in the user settings, and persisted there.
         assert_eq!(handle.user_settings().local_packs, vec!["my_mission"]);
-        let on_disk = RepoUserSettings::read_from_known(&repo_path).unwrap();
+        let on_disk = RepoUserSettings::read_from_known(&repo_path).await.unwrap();
         assert_eq!(on_disk.local_packs, vec!["my_mission"]);
 
         // The crux: absent from the repo config, which mirrors the remote, so
         // config sync can never see it and can never delete it.
         assert!(!handle.get_config().packs.contains("my_mission"));
-        let on_disk = RepoConfig::read_from_known(&repo_path).unwrap();
+        let on_disk = RepoConfig::read_from_known(&repo_path).await.unwrap();
         assert_eq!(on_disk.packs, HashSet::from(["core".to_string()]));
     }
 
-    #[test]
-    fn resolves_like_any_other_pack_once_created() {
-        let (_tmp, repo_path) = client_repo("pamm_add_local_pack_resolves", &["core"]);
-        let mut handle = ClientRepoHandle::open(&repo_path).unwrap();
+    #[tokio::test]
+    async fn resolves_like_any_other_pack_once_created() {
+        let (_tmp, repo_path) = client_repo("pamm_add_local_pack_resolves", &["core"]).await;
+        let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
 
         handle
             .add_local_pack(&pack("my_mission", Some("core")))
+            .await
             .unwrap();
 
         assert!(handle.is_local_pack("my_mission"));
         assert!(!handle.is_local_pack("core"));
 
-        let config = handle.get_pack("my_mission").unwrap();
+        let config = handle.get_pack("my_mission").await.unwrap();
         assert_eq!(config.name, "my_mission");
         assert_eq!(config.parent, Some("core".to_string()));
 
-        let (config, settings) = handle.get_pack_with_settings("my_mission").unwrap();
+        let (config, settings) = handle.get_pack_with_settings("my_mission").await.unwrap();
         assert_eq!(config.name, "my_mission");
         assert!(settings.enabled_optionals.is_empty());
     }
 
-    #[test]
-    fn survives_a_reopen() {
-        let (_tmp, repo_path) = client_repo("pamm_add_local_pack_reopen", &[]);
-        let mut handle = ClientRepoHandle::open(&repo_path).unwrap();
-        handle.add_local_pack(&pack("my_mission", None)).unwrap();
+    #[tokio::test]
+    async fn survives_a_reopen() {
+        let (_tmp, repo_path) = client_repo("pamm_add_local_pack_reopen", &[]).await;
+        let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
+        handle
+            .add_local_pack(&pack("my_mission", None))
+            .await
+            .unwrap();
         drop(handle);
 
-        let handle = ClientRepoHandle::open(&repo_path).unwrap();
+        let handle = ClientRepoHandle::open(&repo_path).await.unwrap();
         assert!(handle.is_local_pack("my_mission"));
-        assert_eq!(handle.get_pack("my_mission").unwrap().name, "my_mission");
+        assert_eq!(
+            handle.get_pack("my_mission").await.unwrap().name,
+            "my_mission"
+        );
     }
 
-    #[test]
-    fn a_local_pack_may_parent_another_local_pack() {
-        let (_tmp, repo_path) = client_repo("pamm_add_local_pack_local_parent", &[]);
-        let mut handle = ClientRepoHandle::open(&repo_path).unwrap();
+    #[tokio::test]
+    async fn a_local_pack_may_parent_another_local_pack() {
+        let (_tmp, repo_path) = client_repo("pamm_add_local_pack_local_parent", &[]).await;
+        let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
 
-        handle.add_local_pack(&pack("base", None)).unwrap();
+        handle.add_local_pack(&pack("base", None)).await.unwrap();
         handle
             .add_local_pack(&pack("derived", Some("base")))
+            .await
             .unwrap();
 
         assert_eq!(
-            handle.get_pack("derived").unwrap().parent,
+            handle.get_pack("derived").await.unwrap().parent,
             Some("base".to_string())
         );
     }
 
-    fn rejects(key: &str, remote_packs: &[&str], config: PackConfig, expected: &str) {
-        let (_tmp, repo_path) = client_repo(key, remote_packs);
-        let mut handle = ClientRepoHandle::open(&repo_path).unwrap();
+    async fn rejects(key: &str, remote_packs: &[&str], config: PackConfig, expected: &str) {
+        let (_tmp, repo_path) = client_repo(key, remote_packs).await;
+        let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
 
-        let err = handle.add_local_pack(&config).unwrap_err();
+        let err = handle.add_local_pack(&config).await.unwrap_err();
         let err = format!("{:#}", err);
         assert!(
             err.contains(expected),
@@ -250,37 +265,43 @@ mod tests {
         assert!(handle.user_settings().local_packs.is_empty());
     }
 
-    #[test]
-    fn rejects_the_name_of_an_existing_remote_pack() {
+    #[tokio::test]
+    async fn rejects_the_name_of_an_existing_remote_pack() {
         rejects(
             "pamm_add_local_pack_dup_remote",
             &["core"],
             pack("core", None),
             "already exists in repo",
-        );
+        )
+        .await;
     }
 
-    #[test]
-    fn rejects_a_remote_name_differing_only_in_case() {
+    #[tokio::test]
+    async fn rejects_a_remote_name_differing_only_in_case() {
         rejects(
             "pamm_add_local_pack_dup_remote_case",
             &["core"],
             pack("Core", None),
             "as remote pack 'core'",
-        );
+        )
+        .await;
     }
 
-    #[test]
-    fn rejects_the_name_of_an_existing_local_pack() {
-        let (_tmp, repo_path) = client_repo("pamm_add_local_pack_dup_local", &[]);
-        let mut handle = ClientRepoHandle::open(&repo_path).unwrap();
-        handle.add_local_pack(&pack("my_mission", None)).unwrap();
+    #[tokio::test]
+    async fn rejects_the_name_of_an_existing_local_pack() {
+        let (_tmp, repo_path) = client_repo("pamm_add_local_pack_dup_local", &[]).await;
+        let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
+        handle
+            .add_local_pack(&pack("my_mission", None))
+            .await
+            .unwrap();
 
         // Differing only in case, which would share one folder on NTFS/APFS.
         let err = format!(
             "{:#}",
             handle
                 .add_local_pack(&pack("My_Mission", None))
+                .await
                 .unwrap_err()
         );
         assert!(
@@ -291,15 +312,16 @@ mod tests {
         assert_eq!(handle.user_settings().local_packs, vec!["my_mission"]);
     }
 
-    #[test]
-    fn rejects_reserved_root_names() {
+    #[tokio::test]
+    async fn rejects_reserved_root_names() {
         for (i, name) in ["www", "media", "indexes", ".cache"].iter().enumerate() {
             rejects(
                 &format!("pamm_add_local_pack_reserved_{}", i),
                 &[],
                 pack(name, None),
                 "would collide with",
-            );
+            )
+            .await;
         }
         for (i, name) in [
             "repo.config.json",
@@ -315,47 +337,54 @@ mod tests {
                 &[],
                 pack(name, None),
                 "would collide with",
-            );
+            )
+            .await;
         }
     }
 
-    #[test]
-    fn rejects_path_like_names() {
+    #[tokio::test]
+    async fn rejects_path_like_names() {
         for (i, name) in ["..", ".", "a/b", "../escape", "/abs"].iter().enumerate() {
             rejects(
                 &format!("pamm_add_local_pack_pathlike_{}", i),
                 &[],
                 pack(name, None),
                 "is not a valid folder name",
-            );
+            )
+            .await;
         }
     }
 
-    #[test]
-    fn rejects_an_empty_or_padded_name() {
+    #[tokio::test]
+    async fn rejects_an_empty_or_padded_name() {
         rejects(
             "pamm_add_local_pack_empty",
             &[],
             pack("", None),
             "must not be empty",
-        );
+        )
+        .await;
         rejects(
             "pamm_add_local_pack_padded",
             &[],
             pack(" spaced ", None),
             "must not start or end with whitespace",
-        );
+        )
+        .await;
     }
 
-    #[test]
-    fn rejects_a_name_whose_folder_already_exists() {
-        let (_tmp, repo_path) = client_repo("pamm_add_local_pack_folder_taken", &[]);
+    #[tokio::test]
+    async fn rejects_a_name_whose_folder_already_exists() {
+        let (_tmp, repo_path) = client_repo("pamm_add_local_pack_folder_taken", &[]).await;
         fs::create_dir_all(repo_path.join("squatter")).unwrap();
 
-        let mut handle = ClientRepoHandle::open(&repo_path).unwrap();
+        let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
         let err = format!(
             "{:#}",
-            handle.add_local_pack(&pack("squatter", None)).unwrap_err()
+            handle
+                .add_local_pack(&pack("squatter", None))
+                .await
+                .unwrap_err()
         );
         assert!(
             err.contains("already exists in the repo"),
@@ -364,13 +393,14 @@ mod tests {
         );
     }
 
-    #[test]
-    fn rejects_a_parent_that_does_not_exist() {
+    #[tokio::test]
+    async fn rejects_a_parent_that_does_not_exist() {
         rejects(
             "pamm_add_local_pack_missing_parent",
             &["core"],
             pack("my_mission", Some("nope")),
             "Parent pack 'nope' of new local pack 'my_mission' does not exist",
-        );
+        )
+        .await;
     }
 }

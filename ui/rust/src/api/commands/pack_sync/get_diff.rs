@@ -11,7 +11,7 @@ use pamm_lib::models::self_keyed::SelfKeyed;
 use std::collections::HashMap;
 use std::path::Path;
 
-pub fn get_diff(
+pub async fn get_diff(
     pack_name: String,
     repo_path: String,
     dart_progress_reporter: &DartProgressReporter,
@@ -19,9 +19,11 @@ pub fn get_diff(
 ) -> anyhow::Result<DiffResult> {
     let repo_dir = Path::new(&repo_path);
 
-    let handle = ClientRepoHandle::open(repo_dir)?;
+    let handle = ClientRepoHandle::open(repo_dir).await?;
 
-    let diff = handle.get_pack_diff(&pack_name, dart_progress_reporter.clone(), clear_cache)?;
+    let diff = handle
+        .get_pack_diff(&pack_name, dart_progress_reporter.clone(), clear_cache)
+        .await?;
 
     dart_progress_reporter.finish();
 

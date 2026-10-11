@@ -12,8 +12,11 @@ use std::path::Path;
 /// after every successful step, so an interrupted run resumes where it left
 /// off. Repos already at the current version return immediately without
 /// touching the filesystem.
-pub(crate) fn run_migrations(repo_path: &Path, repo_config: &RepoConfig) -> anyhow::Result<()> {
-    let mut version = RepoVersion::read_or_v1(repo_path)?.0;
+pub(crate) async fn run_migrations(
+    repo_path: &Path,
+    repo_config: &RepoConfig,
+) -> anyhow::Result<()> {
+    let mut version = RepoVersion::read_or_v1(repo_path).await?.0;
 
     if version > CURRENT_REPO_VERSION {
         bail!(
@@ -27,13 +30,22 @@ pub(crate) fn run_migrations(repo_path: &Path, repo_config: &RepoConfig) -> anyh
 
     while version < CURRENT_REPO_VERSION {
         match version {
-            1 => v1_to_v2::migrate_v1_to_v2(repo_path, repo_config)
-                .context("migrating repo layout from v1 to v2")?,
+            1 => {
+                // A pile of renames; cheaper to run on the blocking pool as-is
+                // than to make every step async.
+                let (repo_path, repo_config) = (repo_path.to_path_buf(), repo_config.clone());
+                tokio::task::spawn_blocking(move || {
+                    v1_to_v2::migrate_v1_to_v2(&repo_path, &repo_config)
+                })
+                .await?
+                .context("migrating repo layout from v1 to v2")?
+            }
             v => unreachable!("no migration registered for version {}", v),
         }
         version += 1;
         RepoVersion(version)
             .write_fixed(repo_path)
+            .await
             .context("writing version.pamm after migration")?;
         info!(
             "Repo at {:?} migrated to layout version {}",

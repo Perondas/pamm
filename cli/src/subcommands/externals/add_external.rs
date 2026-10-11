@@ -4,10 +4,10 @@ use pamm_lib::handle::externals::external_addon::ExternalAddon;
 use pamm_lib::handle::externals::load_externals::LoadExternals;
 use pamm_lib::handle::externals::save_externals::SaveExternals;
 
-pub fn add_external_command(args: AddExternalArgs) -> anyhow::Result<()> {
-    let handle = ClientRepoHandle::open(&std::env::current_dir()?)?;
+pub async fn add_external_command(args: AddExternalArgs) -> anyhow::Result<()> {
+    let handle = ClientRepoHandle::open(&std::env::current_dir()?).await?;
 
-    let mut externals = handle.load_externals(&args.name)?;
+    let mut externals = handle.load_externals(&args.name).await?;
 
     let mut new = ExternalAddon::new(args.path);
 
@@ -15,5 +15,5 @@ pub fn add_external_command(args: AddExternalArgs) -> anyhow::Result<()> {
 
     externals.push(new);
 
-    handle.save_externals(&args.name, &externals)
+    handle.save_externals(&args.name, &externals).await
 }

@@ -13,14 +13,14 @@ pub trait GetAddonPaths {
         &self,
         pack_name: &str,
         disable_optionals: bool,
-    ) -> anyhow::Result<Vec<String>>;
+    ) -> impl Future<Output = anyhow::Result<Vec<String>>> + Send;
 }
 
 impl<T> GetAddonPaths for T
 where
-    T: GetPack + GetRepoInfo,
+    T: GetPack + GetRepoInfo + Sync,
 {
-    fn get_canonical_addon_paths(
+    async fn get_canonical_addon_paths(
         &self,
         pack_name: &str,
         disable_optionals: bool,
@@ -29,9 +29,9 @@ where
 
         let repo_path = self.get_repo_path();
 
-        let required_addons = self.resolve_addons(pack_name)?;
+        let required_addons = self.resolve_addons(pack_name).await?;
         let optional_addons = if !disable_optionals {
-            self.get_optional_paths(pack_name)?
+            self.get_optional_paths(pack_name).await?
         } else {
             vec![]
         };
@@ -45,6 +45,7 @@ where
 
         let externals = self
             .get_external_addon_paths(pack_name)
+            .await
             .context(anyhow!("Failed to read external addons"))?;
 
         Ok([addons, externals].concat())

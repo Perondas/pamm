@@ -38,7 +38,7 @@ pub struct BuildReport {
     pub mode: BuildMode,
 }
 
-impl<'a> From<&Materializer<'a>> for BuildReport {
+impl From<&Materializer> for BuildReport {
     fn from(m: &Materializer) -> Self {
         Self {
             mode: m.mode,

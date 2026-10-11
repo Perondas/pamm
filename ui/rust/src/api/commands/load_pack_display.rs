@@ -9,11 +9,14 @@ pub struct PackDisplayInfo {
     pub icon: Option<String>,
 }
 
-pub fn load_pack_display(repo_path: String, pack_name: String) -> anyhow::Result<PackDisplayInfo> {
+pub async fn load_pack_display(
+    repo_path: String,
+    pack_name: String,
+) -> anyhow::Result<PackDisplayInfo> {
     let repo_path = std::path::Path::new(&repo_path);
 
-    let handle = ClientRepoHandle::open(repo_path)?;
-    let pack = handle.get_pack(&pack_name)?;
+    let handle = ClientRepoHandle::open(repo_path).await?;
+    let pack = handle.get_pack(&pack_name).await?;
     let customization = pack.customization.unwrap_or_default();
 
     Ok(PackDisplayInfo {

@@ -1,30 +1,31 @@
 use crate::io::files::name_consts::MEDIA_DIR_NAME;
 use crate::io::fs::fs_writable::FixedFsWritable;
+use crate::io::fs::util::path_checks::is_dir;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_version::RepoVersion;
-use std::fs;
 use std::path::{Path, PathBuf};
+use tokio::fs;
 
 impl RepoConfig {
     /// Creates the repo directory and returns its path, `<dest_dir>/<repo name>`.
     /// The result is relative to whatever `dest_dir` is relative to — absolute if
     /// `dest_dir` is absolute, otherwise relative (usually to the process working
     /// directory).
-    pub fn init_blank_on_fs(&self, dest_dir: &Path) -> anyhow::Result<PathBuf> {
-        if !dest_dir.is_dir() {
+    pub async fn init_blank_on_fs(&self, dest_dir: &Path) -> anyhow::Result<PathBuf> {
+        if !is_dir(dest_dir).await {
             anyhow::bail!("{} is not a directory", dest_dir.display());
         }
 
         let base_path = dest_dir.join(&self.name);
 
-        if base_path.exists() {
+        if fs::try_exists(&base_path).await? {
             anyhow::bail!("Directory {} already exists", base_path.display());
         }
 
-        fs::create_dir(&base_path)?;
-        fs::create_dir(base_path.join(MEDIA_DIR_NAME))?;
-        self.write_fixed(&base_path)?;
-        RepoVersion::current().write_fixed(&base_path)?;
+        fs::create_dir(&base_path).await?;
+        fs::create_dir(base_path.join(MEDIA_DIR_NAME)).await?;
+        self.write_fixed(&base_path).await?;
+        RepoVersion::current().write_fixed(&base_path).await?;
 
         Ok(base_path)
     }
@@ -37,8 +38,8 @@ mod tests {
     use crate::util::test_utils::TestTempDir;
     use std::collections::HashSet;
 
-    #[test]
-    fn test_init_blank_on_fs() {
+    #[tokio::test]
+    async fn test_init_blank_on_fs() {
         let temp_dir = TestTempDir::new("test_repo_init_blank");
         let base_path = temp_dir.path();
 
@@ -48,7 +49,7 @@ mod tests {
         let config = RepoConfig::new("my_repo".to_string(), "A test repo".to_string(), packs);
 
         // This should succeed
-        let created_path = config.init_blank_on_fs(base_path).unwrap();
+        let created_path = config.init_blank_on_fs(base_path).await.unwrap();
 
         assert!(created_path.exists());
         assert!(created_path.is_dir());
@@ -59,7 +60,7 @@ mod tests {
         assert!(config_file.exists());
 
         // Calling it again should fail since it already exists
-        let result = config.init_blank_on_fs(base_path);
+        let result = config.init_blank_on_fs(base_path).await;
         assert!(result.is_err());
     }
 }

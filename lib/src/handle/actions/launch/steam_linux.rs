@@ -11,7 +11,7 @@ use std::path::Path;
 impl ClientRepoHandle {
     /// Launches through Steam by writing a preset file and opening a
     /// `steam://run` URL that points at it.
-    pub(super) fn launch_via_steam(
+    pub(super) async fn launch_via_steam(
         &self,
         pack_name: &str,
         addon_paths: &[String],
@@ -37,12 +37,12 @@ impl ClientRepoHandle {
             );
         }
 
-        let (pack_config, settings) = self.get_pack_with_settings(pack_name)?;
+        let (pack_config, settings) = self.get_pack_with_settings(pack_name).await?;
         let params = [pack_config.client_params, settings.launch_params].concat();
 
         let preset = Preset::new(pack_name.to_string(), params, arma_mod_paths);
 
-        let preset_path = preset.write_to(&arma.install_dir)?;
+        let preset_path = preset.write_to(&arma.install_dir).await?;
 
         info!("Wrote preset to {preset_path:?}");
 

@@ -222,12 +222,14 @@ mod tests {
         repo_path
     }
 
-    #[test]
-    fn migrates_flat_layout_into_per_pack_folders() {
+    #[tokio::test]
+    async fn migrates_flat_layout_into_per_pack_folders() {
         let tmp = TestTempDir::new("pamm_migrate_flat_happy");
         let repo_path = flat_fixture(&tmp);
 
-        run_migrations::run_migrations(&repo_path, &repo_config(&["core"])).unwrap();
+        run_migrations::run_migrations(&repo_path, &repo_config(&["core"]))
+            .await
+            .unwrap();
 
         assert!(repo_path.join("core/pack.config.json").is_file());
         assert!(repo_path.join("core/pack.settings.json").is_file());
@@ -247,64 +249,76 @@ mod tests {
         assert!(!repo_path.join("core_pack_addons").exists());
 
         assert_eq!(
-            RepoVersion::read_or_v1(&repo_path).unwrap(),
+            RepoVersion::read_or_v1(&repo_path).await.unwrap(),
             RepoVersion::current(),
             "version.pamm is written after migrating"
         );
     }
 
-    #[test]
-    fn migration_is_idempotent() {
+    #[tokio::test]
+    async fn migration_is_idempotent() {
         let tmp = TestTempDir::new("pamm_migrate_flat_idempotent");
         let repo_path = flat_fixture(&tmp);
         let config = repo_config(&["core"]);
 
-        run_migrations::run_migrations(&repo_path, &config).unwrap();
-        run_migrations::run_migrations(&repo_path, &config).unwrap();
+        run_migrations::run_migrations(&repo_path, &config)
+            .await
+            .unwrap();
+        run_migrations::run_migrations(&repo_path, &config)
+            .await
+            .unwrap();
 
         assert!(repo_path.join("core/pack.config.json").is_file());
     }
 
-    #[test]
-    fn current_version_skips_migration_scan() {
+    #[tokio::test]
+    async fn current_version_skips_migration_scan() {
         let tmp = TestTempDir::new("pamm_migrate_current_version");
         let repo_path = tmp.path().join("repo");
         fs::create_dir_all(&repo_path).unwrap();
-        RepoVersion::current().write_fixed(&repo_path).unwrap();
+        RepoVersion::current()
+            .write_fixed(&repo_path)
+            .await
+            .unwrap();
 
         // Leftover flat-looking files must NOT be touched once the repo is
         // marked as current — the version file is authoritative.
         fs::write(repo_path.join("core.pack.config.json"), b"{}").unwrap();
 
-        run_migrations::run_migrations(&repo_path, &repo_config(&["core"])).unwrap();
+        run_migrations::run_migrations(&repo_path, &repo_config(&["core"]))
+            .await
+            .unwrap();
 
         assert!(repo_path.join("core.pack.config.json").is_file());
         assert!(!repo_path.join("core").exists());
     }
 
-    #[test]
-    fn newer_version_is_an_error() {
+    #[tokio::test]
+    async fn newer_version_is_an_error() {
         let tmp = TestTempDir::new("pamm_migrate_newer_version");
         let repo_path = tmp.path().join("repo");
         fs::create_dir_all(&repo_path).unwrap();
         RepoVersion(CURRENT_REPO_VERSION + 1)
             .write_fixed(&repo_path)
+            .await
             .unwrap();
 
         let err = run_migrations::run_migrations(&repo_path, &repo_config(&[]))
+            .await
             .unwrap_err()
             .to_string();
         assert!(err.contains("update pamm"), "unexpected error: {}", err);
     }
 
-    #[test]
-    fn bails_when_both_layouts_have_the_file() {
+    #[tokio::test]
+    async fn bails_when_both_layouts_have_the_file() {
         let tmp = TestTempDir::new("pamm_migrate_flat_conflict");
         let repo_path = flat_fixture(&tmp);
         fs::create_dir_all(repo_path.join("core")).unwrap();
         fs::write(repo_path.join("core/pack.config.json"), b"{}").unwrap();
 
         let err = run_migrations::run_migrations(&repo_path, &repo_config(&["core"]))
+            .await
             .unwrap_err()
             .to_string();
         assert!(err.contains("v1 to v2"), "unexpected error: {}", err);
@@ -314,36 +328,42 @@ mod tests {
         );
     }
 
-    #[test]
-    fn tolerates_pack_without_files() {
+    #[tokio::test]
+    async fn tolerates_pack_without_files() {
         let tmp = TestTempDir::new("pamm_migrate_flat_missing_pack");
         let repo_path = tmp.path().join("repo");
         fs::create_dir_all(&repo_path).unwrap();
 
-        run_migrations::run_migrations(&repo_path, &repo_config(&["ghost"])).unwrap();
+        run_migrations::run_migrations(&repo_path, &repo_config(&["ghost"]))
+            .await
+            .unwrap();
         assert!(!repo_path.join("ghost").exists());
     }
 
-    #[test]
-    fn rejects_pack_named_www() {
+    #[tokio::test]
+    async fn rejects_pack_named_www() {
         let tmp = TestTempDir::new("pamm_migrate_flat_www_pack");
         let repo_path = tmp.path().join("repo");
         fs::create_dir_all(&repo_path).unwrap();
 
         let err = format!(
             "{:#}",
-            run_migrations::run_migrations(&repo_path, &repo_config(&["www"])).unwrap_err()
+            run_migrations::run_migrations(&repo_path, &repo_config(&["www"]))
+                .await
+                .unwrap_err()
         );
         assert!(err.contains("www"), "unexpected error: {}", err);
     }
 
-    #[test]
-    fn leaves_unrelated_flat_files_alone() {
+    #[tokio::test]
+    async fn leaves_unrelated_flat_files_alone() {
         let tmp = TestTempDir::new("pamm_migrate_flat_unrelated");
         let repo_path = flat_fixture(&tmp);
         fs::write(repo_path.join("other.pack.config.json"), b"{}").unwrap();
 
-        run_migrations::run_migrations(&repo_path, &repo_config(&["core"])).unwrap();
+        run_migrations::run_migrations(&repo_path, &repo_config(&["core"]))
+            .await
+            .unwrap();
 
         assert!(
             repo_path.join("other.pack.config.json").is_file(),

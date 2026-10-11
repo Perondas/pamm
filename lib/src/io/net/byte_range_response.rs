@@ -1,68 +1,64 @@
 use crate::io::progress_reporting::download_reporter::DownloadReporter;
 use anyhow::Context;
 use anyhow::anyhow;
+use futures::TryStreamExt;
 use regex::Regex;
-use std::io::{BufRead, BufReader, Read};
+use reqwest::Response;
+use reqwest::header::CONTENT_TYPE;
+use std::pin::Pin;
 use std::sync::LazyLock;
-use ureq::http::Response;
-use ureq::http::header::CONTENT_TYPE;
-use ureq::{Body, BodyReader};
+use tokio::io::{AsyncBufReadExt, AsyncRead, AsyncReadExt, BufReader};
+use tokio_util::io::StreamReader;
 
 static CONTENT_RANGE_HEADER: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^content-range: bytes (\d+)-(\d+)/(\d+)\r\n$").unwrap());
 
-pub struct ByteRangeResponse<R: Read, P: DownloadReporter> {
-    reader: BufReader<R>,
+type BodyReader = Pin<Box<dyn AsyncRead + Send>>;
+
+/// The parts of a `multipart/byteranges` response, read one at a time with
+/// [`ByteRangeResponse::next_part`].
+pub struct ByteRangeResponse<P: DownloadReporter> {
+    reader: BufReader<BodyReader>,
     reporter: P,
     boundary: Vec<u8>,
     errored: bool,
 }
 
-pub trait IntoByteRangeResponse<R: Read, P: DownloadReporter> {
-    fn into_byte_range_response(self, reporter: P) -> anyhow::Result<ByteRangeResponse<R, P>>;
-}
-
-impl<P: DownloadReporter> IntoByteRangeResponse<BodyReader<'static>, P> for Response<Body> {
-    fn into_byte_range_response(
-        self,
-        reporter: P,
-    ) -> anyhow::Result<ByteRangeResponse<BodyReader<'static>, P>> {
-        let (p, b) = self.into_parts();
-        let content_type = p.headers.get(CONTENT_TYPE).expect("Content-Type missing");
+impl<P: DownloadReporter> ByteRangeResponse<P> {
+    pub fn from_response(response: Response, reporter: P) -> anyhow::Result<Self> {
+        let content_type = response
+            .headers()
+            .get(CONTENT_TYPE)
+            .context("Content-Type missing")?;
         let boundary = content_type
             .to_str()?
             .split("boundary=")
             .nth(1)
-            .expect("Boundary missing")
+            .context("Boundary missing")?
             .to_string();
-        Ok(ByteRangeResponse::new(
-            b.into_reader(),
-            boundary.as_bytes().to_vec(),
-            reporter,
-        ))
-    }
-}
 
-impl<R: Read, P: DownloadReporter> ByteRangeResponse<R, P> {
-    pub fn new(reader: R, boundary: Vec<u8>, reporter: P) -> Self {
+        let body = StreamReader::new(response.bytes_stream().map_err(std::io::Error::other));
+
+        Ok(Self::new(body, boundary.into_bytes(), reporter))
+    }
+
+    pub fn new(reader: impl AsyncRead + Send + 'static, boundary: Vec<u8>, reporter: P) -> Self {
         Self {
-            reader: BufReader::new(reader),
+            reader: BufReader::new(Box::pin(reader)),
             reporter,
             boundary,
             errored: false,
         }
     }
-}
 
-impl<R: Read, P: DownloadReporter> Iterator for ByteRangeResponse<R, P> {
-    type Item = anyhow::Result<Vec<u8>>;
-
-    fn next(&mut self) -> Option<Self::Item> {
+    /// The next part's body, or `None` once the final boundary has been read.
+    /// After an error every further call returns `None`.
+    pub async fn next_part(&mut self) -> Option<anyhow::Result<Vec<u8>>> {
         if self.errored {
             return None;
         }
 
-        match get_next_part(&mut self.reader, &self.boundary) {
+        match get_next_part(&mut self.reader, &self.boundary).await {
             Ok(Some(part)) => {
                 self.reporter.report_progress(part.len() as u64);
                 Some(Ok(part))
@@ -76,13 +72,13 @@ impl<R: Read, P: DownloadReporter> Iterator for ByteRangeResponse<R, P> {
     }
 }
 
-fn get_next_part<R: Read>(
+async fn get_next_part<R: AsyncRead + Unpin>(
     reader: &mut BufReader<R>,
     boundary: &[u8],
 ) -> anyhow::Result<Option<Vec<u8>>> {
     let boundary_len = boundary.len() + 4; // "--" + boundary + "\r\n"
     let mut boundary_bytes = vec![0u8; boundary_len];
-    let read = reader.read_exact(&mut boundary_bytes);
+    let read = reader.read_exact(&mut boundary_bytes).await;
 
     if let Err(e) = read {
         return if e.kind() == std::io::ErrorKind::UnexpectedEof {
@@ -98,14 +94,14 @@ fn get_next_part<R: Read>(
 
     if &boundary_bytes[boundary_len - 2..] == b"--" {
         let mut check_eof = [0u8; 2];
-        reader.read_exact(&mut check_eof)?;
+        reader.read_exact(&mut check_eof).await?;
 
         if &check_eof[..2] != b"\r\n" {
             return Err(anyhow!("Invalid data after final boundary"));
         }
 
         let mut peek_buf = [0u8; 1];
-        let bytes_peeked = reader.read(&mut peek_buf)?;
+        let bytes_peeked = reader.read(&mut peek_buf).await?;
         if bytes_peeked != 0 {
             return Err(anyhow!("Data found after final boundary"));
         }
@@ -126,7 +122,7 @@ fn get_next_part<R: Read>(
         }
 
         let mut header = Vec::new();
-        let bytes_read = reader.read_until(b'\n', &mut header)?;
+        let bytes_read = reader.read_until(b'\n', &mut header).await?;
 
         if bytes_read == 0 {
             return Err(anyhow!("Unexpected EOF while reading headers"));
@@ -166,15 +162,47 @@ fn get_next_part<R: Read>(
     let mut part_data = vec![0u8; part_size];
     reader
         .read_exact(&mut part_data)
+        .await
         .context(anyhow!("Failed to read content of length: {}", part_size))?;
 
     // Read the trailing \r\n after the part
     let mut trailing = [0u8; 2];
-    reader.read_exact(&mut trailing)?;
+    reader.read_exact(&mut trailing).await?;
 
     if &trailing != b"\r\n" {
         return Err(anyhow!("Invalid trailing after part"));
     }
 
     Ok(Some(part_data))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::io::progress_reporting::progress_reporter::NoopProgressReporter;
+
+    fn response(body: &'static [u8]) -> ByteRangeResponse<NoopProgressReporter> {
+        ByteRangeResponse::new(body, b"XYZ".to_vec(), NoopProgressReporter)
+    }
+
+    #[tokio::test]
+    async fn reads_every_part_then_stops() {
+        let mut parts = response(
+            b"--XYZ\r\nContent-Range: bytes 0-2/10\r\n\r\nabc\r\n\
+              --XYZ\r\nContent-Type: x\r\nContent-Range: bytes 5-6/10\r\n\r\nde\r\n\
+              --XYZ--\r\n",
+        );
+
+        assert_eq!(parts.next_part().await.unwrap().unwrap(), b"abc");
+        assert_eq!(parts.next_part().await.unwrap().unwrap(), b"de");
+        assert!(parts.next_part().await.is_none());
+    }
+
+    #[tokio::test]
+    async fn stops_after_the_first_error() {
+        let mut parts = response(b"--NOPE\r\n");
+
+        assert!(parts.next_part().await.unwrap().is_err());
+        assert!(parts.next_part().await.is_none());
+    }
 }

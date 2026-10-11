@@ -22,11 +22,11 @@ impl RepoVersion {
 
     /// Reads the repo version from `<repo_path>/version.pamm`; a missing file
     /// means version 1 (repos predate the version file).
-    pub(crate) fn read_or_v1(repo_path: &Path) -> anyhow::Result<Self> {
-        if !repo_path.join(Self::file_name()).exists() {
+    pub(crate) async fn read_or_v1(repo_path: &Path) -> anyhow::Result<Self> {
+        if !tokio::fs::try_exists(repo_path.join(Self::file_name())).await? {
             return Ok(Self(1));
         }
-        Self::read_from_known(repo_path)
+        Self::read_from_known(repo_path).await
     }
 }
 
@@ -56,31 +56,37 @@ mod tests {
     use crate::io::fs::fs_writable::FixedFsWritable;
     use crate::util::test_utils::TestTempDir;
 
-    #[test]
-    fn round_trips_through_the_version_file() {
+    #[tokio::test]
+    async fn round_trips_through_the_version_file() {
         let tmp = TestTempDir::new("pamm_repo_version_roundtrip");
 
-        RepoVersion::current().write_fixed(tmp.path()).unwrap();
+        RepoVersion::current()
+            .write_fixed(tmp.path())
+            .await
+            .unwrap();
 
         let content = std::fs::read_to_string(tmp.path().join("version.pamm")).unwrap();
         assert_eq!(content, CURRENT_REPO_VERSION.to_string());
 
         assert_eq!(
-            RepoVersion::read_or_v1(tmp.path()).unwrap(),
+            RepoVersion::read_or_v1(tmp.path()).await.unwrap(),
             RepoVersion::current()
         );
     }
 
-    #[test]
-    fn missing_file_means_v1() {
+    #[tokio::test]
+    async fn missing_file_means_v1() {
         let tmp = TestTempDir::new("pamm_repo_version_missing");
-        assert_eq!(RepoVersion::read_or_v1(tmp.path()).unwrap(), RepoVersion(1));
+        assert_eq!(
+            RepoVersion::read_or_v1(tmp.path()).await.unwrap(),
+            RepoVersion(1)
+        );
     }
 
-    #[test]
-    fn garbage_content_is_an_error() {
+    #[tokio::test]
+    async fn garbage_content_is_an_error() {
         let tmp = TestTempDir::new("pamm_repo_version_garbage");
         std::fs::write(tmp.path().join("version.pamm"), "not-a-number").unwrap();
-        assert!(RepoVersion::read_or_v1(tmp.path()).is_err());
+        assert!(RepoVersion::read_or_v1(tmp.path()).await.is_err());
     }
 }

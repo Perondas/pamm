@@ -1,5 +1,4 @@
 use anyhow::Context;
-use std::fs::write;
 use std::path::{Path, PathBuf};
 
 const PRESET_PREFIX: &str = "pamm_";
@@ -19,14 +18,16 @@ impl Preset {
         }
     }
 
-    pub fn write_to(&self, path: impl AsRef<Path>) -> anyhow::Result<PathBuf> {
+    pub async fn write_to(&self, path: impl AsRef<Path>) -> anyhow::Result<PathBuf> {
         let file_name = preset_file_name(&self.pack_name);
         let body = render_preset(&self.params, &self.arma_mod_paths);
 
         let path = path.as_ref().join(file_name);
 
         log::debug!("Writing preset to {path:?}");
-        write(&path, body).with_context(|| format!("Failed to write preset to {path:#?}"))?;
+        tokio::fs::write(&path, body)
+            .await
+            .with_context(|| format!("Failed to write preset to {path:#?}"))?;
 
         Ok(path)
     }
@@ -103,26 +104,28 @@ mod tests {
         );
     }
 
-    #[test]
-    fn writes_the_preset_into_the_game_directory() {
+    #[tokio::test]
+    async fn writes_the_preset_into_the_game_directory() {
         let dir = TestTempDir::new("pamm_write_preset");
 
         let preset = Preset::new("main".to_string(), vec!["-skipIntro".to_string()], vec![]);
-        let path = preset.write_to(&dir.0).unwrap();
+        let path = preset.write_to(&dir.0).await.unwrap();
 
         assert_eq!(path, dir.0.join("pamm_main.txt"));
         assert_eq!(std::fs::read_to_string(&path).unwrap(), "-skipIntro\n");
     }
 
-    #[test]
-    fn overwrites_a_stale_preset() {
+    #[tokio::test]
+    async fn overwrites_a_stale_preset() {
         let dir = TestTempDir::new("pamm_overwrite_preset");
 
         Preset::new("main".to_string(), vec!["-old".to_string()], vec![])
             .write_to(&dir.0)
+            .await
             .unwrap();
         let path = Preset::new("main".to_string(), vec!["-new".to_string()], vec![])
             .write_to(&dir.0)
+            .await
             .unwrap();
 
         assert_eq!(std::fs::read_to_string(&path).unwrap(), "-new\n");

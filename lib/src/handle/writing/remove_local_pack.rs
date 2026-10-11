@@ -4,7 +4,7 @@ use crate::io::fs::rm::rm_pack::remove_pack;
 use anyhow::{Context, anyhow, bail, ensure};
 
 impl ClientRepoHandle {
-    pub fn remove_local_pack(&mut self, name: &str) -> anyhow::Result<()> {
+    pub async fn remove_local_pack(&mut self, name: &str) -> anyhow::Result<()> {
         let mut settings = self.user_settings().clone();
 
         ensure!(
@@ -15,6 +15,7 @@ impl ClientRepoHandle {
 
         if let Some(dependant) = self
             .has_no_dependants(name)
+            .await
             .context(anyhow!("Failed to check dependants"))?
         {
             bail!(
@@ -26,25 +27,25 @@ impl ClientRepoHandle {
 
         settings.local_packs.retain(|p| p != name);
 
-        self.update_settings(settings).context(anyhow!(
+        self.update_settings(settings).await.context(anyhow!(
             "failed to update user settings after removing local pack: '{}'",
             name,
         ))?;
 
         // Delete on disk
-        remove_pack(&self.repo_path, name).context(anyhow!(
+        remove_pack(&self.repo_path, name).await.context(anyhow!(
             "failed to remove pack: '{}' from disk. Remove manually!",
             name
         ))
     }
 
-    fn has_no_dependants(&self, name: &str) -> anyhow::Result<Option<String>> {
+    async fn has_no_dependants(&self, name: &str) -> anyhow::Result<Option<String>> {
         let settings = self.user_settings().clone();
 
         let others = settings.local_packs.iter().filter(|p| *p != name);
 
         for other in others {
-            let config = self.get_pack(other).context(anyhow!(
+            let config = self.get_pack(other).await.context(anyhow!(
                 "failed to read pack config for local pack: '{}'",
                 other
             ))?;

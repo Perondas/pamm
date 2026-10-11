@@ -7,20 +7,49 @@ use std::path::{Component, Path, PathBuf};
 
 /// Per-build helper that places source files into the `www/` build output, either
 /// as relative symlinks (default) or as copies.
-pub(crate) struct Materializer<'a> {
+///
+/// Walking and linking a tree is a long run of small blocking filesystem calls,
+/// so each materialization runs as a single job on the blocking thread pool.
+#[derive(Clone)]
+pub(crate) struct Materializer {
     pub mode: BuildMode,
-    src: &'a Path,
-    dest: &'a Path,
+    src: PathBuf,
+    dest: PathBuf,
 }
 
-impl<'a> Materializer<'a> {
-    pub fn new(mode: BuildMode, src: &'a Path, dest: &'a Path) -> Self {
-        Self { mode, src, dest }
+impl Materializer {
+    pub fn new(mode: BuildMode, src: &Path, dest: &Path) -> Self {
+        Self {
+            mode,
+            src: src.to_path_buf(),
+            dest: dest.to_path_buf(),
+        }
     }
 
     /// Materialize `rel_path` under the same relative path on both sides.
-    pub fn materialize(&self, rel_path: &RelPath) -> anyhow::Result<BuildReport> {
-        self.materialize_from(rel_path, rel_path, &[])
+    pub async fn materialize(&self, rel_path: &RelPath) -> anyhow::Result<BuildReport> {
+        self.materialize_from(rel_path, rel_path, &[]).await
+    }
+
+    /// See [`Materializer::materialize_from_blocking`].
+    pub async fn materialize_from(
+        &self,
+        src_rel: &RelPath,
+        dest_rel: &RelPath,
+        top_level_excludes: &[&str],
+    ) -> anyhow::Result<BuildReport> {
+        let this = self.clone();
+        let (src_rel, dest_rel) = (src_rel.clone(), dest_rel.clone());
+        let excludes = top_level_excludes
+            .iter()
+            .map(|e| e.to_string())
+            .collect::<Vec<_>>();
+
+        tokio::task::spawn_blocking(move || {
+            let excludes = excludes.iter().map(String::as_str).collect::<Vec<_>>();
+            this.materialize_from_blocking(&src_rel, &dest_rel, &excludes)
+        })
+        .await?
     }
 
     /// Materialize the source at `src_rel` (relative to the source root) into
@@ -29,13 +58,13 @@ impl<'a> Materializer<'a> {
     /// children of the top-level directory to skip entirely — they are neither
     /// materialized nor counted as live during stale pruning, so a leftover copy
     /// in the destination gets removed.
-    pub fn materialize_from(
+    fn materialize_from_blocking(
         &self,
         src_rel: &RelPath,
         dest_rel: &RelPath,
         top_level_excludes: &[&str],
     ) -> anyhow::Result<BuildReport> {
-        let src_path = src_rel.with_base_path(self.src);
+        let src_path = src_rel.with_base_path(&self.src);
 
         if src_path.is_file() {
             self.place_file(src_rel, dest_rel)
@@ -54,7 +83,7 @@ impl<'a> Materializer<'a> {
     /// Materialize a single file. `source` must exist and be a file; `dest` is the
     /// path in www/ to create. Parent directories are created as needed.
     fn place_file(&self, src_rel: &RelPath, dest_rel: &RelPath) -> anyhow::Result<()> {
-        if let Some(parent) = dest_rel.with_base_path(self.dest).parent() {
+        if let Some(parent) = dest_rel.with_base_path(&self.dest).parent() {
             fs::create_dir_all(parent)
                 .with_context(|| format!("Failed to create destination directory {:?}", parent))?;
         }
@@ -71,8 +100,8 @@ impl<'a> Materializer<'a> {
         dest_rel: &RelPath,
         excludes: &[&str],
     ) -> anyhow::Result<BuildReport> {
-        let src = src_rel.with_base_path(self.src);
-        let dst = dest_rel.with_base_path(self.dest);
+        let src = src_rel.with_base_path(&self.src);
+        let dst = dest_rel.with_base_path(&self.dest);
 
         fs::create_dir_all(&dst)
             .with_context(|| format!("Failed to create directory {:?}", dst))?;
@@ -140,8 +169,8 @@ impl<'a> Materializer<'a> {
     }
 
     fn place_symlink(&self, src_rel: &RelPath, dest_rel: &RelPath) -> anyhow::Result<()> {
-        let dest = dest_rel.with_base_path(self.dest);
-        let source = src_rel.with_base_path(self.src);
+        let dest = dest_rel.with_base_path(&self.dest);
+        let source = src_rel.with_base_path(&self.src);
 
         let link_parent = dest
             .parent()
@@ -186,8 +215,8 @@ impl<'a> Materializer<'a> {
         // If dest is an existing symlink (e.g. from an earlier symlink-mode build),
         // remove it before copying so we get a real file.
 
-        let dest = dest_rel.with_base_path(self.dest);
-        let source = src_rel.with_base_path(self.src);
+        let dest = dest_rel.with_base_path(&self.dest);
+        let source = src_rel.with_base_path(&self.src);
 
         if fs::symlink_metadata(&dest)
             .map(|m| m.file_type().is_symlink())

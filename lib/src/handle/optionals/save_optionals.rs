@@ -3,34 +3,45 @@ use crate::handle::reading::get_pack::GetPack;
 use crate::handle::writing::save_pack_settings::SavePackSettings;
 
 pub trait SaveOptionals {
-    fn save_optionals(&self, pack_name: &str, optionals: &[OptionalAddon]) -> anyhow::Result<()>;
+    fn save_optionals(
+        &self,
+        pack_name: &str,
+        optionals: &[OptionalAddon],
+    ) -> impl Future<Output = anyhow::Result<()>> + Send;
 }
 
 impl<T> SaveOptionals for T
 where
-    T: GetPack + SavePackSettings,
+    T: GetPack + SavePackSettings + Sync,
 {
-    fn save_optionals(&self, pack_name: &str, optionals: &[OptionalAddon]) -> anyhow::Result<()> {
-        let (config, mut settings) = self.get_pack_with_settings(pack_name)?;
+    async fn save_optionals(
+        &self,
+        pack_name: &str,
+        optionals: &[OptionalAddon],
+    ) -> anyhow::Result<()> {
+        let mut current = Some(pack_name.to_string());
 
-        let enabled = optionals
-            .iter()
-            .filter(|optional| optional.enabled)
-            .filter(|optional| {
-                config
-                    .addons
-                    .get(&optional.name)
-                    .is_some_and(|addon| addon.is_optional)
-            })
-            .map(|optional| optional.name.to_owned())
-            .collect();
+        // The pack first, then each ancestor in turn.
+        while let Some(pack_name) = current {
+            let (config, mut settings) = self.get_pack_with_settings(&pack_name).await?;
 
-        settings.enabled_optionals = enabled;
+            let enabled = optionals
+                .iter()
+                .filter(|optional| optional.enabled)
+                .filter(|optional| {
+                    config
+                        .addons
+                        .get(&optional.name)
+                        .is_some_and(|addon| addon.is_optional)
+                })
+                .map(|optional| optional.name.to_owned())
+                .collect();
 
-        self.save_pack_settings(pack_name, &settings)?;
+            settings.enabled_optionals = enabled;
 
-        if let Some(parent) = &config.parent {
-            self.save_optionals(parent, optionals)?;
+            self.save_pack_settings(&pack_name, &settings).await?;
+
+            current = config.parent;
         }
 
         Ok(())
@@ -42,8 +53,8 @@ mod tests {
     use super::*;
     use crate::handle::mock_handle::{MockHandle, MockHandleExt};
 
-    #[test]
-    fn test_save_optionals() {
+    #[tokio::test]
+    async fn test_save_optionals() {
         let mut mock = MockHandle::new();
 
         mock.mock_pack("test_pack", None, &["@opt_addon"], &["@req_addon"], &[]);
@@ -66,11 +77,11 @@ mod tests {
             },
         ];
 
-        mock.save_optionals("test_pack", &optionals).unwrap();
+        mock.save_optionals("test_pack", &optionals).await.unwrap();
     }
 
-    #[test]
-    fn test_save_optionals_with_parent() {
+    #[tokio::test]
+    async fn test_save_optionals_with_parent() {
         let mut mock = MockHandle::new();
 
         mock.mock_pack("child_pack", Some("parent_pack"), &["@child_opt"], &[], &[]);
@@ -106,6 +117,6 @@ mod tests {
             },
         ];
 
-        mock.save_optionals("child_pack", &optionals).unwrap();
+        mock.save_optionals("child_pack", &optionals).await.unwrap();
     }
 }

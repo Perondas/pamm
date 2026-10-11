@@ -6,16 +6,18 @@ use crate::models::pack::pack_index::PackIndex;
 use std::path::Path;
 
 impl PackDiff {
-    pub fn write_checksum_index_to_fs(&self, base_path: &Path) -> anyhow::Result<()> {
-        self.target_index.write_checksum_index_to_fs(base_path)
+    pub async fn write_checksum_index_to_fs(&self, base_path: &Path) -> anyhow::Result<()> {
+        self.target_index
+            .write_checksum_index_to_fs(base_path)
+            .await
     }
 }
 
 impl PackIndex {
-    pub fn write_checksum_index_to_fs(&self, base_path: &Path) -> anyhow::Result<()> {
+    pub async fn write_checksum_index_to_fs(&self, base_path: &Path) -> anyhow::Result<()> {
         let index_dir = base_path.join(&self.pack_name).join(INDEX_DIR_NAME);
 
-        std::fs::create_dir_all(&index_dir)?;
+        tokio::fs::create_dir_all(&index_dir).await?;
 
         let checksum_index = ChecksumIndex {
             checksums: self
@@ -25,18 +27,18 @@ impl PackIndex {
                 .collect(),
         };
 
-        checksum_index.write_fixed(&index_dir)
+        checksum_index.write_fixed(&index_dir).await
     }
 
-    pub fn write_full_index_to_fs(&self, base_path: &Path) -> anyhow::Result<()> {
+    pub async fn write_full_index_to_fs(&self, base_path: &Path) -> anyhow::Result<()> {
         let index_dir = base_path.join(&self.pack_name).join(INDEX_DIR_NAME);
 
-        std::fs::create_dir_all(&index_dir)?;
+        tokio::fs::create_dir_all(&index_dir).await?;
 
         for addon in &self.addons {
-            addon.write_to(&index_dir)?;
+            addon.write_to(&index_dir).await?;
         }
 
-        self.write_checksum_index_to_fs(base_path)
+        self.write_checksum_index_to_fs(base_path).await
     }
 }

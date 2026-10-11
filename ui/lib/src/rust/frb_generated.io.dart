@@ -17,6 +17,7 @@ import 'api/commands/local_pack/remove_local_pack.dart';
 import 'api/commands/local_pack/sync_local_pack.dart';
 import 'api/commands/optionals/load_optionals.dart';
 import 'api/commands/optionals/save_optionals.dart';
+import 'api/commands/pack_sync/cancellation.dart';
 import 'api/commands/pack_sync/file_change.dart';
 import 'api/commands/pack_sync/get_diff.dart';
 import 'api/commands/pack_sync/get_diffs_with_parents.dart';
@@ -50,6 +51,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartProgressReporterPtr;
 
   CrossPlatformFinalizerArg
+  get rust_arc_decrement_strong_count_DownloadCancelTokenPtr => wire
+      ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelTokenPtr;
+
+  CrossPlatformFinalizerArg
   get rust_arc_decrement_strong_count_OpaqueDiffPtr => wire
       ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiffPtr;
 
@@ -69,6 +74,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  DownloadCancelToken
+  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelToken(
+    dynamic raw,
+  );
+
+  @protected
   OpaqueDiff
   dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
     dynamic raw,
@@ -81,6 +92,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  DownloadCancelToken
+  dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelToken(
+    dynamic raw,
+  );
+
+  @protected
   Map<String, List<FileChange>> dco_decode_Map_String_list_file_change_None(
     dynamic raw,
   );
@@ -88,6 +105,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   DartProgressReporter
   dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartProgressReporter(
+    dynamic raw,
+  );
+
+  @protected
+  DownloadCancelToken
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelToken(
     dynamic raw,
   );
 
@@ -138,6 +161,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   DiffResult dco_decode_diff_result(dynamic raw);
+
+  @protected
+  DownloadOutcome dco_decode_download_outcome(dynamic raw);
 
   @protected
   ExternalAddon dco_decode_external_addon(dynamic raw);
@@ -265,6 +291,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  DownloadCancelToken
+  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelToken(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   OpaqueDiff
   sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
     SseDeserializer deserializer,
@@ -277,6 +309,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  DownloadCancelToken
+  sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelToken(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   Map<String, List<FileChange>> sse_decode_Map_String_list_file_change_None(
     SseDeserializer deserializer,
   );
@@ -284,6 +322,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   DartProgressReporter
   sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartProgressReporter(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  DownloadCancelToken
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelToken(
     SseDeserializer deserializer,
   );
 
@@ -342,6 +386,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   DiffResult sse_decode_diff_result(SseDeserializer deserializer);
+
+  @protected
+  DownloadOutcome sse_decode_download_outcome(SseDeserializer deserializer);
 
   @protected
   ExternalAddon sse_decode_external_addon(SseDeserializer deserializer);
@@ -489,6 +536,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelToken(
+    DownloadCancelToken self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
   sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerOpaqueDiff(
     OpaqueDiff self,
     SseSerializer serializer,
@@ -502,6 +556,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void
+  sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelToken(
+    DownloadCancelToken self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_Map_String_list_file_change_None(
     Map<String, List<FileChange>> self,
     SseSerializer serializer,
@@ -511,6 +572,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void
   sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartProgressReporter(
     DartProgressReporter self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelToken(
+    DownloadCancelToken self,
     SseSerializer serializer,
   );
 
@@ -577,6 +645,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_diff_result(DiffResult self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_download_outcome(
+    DownloadOutcome self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_external_addon(ExternalAddon self, SseSerializer serializer);
@@ -782,6 +856,40 @@ class RustLibWire implements BaseWire {
       );
   late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartProgressReporter =
       _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartProgressReporterPtr
+          .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
+
+  void
+  rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelToken(
+    ffi.Pointer<ffi.Void> ptr,
+  ) {
+    return _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelToken(
+      ptr,
+    );
+  }
+
+  late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelTokenPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
+        'frbgen_pamm_ui_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelToken',
+      );
+  late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelToken =
+      _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelTokenPtr
+          .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
+
+  void
+  rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelToken(
+    ffi.Pointer<ffi.Void> ptr,
+  ) {
+    return _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelToken(
+      ptr,
+    );
+  }
+
+  late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelTokenPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
+        'frbgen_pamm_ui_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelToken',
+      );
+  late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelToken =
+      _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDownloadCancelTokenPtr
           .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
 
   void

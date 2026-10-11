@@ -1,12 +1,13 @@
 use crate::io::files::file_paths::rel_path::RelPath;
 use crate::io::files::name_consts::MEDIA_DIR_NAME;
+use crate::io::fs::util::path_checks::{is_dir, is_file};
 use crate::io::net::download_file::download_file_unverified;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::repo::repo_config::RepoConfig;
 use log::warn;
 use std::collections::HashSet;
-use std::fs;
 use std::path::Path;
+use tokio::fs;
 use url::Url;
 
 /// Download every media file referenced by the repo and pack configs into
@@ -19,7 +20,7 @@ use url::Url;
 ///
 /// Media is best-effort cosmetics: every failure is logged and skipped, this
 /// never fails the surrounding init/sync operation.
-pub(crate) fn download_referenced_media(
+pub(crate) async fn download_referenced_media(
     repo_path: &Path,
     remote: &Url,
     repo_config: &RepoConfig,
@@ -49,11 +50,11 @@ pub(crate) fn download_referenced_media(
 
     let media_dir = RelPath::from_name(MEDIA_DIR_NAME).with_base_path(repo_path);
 
-    if referenced.is_empty() && !media_dir.is_dir() {
+    if referenced.is_empty() && !is_dir(&media_dir).await {
         return;
     }
 
-    if let Err(e) = fs::create_dir_all(&media_dir) {
+    if let Err(e) = fs::create_dir_all(&media_dir).await {
         warn!("Failed to create media directory {:?}: {}", media_dir, e);
         return;
     }
@@ -62,16 +63,17 @@ pub(crate) fn download_referenced_media(
         let rel = RelPath::from_name(MEDIA_DIR_NAME).push(name);
         if let Err(e) =
             download_file_unverified(&rel.with_base_path(repo_path), rel.with_base_url(remote))
+                .await
         {
             warn!("Failed to download media file '{}': {}", name, e);
         }
     }
 
-    prune_unreferenced(&media_dir, &referenced);
+    prune_unreferenced(&media_dir, &referenced).await;
 }
 
-fn prune_unreferenced(media_dir: &Path, referenced: &HashSet<&str>) {
-    let entries = match fs::read_dir(media_dir) {
+async fn prune_unreferenced(media_dir: &Path, referenced: &HashSet<&str>) {
+    let mut entries = match fs::read_dir(media_dir).await {
         Ok(entries) => entries,
         Err(e) => {
             warn!("Failed to read media directory {:?}: {}", media_dir, e);
@@ -79,15 +81,15 @@ fn prune_unreferenced(media_dir: &Path, referenced: &HashSet<&str>) {
         }
     };
 
-    for entry in entries.flatten() {
-        if !entry.path().is_file() {
+    while let Ok(Some(entry)) = entries.next_entry().await {
+        if !is_file(entry.path()).await {
             continue;
         }
         let name = entry.file_name();
         if referenced.contains(name.to_string_lossy().as_ref()) {
             continue;
         }
-        if let Err(e) = fs::remove_file(entry.path()) {
+        if let Err(e) = fs::remove_file(entry.path()).await {
             warn!(
                 "Failed to remove stale media file {:?}: {}",
                 entry.path(),
@@ -106,15 +108,15 @@ mod tests {
     // Unreferenced files (incl. .part leftovers) are pruned, referenced files
     // survive even when their re-download fails, and path-like names coming
     // from a (potentially malicious) remote config are ignored.
-    #[test]
-    fn prunes_unreferenced_rejects_invalid_and_tolerates_failures() {
+    #[tokio::test]
+    async fn prunes_unreferenced_rejects_invalid_and_tolerates_failures() {
         let tmp = TestTempDir::new("pamm_sync_media_prune");
         let repo_path = tmp.path();
         let media_dir = repo_path.join(MEDIA_DIR_NAME);
-        fs::create_dir_all(&media_dir).unwrap();
-        fs::write(media_dir.join("keep.png"), b"keep").unwrap();
-        fs::write(media_dir.join("old.png"), b"old").unwrap();
-        fs::write(media_dir.join("interrupted.png.part"), b"part").unwrap();
+        std::fs::create_dir_all(&media_dir).unwrap();
+        std::fs::write(media_dir.join("keep.png"), b"keep").unwrap();
+        std::fs::write(media_dir.join("old.png"), b"old").unwrap();
+        std::fs::write(media_dir.join("interrupted.png.part"), b"part").unwrap();
 
         let mut repo_config =
             RepoConfig::new("repo".to_string(), "test".to_string(), Default::default());
@@ -126,9 +128,9 @@ mod tests {
 
         // Nothing listens here: every download fails and is tolerated.
         let remote = Url::parse("http://127.0.0.1:1/").unwrap();
-        download_referenced_media(repo_path, &remote, &repo_config, &[]);
+        download_referenced_media(repo_path, &remote, &repo_config, &[]).await;
 
-        assert_eq!(fs::read(media_dir.join("keep.png")).unwrap(), b"keep");
+        assert_eq!(std::fs::read(media_dir.join("keep.png")).unwrap(), b"keep");
         assert!(!media_dir.join("old.png").exists());
         assert!(!media_dir.join("interrupted.png.part").exists());
         assert!(!repo_path.join("escape.png").exists());

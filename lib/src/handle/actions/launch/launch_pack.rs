@@ -31,14 +31,16 @@ impl LaunchParams {
 }
 
 impl ClientRepoHandle {
-    pub fn launch_pack(
+    pub async fn launch_pack(
         &self,
         pack_name: &str,
         params: &LaunchParams,
     ) -> anyhow::Result<LaunchOutcome> {
         info!("Launching pack with params: '{:#?}'", params);
 
-        let addon_paths = self.get_canonical_addon_paths(pack_name, params.disable_optionals)?;
+        let addon_paths = self
+            .get_canonical_addon_paths(pack_name, params.disable_optionals)
+            .await?;
 
         debug!(
             "Resolved {} addon path(s) for pack '{}'",
@@ -47,9 +49,9 @@ impl ClientRepoHandle {
         );
 
         match params.mode {
-            LaunchMode::Steam => self.launch_via_steam(pack_name, &addon_paths),
+            LaunchMode::Steam => self.launch_via_steam(pack_name, &addon_paths).await,
             #[cfg(target_os = "windows")]
-            LaunchMode::Executable => self.launch_via_executable(pack_name, &addon_paths),
+            LaunchMode::Executable => self.launch_via_executable(pack_name, &addon_paths).await,
         }
     }
 }

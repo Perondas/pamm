@@ -1,6 +1,6 @@
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
 
-pub(crate) trait DownloadReporter: Send + Sync + Clone {
+pub(crate) trait DownloadReporter: Send + Sync + Clone + 'static {
     fn report_progress(&self, progress: u64);
 }
 

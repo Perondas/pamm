@@ -1,12 +1,15 @@
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use pamm_lib::models::pack::pack_config::PackConfig;
 
-pub fn add_local_pack(repo_path: String, config: FlutterLocalPackConfig) -> anyhow::Result<()> {
+pub async fn add_local_pack(
+    repo_path: String,
+    config: FlutterLocalPackConfig,
+) -> anyhow::Result<()> {
     let repot_path = std::path::Path::new(&repo_path);
 
-    let mut handle = ClientRepoHandle::open(repot_path)?;
+    let mut handle = ClientRepoHandle::open(repot_path).await?;
 
-    handle.add_local_pack(&config.into())
+    handle.add_local_pack(&config.into()).await
 }
 
 #[derive(Debug)]

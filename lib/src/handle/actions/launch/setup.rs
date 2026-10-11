@@ -12,35 +12,34 @@ impl ClientRepoHandle {
     /// Describes the one-time Steam setup this repo needs on Linux: the string
     /// to paste into Arma's launch options, and the `flatpak override` command
     /// when mods sit outside the sandbox.
-    pub fn linux_launch_setup(&self) -> anyhow::Result<LinuxLaunchSetup> {
+    pub async fn linux_launch_setup(&self) -> anyhow::Result<LinuxLaunchSetup> {
         let arma = find_arma_install().context("Failed to find the Arma 3 installation")?;
 
         Ok(compute_linux_launch_setup(
             &arma.steam,
             &arma.install_dir,
             &arma.libraries,
-            &self.mod_roots()?,
+            &self.mod_roots().await?,
         ))
     }
 
     /// The directories this repo's mods live in: the repo itself, which holds
     /// every pack's addons, plus the directory each external addon sits in.
-    fn mod_roots(&self) -> anyhow::Result<Vec<PathBuf>> {
-        let repo_path = self
-            .get_repo_path()
-            .canonicalize()
+    async fn mod_roots(&self) -> anyhow::Result<Vec<PathBuf>> {
+        let repo_path = tokio::fs::canonicalize(self.get_repo_path())
+            .await
             .context("Failed to resolve the repo path")?;
 
         let mut roots = vec![repo_path];
 
         for pack_name in self.all_pack_names() {
-            let externals = self.load_externals(&pack_name).context(anyhow!(
+            let externals = self.load_externals(&pack_name).await.context(anyhow!(
                 "Failed to load external addons for pack {pack_name:?}"
             ))?;
 
             for external in externals.iter().filter(|e| e.enabled) {
-                let path = PathBuf::from(&external.path)
-                    .canonicalize()
+                let path = tokio::fs::canonicalize(&external.path)
+                    .await
                     .context(format!(
                         "Failed to resolve the path of external addon {external:?}"
                     ))?;

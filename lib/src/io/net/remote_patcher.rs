@@ -1,19 +1,20 @@
 use crate::io::files::file_paths::rel_path::RelPath;
 use crate::io::files::name_consts::ADDONS_DIR_NAME;
-use crate::io::net::byte_range_response::{ByteRangeResponse, IntoByteRangeResponse};
+use crate::io::net::byte_range_response::ByteRangeResponse;
 use crate::io::net::download_file::download_file;
+use crate::io::net::http_client;
 use crate::io::progress_reporting::download_reporter::DownloadReporter;
 use crate::models::index::index_node::{PBO_CHECKSUM_LEN, PBOPart};
 use crate::models::index::node_diff::FileModification;
 use crate::models::pack::pack_config::PackConfig;
 use anyhow::{Context, Result, ensure};
 use bi_fs_rs::pbo::handle::PBOHandle;
-use fs::File;
-use std::collections::HashSet;
-use std::io::{BufWriter, Write};
-use std::path::Path;
-use std::{fs, iter};
-use ureq::BodyReader;
+use std::collections::{HashMap, HashSet};
+use std::io::SeekFrom;
+use std::iter;
+use std::path::{Path, PathBuf};
+use tokio::fs::{self, File};
+use tokio::io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt, BufWriter};
 use url::Url;
 
 pub(crate) struct RemotePatcher<P: DownloadReporter> {
@@ -43,7 +44,7 @@ impl<P: DownloadReporter> RemotePatcher<P> {
         }
     }
 
-    pub(crate) fn patch_file(
+    pub(crate) async fn patch_file(
         &self,
         rel_path: &RelPath,
         file_path: &Path,
@@ -60,32 +61,37 @@ impl<P: DownloadReporter> RemotePatcher<P> {
                 new_blob_start,
                 ..
             } => {
-                let mut pbo_handle = PBOHandle::open_file(file_path)?;
+                let local_parts = local_pbo_parts(file_path.to_path_buf()).await?;
+                let mut local_pbo = File::open(file_path).await?;
 
                 let temp_file_path = file_path.with_added_extension("pamm.temp");
 
-                let mut temp_file = BufWriter::new(File::create(&temp_file_path)?);
+                let mut temp_file = BufWriter::new(File::create(&temp_file_path).await?);
 
-                let mut parts = self.get_required_pbo_parts(
-                    &file_url,
-                    &new_order,
-                    &required_checksums,
-                    new_length,
-                    new_blob_start,
-                )?;
+                let mut parts = self
+                    .get_required_pbo_parts(
+                        &file_url,
+                        &new_order,
+                        &required_checksums,
+                        new_length,
+                        new_blob_start,
+                    )
+                    .await?;
 
                 let new_headers = parts
-                    .next()
+                    .next_part()
+                    .await
                     .ok_or_else(|| anyhow::anyhow!("No response for PBO header"))??;
 
-                temp_file.write_all(&new_headers)?;
-                temp_file.flush()?;
+                temp_file.write_all(&new_headers).await?;
+                temp_file.flush().await?;
 
+                let written = temp_file.get_ref().metadata().await?.len();
                 ensure!(
-                    temp_file.get_ref().metadata()?.len() == new_blob_start,
+                    written == new_blob_start,
                     "Patched PBO blob start does not match expected blob start. Expected blob start: {}. Actual blob start: {}",
                     new_blob_start,
-                    temp_file.get_ref().metadata()?.len()
+                    written
                 );
 
                 let required_checksums = required_checksums
@@ -96,7 +102,8 @@ impl<P: DownloadReporter> RemotePatcher<P> {
                 for part in new_order {
                     if required_checksums.contains(part.checksum.as_slice()) {
                         let part_data = parts
-                            .next()
+                            .next_part()
+                            .await
                             .ok_or_else(|| anyhow::anyhow!("No response for PBO part"))??;
                         ensure!(
                             part_data.len() == part.length as usize,
@@ -104,21 +111,27 @@ impl<P: DownloadReporter> RemotePatcher<P> {
                             part.length,
                             part_data.len()
                         );
-                        temp_file.write_all(&part_data)?;
+                        temp_file.write_all(&part_data).await?;
                     } else {
-                        let data = pbo_handle.get_file_content(&part.name)?;
+                        let &(offset, length) = local_parts
+                            .get(&part.name)
+                            .with_context(|| format!("File not found in PBO: {}", part.name))?;
+                        let mut data = vec![0; length as usize];
+                        local_pbo.seek(SeekFrom::Start(offset)).await?;
+                        local_pbo.read_exact(&mut data).await?;
                         ensure!(
                             data.len() == part.length as usize,
                             "Cached PBO part length does not match expected length. Expected length: {}. Actual length: {}",
                             part.length,
                             data.len()
                         );
-                        temp_file.write_all(&data)?;
+                        temp_file.write_all(&data).await?;
                     }
                 }
 
                 let checksum_data = parts
-                    .next()
+                    .next_part()
+                    .await
                     .ok_or_else(|| anyhow::anyhow!("No response for PBO checksum"))??;
 
                 ensure!(
@@ -128,24 +141,25 @@ impl<P: DownloadReporter> RemotePatcher<P> {
                     checksum_data.len()
                 );
 
-                temp_file.write_all(&checksum_data)?;
+                temp_file.write_all(&checksum_data).await?;
 
-                if parts.next().is_some() {
+                if parts.next_part().await.is_some() {
                     return Err(anyhow::anyhow!("Received more entries than expected"));
                 }
 
-                temp_file.flush()?;
-                if temp_file.get_ref().metadata()?.len() != new_length {
+                temp_file.flush().await?;
+                let written = temp_file.get_ref().metadata().await?.len();
+                if written != new_length {
                     return Err(anyhow::anyhow!(
                         "Patched PBO length does not match expected length. Expected length: {}. Actual length: {}",
                         new_length,
-                        temp_file.get_ref().metadata()?.len()
+                        written
                     ));
                 }
 
-                drop(pbo_handle);
+                drop(local_pbo);
                 drop(temp_file);
-                fs::rename(temp_file_path, file_path)?;
+                fs::rename(temp_file_path, file_path).await?;
 
                 log::debug!("PBO patch applied successfully to {:?}", file_path);
                 Ok(())
@@ -155,12 +169,12 @@ impl<P: DownloadReporter> RemotePatcher<P> {
                     "Downloading generic file replacement ({} bytes)",
                     new_length
                 );
-                download_file(file_path, file_url, new_length, &self.reporter)
+                download_file(file_path, file_url, new_length, &self.reporter).await
             }
         }
     }
 
-    pub(crate) fn create_file(
+    pub(crate) async fn create_file(
         &self,
         rel_path: &RelPath,
         file_path: &Path,
@@ -173,19 +187,17 @@ impl<P: DownloadReporter> RemotePatcher<P> {
             file_url,
             expected_len
         );
-        download_file(file_path, file_url, expected_len, &self.reporter)
+        download_file(file_path, file_url, expected_len, &self.reporter).await
     }
 
-    fn get_required_pbo_parts(
+    async fn get_required_pbo_parts(
         &self,
         url: &Url,
         new_order: &[PBOPart],
         required_checksums: &[Vec<u8>],
         new_length: u64,
         blob_start: u64,
-    ) -> Result<ByteRangeResponse<BodyReader<'static>, P>> {
-        let request_builder = ureq::get(url.to_string());
-
+    ) -> Result<ByteRangeResponse<P>> {
         // Ranges are inclusive
 
         // We always get the entire header + the padding bit
@@ -216,13 +228,32 @@ impl<P: DownloadReporter> RemotePatcher<P> {
             .map(|(from, to)| format!("{}-{}", from, to))
             .collect::<Vec<_>>()
             .join(", ");
-        let resp = request_builder
-            .header("Range", format!("bytes={}", ranges_str))
-            .call()
+        let request = http_client::get(url).header("Range", format!("bytes={}", ranges_str));
+        let resp = http_client::send(request, url)
+            .await
             .context(format!("Failed to fetch range for {}", url))?;
 
-        let responses = resp.into_byte_range_response(self.reporter.clone())?;
-
-        Ok(responses)
+        ByteRangeResponse::from_response(resp, self.reporter.clone())
     }
+}
+
+/// Where each file's content sits inside the local PBO: name to (absolute
+/// offset, length). The first entry wins for duplicate names, as in
+/// [`PBOHandle::get_file_content`].
+async fn local_pbo_parts(path: PathBuf) -> Result<HashMap<String, (u64, u64)>> {
+    tokio::task::spawn_blocking(move || {
+        let handle = PBOHandle::open_file(&path)?;
+
+        let mut parts = HashMap::with_capacity(handle.files.len());
+        let mut offset = handle.blob_start;
+        for file in &handle.files {
+            parts
+                .entry(file.filename.to_string())
+                .or_insert((offset, file.size as u64));
+            offset += file.size as u64;
+        }
+
+        Ok(parts)
+    })
+    .await?
 }

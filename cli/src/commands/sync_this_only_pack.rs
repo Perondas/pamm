@@ -7,13 +7,13 @@ use pamm_cli_args::commands::sync_this_only_pack::SyncThisOnlyPackArgs;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use std::env::current_dir;
 
-pub fn sync_this_only_pack_command(
+pub async fn sync_this_only_pack_command(
     args: SyncThisOnlyPackArgs,
     log_wrapper: LogWrapper,
 ) -> anyhow::Result<()> {
-    let mut repo_handle = ClientRepoHandle::open(&current_dir()?)?;
+    let mut repo_handle = ClientRepoHandle::open(&current_dir()?).await?;
 
-    repo_handle.sync_repo_config(&DialogerInteractor)?;
+    repo_handle.sync_repo_config(&DialogerInteractor).await?;
 
     let progress_reporter = if args.silent {
         IndicatifProgressReporter::disabled(log_wrapper)
@@ -21,8 +21,9 @@ pub fn sync_this_only_pack_command(
         IndicatifProgressReporter::new(log_wrapper)
     };
 
-    let diff =
-        repo_handle.get_pack_diff(&args.name, progress_reporter.clone(), args.force_refresh)?;
+    let diff = repo_handle
+        .get_pack_diff(&args.name, progress_reporter.clone(), args.force_refresh)
+        .await?;
 
     if !diff.has_changes() {
         println!("No changes found.");
@@ -42,7 +43,9 @@ pub fn sync_this_only_pack_command(
         return Ok(());
     }
 
-    repo_handle.apply_pack_diff(&args.name, progress_reporter, diff)?;
+    repo_handle
+        .apply_pack_diff(&args.name, progress_reporter, diff)
+        .await?;
 
     println!("Pack synchronized successfully.");
 

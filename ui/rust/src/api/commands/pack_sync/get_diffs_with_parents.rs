@@ -4,7 +4,7 @@ use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use pamm_lib::io::progress_reporting::progress_reporter::ProgressReporter;
 use std::path::Path;
 
-pub fn get_diff_with_parents(
+pub async fn get_diff_with_parents(
     pack_name: String,
     repo_path: String,
     dart_progress_reporter: &DartProgressReporter,
@@ -12,13 +12,11 @@ pub fn get_diff_with_parents(
 ) -> anyhow::Result<MultiDiffResult> {
     let repo_dir = Path::new(&repo_path);
 
-    let handle = ClientRepoHandle::open(repo_dir)?;
+    let handle = ClientRepoHandle::open(repo_dir).await?;
 
-    let diffs = handle.get_pack_and_parents_diffs(
-        &pack_name,
-        dart_progress_reporter.clone(),
-        clear_cache,
-    )?;
+    let diffs = handle
+        .get_pack_and_parents_diffs(&pack_name, dart_progress_reporter.clone(), clear_cache)
+        .await?;
 
     let results: Vec<DiffResult> = diffs.into_iter().map(diff_to_result).collect();
 

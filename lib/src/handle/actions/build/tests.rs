@@ -20,7 +20,7 @@ struct Fixture {
 }
 
 impl Fixture {
-    fn new(key: &str) -> Self {
+    async fn new(key: &str) -> Self {
         let tmp = TestTempDir::new(key);
         let repo_path = tmp.path().join("repo");
 
@@ -28,13 +28,15 @@ impl Fixture {
         let mut packs = HashSet::new();
         packs.insert("core".to_string());
         let repo_config = RepoConfig::new("repo".to_string(), "test".to_string(), packs);
-        ServerRepoHandle::create(tmp.path(), repo_config).unwrap();
+        ServerRepoHandle::create(tmp.path(), repo_config)
+            .await
+            .unwrap();
 
         // Minimal pack config, no required/optional addons declared. Lays out
         // the per-pack source folder: core/pack.config.json + core/addons/.
         let pack_config =
             PackConfig::new("core".to_string(), "test pack".to_string(), vec![], None);
-        pack_config.init_source_on_fs(&repo_path).unwrap();
+        pack_config.init_source_on_fs(&repo_path).await.unwrap();
 
         // Source pack addon dir with one addon containing a tiny file.
         let addon_dir = repo_path.join("core/addons/@addon1");
@@ -48,8 +50,8 @@ impl Fixture {
         }
     }
 
-    fn open(&self) -> ServerRepoHandle {
-        ServerRepoHandle::open(&self.repo_path).unwrap()
+    async fn open(&self) -> ServerRepoHandle {
+        ServerRepoHandle::open(&self.repo_path).await.unwrap()
     }
 
     // Absolute path to the fixture repo's `www` build-output dir (the fixture
@@ -66,13 +68,14 @@ fn opts(mode: BuildMode) -> BuildOptions {
     }
 }
 
-#[test]
-fn build_pack_symlink_creates_links() {
-    let fx = Fixture::new("pamm_build_symlink_creates_links");
-    let server = fx.open();
+#[tokio::test]
+async fn build_pack_symlink_creates_links() {
+    let fx = Fixture::new("pamm_build_symlink_creates_links").await;
+    let server = fx.open().await;
 
     server
         .build_pack("core", opts(BuildMode::Symlink), &NoopProgressReporter)
+        .await
         .unwrap();
 
     let www_file = fx.www().join("core/addons/@addon1/file.txt");
@@ -84,13 +87,14 @@ fn build_pack_symlink_creates_links() {
     assert_eq!(fs::read(&www_nested).unwrap(), b"world");
 }
 
-#[test]
-fn build_pack_copy_creates_files() {
-    let fx = Fixture::new("pamm_build_copy_creates_files");
-    let server = fx.open();
+#[tokio::test]
+async fn build_pack_copy_creates_files() {
+    let fx = Fixture::new("pamm_build_copy_creates_files").await;
+    let server = fx.open().await;
 
     server
         .build_pack("core", opts(BuildMode::Copy), &NoopProgressReporter)
+        .await
         .unwrap();
 
     let www_file = fx.www().join("core/addons/@addon1/file.txt");
@@ -100,12 +104,13 @@ fn build_pack_copy_creates_files() {
     assert_eq!(fs::read(&www_file).unwrap(), b"hello");
 }
 
-#[test]
-fn build_pack_writes_indexes_to_www_only() {
-    let fx = Fixture::new("pamm_build_indexes_to_www_only");
-    let server = fx.open();
+#[tokio::test]
+async fn build_pack_writes_indexes_to_www_only() {
+    let fx = Fixture::new("pamm_build_indexes_to_www_only").await;
+    let server = fx.open().await;
     server
         .build_pack("core", opts(BuildMode::Symlink), &NoopProgressReporter)
+        .await
         .unwrap();
 
     let www_indexes = fx.www().join("core/indexes");
@@ -122,14 +127,14 @@ fn build_pack_writes_indexes_to_www_only() {
     );
 
     // Confirm the checksum index parses.
-    let parsed = ChecksumIndex::read_from_known(&www_indexes).unwrap();
+    let parsed = ChecksumIndex::read_from_known(&www_indexes).await.unwrap();
     assert!(parsed.checksums.contains_key("@addon1"));
 }
 
-#[test]
-fn build_pack_removes_stale_addon_subtree() {
-    let fx = Fixture::new("pamm_build_removes_stale_addon");
-    let server = fx.open();
+#[tokio::test]
+async fn build_pack_removes_stale_addon_subtree() {
+    let fx = Fixture::new("pamm_build_removes_stale_addon").await;
+    let server = fx.open().await;
 
     // Pre-create a stale www tree with a phantom addon.
     let stale = fx.www().join("core/addons/@phantom/file.txt");
@@ -138,18 +143,20 @@ fn build_pack_removes_stale_addon_subtree() {
 
     server
         .build_pack("core", opts(BuildMode::Symlink), &NoopProgressReporter)
+        .await
         .unwrap();
 
     assert!(!stale.exists(), "phantom addon should be removed");
     assert!(fx.www().join("core/addons/@addon1/file.txt").exists());
 }
 
-#[test]
-fn build_pack_force_refresh_clears_cache() {
-    let fx = Fixture::new("pamm_build_force_refresh_clears_cache");
-    let server = fx.open();
+#[tokio::test]
+async fn build_pack_force_refresh_clears_cache() {
+    let fx = Fixture::new("pamm_build_force_refresh_clears_cache").await;
+    let server = fx.open().await;
     server
         .build_pack("core", opts(BuildMode::Symlink), &NoopProgressReporter)
+        .await
         .unwrap();
 
     // The cache dir should exist after the first build.
@@ -166,35 +173,38 @@ fn build_pack_force_refresh_clears_cache() {
             },
             &NoopProgressReporter,
         )
+        .await
         .unwrap();
 
     // After force_refresh, the cache dir exists again (sled recreates it).
     assert!(cache_dir.is_dir());
 }
 
-#[test]
-fn build_repo_materializes_top_level_files() {
-    let fx = Fixture::new("pamm_build_repo_top_level");
-    let server = fx.open();
+#[tokio::test]
+async fn build_repo_materializes_top_level_files() {
+    let fx = Fixture::new("pamm_build_repo_top_level").await;
+    let server = fx.open().await;
     server
         .build(opts(BuildMode::Symlink), NoopProgressReporter)
+        .await
         .unwrap();
 
     assert!(fx.www().join(RepoConfig::file_name()).exists());
     assert!(fx.www().join(RepoVersion::file_name()).exists());
     assert!(fx.www().join("core/pack.config.json").exists());
     assert_eq!(
-        RepoVersion::read_or_v1(&fx.www()).unwrap(),
+        RepoVersion::read_or_v1(&fx.www()).await.unwrap(),
         RepoVersion::current()
     );
 }
 
-#[test]
-fn build_pack_skips_dotcache_in_source() {
-    let fx = Fixture::new("pamm_build_skips_dotcache");
-    let server = fx.open();
+#[tokio::test]
+async fn build_pack_skips_dotcache_in_source() {
+    let fx = Fixture::new("pamm_build_skips_dotcache").await;
+    let server = fx.open().await;
     server
         .build_pack("core", opts(BuildMode::Symlink), &NoopProgressReporter)
+        .await
         .unwrap();
 
     // The sled cache dir should be at the source.
@@ -208,16 +218,18 @@ fn build_pack_skips_dotcache_in_source() {
 
 // A second build runs with the sled cache already present in the source addons
 // dir — it must still be kept out of www and not be pruned into existence.
-#[test]
-fn rebuild_keeps_dotcache_out_of_www() {
-    let fx = Fixture::new("pamm_rebuild_keeps_dotcache_out");
-    let server = fx.open();
+#[tokio::test]
+async fn rebuild_keeps_dotcache_out_of_www() {
+    let fx = Fixture::new("pamm_rebuild_keeps_dotcache_out").await;
+    let server = fx.open().await;
 
     server
         .build_pack("core", opts(BuildMode::Symlink), &NoopProgressReporter)
+        .await
         .unwrap();
     server
         .build_pack("core", opts(BuildMode::Symlink), &NoopProgressReporter)
+        .await
         .unwrap();
 
     let www_cache = fx.www().join("core/addons").join(CACHE_DB_DIR_NAME);
@@ -229,12 +241,13 @@ fn rebuild_keeps_dotcache_out_of_www() {
 }
 
 #[cfg(unix)]
-#[test]
-fn build_pack_symlink_target_is_relative() {
-    let fx = Fixture::new("pamm_build_symlink_target_relative");
-    let server = fx.open();
+#[tokio::test]
+async fn build_pack_symlink_target_is_relative() {
+    let fx = Fixture::new("pamm_build_symlink_target_relative").await;
+    let server = fx.open().await;
     server
         .build_pack("core", opts(BuildMode::Symlink), &NoopProgressReporter)
+        .await
         .unwrap();
 
     let link = fx.www().join("core/addons/@addon1/file.txt");
@@ -248,12 +261,13 @@ fn build_pack_symlink_target_is_relative() {
 }
 
 #[cfg(unix)]
-#[test]
-fn build_pack_symlinks_point_into_per_pack_source() {
-    let fx = Fixture::new("pamm_build_symlink_per_pack_target");
-    let server = fx.open();
+#[tokio::test]
+async fn build_pack_symlinks_point_into_per_pack_source() {
+    let fx = Fixture::new("pamm_build_symlink_per_pack_target").await;
+    let server = fx.open().await;
     server
         .build_pack("core", opts(BuildMode::Symlink), &NoopProgressReporter)
+        .await
         .unwrap();
 
     let link = fx.www().join("core/addons/@addon1/file.txt");
@@ -299,12 +313,13 @@ fn expected_www_entries() -> Vec<PathBuf> {
 }
 
 // The exact www/ entry set is the client-facing contract for layout v2.
-#[test]
-fn build_produces_the_v2_www_shape_clients_expect() {
-    let fx = Fixture::new("pamm_build_www_shape");
-    let server = fx.open();
+#[tokio::test]
+async fn build_produces_the_v2_www_shape_clients_expect() {
+    let fx = Fixture::new("pamm_build_www_shape").await;
+    let server = fx.open().await;
     server
         .build(opts(BuildMode::Symlink), NoopProgressReporter)
+        .await
         .unwrap();
 
     assert_eq!(walk_relative(&fx.www()), expected_www_entries());
@@ -312,10 +327,10 @@ fn build_produces_the_v2_www_shape_clients_expect() {
 
 // Building over a www tree produced by the legacy flat (v1) layout prunes the
 // old entries so the published tree is exactly the v2 shape.
-#[test]
-fn build_prunes_legacy_v1_www_entries() {
-    let fx = Fixture::new("pamm_build_prunes_v1_www");
-    let server = fx.open();
+#[tokio::test]
+async fn build_prunes_legacy_v1_www_entries() {
+    let fx = Fixture::new("pamm_build_prunes_v1_www").await;
+    let server = fx.open().await;
 
     // Fake a leftover v1 www tree.
     let www = fx.www();
@@ -326,6 +341,7 @@ fn build_prunes_legacy_v1_www_entries() {
 
     server
         .build(opts(BuildMode::Symlink), NoopProgressReporter)
+        .await
         .unwrap();
 
     assert_eq!(walk_relative(&fx.www()), expected_www_entries());
@@ -333,10 +349,10 @@ fn build_prunes_legacy_v1_www_entries() {
 
 // Stale pack dirs (pack removed from repo.config.json) are pruned, while
 // unrelated files/dirs the operator may keep in www are left alone.
-#[test]
-fn build_prunes_stale_pack_dirs_but_keeps_unrelated_entries() {
-    let fx = Fixture::new("pamm_build_prunes_stale_pack_dirs");
-    let server = fx.open();
+#[tokio::test]
+async fn build_prunes_stale_pack_dirs_but_keeps_unrelated_entries() {
+    let fx = Fixture::new("pamm_build_prunes_stale_pack_dirs").await;
+    let server = fx.open().await;
 
     let www = fx.www();
     fs::create_dir_all(www.join("oldpack")).unwrap();
@@ -346,6 +362,7 @@ fn build_prunes_stale_pack_dirs_but_keeps_unrelated_entries() {
 
     server
         .build(opts(BuildMode::Symlink), NoopProgressReporter)
+        .await
         .unwrap();
 
     assert!(!www.join("oldpack").exists(), "stale pack dir is pruned");
@@ -355,10 +372,10 @@ fn build_prunes_stale_pack_dirs_but_keeps_unrelated_entries() {
 
 // Repo-root media/ is published into www/ (symlinked), survives rebuilds and
 // the root stale-prune loop, and stale entries inside www/media are pruned.
-#[test]
-fn build_materializes_media_and_prunes_stale_media_entries() {
-    let fx = Fixture::new("pamm_build_materializes_media");
-    let server = fx.open();
+#[tokio::test]
+async fn build_materializes_media_and_prunes_stale_media_entries() {
+    let fx = Fixture::new("pamm_build_materializes_media").await;
+    let server = fx.open().await;
 
     let media_dir = fx.repo_path.join("media");
     fs::create_dir_all(&media_dir).unwrap();
@@ -367,6 +384,7 @@ fn build_materializes_media_and_prunes_stale_media_entries() {
 
     server
         .build(opts(BuildMode::Symlink), NoopProgressReporter)
+        .await
         .unwrap();
 
     let www_icon = fx.www().join("media/icon.png");
@@ -387,6 +405,7 @@ fn build_materializes_media_and_prunes_stale_media_entries() {
     fs::remove_file(media_dir.join("banner.png")).unwrap();
     server
         .build(opts(BuildMode::Symlink), NoopProgressReporter)
+        .await
         .unwrap();
 
     assert!(!fx.www().join("media/banner.png").exists());
@@ -394,10 +413,10 @@ fn build_materializes_media_and_prunes_stale_media_entries() {
 }
 
 // Removing (or emptying) the source media/ removes the published www/media.
-#[test]
-fn build_removes_www_media_when_source_is_gone() {
-    let fx = Fixture::new("pamm_build_removes_www_media");
-    let server = fx.open();
+#[tokio::test]
+async fn build_removes_www_media_when_source_is_gone() {
+    let fx = Fixture::new("pamm_build_removes_www_media").await;
+    let server = fx.open().await;
 
     let media_dir = fx.repo_path.join("media");
     fs::create_dir_all(&media_dir).unwrap();
@@ -405,12 +424,14 @@ fn build_removes_www_media_when_source_is_gone() {
 
     server
         .build(opts(BuildMode::Symlink), NoopProgressReporter)
+        .await
         .unwrap();
     assert!(fx.www().join("media/icon.png").exists());
 
     fs::remove_dir_all(&media_dir).unwrap();
     server
         .build(opts(BuildMode::Symlink), NoopProgressReporter)
+        .await
         .unwrap();
 
     assert!(
@@ -422,38 +443,41 @@ fn build_removes_www_media_when_source_is_gone() {
 // End-to-end: opening a legacy flat (v1) repo migrates the source into
 // per-pack folders, stamps version.pamm, and the subsequent build publishes
 // the v2 www shape.
-#[test]
-fn open_migrates_v1_source_then_build_publishes_v2_www() {
+#[tokio::test]
+async fn open_migrates_v1_source_then_build_publishes_v2_www() {
     let tmp = TestTempDir::new("pamm_migrate_then_build");
     let repo_path = tmp.path().join("repo");
 
     let mut packs = HashSet::new();
     packs.insert("core".to_string());
     let repo_config = RepoConfig::new("repo".to_string(), "test".to_string(), packs);
-    ServerRepoHandle::create(tmp.path(), repo_config).unwrap();
+    ServerRepoHandle::create(tmp.path(), repo_config)
+        .await
+        .unwrap();
 
     // Turn the fresh repo into a v1 one: flat source files, no version.pamm.
     fs::remove_file(repo_path.join(RepoVersion::file_name())).unwrap();
     let pack_config = PackConfig::new("core".to_string(), "test pack".to_string(), vec![], None);
-    pack_config.write_fixed(&repo_path).unwrap();
+    pack_config.write_fixed(&repo_path).await.unwrap();
     let addon_dir = repo_path.join("core_pack_addons").join("@addon1");
     fs::create_dir_all(addon_dir.join("sub")).unwrap();
     fs::write(addon_dir.join("file.txt"), b"hello").unwrap();
     fs::write(addon_dir.join("sub").join("nested.txt"), b"world").unwrap();
 
-    let server = ServerRepoHandle::open(&repo_path).unwrap();
+    let server = ServerRepoHandle::open(&repo_path).await.unwrap();
 
     assert!(repo_path.join("core/pack.config.json").is_file());
     assert!(repo_path.join("core/addons/@addon1/file.txt").is_file());
     assert!(!repo_path.join("core.pack.config.json").exists());
     assert!(!repo_path.join("core_pack_addons").exists());
     assert_eq!(
-        RepoVersion::read_or_v1(&repo_path).unwrap(),
+        RepoVersion::read_or_v1(&repo_path).await.unwrap(),
         RepoVersion::current()
     );
 
     server
         .build(opts(BuildMode::Symlink), NoopProgressReporter)
+        .await
         .unwrap();
 
     let www = repo_path.join(WWW_DIR_NAME);

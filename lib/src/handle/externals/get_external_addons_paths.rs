@@ -4,10 +4,10 @@ use std::path::PathBuf;
 
 impl<T> GetExternalAddonsPaths for T
 where
-    T: GetPack,
+    T: GetPack + Sync,
 {
-    fn get_external_addon_paths(&self, pack_name: &str) -> anyhow::Result<Vec<String>> {
-        let (_, settings) = self.get_pack_with_settings(pack_name)?;
+    async fn get_external_addon_paths(&self, pack_name: &str) -> anyhow::Result<Vec<String>> {
+        let (_, settings) = self.get_pack_with_settings(pack_name).await?;
 
         settings
             .external_addons
@@ -23,7 +23,10 @@ pub(in crate::handle) trait GetExternalAddonsPaths {
     /// Gets the paths to the pack's enabled external addons as absolute,
     /// canonicalized path strings (relative paths in the user settings are
     /// resolved against the process working directory).
-    fn get_external_addon_paths(&self, pack_name: &str) -> anyhow::Result<Vec<String>>;
+    fn get_external_addon_paths(
+        &self,
+        pack_name: &str,
+    ) -> impl Future<Output = anyhow::Result<Vec<String>>> + Send;
 }
 
 #[cfg(test)]
@@ -35,8 +38,8 @@ mod tests {
     use crate::models::pack::pack_config::PackConfig;
     use crate::models::pack::pack_user_settings::PackUserSettings;
 
-    #[test]
-    fn test_get_external_addon_paths() {
+    #[tokio::test]
+    async fn test_get_external_addon_paths() {
         let mut mock = MockHandle::new();
 
         let config = PackConfig::new("test_pack".to_string(), "desc".to_string(), vec![], None);
@@ -61,7 +64,7 @@ mod tests {
             .with(mockall::predicate::eq("test_pack"))
             .returning(move |_| Ok((config.clone(), settings.clone())));
 
-        let paths = mock.get_external_addon_paths("test_pack").unwrap();
+        let paths = mock.get_external_addon_paths("test_pack").await.unwrap();
 
         assert_eq!(paths.len(), 1);
         let valid_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
