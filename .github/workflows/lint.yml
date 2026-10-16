@@ -5,10 +5,12 @@ on:
     branches: [ "main" ]
     paths-ignore:
       - site
+      - .github
   pull_request:
     branches: [ "main" ]
     paths-ignore:
       - site
+      - .github
   # Allows release.yml to reuse these jobs instead of duplicating them.
   workflow_call:
 
@@ -21,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ ubuntu-latest, windows-latest ]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
@@ -49,7 +51,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ ubuntu-latest, windows-latest ]
         features:
           - client
           - server
