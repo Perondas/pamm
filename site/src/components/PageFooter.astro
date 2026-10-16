@@ -1,0 +1,41 @@
+---
+import { siteConfig } from "~/settings";
+
+const currentYear = new Date().getFullYear();
+---
+
+<footer>
+  <p>
+    &copy; {currentYear} Perondas &middot; pamm is licensed under the GPL-3.0
+  </p>
+  <nav aria-label="Footer">
+    <ul>
+      <li>
+        <a href={siteConfig.repoUrl} target="_blank" rel="noopener noreferrer"
+          >GitHub</a
+        >
+      </li>
+      <li>
+        <a
+          href={`${siteConfig.repoUrl}/releases`}
+          target="_blank"
+          rel="noopener noreferrer">Releases</a
+        >
+      </li>
+      <li>
+        <a
+          href={`${siteConfig.repoUrl}/issues`}
+          target="_blank"
+          rel="noopener noreferrer">Issues</a
+        >
+      </li>
+    </ul>
+  </nav>
+</footer>
+{/* CSS required to keep footer at the bottom of the page */}
+<style>
+  footer {
+    position: sticky;
+    top: 100vh;
+  }
+</style>

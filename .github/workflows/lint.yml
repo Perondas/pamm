@@ -3,8 +3,12 @@ name: Cargo Test & Lint
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - site
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - site
   # Allows release.yml to reuse these jobs instead of duplicating them.
   workflow_call:
 
