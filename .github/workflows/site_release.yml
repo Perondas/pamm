@@ -20,7 +20,8 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: '22.x'
-      - run: npm ci build
+      - run: npm ci
+      - run: npm run build
 
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v42
