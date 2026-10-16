@@ -1,5 +1,6 @@
 ---
 import { siteConfig } from "~/settings";
+import { Image } from 'astro:assets';
 ---
 
 <header>
@@ -7,7 +8,7 @@ import { siteConfig } from "~/settings";
     <ul>
       <li>
         <a href="/" class="brand">
-          <img src="/logo.png" alt="" width="32" height="32" />
+          <Image src="/logo.png" alt="" width="32" height="32" loading="eager" />
           <strong>{siteConfig.title}</strong>
         </a>
       </li>
@@ -16,7 +17,7 @@ import { siteConfig } from "~/settings";
       <li class="section-link"><a href="/#features">Features</a></li>
       <li class="section-link"><a href="/#packs">Packs</a></li>
       <li class="section-link"><a href="/#get-started">Get started</a></li>
-      <li class="section-link"><a href="/#linux">Linux</a></li>
+      <li class="section-link"><a href="/#linux">Linux Support</a></li>
       <li>
         <a href={siteConfig.repoUrl} target="_blank" rel="noopener noreferrer"
           >GitHub</a
