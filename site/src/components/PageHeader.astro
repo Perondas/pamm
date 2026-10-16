@@ -1,0 +1,39 @@
+---
+import { siteConfig } from "~/settings";
+---
+
+<header>
+  <nav aria-label="Main">
+    <ul>
+      <li>
+        <a href="/" class="brand">
+          <img src="/logo.png" alt="" width="32" height="32" />
+          <strong>{siteConfig.title}</strong>
+        </a>
+      </li>
+    </ul>
+    <ul>
+      <li class="section-link"><a href="/#features">Features</a></li>
+      <li class="section-link"><a href="/#packs">Packs</a></li>
+      <li class="section-link"><a href="/#get-started">Get started</a></li>
+      <li class="section-link"><a href="/#linux">Linux</a></li>
+      <li>
+        <a href={siteConfig.repoUrl} target="_blank" rel="noopener noreferrer"
+          >GitHub</a
+        >
+      </li>
+    </ul>
+  </nav>
+</header>
+<style>
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  @media (max-width: 576px) {
+    .section-link {
+      display: none;
+    }
+  }
+</style>

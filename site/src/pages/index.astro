@@ -1,0 +1,266 @@
+---
+import Base from "@layouts/Base.astro";
+import { siteConfig } from "~/settings";
+
+const features = [
+  {
+    title: "Many packs, one repository",
+    body: "Host every mod pack your community uses in one place. Packs can depend on each other, so a base pack with core mods can be extended by event-specific packs.",
+  },
+  {
+    title: "Delta patching",
+    body: "Only the parts of a PBO that changed between versions are downloaded. Saves bandwidth for both server and players.",
+  },
+  {
+    title: "Speed above all",
+    body: "Indexes are cached on the server and the client, so files are not re-scanned on every sync. Indexing and downloads run on multiple threads.",
+  },
+  {
+    title: "Packs are cheap",
+    body: "A pack is just a couple of files. Easy to create and delete, which makes one-off event packs painless.",
+  },
+  {
+    title: "Optional addons",
+    body: "Packs can ship optional addons that players toggle on or off. You can also launch a pack with all optionals disabled.",
+  },
+  {
+    title: "External addons",
+    body: "Players can add addons from their own disk to a pack and toggle or remove them later, without touching the server.",
+  },
+  {
+    title: "Local packs",
+    body: "Packs that only exist on your machine, for testing or private mod lists.",
+  },
+  {
+    title: "Server deployment",
+    body: "Deploy a pack to a dedicated server. pamm links the addons and their signing keys, builds the -mod launch parameter, fills in your script templates, and runs your post-deploy commands.",
+  },
+  {
+    title: "Mission maker mode",
+    body: "Extra tools for mission makers in the GUI: launch without optionals, manage local packs, and open the repo on disk.",
+  },
+  {
+    title: "Windows and Linux",
+    body: "Runs natively on Windows. On Linux it starts Arma through Steam and Proton, with native and Flatpak Steam both supported.",
+  },
+  {
+    title: "GUI and CLI",
+    body: "A desktop app for players, and a scriptable command-line tool with a man page for server admins and automation.",
+  },
+  {
+    title: "Automatic migrations",
+    body: "When the repo layout changes, server and client repos are migrated automatically the next time they are opened.",
+  },
+];
+---
+
+<Base>
+  <section class="hero">
+    <img src="/logo.png" alt="The pamm logo" width="160" height="160" />
+    <hgroup>
+      <h1>pamm</h1>
+      <p>Personal ARMA Mod Manager</p>
+    </hgroup>
+    <p>
+      A lightweight, fast Arma 3 mod manager for communities that host their own
+      mods.
+    </p>
+    <p class="actions">
+      <a
+        href={`${siteConfig.repoUrl}/releases/latest`}
+        role="button"
+        target="_blank"
+        rel="noopener noreferrer">Download</a
+      >
+      <a
+        href={siteConfig.repoUrl}
+        role="button"
+        class="secondary outline"
+        target="_blank"
+        rel="noopener noreferrer">View on GitHub</a
+      >
+    </p>
+  </section>
+
+  <section id="features">
+    <h2>Features</h2>
+    <div class="features">
+      {
+        features.map((f) => (
+          <article>
+            <h3>{f.title}</h3>
+            <p>{f.body}</p>
+          </article>
+        ))
+      }
+    </div>
+    <p>
+      <small
+        >pamm is not compatible with other mod managers. Planned features are
+        tracked in the <a
+          href={`${siteConfig.repoUrl}/issues`}
+          target="_blank"
+          rel="noopener noreferrer">issues</a
+        >.</small
+      >
+    </p>
+  </section>
+
+  <section id="packs">
+    <h2>Repositories and packs</h2>
+    <p>
+      A <strong>repository</strong> is what your community hosts: one URL, with
+      its own name, description, and optional icon, banner and colour. It holds
+      any number of <strong>packs</strong>. A pack is a named list of addons that
+      players sync and launch together, with its own description, icon and launch
+      parameters.
+    </p>
+    <p>
+      Each pack can have one <strong>parent</strong>. A pack inherits all of its
+      parent's addons, and the parent inherits from its own parent, so you can
+      build chains as deep as you need:
+    </p>
+    <pre><code>My Community              repository
+├── core                  CBA, ACE, TFAR, ...
+│   ├── campaign          core + campaign terrains and assets
+│   │   └── campaign-ww2  core + campaign + WW2 mods
+│   └── training          core + training maps
+└── modern-event          standalone pack, no parent</code></pre>
+    <ul>
+      <li>
+        <strong>Sync</strong> downloads the whole chain, starting at the root. A
+        parent's addons live in the parent pack, so they're downloaded once no matter
+        how many child packs build on it.
+      </li>
+      <li>
+        <strong>Launch</strong> loads the pack's own addons plus the required addons
+        of every ancestor. Launch parameters are not inherited; each pack keeps its
+        own.
+      </li>
+      <li>
+        <strong>Optional addons</strong> from every pack in the chain show up when
+        you launch a child pack. Your choice is saved on the pack that owns the addon,
+        so enabling an optional in <code>core</code> enables it for every pack built
+        on <code>core</code>.
+      </li>
+      <li>
+        <strong>Deploy</strong> resolves the same chain on the server, so a dedicated
+        server loads the same required addons as players. Optional addons are left
+        out.
+      </li>
+      <li>
+        <strong>Local packs</strong> can use any pack as their parent, including a
+        pack from the server or another local pack. A local pack can't be removed
+        while another local pack depends on it.
+      </li>
+    </ul>
+    <p>
+      On disk, every pack is its own folder next to <code>repo.config.json</code>,
+      with a <code>pack.config.json</code> and an <code>addons/</code> directory.
+      Adding a parent is a single field in that config, which is what makes small
+      event packs on top of a shared base so cheap.
+    </p>
+  </section>
+
+  <section id="get-started">
+    <h2>Get started</h2>
+    <div class="grid">
+      <article>
+        <header><strong>For players</strong></header>
+        <p>
+          Install the desktop app from the <a
+            href={`${siteConfig.repoUrl}/releases/latest`}
+            target="_blank"
+            rel="noopener noreferrer">latest release</a
+          > and add your community's repository URL. Or use the CLI:
+        </p>
+        <pre><code>pamm_cli init-remote &lt;url&gt;  # join a repo
+pamm_cli sync &lt;pack&gt;          # download changes
+pamm_cli launch &lt;pack&gt;        # start Arma</code></pre>
+      </article>
+      <article>
+        <header><strong>For server admins</strong></header>
+        <p>
+          A repo is split into the source you edit and a <code>www/</code> build
+          output that any HTTP server can serve.
+        </p>
+        <pre><code>pamm_cli init       # create an empty repo
+pamm_cli add-pack   # register a pack
+# drop addons into &lt;pack&gt;/addons/@name/
+pamm_cli build      # populate www/</code></pre>
+        <p>
+          <small
+            >Point your web server at <code>&lt;repo&gt;/www/</code>. Any server
+            that supports multiple range requests works; pamm is tested with
+            Caddy.</small
+          >
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section id="linux">
+    <h2>Linux</h2>
+    <p>
+      On Linux, pamm launches the Windows version of Arma 3 through Steam and
+      Proton. Arma can live in any of your Steam libraries.
+    </p>
+    <ul>
+      <li>
+        <strong>Guided Steam setup.</strong> Run <code>pamm_cli linux</code> or click <em
+          >Steam setup</em
+        > in the GUI to see exactly which launch options or Flatpak
+        overrides your mod location needs. pamm never changes Steam's configuration
+        itself.
+      </li>
+      <li>
+        <strong>TeamSpeak in the Proton prefix.</strong> Install and launch the Windows
+        TeamSpeak 3 client in the same prefix as the game.
+      </li>
+      <li>
+        <strong>Prefix tools.</strong> Open a file browser inside the prefix, or stop
+        everything running in it, including the game.
+      </li>
+      <li>
+        <strong>Follows your Proton version.</strong> Switch Arma to another Proton
+        version in Steam and pamm picks it up.
+      </li>
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    text-align: center;
+    padding-block: var(--pico-block-spacing-vertical);
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--pico-spacing);
+  }
+  .hero hgroup {
+    margin-block: 1rem;
+  }
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: var(--pico-grid-column-gap);
+  }
+  .features article {
+    margin: 0;
+  }
+  .features h3 {
+    font-size: 1.1rem;
+  }
+  .features p {
+    margin: 0;
+  }
+  section {
+    scroll-margin-top: 1rem;
+  }
+  #features > p {
+    margin-top: var(--pico-spacing);
+  }
+</style>
