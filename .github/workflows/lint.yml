@@ -4,13 +4,13 @@ on:
   push:
     branches: [ "main" ]
     paths-ignore:
-      - site
-      - .github
+      - site/**
+      - .github/**
   pull_request:
     branches: [ "main" ]
     paths-ignore:
-      - site
-      - .github
+      - site/**
+      - .github/**
   # Allows release.yml to reuse these jobs instead of duplicating them.
   workflow_call:
 
