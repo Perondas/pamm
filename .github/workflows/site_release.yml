@@ -30,3 +30,4 @@ jobs:
           vercel-args: --prod --debug
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID}}
+          working-directory: site/dist
