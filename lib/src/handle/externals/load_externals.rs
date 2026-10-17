@@ -25,6 +25,7 @@ mod tests {
     use crate::handle::mock_handle::MockHandle;
     use crate::models::pack::pack_config::PackConfig;
     use crate::models::pack::pack_user_settings::PackUserSettings;
+    use std::path::PathBuf;
 
     #[tokio::test]
     async fn test_load_externals() {
@@ -34,7 +35,7 @@ mod tests {
 
         let mut settings = PackUserSettings::default();
         let external = ExternalAddon {
-            path: "/some/path".to_string(),
+            path: PathBuf::from("/some/path"),
             name: Some("addon".to_string()),
             enabled: true,
         };
@@ -47,7 +48,7 @@ mod tests {
         let mut externals = mock.load_externals("test_pack").await.unwrap();
         assert_eq!(externals.len(), 1);
         let ext = externals.pop().unwrap();
-        assert_eq!(ext.path, "/some/path");
+        assert_eq!(ext.path, PathBuf::from("/some/path"));
         assert_eq!(ext.name, Some("addon".to_string()));
         assert!(ext.enabled);
     }

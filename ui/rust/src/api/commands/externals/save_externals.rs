@@ -12,13 +12,18 @@ pub async fn save_externals(
 
     let handle = ClientRepoHandle::open(repo_path).await?;
 
-    let externals = externals.into_iter().map(Into::into).collect::<Vec<_>>();
+    let externals = externals
+        .into_iter()
+        .map(TryInto::try_into)
+        .collect::<anyhow::Result<Vec<_>>>()?;
 
     handle.save_externals(&pack_name, &externals).await
 }
 
-impl From<FlutterExternalAddon> for ExternalAddon {
-    fn from(value: FlutterExternalAddon) -> Self {
-        ExternalAddon::new(value.path).with_enabled(value.enabled)
+impl TryFrom<FlutterExternalAddon> for ExternalAddon {
+    type Error = anyhow::Error;
+
+    fn try_from(value: FlutterExternalAddon) -> Result<Self, Self::Error> {
+        Ok(ExternalAddon::new(value.path)?.with_enabled(value.enabled))
     }
 }

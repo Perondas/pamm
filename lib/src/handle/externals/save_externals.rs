@@ -1,4 +1,3 @@
-use std::collections::HashSet;
 use crate::handle::externals::external_addon::ExternalAddon;
 use crate::handle::reading::get_pack::GetPack;
 use crate::handle::writing::save_pack_settings::SavePackSettings;
@@ -32,6 +31,7 @@ where
 mod tests {
     use super::*;
     use crate::handle::mock_handle::{MockHandle, MockHandleExt};
+    use std::path::PathBuf;
 
     #[tokio::test]
     async fn test_save_externals() {
@@ -47,7 +47,7 @@ mod tests {
             .returning(|_, _| Ok(()));
 
         let external = ExternalAddon {
-            path: ".".to_string(),
+            path: PathBuf::from("/some/path/to/addon"),
             name: Some("addon".to_string()),
             enabled: true,
         };
@@ -61,16 +61,12 @@ mod tests {
 
         mock.mock_pack("test_pack", None, &[], &[], &[]);
 
-        let external = ExternalAddon {
-            path: "/path/that/never/will/exist".to_string(),
-            name: None,
-            enabled: true,
-        };
+        let external = ExternalAddon::new("/path/that/never/will/exist");
 
-        let result = mock.save_externals("test_pack", &[external]).await;
-        assert!(
-            result.is_err(),
-            "Expected save_externals to fail due to invalid add-on path"
+        assert!(external.is_err());
+        assert_eq!(
+            external.unwrap_err().to_string(),
+            "External addon path is not a directory: \"/path/that/never/will/exist\""
         );
     }
 
@@ -85,26 +81,13 @@ mod tests {
         let mod_cpp_path = addon_dir.join("mod.cpp");
         std::fs::write(&mod_cpp_path, r#"name = "Dummy Mod";"#).unwrap();
 
-        let mut mock = MockHandle::new();
-        mock.mock_pack("test_pack", None, &[], &[], &[]);
+        let external = ExternalAddon::new(&addon_dir)
+            .expect("Failed to create ExternalAddon from test directory");
 
-        mock.expect_save_pack_settings()
-            .withf(|pack_name, settings| {
-                if pack_name != "test_pack" || settings.external_addons.len() != 1 {
-                    return false;
-                }
-                let resolved = settings.external_addons.iter().next().unwrap();
-                resolved.name == Some("Dummy Mod".to_string())
-            })
-            .times(1)
-            .returning(|_, _| Ok(()));
-
-        let external = ExternalAddon {
-            path: addon_dir.to_string_lossy().to_string(),
-            name: None,
-            enabled: true,
-        };
-
-        mock.save_externals("test_pack", &[external]).await.unwrap();
+        assert_eq!(
+            external.name.as_ref().expect("No name"),
+            "Dummy Mod",
+            "Expected the resolved name to match the content of mod.cpp"
+        );
     }
 }

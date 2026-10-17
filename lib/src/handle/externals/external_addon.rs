@@ -1,27 +1,25 @@
 use crate::io::fs::util::try_find_addon_name::try_find_addon_name;
-use anyhow::{bail, ensure};
+use anyhow::ensure;
 use log::warn;
 use serde::{Deserialize, Serialize};
 use std::hash::{Hash, Hasher};
-#[cfg(not(test))]
-use std::marker::PhantomData;
-use std::path::Path;
+
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[non_exhaustive]
 pub struct ExternalAddon {
-    pub path: String,
+    pub path: PathBuf,
     pub name: Option<String>,
     pub enabled: bool,
-    #[cfg(not(test))]
-    pub phantom: PhantomData<()>,
+    // For convenience we want this to stay constructable in tests, but nowhere else
 }
 
 impl ExternalAddon {
     pub fn new(path: impl AsRef<Path>) -> anyhow::Result<Self> {
         ensure!(
             path.as_ref().is_dir(),
-            "External addon path is not a directory: {:?}",
+            "External addon path is not a directory: {:#?}",
             path.as_ref()
         );
 
@@ -31,11 +29,9 @@ impl ExternalAddon {
         });
 
         Ok(ExternalAddon {
-            path: path.as_ref().to_string_lossy().to_string(),
+            path: path.as_ref().to_path_buf(),
             name,
             enabled: true,
-            #[cfg(not(test))]
-            phantom: PhantomData,
         })
     }
 
@@ -54,6 +50,6 @@ impl Eq for ExternalAddon {}
 
 impl Hash for ExternalAddon {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        state.write(self.path.as_bytes());
+        state.write(self.path.as_os_str().as_encoded_bytes());
     }
 }

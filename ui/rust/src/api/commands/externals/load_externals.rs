@@ -25,7 +25,7 @@ impl From<pamm_lib::handle::externals::external_addon::ExternalAddon> for Flutte
         Self {
             enabled: external.enabled,
             name: external.name,
-            path: external.path,
+            path: external.path.to_string_lossy().to_string(),
         }
     }
 }

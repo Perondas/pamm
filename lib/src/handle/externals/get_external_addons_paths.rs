@@ -44,15 +44,17 @@ mod tests {
 
         let config = PackConfig::new("test_pack".to_string(), "desc".to_string(), vec![], None);
 
+        let manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+
         let mut settings = PackUserSettings::default();
         let external_enabled = ExternalAddon {
-            path: env!("CARGO_MANIFEST_DIR").to_string(),
+            path: manifest_path.clone(),
             name: Some("enabled_addon".to_string()),
             enabled: true,
         };
         // Path does not matter so much, but it must be valid for `canonicalize`
         let external_disabled = ExternalAddon {
-            path: env!("CARGO_MANIFEST_DIR").to_string(),
+            path: manifest_path,
             name: Some("disabled_addon".to_string()),
             enabled: false,
         };
