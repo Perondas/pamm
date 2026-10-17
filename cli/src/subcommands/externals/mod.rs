@@ -5,7 +5,7 @@ pub mod add_external;
 pub mod remove_external;
 pub mod toggle_externals;
 
-fn externals_to_name(externals: &[ExternalAddon]) -> Vec<String> {
+fn externals_to_names(externals: &[ExternalAddon]) -> Vec<String> {
     externals
         .iter()
         .map(|e| {
@@ -15,7 +15,11 @@ fn externals_to_name(externals: &[ExternalAddon]) -> Vec<String> {
                     .unwrap_or_default()
                     .to_string_lossy()
                     .to_string(),
-            )
+            ) + if e.found_in_workshop {
+                " (Workshop)"
+            } else {
+                ""
+            }
         })
         .collect()
 }

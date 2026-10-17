@@ -166,10 +166,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   DownloadOutcome dco_decode_download_outcome(dynamic raw);
 
   @protected
-  ExternalAddon dco_decode_external_addon(dynamic raw);
+  FileChange dco_decode_file_change(dynamic raw);
 
   @protected
-  FileChange dco_decode_file_change(dynamic raw);
+  FlutterExternalAddon dco_decode_flutter_external_addon(dynamic raw);
 
   @protected
   FlutterLocalPackConfig dco_decode_flutter_local_pack_config(dynamic raw);
@@ -202,10 +202,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<DiffResult> dco_decode_list_diff_result(dynamic raw);
 
   @protected
-  List<ExternalAddon> dco_decode_list_external_addon(dynamic raw);
+  List<FileChange> dco_decode_list_file_change(dynamic raw);
 
   @protected
-  List<FileChange> dco_decode_list_file_change(dynamic raw);
+  List<FlutterExternalAddon> dco_decode_list_flutter_external_addon(
+    dynamic raw,
+  );
 
   @protected
   List<OptionalAddon> dco_decode_list_optional_addon(dynamic raw);
@@ -391,10 +393,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   DownloadOutcome sse_decode_download_outcome(SseDeserializer deserializer);
 
   @protected
-  ExternalAddon sse_decode_external_addon(SseDeserializer deserializer);
+  FileChange sse_decode_file_change(SseDeserializer deserializer);
 
   @protected
-  FileChange sse_decode_file_change(SseDeserializer deserializer);
+  FlutterExternalAddon sse_decode_flutter_external_addon(
+    SseDeserializer deserializer,
+  );
 
   @protected
   FlutterLocalPackConfig sse_decode_flutter_local_pack_config(
@@ -431,12 +435,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<DiffResult> sse_decode_list_diff_result(SseDeserializer deserializer);
 
   @protected
-  List<ExternalAddon> sse_decode_list_external_addon(
-    SseDeserializer deserializer,
-  );
+  List<FileChange> sse_decode_list_file_change(SseDeserializer deserializer);
 
   @protected
-  List<FileChange> sse_decode_list_file_change(SseDeserializer deserializer);
+  List<FlutterExternalAddon> sse_decode_list_flutter_external_addon(
+    SseDeserializer deserializer,
+  );
 
   @protected
   List<OptionalAddon> sse_decode_list_optional_addon(
@@ -653,10 +657,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_external_addon(ExternalAddon self, SseSerializer serializer);
+  void sse_encode_file_change(FileChange self, SseSerializer serializer);
 
   @protected
-  void sse_encode_file_change(FileChange self, SseSerializer serializer);
+  void sse_encode_flutter_external_addon(
+    FlutterExternalAddon self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_flutter_local_pack_config(
@@ -702,14 +709,14 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_list_external_addon(
-    List<ExternalAddon> self,
+  void sse_encode_list_file_change(
+    List<FileChange> self,
     SseSerializer serializer,
   );
 
   @protected
-  void sse_encode_list_file_change(
-    List<FileChange> self,
+  void sse_encode_list_flutter_external_addon(
+    List<FlutterExternalAddon> self,
     SseSerializer serializer,
   );
 

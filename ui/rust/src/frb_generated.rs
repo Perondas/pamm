@@ -583,13 +583,13 @@ fn wire__crate__api__commands__linux_setup__linux_setup_info_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_repo_dir = <String>::sse_decode(&mut deserializer);
+            let api__repo_dir = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || async move {
                         let output_ok =
-                            crate::api::commands::linux_setup::linux_setup_info(api_repo_dir)
+                            crate::api::commands::linux_setup::linux_setup_info(api__repo_dir)
                                 .await?;
                         std::result::Result::Ok(output_ok)
                     })()
@@ -857,15 +857,15 @@ fn wire__crate__api__commands__proton__proton_install_teamspeak_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_installer = <String>::sse_decode(&mut deserializer);
-            let api_silent = <bool>::sse_decode(&mut deserializer);
+            let api__installer = <String>::sse_decode(&mut deserializer);
+            let api__silent = <bool>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || {
                         let output_ok = crate::api::commands::proton::proton_install_teamspeak(
-                            api_installer,
-                            api_silent,
+                            api__installer,
+                            api__silent,
                         )?;
                         std::result::Result::Ok(output_ok)
                     })(),
@@ -964,13 +964,13 @@ fn wire__crate__api__commands__proton__proton_open_explorer_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_path = <Option<String>>::sse_decode(&mut deserializer);
+            let api__path = <Option<String>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || {
                         let output_ok =
-                            crate::api::commands::proton::proton_open_explorer(api_path)?;
+                            crate::api::commands::proton::proton_open_explorer(api__path)?;
                         std::result::Result::Ok(output_ok)
                     })(),
                 )
@@ -1085,10 +1085,9 @@ fn wire__crate__api__commands__externals__save_externals__save_externals_impl(
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_repo_path = <String>::sse_decode(&mut deserializer);
             let api_pack_name = <String>::sse_decode(&mut deserializer);
-            let api_externals =
-                <Vec<crate::api::commands::externals::load_externals::ExternalAddon>>::sse_decode(
-                    &mut deserializer,
-                );
+            let api_externals = <Vec<
+                crate::api::commands::externals::load_externals::FlutterExternalAddon,
+            >>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
@@ -1455,13 +1454,6 @@ let decode_indices_ = flutter_rust_bridge::for_generated::lockable_compute_decod
 #[allow(clippy::unnecessary_literal_unwrap)]
 const _: fn() = || {
     {
-        let ExternalAddon =
-            None::<crate::api::commands::externals::load_externals::ExternalAddon>.unwrap();
-        let _: String = ExternalAddon.path;
-        let _: Option<String> = ExternalAddon.name;
-        let _: bool = ExternalAddon.enabled;
-    }
-    {
         let OptionalAddon =
             None::<crate::api::commands::optionals::load_optionals::OptionalAddon>.unwrap();
         let _: String = OptionalAddon.name;
@@ -1697,20 +1689,6 @@ impl SseDecode for crate::api::commands::pack_sync::cancellation::DownloadOutcom
     }
 }
 
-impl SseDecode for crate::api::commands::externals::load_externals::ExternalAddon {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut var_path = <String>::sse_decode(deserializer);
-        let mut var_name = <Option<String>>::sse_decode(deserializer);
-        let mut var_enabled = <bool>::sse_decode(deserializer);
-        return crate::api::commands::externals::load_externals::ExternalAddon {
-            path: var_path,
-            name: var_name,
-            enabled: var_enabled,
-        };
-    }
-}
-
 impl SseDecode for crate::api::commands::pack_sync::file_change::FileChange {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1720,6 +1698,22 @@ impl SseDecode for crate::api::commands::pack_sync::file_change::FileChange {
         return crate::api::commands::pack_sync::file_change::FileChange {
             file_path: var_filePath,
             change: var_change,
+        };
+    }
+}
+
+impl SseDecode for crate::api::commands::externals::load_externals::FlutterExternalAddon {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_path = <String>::sse_decode(deserializer);
+        let mut var_name = <Option<String>>::sse_decode(deserializer);
+        let mut var_enabled = <bool>::sse_decode(deserializer);
+        let mut var_foundInWorkshop = <bool>::sse_decode(deserializer);
+        return crate::api::commands::externals::load_externals::FlutterExternalAddon {
+            path: var_path,
+            name: var_name,
+            enabled: var_enabled,
+            found_in_workshop: var_foundInWorkshop,
         };
     }
 }
@@ -1833,22 +1827,6 @@ impl SseDecode for Vec<crate::api::commands::pack_sync::get_diff::DiffResult> {
     }
 }
 
-impl SseDecode for Vec<crate::api::commands::externals::load_externals::ExternalAddon> {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut len_ = <i32>::sse_decode(deserializer);
-        let mut ans_ = Vec::with_capacity(len_ as usize);
-        for idx_ in 0..len_ {
-            ans_.push(
-                <crate::api::commands::externals::load_externals::ExternalAddon>::sse_decode(
-                    deserializer,
-                ),
-            );
-        }
-        return ans_;
-    }
-}
-
 impl SseDecode for Vec<crate::api::commands::pack_sync::file_change::FileChange> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1857,6 +1835,22 @@ impl SseDecode for Vec<crate::api::commands::pack_sync::file_change::FileChange>
         for idx_ in 0..len_ {
             ans_.push(
                 <crate::api::commands::pack_sync::file_change::FileChange>::sse_decode(
+                    deserializer,
+                ),
+            );
+        }
+        return ans_;
+    }
+}
+
+impl SseDecode for Vec<crate::api::commands::externals::load_externals::FlutterExternalAddon> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = Vec::with_capacity(len_ as usize);
+        for idx_ in 0..len_ {
+            ans_.push(
+                <crate::api::commands::externals::load_externals::FlutterExternalAddon>::sse_decode(
                     deserializer,
                 ),
             );
@@ -2344,34 +2338,6 @@ impl
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart
-    for FrbWrapper<crate::api::commands::externals::load_externals::ExternalAddon>
-{
-    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        [
-            self.0.path.into_into_dart().into_dart(),
-            self.0.name.into_into_dart().into_dart(),
-            self.0.enabled.into_into_dart().into_dart(),
-        ]
-        .into_dart()
-    }
-}
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
-    for FrbWrapper<crate::api::commands::externals::load_externals::ExternalAddon>
-{
-}
-impl
-    flutter_rust_bridge::IntoIntoDart<
-        FrbWrapper<crate::api::commands::externals::load_externals::ExternalAddon>,
-    > for crate::api::commands::externals::load_externals::ExternalAddon
-{
-    fn into_into_dart(
-        self,
-    ) -> FrbWrapper<crate::api::commands::externals::load_externals::ExternalAddon> {
-        self.into()
-    }
-}
-// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::commands::pack_sync::file_change::FileChange {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
@@ -2389,6 +2355,35 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::pack_sync::file_cha
     for crate::api::commands::pack_sync::file_change::FileChange
 {
     fn into_into_dart(self) -> crate::api::commands::pack_sync::file_change::FileChange {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart
+    for crate::api::commands::externals::load_externals::FlutterExternalAddon
+{
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.path.into_into_dart().into_dart(),
+            self.name.into_into_dart().into_dart(),
+            self.enabled.into_into_dart().into_dart(),
+            self.found_in_workshop.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::commands::externals::load_externals::FlutterExternalAddon
+{
+}
+impl
+    flutter_rust_bridge::IntoIntoDart<
+        crate::api::commands::externals::load_externals::FlutterExternalAddon,
+    > for crate::api::commands::externals::load_externals::FlutterExternalAddon
+{
+    fn into_into_dart(
+        self,
+    ) -> crate::api::commands::externals::load_externals::FlutterExternalAddon {
         self
     }
 }
@@ -2850,15 +2845,6 @@ impl SseEncode for crate::api::commands::pack_sync::cancellation::DownloadOutcom
     }
 }
 
-impl SseEncode for crate::api::commands::externals::load_externals::ExternalAddon {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <String>::sse_encode(self.path, serializer);
-        <Option<String>>::sse_encode(self.name, serializer);
-        <bool>::sse_encode(self.enabled, serializer);
-    }
-}
-
 impl SseEncode for crate::api::commands::pack_sync::file_change::FileChange {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -2867,6 +2853,16 @@ impl SseEncode for crate::api::commands::pack_sync::file_change::FileChange {
             self.change,
             serializer,
         );
+    }
+}
+
+impl SseEncode for crate::api::commands::externals::load_externals::FlutterExternalAddon {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.path, serializer);
+        <Option<String>>::sse_encode(self.name, serializer);
+        <bool>::sse_encode(self.enabled, serializer);
+        <bool>::sse_encode(self.found_in_workshop, serializer);
     }
 }
 
@@ -2961,24 +2957,24 @@ impl SseEncode for Vec<crate::api::commands::pack_sync::get_diff::DiffResult> {
     }
 }
 
-impl SseEncode for Vec<crate::api::commands::externals::load_externals::ExternalAddon> {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <i32>::sse_encode(self.len() as _, serializer);
-        for item in self {
-            <crate::api::commands::externals::load_externals::ExternalAddon>::sse_encode(
-                item, serializer,
-            );
-        }
-    }
-}
-
 impl SseEncode for Vec<crate::api::commands::pack_sync::file_change::FileChange> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <i32>::sse_encode(self.len() as _, serializer);
         for item in self {
             <crate::api::commands::pack_sync::file_change::FileChange>::sse_encode(
+                item, serializer,
+            );
+        }
+    }
+}
+
+impl SseEncode for Vec<crate::api::commands::externals::load_externals::FlutterExternalAddon> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <crate::api::commands::externals::load_externals::FlutterExternalAddon>::sse_encode(
                 item, serializer,
             );
         }

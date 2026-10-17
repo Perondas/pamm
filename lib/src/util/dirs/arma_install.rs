@@ -1,9 +1,8 @@
+use crate::util::dirs::ARMA_APP_ID;
 use crate::util::dirs::steam_install::{SteamInstall, find_steam_installs};
 use anyhow::{Context, bail};
 use std::path::PathBuf;
 use steamlocate::{Library, SteamDir};
-
-pub const ARMA_APP_ID: u32 = 107_410;
 
 #[derive(Debug, Clone)]
 pub struct ArmaInstall {

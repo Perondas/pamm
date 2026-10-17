@@ -1,4 +1,4 @@
-use crate::util::dirs::arma_install::ARMA_APP_ID;
+use crate::util::dirs::ARMA_APP_ID;
 use crate::util::dirs::steam_install::SteamInstall;
 use anyhow::Context;
 use std::path::{Path, PathBuf};

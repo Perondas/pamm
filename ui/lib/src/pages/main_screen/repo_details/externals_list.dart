@@ -17,7 +17,7 @@ class ExternalsList extends StatefulWidget {
 
 class _ExternalsListState extends State<ExternalsList> {
   bool loading = true;
-  List<ExternalAddon> externals = [];
+  List<FlutterExternalAddon> externals = [];
 
   @override
   void initState() {
@@ -78,10 +78,11 @@ class _ExternalsListState extends State<ExternalsList> {
               onPressed: () async {
                 final selected = await FilePicker.getDirectoryPath();
                 if (selected != null) {
-                  var newExternal = ExternalAddon(
+                  var newExternal = FlutterExternalAddon(
                     name: null,
                     enabled: true,
                     path: selected,
+                    foundInWorkshop: false,
                   );
 
                   externals.add(newExternal);
@@ -96,13 +97,21 @@ class _ExternalsListState extends State<ExternalsList> {
           for (int i = 0; i < externals.length; i++)
             Row(
               children: [
-                IconButton(
-                  onPressed: () {
-                    externals.removeAt(i);
-                    _saveExternals();
-                  },
-                  icon: Icon(Icons.delete_forever, color: Colors.red),
-                ),
+                if (externals[i].foundInWorkshop) ...[
+                  const Tooltip(
+                    message: "Found in your Workshop",
+                    child: Icon(Icons.info, color: Colors.blue),
+                  ),
+                ] else ...[
+                  IconButton(
+                    onPressed: () {
+                      externals.removeAt(i);
+                      _saveExternals();
+                    },
+                    icon: Icon(Icons.delete_forever, color: Colors.red),
+                  ),
+                ],
+
                 Expanded(
                   child: SwitchListTile(
                     title: Text(
@@ -117,9 +126,10 @@ class _ExternalsListState extends State<ExternalsList> {
                     onChanged: (value) {
                       setState(() {
                         externals.setRange(i, i + 1, [
-                          ExternalAddon(
+                          FlutterExternalAddon(
                             name: externals[i].name,
                             enabled: value,
+                            foundInWorkshop: externals[i].foundInWorkshop,
                             path: externals[i].path,
                           ),
                         ]);

@@ -49,6 +49,6 @@ pub async fn linux_setup_info(repo_dir: String) -> anyhow::Result<Option<LinuxSe
 }
 
 #[cfg(not(target_os = "linux"))]
-pub async fn linux_setup_info(_: String) -> anyhow::Result<Option<LinuxSetupInfo>> {
+pub async fn linux_setup_info(_repo_dir: String) -> anyhow::Result<Option<LinuxSetupInfo>> {
     anyhow::bail!("linux_setup_info is only available on Linux");
 }

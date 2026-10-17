@@ -1,3 +1,4 @@
+use crate::api::commands::externals::load_externals::FlutterExternalAddon;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use pamm_lib::handle::externals::external_addon::ExternalAddon;
 use pamm_lib::handle::externals::save_externals::SaveExternals;
@@ -5,11 +6,30 @@ use pamm_lib::handle::externals::save_externals::SaveExternals;
 pub async fn save_externals(
     repo_path: String,
     pack_name: String,
-    externals: Vec<ExternalAddon>,
+    externals: Vec<FlutterExternalAddon>,
 ) -> anyhow::Result<()> {
     let repo_path = std::path::Path::new(&repo_path);
 
     let handle = ClientRepoHandle::open(repo_path).await?;
 
+    let externals = externals
+        .into_iter()
+        .map(TryInto::try_into)
+        .collect::<anyhow::Result<Vec<_>>>()?;
+
     handle.save_externals(&pack_name, &externals).await
+}
+
+impl TryFrom<FlutterExternalAddon> for ExternalAddon {
+    type Error = anyhow::Error;
+
+    fn try_from(value: FlutterExternalAddon) -> Result<Self, Self::Error> {
+        let mut addon = ExternalAddon::new(value.path)?;
+
+        if value.found_in_workshop {
+            addon = addon.found_in_workshop();
+        }
+
+        Ok(addon.with_enabled(value.enabled))
+    }
 }

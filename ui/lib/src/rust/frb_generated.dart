@@ -170,7 +170,7 @@ abstract class RustLibApi extends BaseApi {
     required String repoDir,
   });
 
-  Future<List<ExternalAddon>>
+  Future<List<FlutterExternalAddon>>
   crateApiCommandsExternalsLoadExternalsLoadExternals({
     required String repotPath,
     required String packName,
@@ -222,7 +222,7 @@ abstract class RustLibApi extends BaseApi {
   Future<void> crateApiCommandsExternalsSaveExternalsSaveExternals({
     required String repoPath,
     required String packName,
-    required List<ExternalAddon> externals,
+    required List<FlutterExternalAddon> externals,
   });
 
   Future<void> crateApiCommandsOptionalsSaveOptionalsSaveOptionals({
@@ -792,7 +792,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "linux_setup_info", argNames: ["repoDir"]);
 
   @override
-  Future<List<ExternalAddon>>
+  Future<List<FlutterExternalAddon>>
   crateApiCommandsExternalsLoadExternalsLoadExternals({
     required String repotPath,
     required String packName,
@@ -811,7 +811,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
         },
         codec: SseCodec(
-          decodeSuccessData: sse_decode_list_external_addon,
+          decodeSuccessData: sse_decode_list_flutter_external_addon,
           decodeErrorData: sse_decode_AnyhowException,
         ),
         constMeta:
@@ -1188,7 +1188,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   Future<void> crateApiCommandsExternalsSaveExternalsSaveExternals({
     required String repoPath,
     required String packName,
-    required List<ExternalAddon> externals,
+    required List<FlutterExternalAddon> externals,
   }) {
     return handler.executeNormal(
       NormalTask(
@@ -1196,7 +1196,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(repoPath, serializer);
           sse_encode_String(packName, serializer);
-          sse_encode_list_external_addon(externals, serializer);
+          sse_encode_list_flutter_external_addon(externals, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
@@ -1778,19 +1778,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  ExternalAddon dco_decode_external_addon(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    final arr = raw as List<dynamic>;
-    if (arr.length != 3)
-      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
-    return ExternalAddon(
-      path: dco_decode_String(arr[0]),
-      name: dco_decode_opt_String(arr[1]),
-      enabled: dco_decode_bool(arr[2]),
-    );
-  }
-
-  @protected
   FileChange dco_decode_file_change(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
@@ -1799,6 +1786,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     return FileChange(
       filePath: dco_decode_String(arr[0]),
       change: dco_decode_change_type(arr[1]),
+    );
+  }
+
+  @protected
+  FlutterExternalAddon dco_decode_flutter_external_addon(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    return FlutterExternalAddon(
+      path: dco_decode_String(arr[0]),
+      name: dco_decode_opt_String(arr[1]),
+      enabled: dco_decode_bool(arr[2]),
+      foundInWorkshop: dco_decode_bool(arr[3]),
     );
   }
 
@@ -1886,15 +1887,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  List<ExternalAddon> dco_decode_list_external_addon(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return (raw as List<dynamic>).map(dco_decode_external_addon).toList();
-  }
-
-  @protected
   List<FileChange> dco_decode_list_file_change(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return (raw as List<dynamic>).map(dco_decode_file_change).toList();
+  }
+
+  @protected
+  List<FlutterExternalAddon> dco_decode_list_flutter_external_addon(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>)
+        .map(dco_decode_flutter_external_addon)
+        .toList();
   }
 
   @protected
@@ -2350,20 +2355,28 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  ExternalAddon sse_decode_external_addon(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    var var_path = sse_decode_String(deserializer);
-    var var_name = sse_decode_opt_String(deserializer);
-    var var_enabled = sse_decode_bool(deserializer);
-    return ExternalAddon(path: var_path, name: var_name, enabled: var_enabled);
-  }
-
-  @protected
   FileChange sse_decode_file_change(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_filePath = sse_decode_String(deserializer);
     var var_change = sse_decode_change_type(deserializer);
     return FileChange(filePath: var_filePath, change: var_change);
+  }
+
+  @protected
+  FlutterExternalAddon sse_decode_flutter_external_addon(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_path = sse_decode_String(deserializer);
+    var var_name = sse_decode_opt_String(deserializer);
+    var var_enabled = sse_decode_bool(deserializer);
+    var var_foundInWorkshop = sse_decode_bool(deserializer);
+    return FlutterExternalAddon(
+      path: var_path,
+      name: var_name,
+      enabled: var_enabled,
+      foundInWorkshop: var_foundInWorkshop,
+    );
   }
 
   @protected
@@ -2471,20 +2484,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  List<ExternalAddon> sse_decode_list_external_addon(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-
-    var len_ = sse_decode_i_32(deserializer);
-    var ans_ = <ExternalAddon>[];
-    for (var idx_ = 0; idx_ < len_; ++idx_) {
-      ans_.add(sse_decode_external_addon(deserializer));
-    }
-    return ans_;
-  }
-
-  @protected
   List<FileChange> sse_decode_list_file_change(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
@@ -2492,6 +2491,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var ans_ = <FileChange>[];
     for (var idx_ = 0; idx_ < len_; ++idx_) {
       ans_.add(sse_decode_file_change(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
+  List<FlutterExternalAddon> sse_decode_list_flutter_external_addon(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <FlutterExternalAddon>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_flutter_external_addon(deserializer));
     }
     return ans_;
   }
@@ -3004,18 +3017,22 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_external_addon(ExternalAddon self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_String(self.path, serializer);
-    sse_encode_opt_String(self.name, serializer);
-    sse_encode_bool(self.enabled, serializer);
-  }
-
-  @protected
   void sse_encode_file_change(FileChange self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.filePath, serializer);
     sse_encode_change_type(self.change, serializer);
+  }
+
+  @protected
+  void sse_encode_flutter_external_addon(
+    FlutterExternalAddon self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.path, serializer);
+    sse_encode_opt_String(self.name, serializer);
+    sse_encode_bool(self.enabled, serializer);
+    sse_encode_bool(self.foundInWorkshop, serializer);
   }
 
   @protected
@@ -3108,18 +3125,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_list_external_addon(
-    List<ExternalAddon> self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_i_32(self.length, serializer);
-    for (final item in self) {
-      sse_encode_external_addon(item, serializer);
-    }
-  }
-
-  @protected
   void sse_encode_list_file_change(
     List<FileChange> self,
     SseSerializer serializer,
@@ -3128,6 +3133,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_i_32(self.length, serializer);
     for (final item in self) {
       sse_encode_file_change(item, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_list_flutter_external_addon(
+    List<FlutterExternalAddon> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_flutter_external_addon(item, serializer);
     }
   }
 
