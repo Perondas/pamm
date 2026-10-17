@@ -5,5 +5,6 @@ pub mod fs_writable;
 pub mod init;
 pub(crate) mod migration;
 pub mod pack;
+#[cfg(feature = "client")]
 pub(crate) mod rm;
 pub mod util;

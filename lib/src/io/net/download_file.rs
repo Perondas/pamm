@@ -43,6 +43,7 @@ pub(crate) async fn download_file(
 /// Download a file whose length is not known up front (nothing indexes it).
 /// Writes to a `<name>.part` sibling first and renames on success, so the
 /// destination only ever holds a complete file.
+#[cfg(feature = "client")]
 pub(crate) async fn download_file_unverified(
     file_path: &Path,
     file_url: Url,
