@@ -12,6 +12,7 @@ where
             .external_addons
             .iter()
             .filter(|addon| addon.enabled)
+            .filter(|addon| addon.path.exists())
             .map(|addon| addon.path.to_owned())
             .map(canonicalize_and_clean_path)
             .collect::<anyhow::Result<Vec<_>>>()

@@ -24,6 +24,8 @@ where
 
         externals.extend(ws_addons);
 
+        externals.retain(|addon| addon.path.exists());
+
         Ok(externals.into_iter().collect())
     }
 }
