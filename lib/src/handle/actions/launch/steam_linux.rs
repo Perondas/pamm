@@ -2,6 +2,7 @@ use crate::handle::actions::launch::launch_pack::LaunchOutcome;
 use crate::handle::actions::launch::preset::Preset;
 use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::reading::get_pack::GetPack;
+use crate::util::dirs::ARMA_APP_ID;
 use crate::util::dirs::arma_install::find_arma_install;
 use crate::util::dirs::container_path::to_arma_path;
 use anyhow::Context;
