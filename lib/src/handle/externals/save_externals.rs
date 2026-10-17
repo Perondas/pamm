@@ -1,7 +1,7 @@
+use std::collections::HashSet;
 use crate::handle::externals::external_addon::ExternalAddon;
 use crate::handle::reading::get_pack::GetPack;
 use crate::handle::writing::save_pack_settings::SavePackSettings;
-use std::collections::HashSet;
 
 pub trait SaveExternals {
     fn save_externals(
@@ -22,14 +22,7 @@ where
     ) -> anyhow::Result<()> {
         let (_, mut settings) = self.get_pack_with_settings(pack_name).await?;
 
-        settings.external_addons = externals
-            .iter()
-            .map(|e| e.to_owned())
-            .map(|mut e| {
-                e.resolve_name()?;
-                Ok(e)
-            })
-            .collect::<anyhow::Result<HashSet<_>>>()?;
+        settings.external_addons = externals.iter().cloned().collect();
 
         self.save_pack_settings(pack_name, &settings).await
     }

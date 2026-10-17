@@ -82,7 +82,7 @@ pub fn proton_info() -> anyhow::Result<ProtonInfo> {
 
 /// Blocks until the installer exits.
 #[cfg(not(target_os = "linux"))]
-pub fn proton_install_teamspeak(_: String, _: bool) -> anyhow::Result<()> {
+pub fn proton_install_teamspeak(_installer: String, _silent: bool) -> anyhow::Result<()> {
     anyhow::bail!("proton_install_teamspeak is only available on Linux");
 }
 
@@ -92,7 +92,7 @@ pub fn proton_launch_teamspeak() -> anyhow::Result<()> {
 }
 
 #[cfg(not(target_os = "linux"))]
-pub fn proton_open_explorer(_: Option<String>) -> anyhow::Result<()> {
+pub fn proton_open_explorer(_path: Option<String>) -> anyhow::Result<()> {
     anyhow::bail!("proton_open_explorer is only available on Linux");
 }
 

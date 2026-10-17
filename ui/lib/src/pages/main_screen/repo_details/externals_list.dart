@@ -17,7 +17,7 @@ class ExternalsList extends StatefulWidget {
 
 class _ExternalsListState extends State<ExternalsList> {
   bool loading = true;
-  List<ExternalAddon> externals = [];
+  List<FlutterExternalAddon> externals = [];
 
   @override
   void initState() {
@@ -78,7 +78,7 @@ class _ExternalsListState extends State<ExternalsList> {
               onPressed: () async {
                 final selected = await FilePicker.getDirectoryPath();
                 if (selected != null) {
-                  var newExternal = ExternalAddon(
+                  var newExternal = FlutterExternalAddon(
                     name: null,
                     enabled: true,
                     path: selected,
@@ -117,7 +117,7 @@ class _ExternalsListState extends State<ExternalsList> {
                     onChanged: (value) {
                       setState(() {
                         externals.setRange(i, i + 1, [
-                          ExternalAddon(
+                          FlutterExternalAddon(
                             name: externals[i].name,
                             enabled: value,
                             path: externals[i].path,

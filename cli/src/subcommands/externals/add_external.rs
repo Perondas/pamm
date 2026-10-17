@@ -9,9 +9,7 @@ pub async fn add_external_command(args: AddExternalArgs) -> anyhow::Result<()> {
 
     let mut externals = handle.load_externals(&args.name).await?;
 
-    let mut new = ExternalAddon::new(args.path);
-
-    new.resolve_name()?;
+    let new = ExternalAddon::new(args.path);
 
     externals.push(new);
 
