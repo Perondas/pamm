@@ -1,6 +1,5 @@
 use crate::handle::reading::get_pack::GetPack;
 use crate::io::fs::util::clean_path::canonicalize_and_clean_path;
-use std::path::PathBuf;
 
 impl<T> GetExternalAddonsPaths for T
 where
@@ -13,7 +12,7 @@ where
             .external_addons
             .iter()
             .filter(|addon| addon.enabled)
-            .map(|addon| PathBuf::from(addon.path.to_owned()))
+            .map(|addon| addon.path.to_owned())
             .map(canonicalize_and_clean_path)
             .collect::<anyhow::Result<Vec<_>>>()
     }
@@ -37,6 +36,7 @@ mod tests {
     use crate::io::fs::util::clean_path::canonicalize_and_clean_path;
     use crate::models::pack::pack_config::PackConfig;
     use crate::models::pack::pack_user_settings::PackUserSettings;
+    use std::path::PathBuf;
 
     #[tokio::test]
     async fn test_get_external_addon_paths() {
@@ -51,12 +51,14 @@ mod tests {
             path: manifest_path.clone(),
             name: Some("enabled_addon".to_string()),
             enabled: true,
+            found_in_workshop: false,
         };
         // Path does not matter so much, but it must be valid for `canonicalize`
         let external_disabled = ExternalAddon {
             path: manifest_path,
             name: Some("disabled_addon".to_string()),
             enabled: false,
+            found_in_workshop: false,
         };
 
         settings.external_addons.insert(external_enabled);

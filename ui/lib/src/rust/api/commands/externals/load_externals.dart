@@ -20,15 +20,21 @@ class FlutterExternalAddon {
   final String path;
   final String? name;
   final bool enabled;
+  final bool foundInWorkshop;
 
   const FlutterExternalAddon({
     required this.path,
     this.name,
     required this.enabled,
+    required this.foundInWorkshop,
   });
 
   @override
-  int get hashCode => path.hashCode ^ name.hashCode ^ enabled.hashCode;
+  int get hashCode =>
+      path.hashCode ^
+      name.hashCode ^
+      enabled.hashCode ^
+      foundInWorkshop.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -37,5 +43,6 @@ class FlutterExternalAddon {
           runtimeType == other.runtimeType &&
           path == other.path &&
           name == other.name &&
-          enabled == other.enabled;
+          enabled == other.enabled &&
+          foundInWorkshop == other.foundInWorkshop;
 }

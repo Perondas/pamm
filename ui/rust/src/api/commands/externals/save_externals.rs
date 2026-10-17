@@ -24,6 +24,12 @@ impl TryFrom<FlutterExternalAddon> for ExternalAddon {
     type Error = anyhow::Error;
 
     fn try_from(value: FlutterExternalAddon) -> Result<Self, Self::Error> {
-        Ok(ExternalAddon::new(value.path)?.with_enabled(value.enabled))
+        let mut addon = ExternalAddon::new(value.path)?;
+
+        if value.found_in_workshop {
+            addon = addon.found_in_workshop();
+        }
+
+        Ok(addon.with_enabled(value.enabled))
     }
 }

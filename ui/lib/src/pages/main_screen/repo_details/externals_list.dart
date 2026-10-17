@@ -82,6 +82,7 @@ class _ExternalsListState extends State<ExternalsList> {
                     name: null,
                     enabled: true,
                     path: selected,
+                    foundInWorkshop: false,
                   );
 
                   externals.add(newExternal);
@@ -96,13 +97,21 @@ class _ExternalsListState extends State<ExternalsList> {
           for (int i = 0; i < externals.length; i++)
             Row(
               children: [
-                IconButton(
-                  onPressed: () {
-                    externals.removeAt(i);
-                    _saveExternals();
-                  },
-                  icon: Icon(Icons.delete_forever, color: Colors.red),
-                ),
+                if (externals[i].foundInWorkshop) ...[
+                  const Tooltip(
+                    message: "Found in your Workshop",
+                    child: Icon(Icons.info, color: Colors.blue),
+                  ),
+                ] else ...[
+                  IconButton(
+                    onPressed: () {
+                      externals.removeAt(i);
+                      _saveExternals();
+                    },
+                    icon: Icon(Icons.delete_forever, color: Colors.red),
+                  ),
+                ],
+
                 Expanded(
                   child: SwitchListTile(
                     title: Text(
@@ -120,6 +129,7 @@ class _ExternalsListState extends State<ExternalsList> {
                           FlutterExternalAddon(
                             name: externals[i].name,
                             enabled: value,
+                            foundInWorkshop: externals[i].foundInWorkshop,
                             path: externals[i].path,
                           ),
                         ]);

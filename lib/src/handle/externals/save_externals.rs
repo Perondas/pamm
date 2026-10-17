@@ -50,6 +50,7 @@ mod tests {
             path: PathBuf::from("/some/path/to/addon"),
             name: Some("addon".to_string()),
             enabled: true,
+            found_in_workshop: false,
         };
 
         mock.save_externals("test_pack", &[external]).await.unwrap();

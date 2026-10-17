@@ -1708,10 +1708,12 @@ impl SseDecode for crate::api::commands::externals::load_externals::FlutterExter
         let mut var_path = <String>::sse_decode(deserializer);
         let mut var_name = <Option<String>>::sse_decode(deserializer);
         let mut var_enabled = <bool>::sse_decode(deserializer);
+        let mut var_foundInWorkshop = <bool>::sse_decode(deserializer);
         return crate::api::commands::externals::load_externals::FlutterExternalAddon {
             path: var_path,
             name: var_name,
             enabled: var_enabled,
+            found_in_workshop: var_foundInWorkshop,
         };
     }
 }
@@ -2365,6 +2367,7 @@ impl flutter_rust_bridge::IntoDart
             self.path.into_into_dart().into_dart(),
             self.name.into_into_dart().into_dart(),
             self.enabled.into_into_dart().into_dart(),
+            self.found_in_workshop.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -2859,6 +2862,7 @@ impl SseEncode for crate::api::commands::externals::load_externals::FlutterExter
         <String>::sse_encode(self.path, serializer);
         <Option<String>>::sse_encode(self.name, serializer);
         <bool>::sse_encode(self.enabled, serializer);
+        <bool>::sse_encode(self.found_in_workshop, serializer);
     }
 }
 

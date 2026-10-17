@@ -1,4 +1,4 @@
-use crate::subcommands::externals::externals_to_name;
+use crate::subcommands::externals::externals_to_names;
 use pamm_cli_args::subcommands::externals::toggle_externals::ToggleExternalsArgs;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use pamm_lib::handle::externals::load_externals::LoadExternals;
@@ -9,9 +9,14 @@ pub async fn toggle_externals_command(args: ToggleExternalsArgs) -> anyhow::Resu
 
     let mut externals = handle.load_externals(&args.name).await?;
 
+    if externals.is_empty() {
+        println!("No externals to toggle.");
+        return Ok(());
+    }
+
     let selection = dialoguer::MultiSelect::new()
         .with_prompt("What externals to enable?")
-        .items(externals_to_name(&externals))
+        .items(externals_to_names(&externals))
         .defaults(&externals.iter().map(|e| e.enabled).collect::<Vec<_>>())
         .interact()?;
 

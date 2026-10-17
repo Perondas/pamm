@@ -1793,12 +1793,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   FlutterExternalAddon dco_decode_flutter_external_addon(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 3)
-      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
     return FlutterExternalAddon(
       path: dco_decode_String(arr[0]),
       name: dco_decode_opt_String(arr[1]),
       enabled: dco_decode_bool(arr[2]),
+      foundInWorkshop: dco_decode_bool(arr[3]),
     );
   }
 
@@ -2369,10 +2370,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_path = sse_decode_String(deserializer);
     var var_name = sse_decode_opt_String(deserializer);
     var var_enabled = sse_decode_bool(deserializer);
+    var var_foundInWorkshop = sse_decode_bool(deserializer);
     return FlutterExternalAddon(
       path: var_path,
       name: var_name,
       enabled: var_enabled,
+      foundInWorkshop: var_foundInWorkshop,
     );
   }
 
@@ -3029,6 +3032,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_String(self.path, serializer);
     sse_encode_opt_String(self.name, serializer);
     sse_encode_bool(self.enabled, serializer);
+    sse_encode_bool(self.foundInWorkshop, serializer);
   }
 
   @protected

@@ -18,6 +18,7 @@ pub struct FlutterExternalAddon {
     pub path: String,
     pub name: Option<String>,
     pub enabled: bool,
+    pub found_in_workshop: bool,
 }
 
 impl From<pamm_lib::handle::externals::external_addon::ExternalAddon> for FlutterExternalAddon {
@@ -26,6 +27,7 @@ impl From<pamm_lib::handle::externals::external_addon::ExternalAddon> for Flutte
             enabled: external.enabled,
             name: external.name,
             path: external.path.to_string_lossy().to_string(),
+            found_in_workshop: external.found_in_workshop,
         }
     }
 }

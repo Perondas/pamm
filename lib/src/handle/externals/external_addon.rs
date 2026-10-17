@@ -12,6 +12,8 @@ pub struct ExternalAddon {
     pub path: PathBuf,
     pub name: Option<String>,
     pub enabled: bool,
+    #[serde(default)]
+    pub found_in_workshop: bool,
     // For convenience we want this to stay constructable in tests, but nowhere else
 }
 
@@ -31,12 +33,20 @@ impl ExternalAddon {
         Ok(ExternalAddon {
             path: path.as_ref().to_path_buf(),
             name,
-            enabled: true,
+            enabled: false,
+            found_in_workshop: false,
         })
     }
 
     pub fn with_enabled(self, enabled: bool) -> Self {
         Self { enabled, ..self }
+    }
+
+    pub fn found_in_workshop(self) -> Self {
+        Self {
+            found_in_workshop: true,
+            ..self
+        }
     }
 }
 
