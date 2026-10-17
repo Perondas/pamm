@@ -1,9 +1,8 @@
 use crate::io::net::http_client;
 use crate::io::progress_reporting::copy_with_report::copy;
 use crate::io::progress_reporting::download_reporter::DownloadReporter;
-use anyhow::Context;
 use std::path::Path;
-use tokio::fs::{self, File};
+use tokio::fs::File;
 use tokio::io::{AsyncWriteExt, BufWriter};
 use url::Url;
 
@@ -48,6 +47,9 @@ pub(crate) async fn download_file_unverified(
     file_path: &Path,
     file_url: Url,
 ) -> anyhow::Result<()> {
+    use anyhow::Context;
+    use tokio::fs;
+
     log::debug!("Downloading {} -> {:?} (unverified)", file_url, file_path);
 
     let file_name = file_path
