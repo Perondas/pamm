@@ -13,12 +13,12 @@ const features = [
         body: "Only the parts of a PBO that changed between versions are downloaded. Saves bandwidth for both server and players.",
     },
     {
-        title: "Speed above all",
-        body: "Indexes are cached on the server and the client, so files are not re-scanned on every sync. Indexing and downloads run on multiple threads.",
+        title: "Speedy",
+        body: "pamm is written to be fast, be it downloading changes or building the repo server side.",
     },
     {
         title: "Packs are cheap",
-        body: "A pack is just a couple of files. Easy to create and delete, which makes one-off event packs possible.",
+        body: "A pack is just a couple of files. Easy to create and delete, which makes one-off event packs easy.",
     },
     {
         title: "Optional addons",
@@ -33,20 +33,20 @@ const features = [
         body: "Packs that only exist on your machine, for testing, mission making or private mod lists.",
     },
     {
-        title: "Server deployment",
-        body: "Deploy a pack to a dedicated server. pamm links the addons and their signing keys, builds the launch parameters, fills in script templates, and runs your server.",
+        title: "Server deployment (experimental)",
+        body: "Deploy a pack to a dedicated server. pamm will symlink/copy the addons to the right place, copy their keys to the right directory, write the launch params and fire up the server.",
     },
     {
         title: "Mission maker mode",
-        body: "Extra tools for mission makers in the GUI: launch without optionals, manage local packs, and open the repo on disk.",
+        body: "Extra tools for mission makers in the GUI: launching without optionals, manage local packs, jumping straight to the repo on disk",
     },
     {
         title: "Full Linux support",
-        body: "Runs natively on Linux. On Linux it starts Arma through Steam and Proton, with native, Flatpak and snap Steam fully supported.",
+        body: "Runs natively on Linux, with native, Flatpak and snap Steam fully supported.",
     },
     {
         title: "GUI and CLI",
-        body: "All player features are available in both, server admin only via cli",
+        body: "All player features are available in both, server administration tools only via cli",
     },
     {
         title: "Customizable GUI",
@@ -102,13 +102,13 @@ const features = [
         <p>
             A <strong>repository</strong> is what your community hosts: all behind just one URL.
             It holds any number of <strong>packs</strong>. A pack is a collection of addons that
-            players sync and launch together, with its own description, icon and launch
+            players sync and launch, with its own description, icon and launch
             parameters.
         </p>
         <p>
             Each pack can have one <strong>parent</strong>. A pack inherits all of its
             parent's addons, and the parent inherits from its own parent, so you can
-            build chains as deep as you need:
+            build chains as long as you need:
         </p>
         <pre><code>My Community              repository
 ├── core                  CBA, ACE, TFAR, ...
