@@ -7,6 +7,7 @@ use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use termtree::Tree;
 
+#[derive(Debug)]
 struct Node {
     pack_name: String,
     needs_update: bool,
@@ -56,8 +57,8 @@ pub async fn status_command(_args: StatusArgs) -> anyhow::Result<()> {
 
     let mut packs = HashMap::new();
 
-    for pack in &config.packs {
-        let pack = handle.get_pack(pack).await?;
+    for pack in handle.get_all_packs() {
+        let pack = handle.get_pack(&pack).await?;
         let needs_update = !handle
             .quick_check_pack_up_to_date(&pack.name)
             .await
@@ -86,7 +87,12 @@ pub async fn status_command(_args: StatusArgs) -> anyhow::Result<()> {
     while !packs.is_empty() {
         if current_level.is_empty() && !packs.is_empty() {
             bail!(
-                "There are child packs with no path to the root. The repository may be in an inconsistent state."
+                "There are child packs with no path to the root. The repository may be in an inconsistent state. These are the offending packs: {:?}",
+                packs
+                    .values()
+                    .flatten()
+                    .map(|node| node.root.pack_name.as_ref())
+                    .collect::<Vec<&str>>()
             )
         }
 

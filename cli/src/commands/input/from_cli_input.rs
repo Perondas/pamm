@@ -1,5 +1,4 @@
 use anyhow::Result;
-use pamm_lib::models::repo::repo_config::RepoConfig;
 
 pub trait FromCliInput {
     fn from_cli_input() -> Result<Self>
@@ -8,7 +7,7 @@ pub trait FromCliInput {
 }
 
 pub trait FromCliInputWithContext {
-    fn from_cli_input(repo_config: &RepoConfig) -> Result<Self>
+    fn from_cli_input(existing_packs: &[&str]) -> Result<Self>
     where
         Self: Sized;
 }

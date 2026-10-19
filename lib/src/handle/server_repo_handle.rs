@@ -50,6 +50,11 @@ impl ServerRepoHandle {
     pub fn get_www_path(&self) -> PathBuf {
         self.base.repo_path.join(WWW_DIR_NAME)
     }
+
+    /// Returns a list of all packs in the repository.
+    pub fn get_all_packs(&self) -> Vec<&str> {
+        self.repo_config.packs.iter().map(|s| s.as_str()).collect()
+    }
 }
 
 impl Deref for ServerRepoHandle {

@@ -3,11 +3,10 @@ use anyhow::Result;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::io::files::file_names::fixed_file::FixedFile;
 use pamm_lib::models::pack::pack_config::PackConfig;
-use pamm_lib::models::repo::repo_config::RepoConfig;
 use std::path::PathBuf;
 
 impl FromCliInputWithContext for PackConfig {
-    fn from_cli_input(repo_config: &RepoConfig) -> Result<Self> {
+    fn from_cli_input(existing_packs: &[&str]) -> Result<Self> {
         let name = dialoguer::Input::<String>::with_theme(&ColorfulTheme::default())
             .with_prompt("Pack Name")
             .allow_empty(true)
@@ -37,15 +36,13 @@ impl FromCliInputWithContext for PackConfig {
 
         let mut parent = None;
 
-        let pack_vec: Vec<String> = repo_config.packs.iter().cloned().collect();
-
-        if !repo_config.packs.is_empty() {
+        if !existing_packs.is_empty() {
             // We don't check for loops because we assume that users will never edit the pack config manually
             parent = dialoguer::Select::new()
                 .with_prompt("Select Parent Pack (if any) ESC to skip")
-                .items(&pack_vec)
+                .items(existing_packs)
                 .interact_opt()?
-                .map(|i| pack_vec[i].clone());
+                .map(|i| existing_packs[i].to_string());
         }
 
         Ok(PackConfig::new(name, description, client_params, parent))
