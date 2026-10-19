@@ -1,11 +1,40 @@
-use std::collections::HashMap;
-use futures::StreamExt;
-use futures::stream;
+use anyhow::bail;
 use pamm_cli_args::commands::status::StatusArgs;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use pamm_lib::handle::reading::get_pack::GetPack;
 use pamm_lib::handle::reading::get_repo_info::GetRepoInfo;
+use std::collections::HashMap;
+use std::fmt::{Display, Formatter};
 use termtree::Tree;
+
+struct Node {
+    pack_name: String,
+    needs_update: bool,
+}
+
+impl Node {
+    fn new(pack_name: String, needs_update: bool) -> Self {
+        Self {
+            pack_name,
+            needs_update,
+        }
+    }
+}
+
+impl Display for Node {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}{}",
+            self.pack_name,
+            if self.needs_update {
+                " (needs update)"
+            } else {
+                ""
+            }
+        )
+    }
+}
 
 pub async fn status_command(_args: StatusArgs) -> anyhow::Result<()> {
     let handle = ClientRepoHandle::open(&std::env::current_dir()?).await?;
@@ -23,25 +52,58 @@ pub async fn status_command(_args: StatusArgs) -> anyhow::Result<()> {
         return Ok(());
     }
 
-    let mut root = Tree::new(config.name.clone());
+    let mut repo_root = Tree::new(Node::new(config.name.clone(), false));
 
     let mut packs = HashMap::new();
 
-    for pack in config.packs {
-        let pack = handle.get_pack(&pack).await?;
-        packs.insert(pack.parent, pack.name.clone());
+    for pack in &config.packs {
+        let pack = handle.get_pack(pack).await?;
+        let needs_update = !handle
+            .quick_check_pack_up_to_date(&pack.name)
+            .await
+            .unwrap_or(true);
+
+        let node = Node::new(pack.name.clone(), needs_update);
+
+        packs
+            .entry(pack.parent.clone())
+            .or_insert_with(Vec::new)
+            .push(Tree::new(node));
     }
 
-    let current_parent = None;
+    let root_packs = packs.remove(&None).unwrap_or_default();
 
-    loop {
-
+    if root_packs.is_empty() && !packs.is_empty() {
+        bail!(
+            "No root pack found, but there are child packs. The repository may be in an inconsistent state."
+        );
     }
 
+    repo_root.leaves = root_packs;
 
-    let mut waiting: Vec<(Option<String>, Tree<String>)> = config.packs.iter().map(async |name| handle.get_pack(name).await).map(|p|).collect();
+    let mut current_level = repo_root.leaves.iter_mut().collect::<Vec<_>>();
 
-    loop {}
+    while !packs.is_empty() {
+        if current_level.is_empty() && !packs.is_empty() {
+            bail!(
+                "There are child packs with no path to the root. The repository may be in an inconsistent state."
+            )
+        }
 
-    todo!()
+        let mut next_level = vec![];
+        for node in current_level {
+            let children = packs
+                .remove(&Some(node.root.pack_name.clone()))
+                .unwrap_or_default();
+            node.leaves = children;
+
+            next_level.extend(node.leaves.iter_mut());
+        }
+
+        current_level = next_level;
+    }
+
+    println!("{}", repo_root);
+
+    Ok(())
 }
