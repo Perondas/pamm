@@ -3,6 +3,7 @@ use crate::commands::build::BuildArgs;
 use crate::commands::deploy::DeployArgs;
 use crate::commands::init_remote::InitRemoteArgs;
 use crate::commands::launch::LaunchArgs;
+use crate::commands::status::StatusArgs;
 use crate::commands::sync_pack::SyncPackArgs;
 use crate::commands::sync_this_only_pack::SyncThisOnlyPackArgs;
 use crate::subcommands::externals::ExternalsArgs;
@@ -38,4 +39,5 @@ pub enum AppSubcommand {
     Externals(ExternalsArgs),
     Local(LocalPacksArgs),
     Deploy(DeployArgs),
+    Status(StatusArgs),
 }
