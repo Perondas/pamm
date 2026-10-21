@@ -58,7 +58,7 @@ pub async fn status_command(_args: StatusArgs) -> anyhow::Result<()> {
     let mut packs = HashMap::new();
 
     for pack in handle.get_all_packs() {
-        let pack = handle.get_pack(&pack).await?;
+        let pack = handle.get_pack(pack).await?;
         let needs_update = !handle
             .quick_check_pack_up_to_date(&pack.name)
             .await
