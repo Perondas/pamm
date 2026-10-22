@@ -1,6 +1,7 @@
 use crate::handle::addons::ResolveAddons;
 use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::server_repo_handle::ServerRepoHandle;
+use crate::io::files::name_consts::MP_MISSIONS_DIR_NAME;
 use crate::io::fs::util::clean_path::canonicalize_and_clean_path;
 use crate::io::fs::util::path_checks::is_file;
 use crate::io::fs::util::symlink::create_or_recreate_symlink;
@@ -71,6 +72,8 @@ impl ServerRepoHandle {
             pack_name, mod_launch_param
         );
 
+        self.symlink_missions(pack_name, server_dir).await?;
+
         self.process_script_templates(pack_name, &mod_launch_param)
             .await?;
 
@@ -135,6 +138,69 @@ impl ServerRepoHandle {
                     self.server_config.file_group_gid,
                 )
                 .context(anyhow!("Failed to change ownership for {:?}", key))?;
+            }
+        }
+
+        Ok(())
+    }
+
+    async fn symlink_missions(&self, pack_name: &str, server_path: &Path) -> anyhow::Result<()> {
+        // First remove all exising symlinks that link to our repo
+        let server_missions_folder = server_path.join("mpmissions");
+
+        let mut entries = fs::read_dir(&server_missions_folder)
+            .await
+            .context(anyhow!(
+                "Failed to read server missions folder at {:?}",
+                server_missions_folder
+            ))?;
+
+        while let Some(entry) = entries.next_entry().await? {
+            if entry.metadata().await?.is_symlink() {
+                let target = fs::read_link(entry.path())
+                    .await
+                    .context(anyhow!("Failed to read symlink at {:?}", entry.path()))?;
+
+                if target.starts_with(self.get_repo_path()) {
+                    debug!(
+                        "Removing existing symlink at {:?} that points to repo at {:?}",
+                        entry.path(),
+                        target
+                    );
+                    fs::remove_file(entry.path())
+                        .await
+                        .context(anyhow!("Failed to remove symlink at {:?}", entry.path()))?;
+                }
+            }
+        }
+
+        // Now create new symlinks for all missions in the repo
+        let repo_missions_folder = self
+            .get_repo_path()
+            .join(pack_name)
+            .join(MP_MISSIONS_DIR_NAME);
+
+        let mut entries = fs::read_dir(&repo_missions_folder).await.context(anyhow!(
+            "Failed to read repo missions folder at {:?}",
+            repo_missions_folder
+        ))?;
+
+        while let Some(entry) = entries.next_entry().await? {
+            let dest_path= server_missions_folder.join(entry.file_name());
+
+            create_or_recreate_symlink(
+                &entry.path(),
+                &dest_path,
+            )?;
+
+            #[cfg(unix)]
+            {
+                std::os::unix::fs::lchown(
+                    &dest_path,
+                    self.server_config.file_owner_uid,
+                    self.server_config.file_group_gid,
+                )
+                    .context(anyhow!("Failed to change ownership for {:?}", key))?;
             }
         }
 
@@ -232,6 +298,7 @@ mod tests {
             let server_dir = tmp.path().join("server");
             fs::create_dir_all(&server_dir).unwrap();
             fs::create_dir_all(server_dir.join("keys")).unwrap();
+            fs::create_dir_all(server_dir.join("mpmissions")).unwrap();
 
             let mut packs = HashSet::new();
             packs.insert("core".to_string());
