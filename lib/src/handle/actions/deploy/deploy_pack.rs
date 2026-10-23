@@ -186,12 +186,9 @@ impl ServerRepoHandle {
         ))?;
 
         while let Some(entry) = entries.next_entry().await? {
-            let dest_path= server_missions_folder.join(entry.file_name());
+            let dest_path = server_missions_folder.join(entry.file_name());
 
-            create_or_recreate_symlink(
-                &entry.path(),
-                &dest_path,
-            )?;
+            create_or_recreate_symlink(&entry.path(), &dest_path)?;
 
             #[cfg(unix)]
             {
@@ -200,7 +197,7 @@ impl ServerRepoHandle {
                     self.server_config.file_owner_uid,
                     self.server_config.file_group_gid,
                 )
-                    .context(anyhow!("Failed to change ownership for {:?}", key))?;
+                .context(anyhow!("Failed to change ownership for {:?}", key))?;
             }
         }
 

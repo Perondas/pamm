@@ -10,7 +10,6 @@ pub(crate) const ADDONS_DIR_NAME: &str = "addons";
 
 pub(crate) const MP_MISSIONS_DIR_NAME: &str = "mp_missions";
 
-
 /// Legacy (layout v1) addon directory name at the repo root. Only referenced by
 /// the v1 -> v2 migration and the build's stale-entry pruning.
 pub(crate) fn get_pack_addon_directory_name(pack_name: &str) -> String {
