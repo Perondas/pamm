@@ -5,6 +5,7 @@ pub mod client_repo_handle;
 #[cfg(feature = "client")]
 pub mod downloading;
 pub mod externals;
+#[cfg(feature = "deploy")]
 pub mod missions;
 pub mod optionals;
 #[cfg(feature = "client")]
