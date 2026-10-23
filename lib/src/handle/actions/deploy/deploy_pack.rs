@@ -197,7 +197,7 @@ impl ServerRepoHandle {
                     self.server_config.file_owner_uid,
                     self.server_config.file_group_gid,
                 )
-                .context(anyhow!("Failed to change ownership for {:?}", key))?;
+                .context(anyhow!("Failed to change ownership for {:?}", dest_path))?;
             }
         }
 
