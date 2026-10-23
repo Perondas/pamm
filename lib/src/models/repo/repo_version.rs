@@ -10,7 +10,7 @@ use std::path::Path;
 /// `www/`); a repo without the file is version 1 (the flat pre-versioning
 /// layout). Migrations run when the stored version is older than
 /// [`CURRENT_REPO_VERSION`].
-pub const CURRENT_REPO_VERSION: u32 = 2;
+pub const CURRENT_REPO_VERSION: u32 = 3;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct RepoVersion(pub u32);

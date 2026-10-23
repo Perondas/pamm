@@ -1,4 +1,6 @@
-use crate::io::files::name_consts::{ADDONS_DIR_NAME, INDEX_DIR_NAME, WWW_DIR_NAME};
+use crate::io::files::name_consts::{
+    ADDONS_DIR_NAME, INDEX_DIR_NAME, MP_MISSIONS_DIR_NAME, WWW_DIR_NAME,
+};
 use crate::io::fs::fs_writable::FixedFsWritable;
 use crate::io::fs::util::path_checks::is_dir;
 use crate::models::pack::pack_config::PackConfig;
@@ -22,11 +24,13 @@ impl PackConfig {
             );
         }
 
-        let addon_dir = parent_dir.join(&self.name);
+        let pack_dir = parent_dir.join(&self.name);
 
-        fs::create_dir_all(addon_dir.join(ADDONS_DIR_NAME)).await?;
+        fs::create_dir_all(pack_dir.join(ADDONS_DIR_NAME)).await?;
 
-        self.write_fixed(addon_dir).await
+        fs::create_dir_all(pack_dir.join(MP_MISSIONS_DIR_NAME)).await?;
+
+        self.write_fixed(pack_dir).await
     }
 
     /// Lay out a new pack on the **client**: create the pack folder with its
@@ -66,6 +70,19 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn test_init_server_on_fs() {
+        let temp = TestTempDir::new("pamm_test_init_server");
+
+        let config = test_pack_config();
+        config.init_source_on_fs(temp.path()).await.unwrap();
+
+        let pack_dir = temp.path().join(&config.name);
+        assert!(pack_dir.join("addons").is_dir());
+        assert!(pack_dir.join("mpmissions").is_dir());
+        assert!(pack_dir.join("pack.config.json").is_file());
+    }
+
+    #[tokio::test]
     async fn test_init_client_on_fs() {
         let temp = TestTempDir::new("pamm_test_init_client");
 
@@ -76,10 +93,7 @@ mod tests {
         assert!(pack_dir.join("addons").is_dir());
         assert!(pack_dir.join("indexes").is_dir());
         assert!(pack_dir.join("pack.config.json").is_file());
-        assert!(
-            pack_dir.join("pack.settings.json").is_file(),
-            "client layout writes pack settings"
-        );
+        assert!(pack_dir.join("pack.settings.json").is_file());
     }
 
     #[tokio::test]

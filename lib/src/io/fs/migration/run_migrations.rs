@@ -1,5 +1,5 @@
 use crate::io::fs::fs_writable::FixedFsWritable;
-use crate::io::fs::migration::migrations::v1_to_v2;
+use crate::io::fs::migration::migrations::{v1_to_v2, v2_to_v3};
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_version::{CURRENT_REPO_VERSION, RepoVersion};
 use anyhow::{Context, bail};
@@ -39,6 +39,15 @@ pub(crate) async fn run_migrations(
                 })
                 .await?
                 .context("migrating repo layout from v1 to v2")?
+            }
+            2 => {
+                // Add mpmissions to server repo
+                let (repo_path, repo_config) = (repo_path.to_path_buf(), repo_config.clone());
+                tokio::task::spawn_blocking(move || {
+                    v2_to_v3::migrate_v2_to_v3(&repo_path, &repo_config)
+                })
+                .await?
+                .context("migrating repo layout from v2 to v3")?
             }
             v => unreachable!("no migration registered for version {}", v),
         }
