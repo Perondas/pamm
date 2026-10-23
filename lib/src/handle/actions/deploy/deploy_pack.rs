@@ -178,7 +178,7 @@ impl ServerRepoHandle {
         let missions = self.resolve_missions(pack_name).await?;
 
         for entry in missions {
-            let dest_path = server_missions_folder.join(&entry);
+            let dest_path = server_missions_folder.join(entry.file_name().unwrap_or_default());
 
             create_or_recreate_symlink(&entry, &dest_path)?;
 
