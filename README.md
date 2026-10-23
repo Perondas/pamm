@@ -11,6 +11,10 @@ packs.
 
 It is NOT compatible with other mod managers.
 
+## Admin guide
+
+Check the [wiki](https://github.com/Perondas/pamm/wiki) for an admin guode
+
 ## Features
 
 - Multiple mod packs in one mod repository
