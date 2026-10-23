@@ -78,7 +78,7 @@ mod tests {
 
         let pack_dir = temp.path().join(&config.name);
         assert!(pack_dir.join("addons").is_dir());
-        assert!(pack_dir.join("mp_missions").is_dir());
+        assert!(pack_dir.join("mpmissions").is_dir());
         assert!(pack_dir.join("pack.config.json").is_file());
     }
 

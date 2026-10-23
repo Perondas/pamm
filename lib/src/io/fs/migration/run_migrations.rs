@@ -41,7 +41,7 @@ pub(crate) async fn run_migrations(
                 .context("migrating repo layout from v1 to v2")?
             }
             2 => {
-                // Add mp_missions to server repo
+                // Add mpmissions to server repo
                 let (repo_path, repo_config) = (repo_path.to_path_buf(), repo_config.clone());
                 tokio::task::spawn_blocking(move || {
                     v2_to_v3::migrate_v2_to_v3(&repo_path, &repo_config)

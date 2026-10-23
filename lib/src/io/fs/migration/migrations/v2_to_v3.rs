@@ -5,7 +5,7 @@ use std::fs::create_dir_all;
 use std::path::Path;
 
 /// Migrates the repo from v2 to v3.
-/// Only a change for server repos: adds the mp_missions folder to the pack folder
+/// Only a change for server repos: adds the mpmissions folder to the pack folder
 pub fn migrate_v2_to_v3(repo_path: &Path, repo_config: &RepoConfig) -> anyhow::Result<()> {
     info!(
         "Starting migration from v2 to v3 for repo: {}",
@@ -31,8 +31,8 @@ pub fn migrate_v2_to_v3(repo_path: &Path, repo_config: &RepoConfig) -> anyhow::R
             );
         }
 
-        let mp_missions_path = pack_path.join("mp_missions");
-        create_dir_all(&mp_missions_path)?;
+        let mpmissions_path = pack_path.join("mpmissions");
+        create_dir_all(&mpmissions_path)?;
     }
 
     info!(

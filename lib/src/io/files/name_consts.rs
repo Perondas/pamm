@@ -8,7 +8,7 @@ pub(crate) const WWW_DIR_NAME: &str = "www";
 // layout v2: server source, client repos, and the published `www/`.
 pub(crate) const ADDONS_DIR_NAME: &str = "addons";
 
-pub(crate) const MP_MISSIONS_DIR_NAME: &str = "mp_missions";
+pub(crate) const MP_MISSIONS_DIR_NAME: &str = "mpmissions";
 
 /// Legacy (layout v1) addon directory name at the repo root. Only referenced by
 /// the v1 -> v2 migration and the build's stale-entry pruning.
