@@ -17,6 +17,7 @@ use crate::subcommands::externals::remove_external::remove_external_command;
 use crate::subcommands::local_packs::remove_local_pack::remove_local_pack_command;
 use anyhow::Result;
 use clap::Parser;
+use log::{debug, trace};
 use pamm_cli_args::args::{AppSubcommand, Args};
 use pamm_cli_args::subcommands::externals::ExternalsSubcommand;
 use pamm_cli_args::subcommands::local_packs::LocalPacksSubcommand;
@@ -30,7 +31,7 @@ use subcommands::optionals::toggle_optionals::toggle_optionals_command;
 async fn main() -> Result<()> {
     let args = Args::parse();
 
-    let log_level = args.log_level.unwrap_or("warn".to_string());
+    let log_level = args.log_level.clone().unwrap_or("warn".to_string());
 
     let log_wrapper = log_wrapper::LogWrapper::new(
         env_logger::Builder::from_env(env_logger::Env::default().default_filter_or(log_level))
@@ -38,6 +39,12 @@ async fn main() -> Result<()> {
     );
 
     let log_wrapper = log_wrapper.try_init()?;
+
+    trace!(
+        "Running in: {:?}",
+        std::env::current_dir().unwrap_or_default()
+    );
+    debug!("Got args: {:#?}", args);
 
     match args.command {
         AppSubcommand::Init => init_repo_command().await,
