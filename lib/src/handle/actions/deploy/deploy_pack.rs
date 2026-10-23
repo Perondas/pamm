@@ -1,7 +1,7 @@
 use crate::handle::addons::ResolveAddons;
+use crate::handle::missions::ResolveMissions;
 use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::server_repo_handle::ServerRepoHandle;
-use crate::io::files::name_consts::MP_MISSIONS_DIR_NAME;
 use crate::io::fs::util::clean_path::canonicalize_and_clean_path;
 use crate::io::fs::util::path_checks::is_file;
 use crate::io::fs::util::symlink::create_or_recreate_symlink;
@@ -175,20 +175,12 @@ impl ServerRepoHandle {
         }
 
         // Now create new symlinks for all missions in the repo
-        let repo_missions_folder = self
-            .get_repo_path()
-            .join(pack_name)
-            .join(MP_MISSIONS_DIR_NAME);
+        let missions = self.resolve_missions(pack_name).await?;
 
-        let mut entries = fs::read_dir(&repo_missions_folder).await.context(anyhow!(
-            "Failed to read repo missions folder at {:?}",
-            repo_missions_folder
-        ))?;
+        for entry in missions {
+            let dest_path = server_missions_folder.join(&entry);
 
-        while let Some(entry) = entries.next_entry().await? {
-            let dest_path = server_missions_folder.join(entry.file_name());
-
-            create_or_recreate_symlink(&entry.path(), &dest_path)?;
+            create_or_recreate_symlink(&entry, &dest_path)?;
 
             #[cfg(unix)]
             {
