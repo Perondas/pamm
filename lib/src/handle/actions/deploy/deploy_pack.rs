@@ -298,8 +298,13 @@ mod tests {
                 .unwrap();
             let repo_path = server.get_repo_path().to_path_buf();
 
-            let mut pack =
-                PackConfig::new("core".to_string(), "core pack".to_string(), vec![], None);
+            let mut pack = PackConfig::new(
+                "core".to_string(),
+                "core pack".to_string(),
+                vec![],
+                None,
+                vec![],
+            );
             pack.addons
                 .insert("@addon1".to_string(), AddonSettings { is_optional: false });
             pack.init_source_on_fs(&repo_path).await.unwrap();
@@ -418,7 +423,13 @@ mod tests {
             .await
             .unwrap();
 
-        let mut pack = PackConfig::new("core".to_string(), "core pack".to_string(), vec![], None);
+        let mut pack = PackConfig::new(
+            "core".to_string(),
+            "core pack".to_string(),
+            vec![],
+            None,
+            vec![],
+        );
         pack.addons
             .insert("@addon1".to_string(), AddonSettings { is_optional: false });
         pack.init_source_on_fs(server.get_repo_path())

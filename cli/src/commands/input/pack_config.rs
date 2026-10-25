@@ -45,6 +45,12 @@ impl FromCliInputWithContext for PackConfig {
                 .map(|i| existing_packs[i].to_string());
         }
 
-        Ok(PackConfig::new(name, description, client_params, parent))
+        Ok(PackConfig::new(
+            name,
+            description,
+            client_params,
+            parent,
+            vec![],
+        ))
     }
 }

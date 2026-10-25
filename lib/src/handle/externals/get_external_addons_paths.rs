@@ -43,7 +43,13 @@ mod tests {
     async fn test_get_external_addon_paths() {
         let mut mock = MockHandle::new();
 
-        let config = PackConfig::new("test_pack".to_string(), "desc".to_string(), vec![], None);
+        let config = PackConfig::new(
+            "test_pack".to_string(),
+            "desc".to_string(),
+            vec![],
+            None,
+            vec![],
+        );
 
         let manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 

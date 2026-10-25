@@ -1807,11 +1807,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   FlutterLocalPackConfig dco_decode_flutter_local_pack_config(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 2)
-      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    if (arr.length != 3)
+      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
     return FlutterLocalPackConfig(
       name: dco_decode_String(arr[0]),
       parent: dco_decode_opt_String(arr[1]),
+      enabledCdlc: dco_decode_list_String(arr[2]),
     );
   }
 
@@ -2386,7 +2387,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_name = sse_decode_String(deserializer);
     var var_parent = sse_decode_opt_String(deserializer);
-    return FlutterLocalPackConfig(name: var_name, parent: var_parent);
+    var var_enabledCdlc = sse_decode_list_String(deserializer);
+    return FlutterLocalPackConfig(
+      name: var_name,
+      parent: var_parent,
+      enabledCdlc: var_enabledCdlc,
+    );
   }
 
   @protected
@@ -3043,6 +3049,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.name, serializer);
     sse_encode_opt_String(self.parent, serializer);
+    sse_encode_list_String(self.enabledCdlc, serializer);
   }
 
   @protected

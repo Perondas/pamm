@@ -1,4 +1,5 @@
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
+use pamm_lib::models::cdlc::Cdlc;
 use pamm_lib::models::pack::pack_config::PackConfig;
 
 pub async fn add_local_pack(
@@ -16,10 +17,21 @@ pub async fn add_local_pack(
 pub struct FlutterLocalPackConfig {
     pub name: String,
     pub parent: Option<String>,
+    pub enabled_cdlc: Vec<String>,
 }
 
 impl From<FlutterLocalPackConfig> for PackConfig {
     fn from(value: FlutterLocalPackConfig) -> Self {
-        Self::new(value.name, String::default(), Vec::default(), value.parent)
+        Self::new(
+            value.name,
+            String::default(),
+            Vec::default(),
+            value.parent,
+            value
+                .enabled_cdlc
+                .iter()
+                .map(|cdlc| Cdlc::from_short_form(cdlc))
+                .collect(),
+        )
     }
 }

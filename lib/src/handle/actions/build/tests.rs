@@ -34,8 +34,13 @@ impl Fixture {
 
         // Minimal pack config, no required/optional addons declared. Lays out
         // the per-pack source folder: core/pack.config.json + core/addons/.
-        let pack_config =
-            PackConfig::new("core".to_string(), "test pack".to_string(), vec![], None);
+        let pack_config = PackConfig::new(
+            "core".to_string(),
+            "test pack".to_string(),
+            vec![],
+            None,
+            vec![],
+        );
         pack_config.init_source_on_fs(&repo_path).await.unwrap();
 
         // Source pack addon dir with one addon containing a tiny file.
@@ -457,7 +462,13 @@ async fn open_migrates_v1_source_then_build_publishes_v2_www() {
 
     // Turn the fresh repo into a v1 one: flat source files, no version.pamm.
     fs::remove_file(repo_path.join(RepoVersion::file_name())).unwrap();
-    let pack_config = PackConfig::new("core".to_string(), "test pack".to_string(), vec![], None);
+    let pack_config = PackConfig::new(
+        "core".to_string(),
+        "test pack".to_string(),
+        vec![],
+        None,
+        vec![],
+    );
     pack_config.write_fixed(&repo_path).await.unwrap();
     let addon_dir = repo_path.join("core_pack_addons").join("@addon1");
     fs::create_dir_all(addon_dir.join("sub")).unwrap();

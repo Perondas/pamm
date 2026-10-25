@@ -1723,9 +1723,11 @@ impl SseDecode for crate::api::commands::local_pack::add_local_pack::FlutterLoca
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_name = <String>::sse_decode(deserializer);
         let mut var_parent = <Option<String>>::sse_decode(deserializer);
+        let mut var_enabledCdlc = <Vec<String>>::sse_decode(deserializer);
         return crate::api::commands::local_pack::add_local_pack::FlutterLocalPackConfig {
             name: var_name,
             parent: var_parent,
+            enabled_cdlc: var_enabledCdlc,
         };
     }
 }
@@ -2395,6 +2397,7 @@ impl flutter_rust_bridge::IntoDart
         [
             self.name.into_into_dart().into_dart(),
             self.parent.into_into_dart().into_dart(),
+            self.enabled_cdlc.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -2871,6 +2874,7 @@ impl SseEncode for crate::api::commands::local_pack::add_local_pack::FlutterLoca
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.name, serializer);
         <Option<String>>::sse_encode(self.parent, serializer);
+        <Vec<String>>::sse_encode(self.enabled_cdlc, serializer);
     }
 }
 
