@@ -39,7 +39,7 @@ impl Fixture {
             "test pack".to_string(),
             vec![],
             None,
-            vec![],
+            None,
         );
         pack_config.init_source_on_fs(&repo_path).await.unwrap();
 
@@ -467,7 +467,7 @@ async fn open_migrates_v1_source_then_build_publishes_v2_www() {
         "test pack".to_string(),
         vec![],
         None,
-        vec![],
+        None,
     );
     pack_config.write_fixed(&repo_path).await.unwrap();
     let addon_dir = repo_path.join("core_pack_addons").join("@addon1");

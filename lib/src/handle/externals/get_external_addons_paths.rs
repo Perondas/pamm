@@ -48,7 +48,7 @@ mod tests {
             "desc".to_string(),
             vec![],
             None,
-            vec![],
+            None,
         );
 
         let manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));

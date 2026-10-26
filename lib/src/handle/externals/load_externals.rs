@@ -58,7 +58,7 @@ mod tests {
             "desc".to_string(),
             vec![],
             None,
-            vec![],
+            None,
         );
 
         let mut settings = PackUserSettings::default();

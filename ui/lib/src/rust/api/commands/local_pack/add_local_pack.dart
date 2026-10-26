@@ -16,15 +16,25 @@ Future<void> addLocalPack({
   config: config,
 );
 
+enum Cdlc {
+  globalMobilization,
+  sogPrairieFire,
+  cslaIronCurtain,
+  westernSahara,
+  spearhead1944,
+  reactionForces,
+  expeditionaryForces,
+}
+
 class FlutterLocalPackConfig {
   final String name;
   final String? parent;
-  final List<String> enabledCdlc;
+  final Cdlc? enabledCdlc;
 
   const FlutterLocalPackConfig({
     required this.name,
     this.parent,
-    required this.enabledCdlc,
+    this.enabledCdlc,
   });
 
   @override

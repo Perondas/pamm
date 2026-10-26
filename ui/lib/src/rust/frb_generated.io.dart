@@ -136,6 +136,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool dco_decode_bool(dynamic raw);
 
   @protected
+  Cdlc dco_decode_box_autoadd_cdlc(dynamic raw);
+
+  @protected
   FlutterLocalPackConfig dco_decode_box_autoadd_flutter_local_pack_config(
     dynamic raw,
   );
@@ -155,6 +158,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   RepoCustomization dco_decode_box_autoadd_repo_customization(dynamic raw);
+
+  @protected
+  Cdlc dco_decode_cdlc(dynamic raw);
 
   @protected
   ChangeType dco_decode_change_type(dynamic raw);
@@ -224,6 +230,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   String? dco_decode_opt_String(dynamic raw);
+
+  @protected
+  Cdlc? dco_decode_opt_box_autoadd_cdlc(dynamic raw);
 
   @protected
   LinuxSetupInfo? dco_decode_opt_box_autoadd_linux_setup_info(dynamic raw);
@@ -359,6 +368,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool sse_decode_bool(SseDeserializer deserializer);
 
   @protected
+  Cdlc sse_decode_box_autoadd_cdlc(SseDeserializer deserializer);
+
+  @protected
   FlutterLocalPackConfig sse_decode_box_autoadd_flutter_local_pack_config(
     SseDeserializer deserializer,
   );
@@ -382,6 +394,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   RepoCustomization sse_decode_box_autoadd_repo_customization(
     SseDeserializer deserializer,
   );
+
+  @protected
+  Cdlc sse_decode_cdlc(SseDeserializer deserializer);
 
   @protected
   ChangeType sse_decode_change_type(SseDeserializer deserializer);
@@ -459,6 +474,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   String? sse_decode_opt_String(SseDeserializer deserializer);
+
+  @protected
+  Cdlc? sse_decode_opt_box_autoadd_cdlc(SseDeserializer deserializer);
 
   @protected
   LinuxSetupInfo? sse_decode_opt_box_autoadd_linux_setup_info(
@@ -615,6 +633,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_bool(bool self, SseSerializer serializer);
 
   @protected
+  void sse_encode_box_autoadd_cdlc(Cdlc self, SseSerializer serializer);
+
+  @protected
   void sse_encode_box_autoadd_flutter_local_pack_config(
     FlutterLocalPackConfig self,
     SseSerializer serializer,
@@ -643,6 +664,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     RepoCustomization self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_cdlc(Cdlc self, SseSerializer serializer);
 
   @protected
   void sse_encode_change_type(ChangeType self, SseSerializer serializer);
@@ -746,6 +770,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_opt_String(String? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_opt_box_autoadd_cdlc(Cdlc? self, SseSerializer serializer);
 
   @protected
   void sse_encode_opt_box_autoadd_linux_setup_info(

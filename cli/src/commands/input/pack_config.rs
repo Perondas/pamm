@@ -50,7 +50,7 @@ impl FromCliInputWithContext for PackConfig {
             description,
             client_params,
             parent,
-            vec![],
+            None,
         ))
     }
 }

@@ -583,13 +583,13 @@ fn wire__crate__api__commands__linux_setup__linux_setup_info_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api__repo_dir = <String>::sse_decode(&mut deserializer);
+            let api_repo_dir = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || async move {
                         let output_ok =
-                            crate::api::commands::linux_setup::linux_setup_info(api__repo_dir)
+                            crate::api::commands::linux_setup::linux_setup_info(api_repo_dir)
                                 .await?;
                         std::result::Result::Ok(output_ok)
                     })()
@@ -857,15 +857,15 @@ fn wire__crate__api__commands__proton__proton_install_teamspeak_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api__installer = <String>::sse_decode(&mut deserializer);
-            let api__silent = <bool>::sse_decode(&mut deserializer);
+            let api_installer = <String>::sse_decode(&mut deserializer);
+            let api_silent = <bool>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || {
                         let output_ok = crate::api::commands::proton::proton_install_teamspeak(
-                            api__installer,
-                            api__silent,
+                            api_installer,
+                            api_silent,
                         )?;
                         std::result::Result::Ok(output_ok)
                     })(),
@@ -964,13 +964,13 @@ fn wire__crate__api__commands__proton__proton_open_explorer_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api__path = <Option<String>>::sse_decode(&mut deserializer);
+            let api_path = <Option<String>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || {
                         let output_ok =
-                            crate::api::commands::proton::proton_open_explorer(api__path)?;
+                            crate::api::commands::proton::proton_open_explorer(api_path)?;
                         std::result::Result::Ok(output_ok)
                     })(),
                 )
@@ -1623,6 +1623,23 @@ impl SseDecode for bool {
     }
 }
 
+impl SseDecode for crate::api::commands::local_pack::add_local_pack::Cdlc {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::commands::local_pack::add_local_pack::Cdlc::GlobalMobilization,
+            1 => crate::api::commands::local_pack::add_local_pack::Cdlc::SogPrairieFire,
+            2 => crate::api::commands::local_pack::add_local_pack::Cdlc::CslaIronCurtain,
+            3 => crate::api::commands::local_pack::add_local_pack::Cdlc::WesternSahara,
+            4 => crate::api::commands::local_pack::add_local_pack::Cdlc::Spearhead1944,
+            5 => crate::api::commands::local_pack::add_local_pack::Cdlc::ReactionForces,
+            6 => crate::api::commands::local_pack::add_local_pack::Cdlc::ExpeditionaryForces,
+            _ => unreachable!("Invalid variant for Cdlc: {}", inner),
+        };
+    }
+}
+
 impl SseDecode for crate::api::commands::pack_sync::file_change::ChangeType {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1723,7 +1740,10 @@ impl SseDecode for crate::api::commands::local_pack::add_local_pack::FlutterLoca
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_name = <String>::sse_decode(deserializer);
         let mut var_parent = <Option<String>>::sse_decode(deserializer);
-        let mut var_enabledCdlc = <Vec<String>>::sse_decode(deserializer);
+        let mut var_enabledCdlc =
+            <Option<crate::api::commands::local_pack::add_local_pack::Cdlc>>::sse_decode(
+                deserializer,
+            );
         return crate::api::commands::local_pack::add_local_pack::FlutterLocalPackConfig {
             name: var_name,
             parent: var_parent,
@@ -1935,6 +1955,19 @@ impl SseDecode for Option<String> {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         if (<bool>::sse_decode(deserializer)) {
             return Some(<String>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for Option<crate::api::commands::local_pack::add_local_pack::Cdlc> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(
+                <crate::api::commands::local_pack::add_local_pack::Cdlc>::sse_decode(deserializer),
+            );
         } else {
             return None;
         }
@@ -2252,6 +2285,42 @@ impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<OpaqueDiff>> for OpaqueDiff {
     }
 }
 
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart
+    for FrbWrapper<crate::api::commands::local_pack::add_local_pack::Cdlc>
+{
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self.0 {
+            crate::api::commands::local_pack::add_local_pack::Cdlc::GlobalMobilization => {
+                0.into_dart()
+            }
+            crate::api::commands::local_pack::add_local_pack::Cdlc::SogPrairieFire => 1.into_dart(),
+            crate::api::commands::local_pack::add_local_pack::Cdlc::CslaIronCurtain => {
+                2.into_dart()
+            }
+            crate::api::commands::local_pack::add_local_pack::Cdlc::WesternSahara => 3.into_dart(),
+            crate::api::commands::local_pack::add_local_pack::Cdlc::Spearhead1944 => 4.into_dart(),
+            crate::api::commands::local_pack::add_local_pack::Cdlc::ReactionForces => 5.into_dart(),
+            crate::api::commands::local_pack::add_local_pack::Cdlc::ExpeditionaryForces => {
+                6.into_dart()
+            }
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::commands::local_pack::add_local_pack::Cdlc>
+{
+}
+impl
+    flutter_rust_bridge::IntoIntoDart<
+        FrbWrapper<crate::api::commands::local_pack::add_local_pack::Cdlc>,
+    > for crate::api::commands::local_pack::add_local_pack::Cdlc
+{
+    fn into_into_dart(self) -> FrbWrapper<crate::api::commands::local_pack::add_local_pack::Cdlc> {
+        self.into()
+    }
+}
 // Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::commands::pack_sync::file_change::ChangeType {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
@@ -2790,6 +2859,27 @@ impl SseEncode for bool {
     }
 }
 
+impl SseEncode for crate::api::commands::local_pack::add_local_pack::Cdlc {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::commands::local_pack::add_local_pack::Cdlc::GlobalMobilization => 0,
+                crate::api::commands::local_pack::add_local_pack::Cdlc::SogPrairieFire => 1,
+                crate::api::commands::local_pack::add_local_pack::Cdlc::CslaIronCurtain => 2,
+                crate::api::commands::local_pack::add_local_pack::Cdlc::WesternSahara => 3,
+                crate::api::commands::local_pack::add_local_pack::Cdlc::Spearhead1944 => 4,
+                crate::api::commands::local_pack::add_local_pack::Cdlc::ReactionForces => 5,
+                crate::api::commands::local_pack::add_local_pack::Cdlc::ExpeditionaryForces => 6,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
 impl SseEncode for crate::api::commands::pack_sync::file_change::ChangeType {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -2874,7 +2964,10 @@ impl SseEncode for crate::api::commands::local_pack::add_local_pack::FlutterLoca
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.name, serializer);
         <Option<String>>::sse_encode(self.parent, serializer);
-        <Vec<String>>::sse_encode(self.enabled_cdlc, serializer);
+        <Option<crate::api::commands::local_pack::add_local_pack::Cdlc>>::sse_encode(
+            self.enabled_cdlc,
+            serializer,
+        );
     }
 }
 
@@ -3046,6 +3139,16 @@ impl SseEncode for Option<String> {
         <bool>::sse_encode(self.is_some(), serializer);
         if let Some(value) = self {
             <String>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<crate::api::commands::local_pack::add_local_pack::Cdlc> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::commands::local_pack::add_local_pack::Cdlc>::sse_encode(value, serializer);
         }
     }
 }

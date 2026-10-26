@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pamm_ui/src/pages/main_screen/repo_details/cldc_dialog.dart';
+import 'package:pamm_ui/src/pages/main_screen/repo_details/cdlc_dialog.dart';
 import 'package:pamm_ui/src/rust/api/commands/params.dart';
 
 class ParamsForm extends StatefulWidget {

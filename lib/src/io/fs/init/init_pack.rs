@@ -66,7 +66,7 @@ mod tests {
             parent: None,
             addons: Default::default(),
             customization: None,
-            enabled_cdlc: vec![],
+            enabled_cdlc: None,
         }
     }
 

@@ -17,7 +17,7 @@ pub struct PackConfig {
     pub addons: HashMap<String, AddonSettings>,
     pub customization: Option<PackCustomization>,
     #[serde(default)]
-    pub enabled_cdlc: Vec<Cdlc>,
+    pub enabled_cdlc: Option<Cdlc>,
 }
 
 impl PackConfig {
@@ -26,7 +26,7 @@ impl PackConfig {
         description: String,
         client_params: Vec<String>,
         parent: Option<String>,
-        enabled_cdlc: Vec<Cdlc>
+        enabled_cdlc: Option<Cdlc>
     ) -> Self {
         Self {
             name,
@@ -74,7 +74,7 @@ mod tests {
             "A test pack".to_string(),
             vec!["-mod=1".to_string()],
             Some("parent_pack".to_string()),
-            vec![],
+            None,
         );
 
         assert_eq!(config.name, "test_pack");
@@ -91,7 +91,7 @@ mod tests {
             "desc".to_string(),
             vec![],
             None,
-            vec![],
+            None,
         );
 
         // Required addon

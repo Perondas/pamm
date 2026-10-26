@@ -303,7 +303,7 @@ mod tests {
                 "core pack".to_string(),
                 vec![],
                 None,
-                vec![],
+                None,
             );
             pack.addons
                 .insert("@addon1".to_string(), AddonSettings { is_optional: false });
@@ -428,7 +428,7 @@ mod tests {
             "core pack".to_string(),
             vec![],
             None,
-            vec![],
+            None,
         );
         pack.addons
             .insert("@addon1".to_string(), AddonSettings { is_optional: false });

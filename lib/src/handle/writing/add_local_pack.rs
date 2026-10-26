@@ -144,7 +144,7 @@ mod tests {
             .unwrap();
 
         for pack in remote_packs {
-            PackConfig::new(pack.to_string(), "d".to_string(), vec![], None, vec![])
+            PackConfig::new(pack.to_string(), "d".to_string(), vec![], None, None)
                 .init_client_on_fs(&repo_path)
                 .await
                 .unwrap();
@@ -159,7 +159,7 @@ mod tests {
             "a local pack".to_string(),
             vec![],
             parent.map(|p| p.to_string()),
-            vec![],
+            None,
         )
     }
 

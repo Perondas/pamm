@@ -49,7 +49,7 @@ impl MockHandleExt for MockHandle {
             "desc".to_string(),
             vec![],
             parent.map(|s| s.to_string()),
-            vec![],
+            None,
         );
 
         for opt in optionals {

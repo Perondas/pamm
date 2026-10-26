@@ -1,5 +1,6 @@
+use flutter_rust_bridge::frb;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-use pamm_lib::models::cdlc::Cdlc;
+pub use pamm_lib::models::cdlc::Cdlc;
 use pamm_lib::models::pack::pack_config::PackConfig;
 
 pub async fn add_local_pack(
@@ -17,7 +18,7 @@ pub async fn add_local_pack(
 pub struct FlutterLocalPackConfig {
     pub name: String,
     pub parent: Option<String>,
-    pub enabled_cdlc: Vec<String>,
+    pub enabled_cdlc: Option<Cdlc>,
 }
 
 impl From<FlutterLocalPackConfig> for PackConfig {
@@ -27,11 +28,18 @@ impl From<FlutterLocalPackConfig> for PackConfig {
             String::default(),
             Vec::default(),
             value.parent,
-            value
-                .enabled_cdlc
-                .iter()
-                .map(|cdlc| Cdlc::from_short_form(cdlc))
-                .collect(),
+            value.enabled_cdlc,
         )
     }
+}
+
+#[frb(mirror(Cdlc))]
+pub enum _Cdlc {
+    GlobalMobilization,
+    SogPrairieFire,
+    CslaIronCurtain,
+    WesternSahara,
+    Spearhead1944,
+    ReactionForces,
+    ExpeditionaryForces,
 }
