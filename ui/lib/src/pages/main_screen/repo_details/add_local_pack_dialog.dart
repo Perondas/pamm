@@ -12,6 +12,7 @@ class AddLocalPackDialog extends StatefulWidget {
 
 class _AddLocalPackDialogState extends State<AddLocalPackDialog> {
   String? selectedParent;
+  Cdlc? selectedCdlc;
   String? selectedName;
 
   @override
@@ -50,6 +51,25 @@ class _AddLocalPackDialogState extends State<AddLocalPackDialog> {
               selectedParent = value;
             },
           ),
+          DropdownButtonFormField<Cdlc?>(
+            decoration: InputDecoration(
+              hintText: "Select a CDLC",
+              label: Text("CDLC"),
+            ),
+            items:
+                Cdlc.values
+                    .map(
+                      (value) => DropdownMenuItem(
+                        value: value,
+                        child: Text(value.toString().split('.').last),
+                      ),
+                    )
+                    .toList() +
+                [DropdownMenuItem(value: null, child: Text('None'))],
+            onChanged: (value) {
+              selectedCdlc = value;
+            },
+          ),
         ],
       ),
       actions: [
@@ -60,6 +80,7 @@ class _AddLocalPackDialogState extends State<AddLocalPackDialog> {
                 FlutterLocalPackConfig(
                   name: selectedName!,
                   parent: selectedParent,
+                  enabledCdlc: selectedCdlc,
                 ),
               );
             }

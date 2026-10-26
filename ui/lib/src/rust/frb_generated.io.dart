@@ -11,6 +11,7 @@ import 'api/commands/init_from_remote.dart';
 import 'api/commands/launch.dart';
 import 'api/commands/linux_setup.dart';
 import 'api/commands/load_pack_display.dart';
+import 'api/commands/load_pack_info.dart';
 import 'api/commands/load_repo.dart';
 import 'api/commands/local_pack/add_local_pack.dart';
 import 'api/commands/local_pack/remove_local_pack.dart';
@@ -250,6 +251,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   PackDisplayInfo dco_decode_pack_display_info(dynamic raw);
+
+  @protected
+  PackInfo dco_decode_pack_info(dynamic raw);
 
   @protected
   ProtonInfo dco_decode_proton_info(dynamic raw);
@@ -498,6 +502,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   PackDisplayInfo sse_decode_pack_display_info(SseDeserializer deserializer);
+
+  @protected
+  PackInfo sse_decode_pack_info(SseDeserializer deserializer);
 
   @protected
   ProtonInfo sse_decode_proton_info(SseDeserializer deserializer);
@@ -800,6 +807,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     PackDisplayInfo self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_pack_info(PackInfo self, SseSerializer serializer);
 
   @protected
   void sse_encode_proton_info(ProtonInfo self, SseSerializer serializer);

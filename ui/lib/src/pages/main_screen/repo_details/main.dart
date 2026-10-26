@@ -8,6 +8,7 @@ import 'package:pamm_ui/src/pages/sync_screen/main.dart';
 import 'package:pamm_ui/src/pages/sync_single_pack_screen/main.dart';
 import 'package:pamm_ui/src/rust/api/commands/launch.dart';
 import 'package:pamm_ui/src/rust/api/commands/load_pack_display.dart';
+import 'package:pamm_ui/src/rust/api/commands/load_pack_info.dart';
 import 'package:pamm_ui/src/rust/api/commands/local_pack/add_local_pack.dart';
 import 'package:pamm_ui/src/rust/api/commands/local_pack/remove_local_pack.dart';
 import 'package:pamm_ui/src/rust/api/commands/local_pack/sync_local_pack.dart';
@@ -17,9 +18,9 @@ import 'package:pamm_ui/src/services/repo_state_store.dart';
 import 'package:pamm_ui/src/services/settings_service.dart';
 import 'package:pamm_ui/src/util/media.dart';
 import 'package:pamm_ui/src/widgets/confirm_dialog.dart';
+import 'package:pamm_ui/src/widgets/launch_teamspeak_button.dart';
 import 'package:pamm_ui/src/widgets/linux_setup_dialog.dart';
 import 'package:pamm_ui/src/widgets/media_icon.dart';
-import 'package:pamm_ui/src/widgets/launch_teamspeak_button.dart';
 
 class RepoDetails extends StatefulWidget {
   const RepoDetails(this.selectedRepo, {super.key});
@@ -274,12 +275,33 @@ class PackListTile extends StatefulWidget {
 class _PackListTileState extends State<PackListTile> {
   bool? _upToDate;
   PackDisplayInfo? _display;
+  PackInfo? _info;
 
   @override
   void initState() {
     super.initState();
     _checkStatus();
     _loadDisplay();
+    _loadConfig();
+  }
+
+  Future<void> _loadConfig() async {
+    try {
+      final info = await loadPackInfo(
+        repoPath: widget.repoPath,
+        packName: widget.packName,
+      );
+      if (mounted) {
+        setState(() {
+          _info = info;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to load pack info: $e')));
+    }
   }
 
   Future<void> _loadDisplay() async {
@@ -325,7 +347,21 @@ class _PackListTileState extends State<PackListTile> {
 
     return ListTile(
       leading: leadingWidget,
-      title: Text(widget.packName),
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(widget.packName),
+          if (_info != null) ...[
+            SizedBox(width: 8),
+            Tooltip(
+              message:
+                  'Description: ${_info!.description}\nParent: ${_info!.parent ?? 'None'}\nCDLC: ${_info!.enabledCdlc?.toString().split('.').last ?? 'None'}',
+              child: Icon(Icons.info_outline, size: 16),
+            ),
+          ],
+        ],
+      ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
