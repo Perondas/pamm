@@ -1,11 +1,11 @@
 use crate::keyed;
+use crate::models::cdlc::Cdlc;
 use crate::models::pack::addon::AddonSettings;
 use crate::models::pack::pack_customization::PackCustomization;
 use crate::models::pack::pack_diff::PackDiff;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use crate::models::cdlc::Cdlc;
 
 keyed!(PackConfig);
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -26,7 +26,7 @@ impl PackConfig {
         description: String,
         client_params: Vec<String>,
         parent: Option<String>,
-        enabled_cdlc: Option<Cdlc>
+        enabled_cdlc: Option<Cdlc>,
     ) -> Self {
         Self {
             name,

@@ -1,5 +1,6 @@
 use crate::handle::addons::ResolveAddons;
 use crate::handle::missions::ResolveMissions;
+use crate::handle::reading::get_pack::GetPack;
 use crate::handle::reading::get_repo_info::GetRepoInfo;
 use crate::handle::server_repo_handle::ServerRepoHandle;
 use crate::io::fs::util::clean_path::canonicalize_and_clean_path;
@@ -55,7 +56,7 @@ impl ServerRepoHandle {
             pack_name, server_dir
         );
 
-        let addon_paths = resolved_addons
+        let mut addon_paths = resolved_addons
             .iter()
             .map(|rel| {
                 let p = Path::new("pamm").join(&self.get_config().name).join(rel);
@@ -64,6 +65,10 @@ impl ServerRepoHandle {
                     .context(anyhow!("Failed to convert path to string: {:?}", p))
             })
             .collect::<anyhow::Result<Vec<_>>>()?;
+
+        if let Some(cdlc) = self.get_pack(pack_name).await?.enabled_cdlc {
+            addon_paths.push(cdlc.short_form().to_string());
+        }
 
         let mod_launch_param = format!("\"-mod={}\"", addon_paths.join(";"));
 

@@ -1,5 +1,6 @@
 use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::reading::get_canonical_addon_paths::GetAddonPaths;
+use crate::handle::reading::get_pack::GetPack;
 use log::{debug, info};
 
 /// What a launch left behind, for callers that want to tell the user about it.
@@ -38,9 +39,13 @@ impl ClientRepoHandle {
     ) -> anyhow::Result<LaunchOutcome> {
         info!("Launching pack with params: '{:#?}'", params);
 
-        let addon_paths = self
+        let mut addon_paths = self
             .get_canonical_addon_paths(pack_name, params.disable_optionals)
             .await?;
+
+        if let Some(cdlc) = self.get_pack(pack_name).await?.enabled_cdlc {
+            addon_paths.push(cdlc.short_form().to_string());
+        }
 
         debug!(
             "Resolved {} addon path(s) for pack '{}'",
