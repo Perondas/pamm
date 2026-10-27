@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
+use strum::EnumIter;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, EnumIter)]
 pub enum Cdlc {
     GlobalMobilization,
     SogPrairieFire,
@@ -12,7 +13,7 @@ pub enum Cdlc {
 }
 
 impl Cdlc {
-    pub const fn name(self) -> &'static str {
+    pub const fn name(&self) -> &'static str {
         match self {
             Self::GlobalMobilization => "Global Mobilization",
             Self::SogPrairieFire => "SOG Prairie Fire",

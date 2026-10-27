@@ -17,6 +17,7 @@ log = "0.4.29"
 env_logger = "0.11.11"
 tokio = { version = "1.53.2", features = ["macros", "rt-multi-thread"] }
 termtree = "1.0.0"
+strum = { version = "0.28" }
 
 [build-dependencies]
 pamm_cli_args = { path = "../cli_args" }

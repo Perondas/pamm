@@ -26,6 +26,7 @@ reqwest = { version = "0.13.5", features = ["stream"] }
 futures = "0.3.34"
 tokio-util = { version = "0.7.20", features = ["io"] }
 bytes = "1.12.1"
+strum = { version = "0.28", features = ["derive"] }
 
 [dev-dependencies]
 mockall = "0.15.0"
