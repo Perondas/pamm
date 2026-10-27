@@ -2,6 +2,7 @@ use crate::handle::actions::launch::launch_pack::LaunchOutcome;
 use crate::handle::actions::launch::preset::Preset;
 use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::reading::get_pack::GetPack;
+use crate::models::cdlc::Cdlc;
 use crate::util::dirs::ARMA_APP_ID;
 use crate::util::dirs::arma_install::find_arma_install;
 use crate::util::dirs::container_path::to_arma_path;
@@ -16,6 +17,7 @@ impl ClientRepoHandle {
         &self,
         pack_name: &str,
         addon_paths: &[String],
+        cdlc: Option<Cdlc>,
     ) -> anyhow::Result<LaunchOutcome> {
         info!("Launching pack '{}' via Steam", pack_name);
 
@@ -24,10 +26,16 @@ impl ClientRepoHandle {
         // Host paths might not be what the game sees. Under Flatpak the persisted
         // home is mounted elsewhere, and a host path there would resolve
         // successfully to the wrong directory rather than failing loudly.
-        let arma_mod_paths = addon_paths
+        let mut arma_mod_paths = addon_paths
             .iter()
             .map(|path| to_arma_path(&arma.steam.container_path(Path::new(path))))
             .collect::<anyhow::Result<Vec<_>>>()?;
+
+        // CDLCs are addressed by their short form, which is not a path and
+        // must not be translated
+        if let Some(cdlc) = cdlc {
+            arma_mod_paths.push(cdlc.short_form().to_string());
+        }
 
         // Earlier versions symlinked mods into <arma>/pamm/. Warn the user
         let legacy_dir = arma.install_dir.join("pamm");
