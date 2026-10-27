@@ -25,7 +25,7 @@ impl Cdlc {
         }
     }
 
-    pub const fn short_form(self) -> &'static str {
+    pub const fn short_form(&self) -> &'static str {
         match self {
             Self::GlobalMobilization => "gm",
             Self::SogPrairieFire => "vn",
