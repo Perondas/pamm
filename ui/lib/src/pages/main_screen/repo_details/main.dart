@@ -352,12 +352,12 @@ class _PackListTileState extends State<PackListTile> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(widget.packName),
-          if (_info != null) ...[
+          if (_info != null && _info?.enabledCdlc != null) ...[
             SizedBox(width: 8),
             Tooltip(
               message:
-                  'Description: ${_info!.description}\nParent: ${_info!.parent ?? 'None'}\nCDLC: ${_info!.enabledCdlc?.toString().split('.').last ?? 'None'}',
-              child: Icon(Icons.info_outline, size: 16),
+                  'CDLC: ${_info!.enabledCdlc!.toString().split('.').last}',
+              child: Icon(Icons.warning_amber, size: 16),
             ),
           ],
         ],
@@ -368,6 +368,7 @@ class _PackListTileState extends State<PackListTile> {
           if (widget.isLocal &&
               settingsService.settings.mmSettings.mmModeEnabled) ...[
             IconButton(
+              tooltip: 'Delete Pack',
               onPressed: () async {
                 try {
                   final confirm =
@@ -401,6 +402,7 @@ class _PackListTileState extends State<PackListTile> {
             ),
           ],
           IconButton(
+            tooltip: 'Launch Pack',
             onPressed: () async {
               try {
                 await launch(
@@ -453,6 +455,7 @@ class _PackListTileState extends State<PackListTile> {
             ),
           ),
           IconButton(
+            tooltip: 'Edit Pack',
             onPressed: () async {
               await showDialog(
                 context: context,
