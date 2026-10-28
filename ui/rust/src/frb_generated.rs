@@ -42,7 +42,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1091330654;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1335422016;
 
 // Section: executor
 
@@ -712,6 +712,47 @@ fn wire__crate__api__commands__load_pack_display__load_pack_display_impl(
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || async move {
                         let output_ok = crate::api::commands::load_pack_display::load_pack_display(
+                            api_repo_path,
+                            api_pack_name,
+                        )
+                        .await?;
+                        std::result::Result::Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__commands__load_pack_info__load_pack_info_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "load_pack_info",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_repo_path = <String>::sse_decode(&mut deserializer);
+            let api_pack_name = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok = crate::api::commands::load_pack_info::load_pack_info(
                             api_repo_path,
                             api_pack_name,
                         )
@@ -1623,6 +1664,23 @@ impl SseDecode for bool {
     }
 }
 
+impl SseDecode for crate::api::commands::local_pack::add_local_pack::Cdlc {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::commands::local_pack::add_local_pack::Cdlc::GlobalMobilization,
+            1 => crate::api::commands::local_pack::add_local_pack::Cdlc::SogPrairieFire,
+            2 => crate::api::commands::local_pack::add_local_pack::Cdlc::CslaIronCurtain,
+            3 => crate::api::commands::local_pack::add_local_pack::Cdlc::WesternSahara,
+            4 => crate::api::commands::local_pack::add_local_pack::Cdlc::Spearhead1944,
+            5 => crate::api::commands::local_pack::add_local_pack::Cdlc::ReactionForces,
+            6 => crate::api::commands::local_pack::add_local_pack::Cdlc::ExpeditionaryForces,
+            _ => unreachable!("Invalid variant for Cdlc: {}", inner),
+        };
+    }
+}
+
 impl SseDecode for crate::api::commands::pack_sync::file_change::ChangeType {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1723,9 +1781,14 @@ impl SseDecode for crate::api::commands::local_pack::add_local_pack::FlutterLoca
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_name = <String>::sse_decode(deserializer);
         let mut var_parent = <Option<String>>::sse_decode(deserializer);
+        let mut var_enabledCdlc =
+            <Option<crate::api::commands::local_pack::add_local_pack::Cdlc>>::sse_decode(
+                deserializer,
+            );
         return crate::api::commands::local_pack::add_local_pack::FlutterLocalPackConfig {
             name: var_name,
             parent: var_parent,
+            enabled_cdlc: var_enabledCdlc,
         };
     }
 }
@@ -1939,6 +2002,19 @@ impl SseDecode for Option<String> {
     }
 }
 
+impl SseDecode for Option<crate::api::commands::local_pack::add_local_pack::Cdlc> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(
+                <crate::api::commands::local_pack::add_local_pack::Cdlc>::sse_decode(deserializer),
+            );
+        } else {
+            return None;
+        }
+    }
+}
+
 impl SseDecode for Option<crate::api::commands::linux_setup::LinuxSetupInfo> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -2000,6 +2076,23 @@ impl SseDecode for crate::api::commands::load_pack_display::PackDisplayInfo {
             name: var_name,
             description: var_description,
             icon: var_icon,
+        };
+    }
+}
+
+impl SseDecode for crate::api::commands::load_pack_info::PackInfo {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_description = <String>::sse_decode(deserializer);
+        let mut var_parent = <Option<String>>::sse_decode(deserializer);
+        let mut var_enabledCdlc =
+            <Option<crate::api::commands::local_pack::add_local_pack::Cdlc>>::sse_decode(
+                deserializer,
+            );
+        return crate::api::commands::load_pack_info::PackInfo {
+            description: var_description,
+            parent: var_parent,
+            enabled_cdlc: var_enabledCdlc,
         };
     }
 }
@@ -2144,23 +2237,24 @@ fn pde_ffi_dispatcher_primary_impl(
 15 => wire__crate__api__commands__externals__load_externals__load_externals_impl(port, ptr, rust_vec_len, data_len),
 16 => wire__crate__api__commands__optionals__load_optionals__load_optionals_impl(port, ptr, rust_vec_len, data_len),
 17 => wire__crate__api__commands__load_pack_display__load_pack_display_impl(port, ptr, rust_vec_len, data_len),
-18 => wire__crate__api__commands__load_repo__load_repo_impl(port, ptr, rust_vec_len, data_len),
-19 => wire__crate__api__commands__user_repo_settings__load_settings__load_settings_impl(port, ptr, rust_vec_len, data_len),
-20 => wire__crate__api__commands__proton__proton_info_impl(port, ptr, rust_vec_len, data_len),
-21 => wire__crate__api__commands__proton__proton_install_teamspeak_impl(port, ptr, rust_vec_len, data_len),
-22 => wire__crate__api__commands__proton__proton_kill_all_impl(port, ptr, rust_vec_len, data_len),
-23 => wire__crate__api__commands__proton__proton_launch_teamspeak_impl(port, ptr, rust_vec_len, data_len),
-24 => wire__crate__api__commands__proton__proton_open_explorer_impl(port, ptr, rust_vec_len, data_len),
-25 => wire__crate__api__commands__pack_sync__quick_check__quick_check_impl(port, ptr, rust_vec_len, data_len),
-26 => wire__crate__api__commands__local_pack__remove_local_pack__remove_local_pack_impl(port, ptr, rust_vec_len, data_len),
-27 => wire__crate__api__commands__externals__save_externals__save_externals_impl(port, ptr, rust_vec_len, data_len),
-28 => wire__crate__api__commands__optionals__save_optionals__save_optionals_impl(port, ptr, rust_vec_len, data_len),
-29 => wire__crate__api__commands__user_repo_settings__save_settings__save_settings_impl(port, ptr, rust_vec_len, data_len),
-30 => wire__crate__api__commands__params__set_launch_params_impl(port, ptr, rust_vec_len, data_len),
-32 => wire__crate__api__commands__sync_config__sync_config_impl(port, ptr, rust_vec_len, data_len),
-33 => wire__crate__api__commands__local_pack__sync_local_pack__sync_local_pack_impl(port, ptr, rust_vec_len, data_len),
-34 => wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(port, ptr, rust_vec_len, data_len),
-35 => wire__crate__api__commands__pack_sync__sync_pack_with_parents__sync_pack_with_parents_impl(port, ptr, rust_vec_len, data_len),
+18 => wire__crate__api__commands__load_pack_info__load_pack_info_impl(port, ptr, rust_vec_len, data_len),
+19 => wire__crate__api__commands__load_repo__load_repo_impl(port, ptr, rust_vec_len, data_len),
+20 => wire__crate__api__commands__user_repo_settings__load_settings__load_settings_impl(port, ptr, rust_vec_len, data_len),
+21 => wire__crate__api__commands__proton__proton_info_impl(port, ptr, rust_vec_len, data_len),
+22 => wire__crate__api__commands__proton__proton_install_teamspeak_impl(port, ptr, rust_vec_len, data_len),
+23 => wire__crate__api__commands__proton__proton_kill_all_impl(port, ptr, rust_vec_len, data_len),
+24 => wire__crate__api__commands__proton__proton_launch_teamspeak_impl(port, ptr, rust_vec_len, data_len),
+25 => wire__crate__api__commands__proton__proton_open_explorer_impl(port, ptr, rust_vec_len, data_len),
+26 => wire__crate__api__commands__pack_sync__quick_check__quick_check_impl(port, ptr, rust_vec_len, data_len),
+27 => wire__crate__api__commands__local_pack__remove_local_pack__remove_local_pack_impl(port, ptr, rust_vec_len, data_len),
+28 => wire__crate__api__commands__externals__save_externals__save_externals_impl(port, ptr, rust_vec_len, data_len),
+29 => wire__crate__api__commands__optionals__save_optionals__save_optionals_impl(port, ptr, rust_vec_len, data_len),
+30 => wire__crate__api__commands__user_repo_settings__save_settings__save_settings_impl(port, ptr, rust_vec_len, data_len),
+31 => wire__crate__api__commands__params__set_launch_params_impl(port, ptr, rust_vec_len, data_len),
+33 => wire__crate__api__commands__sync_config__sync_config_impl(port, ptr, rust_vec_len, data_len),
+34 => wire__crate__api__commands__local_pack__sync_local_pack__sync_local_pack_impl(port, ptr, rust_vec_len, data_len),
+35 => wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(port, ptr, rust_vec_len, data_len),
+36 => wire__crate__api__commands__pack_sync__sync_pack_with_parents__sync_pack_with_parents_impl(port, ptr, rust_vec_len, data_len),
                         _ => unreachable!(),
                     }
 }
@@ -2192,7 +2286,7 @@ fn pde_ffi_dispatcher_sync_impl(
         }
         10 => wire__crate__api__init_app_impl(ptr, rust_vec_len, data_len),
         12 => wire__crate__api__logging__init_rust_logger_impl(ptr, rust_vec_len, data_len),
-        31 => wire__crate__api__logging__set_rust_log_level_impl(ptr, rust_vec_len, data_len),
+        32 => wire__crate__api__logging__set_rust_log_level_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -2250,6 +2344,42 @@ impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<OpaqueDiff>> for OpaqueDiff {
     }
 }
 
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart
+    for FrbWrapper<crate::api::commands::local_pack::add_local_pack::Cdlc>
+{
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self.0 {
+            crate::api::commands::local_pack::add_local_pack::Cdlc::GlobalMobilization => {
+                0.into_dart()
+            }
+            crate::api::commands::local_pack::add_local_pack::Cdlc::SogPrairieFire => 1.into_dart(),
+            crate::api::commands::local_pack::add_local_pack::Cdlc::CslaIronCurtain => {
+                2.into_dart()
+            }
+            crate::api::commands::local_pack::add_local_pack::Cdlc::WesternSahara => 3.into_dart(),
+            crate::api::commands::local_pack::add_local_pack::Cdlc::Spearhead1944 => 4.into_dart(),
+            crate::api::commands::local_pack::add_local_pack::Cdlc::ReactionForces => 5.into_dart(),
+            crate::api::commands::local_pack::add_local_pack::Cdlc::ExpeditionaryForces => {
+                6.into_dart()
+            }
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::commands::local_pack::add_local_pack::Cdlc>
+{
+}
+impl
+    flutter_rust_bridge::IntoIntoDart<
+        FrbWrapper<crate::api::commands::local_pack::add_local_pack::Cdlc>,
+    > for crate::api::commands::local_pack::add_local_pack::Cdlc
+{
+    fn into_into_dart(self) -> FrbWrapper<crate::api::commands::local_pack::add_local_pack::Cdlc> {
+        self.into()
+    }
+}
 // Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::commands::pack_sync::file_change::ChangeType {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
@@ -2395,6 +2525,7 @@ impl flutter_rust_bridge::IntoDart
         [
             self.name.into_into_dart().into_dart(),
             self.parent.into_into_dart().into_dart(),
+            self.enabled_cdlc.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -2562,6 +2693,28 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::load_pack_display::
     for crate::api::commands::load_pack_display::PackDisplayInfo
 {
     fn into_into_dart(self) -> crate::api::commands::load_pack_display::PackDisplayInfo {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::commands::load_pack_info::PackInfo {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.description.into_into_dart().into_dart(),
+            self.parent.into_into_dart().into_dart(),
+            self.enabled_cdlc.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::commands::load_pack_info::PackInfo
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::load_pack_info::PackInfo>
+    for crate::api::commands::load_pack_info::PackInfo
+{
+    fn into_into_dart(self) -> crate::api::commands::load_pack_info::PackInfo {
         self
     }
 }
@@ -2787,6 +2940,27 @@ impl SseEncode for bool {
     }
 }
 
+impl SseEncode for crate::api::commands::local_pack::add_local_pack::Cdlc {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::commands::local_pack::add_local_pack::Cdlc::GlobalMobilization => 0,
+                crate::api::commands::local_pack::add_local_pack::Cdlc::SogPrairieFire => 1,
+                crate::api::commands::local_pack::add_local_pack::Cdlc::CslaIronCurtain => 2,
+                crate::api::commands::local_pack::add_local_pack::Cdlc::WesternSahara => 3,
+                crate::api::commands::local_pack::add_local_pack::Cdlc::Spearhead1944 => 4,
+                crate::api::commands::local_pack::add_local_pack::Cdlc::ReactionForces => 5,
+                crate::api::commands::local_pack::add_local_pack::Cdlc::ExpeditionaryForces => 6,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
 impl SseEncode for crate::api::commands::pack_sync::file_change::ChangeType {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -2871,6 +3045,10 @@ impl SseEncode for crate::api::commands::local_pack::add_local_pack::FlutterLoca
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.name, serializer);
         <Option<String>>::sse_encode(self.parent, serializer);
+        <Option<crate::api::commands::local_pack::add_local_pack::Cdlc>>::sse_encode(
+            self.enabled_cdlc,
+            serializer,
+        );
     }
 }
 
@@ -3046,6 +3224,16 @@ impl SseEncode for Option<String> {
     }
 }
 
+impl SseEncode for Option<crate::api::commands::local_pack::add_local_pack::Cdlc> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::commands::local_pack::add_local_pack::Cdlc>::sse_encode(value, serializer);
+        }
+    }
+}
+
 impl SseEncode for Option<crate::api::commands::linux_setup::LinuxSetupInfo> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -3092,6 +3280,18 @@ impl SseEncode for crate::api::commands::load_pack_display::PackDisplayInfo {
         <String>::sse_encode(self.name, serializer);
         <String>::sse_encode(self.description, serializer);
         <Option<String>>::sse_encode(self.icon, serializer);
+    }
+}
+
+impl SseEncode for crate::api::commands::load_pack_info::PackInfo {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.description, serializer);
+        <Option<String>>::sse_encode(self.parent, serializer);
+        <Option<crate::api::commands::local_pack::add_local_pack::Cdlc>>::sse_encode(
+            self.enabled_cdlc,
+            serializer,
+        );
     }
 }
 

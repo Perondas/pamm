@@ -4,6 +4,7 @@ pub mod init_from_remote;
 pub mod launch;
 pub mod linux_setup;
 pub mod load_pack_display;
+pub mod load_pack_info;
 pub mod load_repo;
 pub mod local_pack;
 pub mod optionals;

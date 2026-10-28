@@ -3,6 +3,7 @@ use pamm_cli_args::commands::status::StatusArgs;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use pamm_lib::handle::reading::get_pack::GetPack;
 use pamm_lib::handle::reading::get_repo_info::GetRepoInfo;
+use pamm_lib::models::cdlc::Cdlc;
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use termtree::Tree;
@@ -37,8 +38,12 @@ impl Display for Node {
     }
 }
 
-pub async fn status_command(_args: StatusArgs) -> anyhow::Result<()> {
+pub async fn status_command(args: StatusArgs) -> anyhow::Result<()> {
     let handle = ClientRepoHandle::open(&std::env::current_dir()?).await?;
+
+    if let Some(name) = args.name {
+        return pack_status(&handle, &name).await;
+    }
 
     let config = handle.get_config();
 
@@ -110,6 +115,36 @@ pub async fn status_command(_args: StatusArgs) -> anyhow::Result<()> {
     }
 
     println!("{}", repo_root);
+
+    Ok(())
+}
+
+async fn pack_status(handle: &ClientRepoHandle, pack_name: &str) -> anyhow::Result<()> {
+    let pack = handle.get_pack(pack_name).await?;
+
+    println!("Pack: {}", pack.name);
+
+    if !pack.description.is_empty() {
+        println!("Description: {}", pack.description);
+    }
+
+    println!("Parent: {}", pack.parent.as_deref().unwrap_or("None"));
+    println!(
+        "CDLC: {}",
+        pack.enabled_cdlc.as_ref().map_or("None", Cdlc::name)
+    );
+
+    let status = if handle.is_local_pack(pack_name) {
+        "Local pack (no remote)".to_string()
+    } else {
+        match handle.quick_check_pack_up_to_date(pack_name).await {
+            Ok(true) => "Up to date".to_string(),
+            Ok(false) => "Needs update".to_string(),
+            Err(e) => format!("Unable to check ({e})"),
+        }
+    };
+
+    println!("Status: {}", status);
 
     Ok(())
 }

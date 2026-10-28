@@ -1,6 +1,7 @@
 use crate::handle::actions::launch::launch_pack::LaunchOutcome;
 use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::reading::get_pack::GetPack;
+use crate::models::cdlc::Cdlc;
 use anyhow::Context;
 use log::{debug, info};
 
@@ -9,6 +10,7 @@ impl ClientRepoHandle {
         &self,
         pack_name: &str,
         addon_paths: &[String],
+        cdlc: Option<Cdlc>,
     ) -> anyhow::Result<LaunchOutcome> {
         info!("Launching pack '{}' via Steam", pack_name);
 
@@ -26,7 +28,14 @@ impl ClientRepoHandle {
             launch_url.push(' ');
         }
 
-        let addons_combined = format!("\"-mod={}\"", addon_paths.join(";"));
+        // CDLCs are addressed by their short form, not by a path
+        let mods = addon_paths
+            .iter()
+            .map(String::as_str)
+            .chain(cdlc.as_ref().map(Cdlc::short_form))
+            .collect::<Vec<_>>();
+
+        let addons_combined = format!("\"-mod={}\"", mods.join(";"));
 
         launch_url.push_str(&urlencoding::encode(&addons_combined));
 

@@ -1,5 +1,4 @@
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-use pamm_lib::models::pack::pack_config::PackConfig;
 
 pub async fn remove_local_pack(repo_path: String, pack_name: String) -> anyhow::Result<()> {
     let repot_path = std::path::Path::new(&repo_path);
@@ -7,16 +6,4 @@ pub async fn remove_local_pack(repo_path: String, pack_name: String) -> anyhow::
     let mut handle = ClientRepoHandle::open(repot_path).await?;
 
     handle.remove_local_pack(&pack_name).await
-}
-
-#[derive(Debug)]
-pub struct FlutterLocalPackConfig {
-    pub name: String,
-    pub parent: Option<String>,
-}
-
-impl From<FlutterLocalPackConfig> for PackConfig {
-    fn from(value: FlutterLocalPackConfig) -> Self {
-        Self::new(value.name, String::default(), Vec::default(), value.parent)
-    }
 }

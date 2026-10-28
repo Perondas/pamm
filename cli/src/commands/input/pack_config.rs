@@ -2,8 +2,10 @@ use crate::commands::input::from_cli_input::FromCliInputWithContext;
 use anyhow::Result;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::io::files::file_names::fixed_file::FixedFile;
+use pamm_lib::models::cdlc::Cdlc;
 use pamm_lib::models::pack::pack_config::PackConfig;
 use std::path::PathBuf;
+use strum::IntoEnumIterator;
 
 impl FromCliInputWithContext for PackConfig {
     fn from_cli_input(existing_packs: &[&str]) -> Result<Self> {
@@ -45,6 +47,20 @@ impl FromCliInputWithContext for PackConfig {
                 .map(|i| existing_packs[i].to_string());
         }
 
-        Ok(PackConfig::new(name, description, client_params, parent))
+        let cdlcs = Cdlc::iter().collect::<Vec<_>>();
+
+        let cdlc = dialoguer::Select::new()
+            .with_prompt("Select enabled CDLC (if any) ESC to skip")
+            .items(cdlcs.iter().map(Cdlc::name))
+            .interact_opt()?
+            .map(|i| cdlcs[i]);
+
+        Ok(PackConfig::new(
+            name,
+            description,
+            client_params,
+            parent,
+            cdlc,
+        ))
     }
 }

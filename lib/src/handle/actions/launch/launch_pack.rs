@@ -1,5 +1,6 @@
 use crate::handle::client_repo_handle::ClientRepoHandle;
 use crate::handle::reading::get_canonical_addon_paths::GetAddonPaths;
+use crate::handle::reading::get_pack::GetPack;
 use log::{debug, info};
 
 /// What a launch left behind, for callers that want to tell the user about it.
@@ -42,6 +43,8 @@ impl ClientRepoHandle {
             .get_canonical_addon_paths(pack_name, params.disable_optionals)
             .await?;
 
+        let cdlc = self.get_pack(pack_name).await?.enabled_cdlc;
+
         debug!(
             "Resolved {} addon path(s) for pack '{}'",
             addon_paths.len(),
@@ -49,9 +52,12 @@ impl ClientRepoHandle {
         );
 
         match params.mode {
-            LaunchMode::Steam => self.launch_via_steam(pack_name, &addon_paths).await,
+            LaunchMode::Steam => self.launch_via_steam(pack_name, &addon_paths, cdlc).await,
             #[cfg(target_os = "windows")]
-            LaunchMode::Executable => self.launch_via_executable(pack_name, &addon_paths).await,
+            LaunchMode::Executable => {
+                self.launch_via_executable(pack_name, &addon_paths, cdlc)
+                    .await
+            }
         }
     }
 }

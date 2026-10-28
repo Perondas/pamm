@@ -16,14 +16,29 @@ Future<void> addLocalPack({
   config: config,
 );
 
+enum Cdlc {
+  globalMobilization,
+  sogPrairieFire,
+  cslaIronCurtain,
+  westernSahara,
+  spearhead1944,
+  reactionForces,
+  expeditionaryForces,
+}
+
 class FlutterLocalPackConfig {
   final String name;
   final String? parent;
+  final Cdlc? enabledCdlc;
 
-  const FlutterLocalPackConfig({required this.name, this.parent});
+  const FlutterLocalPackConfig({
+    required this.name,
+    this.parent,
+    this.enabledCdlc,
+  });
 
   @override
-  int get hashCode => name.hashCode ^ parent.hashCode;
+  int get hashCode => name.hashCode ^ parent.hashCode ^ enabledCdlc.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -31,5 +46,6 @@ class FlutterLocalPackConfig {
       other is FlutterLocalPackConfig &&
           runtimeType == other.runtimeType &&
           name == other.name &&
-          parent == other.parent;
+          parent == other.parent &&
+          enabledCdlc == other.enabledCdlc;
 }

@@ -80,7 +80,7 @@ mod tests {
             .await
             .unwrap();
 
-        let pack = PackConfig::new("core".to_string(), "c".to_string(), vec![], None);
+        let pack = PackConfig::new("core".to_string(), "c".to_string(), vec![], None, None);
         server.add_pack(&pack).await.unwrap();
 
         let repo_path = server.get_repo_path().to_path_buf();

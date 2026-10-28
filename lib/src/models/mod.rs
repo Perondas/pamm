@@ -1,3 +1,4 @@
+pub mod cdlc;
 pub mod index;
 pub mod pack;
 pub mod repo;

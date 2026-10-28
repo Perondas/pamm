@@ -258,7 +258,7 @@ mod local_pack_tests {
             .await
             .unwrap();
 
-        let mut core = PackConfig::new("core".to_string(), "d".to_string(), vec![], None);
+        let mut core = PackConfig::new("core".to_string(), "d".to_string(), vec![], None, None);
         core.addons.insert(
             "@core_addon".to_string(),
             AddonSettings { is_optional: false },
@@ -273,6 +273,7 @@ mod local_pack_tests {
             "d".to_string(),
             vec![],
             Some("core".to_string()),
+            None,
         );
         mission.addons.insert(
             "@mission_addon".to_string(),

@@ -1,4 +1,5 @@
 use crate::keyed;
+use crate::models::cdlc::Cdlc;
 use crate::models::pack::addon::AddonSettings;
 use crate::models::pack::pack_customization::PackCustomization;
 use crate::models::pack::pack_diff::PackDiff;
@@ -15,6 +16,8 @@ pub struct PackConfig {
     pub parent: Option<String>,
     pub addons: HashMap<String, AddonSettings>,
     pub customization: Option<PackCustomization>,
+    #[serde(default)]
+    pub enabled_cdlc: Option<Cdlc>,
 }
 
 impl PackConfig {
@@ -23,6 +26,7 @@ impl PackConfig {
         description: String,
         client_params: Vec<String>,
         parent: Option<String>,
+        enabled_cdlc: Option<Cdlc>,
     ) -> Self {
         Self {
             name,
@@ -31,6 +35,7 @@ impl PackConfig {
             parent,
             addons: HashMap::new(),
             customization: None,
+            enabled_cdlc,
         }
     }
 
@@ -69,6 +74,7 @@ mod tests {
             "A test pack".to_string(),
             vec!["-mod=1".to_string()],
             Some("parent_pack".to_string()),
+            None,
         );
 
         assert_eq!(config.name, "test_pack");
@@ -80,7 +86,13 @@ mod tests {
 
     #[test]
     fn test_remove_disabled_optionals() {
-        let mut config = PackConfig::new("test_pack".to_string(), "desc".to_string(), vec![], None);
+        let mut config = PackConfig::new(
+            "test_pack".to_string(),
+            "desc".to_string(),
+            vec![],
+            None,
+            None,
+        );
 
         // Required addon
         config.addons.insert(

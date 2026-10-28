@@ -11,6 +11,7 @@ import 'api/commands/init_from_remote.dart';
 import 'api/commands/launch.dart';
 import 'api/commands/linux_setup.dart';
 import 'api/commands/load_pack_display.dart';
+import 'api/commands/load_pack_info.dart';
 import 'api/commands/load_repo.dart';
 import 'api/commands/local_pack/add_local_pack.dart';
 import 'api/commands/local_pack/remove_local_pack.dart';
@@ -136,6 +137,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool dco_decode_bool(dynamic raw);
 
   @protected
+  Cdlc dco_decode_box_autoadd_cdlc(dynamic raw);
+
+  @protected
   FlutterLocalPackConfig dco_decode_box_autoadd_flutter_local_pack_config(
     dynamic raw,
   );
@@ -155,6 +159,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   RepoCustomization dco_decode_box_autoadd_repo_customization(dynamic raw);
+
+  @protected
+  Cdlc dco_decode_cdlc(dynamic raw);
 
   @protected
   ChangeType dco_decode_change_type(dynamic raw);
@@ -226,6 +233,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   String? dco_decode_opt_String(dynamic raw);
 
   @protected
+  Cdlc? dco_decode_opt_box_autoadd_cdlc(dynamic raw);
+
+  @protected
   LinuxSetupInfo? dco_decode_opt_box_autoadd_linux_setup_info(dynamic raw);
 
   @protected
@@ -241,6 +251,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   PackDisplayInfo dco_decode_pack_display_info(dynamic raw);
+
+  @protected
+  PackInfo dco_decode_pack_info(dynamic raw);
 
   @protected
   ProtonInfo dco_decode_proton_info(dynamic raw);
@@ -359,6 +372,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool sse_decode_bool(SseDeserializer deserializer);
 
   @protected
+  Cdlc sse_decode_box_autoadd_cdlc(SseDeserializer deserializer);
+
+  @protected
   FlutterLocalPackConfig sse_decode_box_autoadd_flutter_local_pack_config(
     SseDeserializer deserializer,
   );
@@ -382,6 +398,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   RepoCustomization sse_decode_box_autoadd_repo_customization(
     SseDeserializer deserializer,
   );
+
+  @protected
+  Cdlc sse_decode_cdlc(SseDeserializer deserializer);
 
   @protected
   ChangeType sse_decode_change_type(SseDeserializer deserializer);
@@ -461,6 +480,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   String? sse_decode_opt_String(SseDeserializer deserializer);
 
   @protected
+  Cdlc? sse_decode_opt_box_autoadd_cdlc(SseDeserializer deserializer);
+
+  @protected
   LinuxSetupInfo? sse_decode_opt_box_autoadd_linux_setup_info(
     SseDeserializer deserializer,
   );
@@ -480,6 +502,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   PackDisplayInfo sse_decode_pack_display_info(SseDeserializer deserializer);
+
+  @protected
+  PackInfo sse_decode_pack_info(SseDeserializer deserializer);
 
   @protected
   ProtonInfo sse_decode_proton_info(SseDeserializer deserializer);
@@ -615,6 +640,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_bool(bool self, SseSerializer serializer);
 
   @protected
+  void sse_encode_box_autoadd_cdlc(Cdlc self, SseSerializer serializer);
+
+  @protected
   void sse_encode_box_autoadd_flutter_local_pack_config(
     FlutterLocalPackConfig self,
     SseSerializer serializer,
@@ -643,6 +671,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     RepoCustomization self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_cdlc(Cdlc self, SseSerializer serializer);
 
   @protected
   void sse_encode_change_type(ChangeType self, SseSerializer serializer);
@@ -748,6 +779,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_opt_String(String? self, SseSerializer serializer);
 
   @protected
+  void sse_encode_opt_box_autoadd_cdlc(Cdlc? self, SseSerializer serializer);
+
+  @protected
   void sse_encode_opt_box_autoadd_linux_setup_info(
     LinuxSetupInfo? self,
     SseSerializer serializer,
@@ -773,6 +807,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     PackDisplayInfo self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_pack_info(PackInfo self, SseSerializer serializer);
 
   @protected
   void sse_encode_proton_info(ProtonInfo self, SseSerializer serializer);
