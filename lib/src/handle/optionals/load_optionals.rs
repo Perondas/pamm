@@ -40,7 +40,7 @@ pub trait LoadOptionals {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::handle::mock_handle::{MockHandle, MockHandleExt};
+    use crate::util::test::mock_handle::{MockHandle, MockHandleExt};
 
     #[tokio::test]
     async fn test_load_optionals() {

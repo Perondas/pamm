@@ -69,7 +69,7 @@ mod tests {
     use crate::handle::server_repo_handle::ServerRepoHandle;
     use crate::models::pack::pack_config::PackConfig;
     use crate::models::repo::repo_config::RepoConfig;
-    use crate::util::test_utils::TestTempDir;
+    use crate::util::test::test_utils::TestTempDir;
     use std::collections::HashSet;
 
     #[tokio::test]

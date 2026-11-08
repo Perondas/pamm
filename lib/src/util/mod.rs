@@ -4,4 +4,4 @@ pub(crate) mod name_matches;
 #[cfg(target_os = "linux")]
 pub mod proton;
 #[cfg(test)]
-pub mod test_utils;
+pub(crate) mod test;

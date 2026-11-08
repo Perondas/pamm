@@ -30,7 +30,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::handle::mock_handle::{MockHandle, MockHandleExt};
+    use crate::util::test::mock_handle::{MockHandle, MockHandleExt};
     use std::path::PathBuf;
 
     #[tokio::test]
@@ -73,7 +73,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_save_externals_resolves_name() {
-        use crate::util::test_utils::TestTempDir;
+        use crate::util::test::test_utils::TestTempDir;
         let temp_dir = TestTempDir::new("pamm_test_save_externals");
         let addon_dir = temp_dir.path().join("my_dummy_mod");
         std::fs::create_dir_all(&addon_dir).unwrap();

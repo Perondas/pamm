@@ -54,7 +54,7 @@ impl Writable for RepoVersion {
 mod tests {
     use super::*;
     use crate::io::fs::fs_writable::FixedFsWritable;
-    use crate::util::test_utils::TestTempDir;
+    use crate::util::test::test_utils::TestTempDir;
 
     #[tokio::test]
     async fn round_trips_through_the_version_file() {

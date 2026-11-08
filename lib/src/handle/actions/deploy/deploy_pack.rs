@@ -274,7 +274,7 @@ mod tests {
     use crate::models::pack::addon::AddonSettings;
     use crate::models::pack::pack_config::PackConfig;
     use crate::models::repo::repo_config::RepoConfig;
-    use crate::util::test_utils::TestTempDir;
+    use crate::util::test::test_utils::TestTempDir;
     use std::collections::HashSet;
     use std::fs;
     use std::path::PathBuf;

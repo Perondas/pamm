@@ -164,7 +164,7 @@ impl SavePackSettings for ClientRepoHandle {
 mod tests {
     use super::*;
     use crate::models::repo::repo_version::RepoVersion;
-    use crate::util::test_utils::TestTempDir;
+    use crate::util::test::test_utils::TestTempDir;
     use std::collections::HashSet;
     use std::fs;
 
@@ -220,7 +220,7 @@ mod local_pack_tests {
     use crate::io::progress_reporting::progress_reporter::ProgressReporter;
     use crate::models::pack::addon::AddonSettings;
     use crate::models::repo::repo_version::RepoVersion;
-    use crate::util::test_utils::TestTempDir;
+    use crate::util::test::test_utils::TestTempDir;
     use std::collections::HashSet;
     use std::fs;
     use std::path::PathBuf;
