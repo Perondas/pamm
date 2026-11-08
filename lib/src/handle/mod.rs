@@ -16,5 +16,3 @@ pub mod repo_handle;
 pub mod server_repo_handle;
 pub mod writing;
 
-#[cfg(test)]
-pub mod mock_handle;

@@ -103,7 +103,7 @@ async fn prune_unreferenced(media_dir: &Path, referenced: &HashSet<&str>) {
 mod tests {
     use super::*;
     use crate::models::repo::repo_customization::RepoCustomization;
-    use crate::util::test_utils::TestTempDir;
+    use crate::util::test::test_utils::TestTempDir;
 
     // Unreferenced files (incl. .part leftovers) are pruned, referenced files
     // survive even when their re-download fails, and path-like names coming

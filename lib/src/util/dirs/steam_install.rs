@@ -174,7 +174,7 @@ pub fn find_steam_installs() -> anyhow::Result<Vec<SteamInstall>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::util::test_utils::TestTempDir;
+    use crate::util::test::test_utils::TestTempDir;
 
     fn flatpak() -> SteamInstall {
         SteamInstall::new(

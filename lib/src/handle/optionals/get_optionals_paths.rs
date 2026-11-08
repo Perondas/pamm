@@ -61,7 +61,7 @@ pub trait GetOptionalsPaths {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::handle::mock_handle::{MockHandle, MockHandleExt};
+    use crate::util::test::mock_handle::{MockHandle, MockHandleExt};
     use std::path::PathBuf;
 
     #[tokio::test]

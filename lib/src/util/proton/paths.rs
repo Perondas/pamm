@@ -82,7 +82,7 @@ pub fn windows_to_prefix_path(prefix: &Path, windows_path: &str) -> Option<PathB
 mod tests {
     use super::*;
     use crate::util::dirs::steam_install::SteamFlavour;
-    use crate::util::test_utils::TestTempDir;
+    use crate::util::test::test_utils::TestTempDir;
 
     #[test]
     fn compat_data_sits_next_to_common() {

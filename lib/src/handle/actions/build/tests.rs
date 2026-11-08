@@ -9,7 +9,7 @@ use crate::models::index::checksum_index::ChecksumIndex;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_version::RepoVersion;
-use crate::util::test_utils::TestTempDir;
+use crate::util::test::test_utils::TestTempDir;
 use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
