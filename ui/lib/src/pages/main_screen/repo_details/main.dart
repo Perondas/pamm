@@ -6,6 +6,7 @@ import 'package:pamm_ui/src/pages/main_screen/repo_details/add_local_pack_dialog
 import 'package:pamm_ui/src/pages/main_screen/repo_details/edit_pack_dialog.dart';
 import 'package:pamm_ui/src/pages/sync_screen/main.dart';
 import 'package:pamm_ui/src/pages/sync_single_pack_screen/main.dart';
+import 'package:pamm_ui/src/rust/api/commands/delete_pack_content.dart';
 import 'package:pamm_ui/src/rust/api/commands/launch.dart';
 import 'package:pamm_ui/src/rust/api/commands/load_pack_display.dart';
 import 'package:pamm_ui/src/rust/api/commands/load_pack_info.dart';
@@ -464,6 +465,37 @@ class _PackListTileState extends State<PackListTile> {
               );
             },
             icon: Icon(Icons.settings),
+          ),
+          IconButton(
+            tooltip: 'Clear pack from disk',
+            onPressed: () async {
+              var answer = await showDialog(
+                context: context,
+                builder: (_) => ConfirmDialog(
+                  content:
+                      'Are you sure you want to clear the content of ${widget.packName}? This will delete all addons on disk!',
+                  title: "Clear ${widget.packName}",
+                ),
+              );
+
+              if (!mounted || !answer) return;
+
+              await deletePackContent(
+                repoPath: widget.repoPath,
+                packName: widget.packName,
+              );
+
+              // Show a snackbar on success
+              if (!mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    "Content of ${widget.packName} cleared from disk",
+                  ),
+                ),
+              );
+            },
+            icon: Icon(Icons.clear),
           ),
         ],
       ),

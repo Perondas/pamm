@@ -7,6 +7,7 @@
 // ignore_for_file: argument_type_not_assignable
 
 import 'api.dart';
+import 'api/commands/delete_pack_content.dart';
 import 'api/commands/externals/load_externals.dart';
 import 'api/commands/externals/save_externals.dart';
 import 'api/commands/get_remote_repo_info.dart';

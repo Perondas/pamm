@@ -148,6 +148,10 @@ impl GetPack for ClientRepoHandle {
 
         self.base.get_pack_with_settings(pack_name).await
     }
+
+    async fn get_all_pack_names(&self) -> anyhow::Result<Vec<&str>> {
+        Ok(self.get_all_packs())
+    }
 }
 
 impl SavePackSettings for ClientRepoHandle {
