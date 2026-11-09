@@ -14,6 +14,7 @@ mockall::mock! {
             &self,
             pack_name: &str,
         ) -> anyhow::Result<(PackConfig, PackUserSettings)>;
+        async fn get_all_pack_names<'a>(&'a self) -> anyhow::Result<Vec<&'a str>>;
     }
     impl SavePackSettings for Handle {
         async fn save_pack_settings(&self, pack_name: &str, settings: &PackUserSettings) -> anyhow::Result<()>;
@@ -27,7 +28,7 @@ mockall::mock! {
 pub trait MockHandleExt {
     fn mock_pack(
         &mut self,
-        pack_name: &str,
+        pack_name: &'static str,
         parent: Option<&str>,
         optionals: &[&str],
         required: &[&str],
@@ -38,7 +39,7 @@ pub trait MockHandleExt {
 impl MockHandleExt for MockHandle {
     fn mock_pack(
         &mut self,
-        pack_name: &str,
+        pack_name: &'static str,
         parent: Option<&str>,
         optionals: &[&str],
         required: &[&str],
@@ -72,7 +73,10 @@ impl MockHandleExt for MockHandle {
 
         let pack_name_owned = pack_name.to_string();
         self.expect_get_pack_with_settings()
-            .withf(move |p| p == pack_name_owned)
+            .withf(move |p| p == pack_name_owned.clone())
             .returning(move |_| Ok((config.clone(), settings.clone())));
+
+        self.expect_get_all_pack_names()
+            .returning(move || Ok(vec![pack_name]));
     }
 }
