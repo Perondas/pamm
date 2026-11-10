@@ -27,15 +27,24 @@ pub async fn remove_pack_content(
 
     let addon_dir = pack_path.join(ADDONS_DIR_NAME);
 
+    // Way easier than cleaning out the folder :)
     tokio::fs::remove_dir_all(&addon_dir)
         .await
         .with_context(|| format!("Failed to remove addons: {}", addon_dir.display()))?;
+
+    tokio::fs::create_dir_all(&addon_dir)
+        .await
+        .with_context(|| format!("Failed to recreate addons dir: {}", addon_dir.display()))?;
 
     let index_dir = pack_path.join(INDEX_DIR_NAME);
 
     tokio::fs::remove_dir_all(&index_dir)
         .await
         .with_context(|| format!("Failed to remove index: {}", index_dir.display()))?;
+
+    tokio::fs::create_dir_all(&index_dir)
+        .await
+        .with_context(|| format!("Failed to recreate index dir: {}", index_dir.display()))?;
 
     Ok(())
 }
