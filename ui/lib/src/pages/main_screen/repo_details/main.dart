@@ -467,7 +467,7 @@ class _PackListTileState extends State<PackListTile> {
             icon: Icon(Icons.settings),
           ),
           IconButton(
-            tooltip: 'Clear pack from disk',
+            tooltip: 'Clear content from disk',
             onPressed: () async {
               var answer = await showDialog(
                 context: context,

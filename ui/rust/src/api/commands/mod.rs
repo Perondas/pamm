@@ -1,3 +1,4 @@
+pub mod delete_pack_content;
 pub mod externals;
 pub mod get_remote_repo_info;
 pub mod init_from_remote;
@@ -13,4 +14,3 @@ pub mod params;
 pub mod proton;
 pub mod sync_config;
 pub mod user_repo_settings;
-pub mod delete_pack_content;

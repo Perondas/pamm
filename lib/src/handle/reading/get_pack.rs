@@ -10,7 +10,7 @@ pub trait GetPack {
         pack_name: &str,
     ) -> impl Future<Output = anyhow::Result<(PackConfig, PackUserSettings)>> + Send;
 
-    fn get_all_pack_names(&self) -> impl Future<Output=anyhow::Result<Vec<&str>>> + Send;
+    fn get_all_pack_names(&self) -> impl Future<Output = anyhow::Result<Vec<&str>>> + Send;
 }
 
 impl RepoHandle {

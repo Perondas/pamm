@@ -31,7 +31,6 @@ impl<T: GetPack + GetRepoInfo + Send> DeletePackContent for T {
     }
 }
 
-
 #[cfg(test)]
 mod test {
     use crate::util::test::test_utils::TestTempDir;
@@ -39,8 +38,5 @@ mod test {
     #[test]
     fn test_delete_pack_content() {
         let dir = TestTempDir::new("test_delete_pack_content");
-
-
-
     }
 }

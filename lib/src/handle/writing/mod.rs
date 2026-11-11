@@ -2,12 +2,12 @@
 pub mod add_local_pack;
 pub mod add_pack;
 pub mod delete_pack;
+pub mod delete_pack_content;
 #[cfg(feature = "client")]
 pub mod remove_local_pack;
 pub mod save_pack_settings;
 pub mod update_pack;
 pub mod update_repo_config;
-pub mod delete_pack_content;
 
 use crate::handle::repo_handle::RepoHandle;
 use crate::io::files::file_names::fixed_file::FixedFile;

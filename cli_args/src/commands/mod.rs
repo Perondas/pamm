@@ -1,4 +1,3 @@
-pub mod add_pack;
 pub mod build;
 pub mod deploy;
 pub mod init_remote;

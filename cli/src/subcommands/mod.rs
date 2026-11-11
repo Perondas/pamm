@@ -3,3 +3,4 @@ pub mod externals;
 pub mod linux;
 pub mod local_packs;
 pub mod optionals;
+pub mod pack;
