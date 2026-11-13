@@ -14,10 +14,6 @@ pub struct ServerRepoHandle {
 }
 
 impl ServerRepoHandle {
-    pub async fn open(_repo_path: &Path) -> anyhow::Result<Self> {
-        todo!()
-    }
-
     pub async fn create(parent_path: &Path, repo_config: RepoConfig) -> anyhow::Result<Self> {
         let repo_path = repo_config
             .init_server_repo_blank_on_fs(parent_path)

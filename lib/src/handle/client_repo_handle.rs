@@ -21,10 +21,6 @@ pub struct ClientRepoHandle {
 }
 
 impl ClientRepoHandle {
-    pub async fn open(_repo_path: &Path) -> anyhow::Result<Self> {
-        todo!()
-    }
-
     pub async fn init_from_remote(dest_path: &Path, remote: &Url) -> anyhow::Result<Self> {
         ensure!(is_dir(dest_path).await, "Destination path is not a folder");
 

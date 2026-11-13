@@ -1,5 +1,4 @@
 use flutter_rust_bridge::for_generated::anyhow;
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 
 /// The one-time Steam setup a repo needs on Linux.
 ///
