@@ -22,6 +22,32 @@ pub type TestServerRepoBuilder = TestRepoBuilder<ServerRepo>;
 #[cfg(feature = "client")]
 pub type TestClientRepoBuilder = TestRepoBuilder<ClientRepo>;
 
+fn default_pack() -> PackConfig {
+    PackConfig::new(
+        "core".to_string(),
+        "test pack".to_string(),
+        vec![],
+        None,
+        None,
+    )
+}
+
+#[cfg(feature = "server")]
+pub fn default_server_repo(parent_dir: impl AsRef<Path>) -> TestServerRepoBuilder {
+    TestServerRepoBuilder::new(parent_dir)
+        .repo_name("repo")
+        .description("test repo")
+        .pack(default_pack())
+}
+
+#[cfg(feature = "client")]
+pub fn default_client_repo(parent_dir: impl AsRef<Path>) -> TestClientRepoBuilder {
+    TestClientRepoBuilder::new(parent_dir)
+        .repo_name("repo")
+        .description("test repo")
+        .pack(default_pack())
+}
+
 pub struct TestRepoBuilder<Kind> {
     parent_dir: PathBuf,
     repo_name: String,

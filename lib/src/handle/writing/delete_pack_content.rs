@@ -37,21 +37,13 @@ mod server_tests {
     use crate::handle::repo_handle::RepoHandle;
     use crate::handle::server_repo_handle::ServerRepoHandle;
     use crate::io::files::name_consts::{ADDONS_DIR_NAME, INDEX_DIR_NAME};
-    use crate::models::pack::pack_config::PackConfig;
-    use crate::util::test::repo_builder::TestServerRepoBuilder;
+    use crate::util::test::repo_builder::default_server_repo;
     use crate::util::test::test_utils::TestTempDir;
 
     #[tokio::test]
     async fn delete_server_pack_content_clears_addons_and_indexes() {
         let temp_dir = TestTempDir::new("pamm_delete_server_pack_content");
-        let fixture = TestServerRepoBuilder::new(temp_dir.path())
-            .pack(PackConfig::new(
-                "core".to_string(),
-                "test pack".to_string(),
-                vec![],
-                None,
-                None,
-            ))
+        let fixture = default_server_repo(temp_dir.path())
             .pack_file("core", "addons/@addon/file.txt", b"addon data".as_slice())
             .pack_file("core", "indexes/core.index", b"index data".as_slice())
             .build()
@@ -83,21 +75,13 @@ mod client_tests {
     use crate::handle::client_repo_handle::ClientRepoHandle;
     use crate::handle::repo_handle::RepoHandle;
     use crate::io::files::name_consts::{ADDONS_DIR_NAME, INDEX_DIR_NAME};
-    use crate::models::pack::pack_config::PackConfig;
-    use crate::util::test::repo_builder::TestClientRepoBuilder;
+    use crate::util::test::repo_builder::default_client_repo;
     use crate::util::test::test_utils::TestTempDir;
 
     #[tokio::test]
     async fn delete_client_pack_content_clears_addons_and_indexes() {
         let temp_dir = TestTempDir::new("pamm_delete_client_pack_content");
-        let fixture = TestClientRepoBuilder::new(temp_dir.path())
-            .pack(PackConfig::new(
-                "core".to_string(),
-                "test pack".to_string(),
-                vec![],
-                None,
-                None,
-            ))
+        let fixture = default_client_repo(temp_dir.path())
             .pack_file("core", "addons/@addon/file.txt", b"addon data".as_slice())
             .pack_file("core", "indexes/core.index", b"index data".as_slice())
             .build()

@@ -220,12 +220,10 @@ mod tests {
 mod local_pack_tests {
     use super::*;
     use crate::handle::reading::get_canonical_addon_paths::GetAddonPaths;
-    use crate::io::fs::fs_writable::FixedFsWritable;
     use crate::io::progress_reporting::progress_reporter::ProgressReporter;
     use crate::models::pack::addon::AddonSettings;
-    use crate::models::repo::repo_version::RepoVersion;
+    use crate::util::test::repo_builder::TestClientRepoBuilder;
     use crate::util::test::test_utils::TestTempDir;
-    use std::collections::HashSet;
     use std::fs;
     use std::path::PathBuf;
 
@@ -244,31 +242,21 @@ mod local_pack_tests {
     /// exist on disk, as they would after a sync.
     async fn repo_with_local_pack(key: &str) -> (TestTempDir, PathBuf, ClientRepoHandle) {
         let tmp = TestTempDir::new(key);
-        let repo_path = tmp.path().join("repo");
-        fs::create_dir_all(&repo_path).unwrap();
-
-        let repo_config = RepoConfig::new(
-            "repo".to_string(),
-            "desc".to_string(),
-            HashSet::from(["core".to_string()]),
-        );
-        repo_config.write_fixed(&repo_path).await.unwrap();
-        RepoUserSettings::new(Url::parse("http://localhost/").unwrap())
-            .write_fixed(&repo_path)
-            .await
-            .unwrap();
-        RepoVersion::current()
-            .write_fixed(&repo_path)
-            .await
-            .unwrap();
 
         let mut core = PackConfig::new("core".to_string(), "d".to_string(), vec![], None, None);
         core.addons.insert(
             "@core_addon".to_string(),
             AddonSettings { is_optional: false },
         );
-        core.init_client_on_fs(&repo_path).await.unwrap();
-        fs::create_dir_all(repo_path.join("core/addons/@core_addon")).unwrap();
+        let fixture = TestClientRepoBuilder::new(tmp.path())
+            .repo_name("repo")
+            .description("desc")
+            .pack(core)
+            .pack_file("core", "addons/@core_addon/.keep", b"".as_slice())
+            .build()
+            .await
+            .unwrap();
+        let repo_path = fixture.repo_path().to_path_buf();
 
         let mut handle: ClientRepoHandle = RepoHandle::open(&repo_path)
             .await

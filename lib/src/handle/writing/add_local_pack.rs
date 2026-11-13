@@ -112,45 +112,34 @@ impl ClientRepoHandle {
 mod tests {
     use super::*;
     use crate::io::fs::fs_readable::KnownFSReadable;
-    use crate::io::fs::fs_writable::FixedFsWritable;
     use crate::models::repo::repo_config::RepoConfig;
     use crate::models::repo::repo_user_settings::RepoUserSettings;
-    use crate::models::repo::repo_version::RepoVersion;
+    use crate::util::test::repo_builder::TestClientRepoBuilder;
     use crate::util::test::test_utils::TestTempDir;
     use std::collections::HashSet;
     use std::fs;
     use std::path::PathBuf;
-    use url::Url;
 
     /// A client repo at layout v2 holding the remote packs named in `remote_packs`,
     /// each laid out on disk. Written through the real writers so `open` sees a
     /// well-formed repo and its migration pass is a no-op.
     async fn client_repo(key: &str, remote_packs: &[&str]) -> (TestTempDir, PathBuf) {
         let tmp = TestTempDir::new(key);
-        let repo_path = tmp.path().join("repo");
-        fs::create_dir_all(&repo_path).unwrap();
-
-        let packs: HashSet<String> = remote_packs.iter().map(|p| p.to_string()).collect();
-        let repo_config = RepoConfig::new("repo".to_string(), "desc".to_string(), packs);
-        repo_config.write_fixed(&repo_path).await.unwrap();
-
-        RepoUserSettings::new(Url::parse("http://localhost/").unwrap())
-            .write_fixed(&repo_path)
-            .await
-            .unwrap();
-        RepoVersion::current()
-            .write_fixed(&repo_path)
-            .await
-            .unwrap();
-
+        let mut builder = TestClientRepoBuilder::new(tmp.path())
+            .repo_name("repo")
+            .description("desc");
         for pack in remote_packs {
-            PackConfig::new(pack.to_string(), "d".to_string(), vec![], None, None)
-                .init_client_on_fs(&repo_path)
-                .await
-                .unwrap();
+            builder = builder.pack(PackConfig::new(
+                pack.to_string(),
+                "d".to_string(),
+                vec![],
+                None,
+                None,
+            ));
         }
+        let fixture = builder.build().await.unwrap();
 
-        (tmp, repo_path)
+        (tmp, fixture.repo_path().to_path_buf())
     }
 
     fn pack(name: &str, parent: Option<&str>) -> PackConfig {

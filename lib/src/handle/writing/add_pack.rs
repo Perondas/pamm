@@ -66,18 +66,25 @@ impl ClientRepoHandle {
 #[cfg(all(test, feature = "server"))]
 mod tests {
     use crate::handle::reading::get_repo_info::GetRepoInfo;
+    use crate::handle::repo_handle::RepoHandle;
     use crate::handle::server_repo_handle::ServerRepoHandle;
     use crate::models::pack::pack_config::PackConfig;
-    use crate::models::repo::repo_config::RepoConfig;
+    use crate::util::test::repo_builder::TestServerRepoBuilder;
     use crate::util::test::test_utils::TestTempDir;
-    use std::collections::HashSet;
 
     #[tokio::test]
     async fn server_add_pack_lays_out_per_pack_folder_without_settings() {
         let tmp = TestTempDir::new("pamm_server_add_pack_no_settings");
-        let repo_config = RepoConfig::new("repo".to_string(), "desc".to_string(), HashSet::new());
-        let mut server = ServerRepoHandle::create(tmp.path(), repo_config)
+        let fixture = TestServerRepoBuilder::new(tmp.path())
+            .repo_name("repo")
+            .description("desc")
+            .build()
             .await
+            .unwrap();
+        let mut server: ServerRepoHandle = RepoHandle::open(fixture.repo_path())
+            .await
+            .unwrap()
+            .try_into()
             .unwrap();
 
         let pack = PackConfig::new("core".to_string(), "c".to_string(), vec![], None, None);
