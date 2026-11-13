@@ -12,7 +12,9 @@ pub struct PackInfo {
 pub async fn load_pack_info(repo_path: String, pack_name: String) -> anyhow::Result<PackInfo> {
     let repo_path = std::path::Path::new(&repo_path);
 
-    let handle = ClientRepoHandle::open(repo_path).await?;
+    let handle: ClientRepoHandle = pamm_lib::handle::repo_handle::RepoHandle::open(repo_path)
+        .await?
+        .try_into()?;
     handle.get_pack(&pack_name).await.map(Into::into)
 }
 

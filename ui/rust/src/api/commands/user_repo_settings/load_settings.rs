@@ -5,7 +5,9 @@ pub use pamm_lib::models::repo::repo_user_settings::RepoUserSettings;
 pub async fn load_settings(repo_path: String) -> anyhow::Result<FlutterRepoUserSettings> {
     let repot_path = std::path::Path::new(&repo_path);
 
-    let handle = ClientRepoHandle::open(repot_path).await?;
+    let handle: ClientRepoHandle = pamm_lib::handle::repo_handle::RepoHandle::open(repot_path)
+        .await?
+        .try_into()?;
 
     Ok(handle.user_settings().clone().into())
 }

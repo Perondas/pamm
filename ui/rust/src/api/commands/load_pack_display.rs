@@ -15,7 +15,9 @@ pub async fn load_pack_display(
 ) -> anyhow::Result<PackDisplayInfo> {
     let repo_path = std::path::Path::new(&repo_path);
 
-    let handle = ClientRepoHandle::open(repo_path).await?;
+    let handle: ClientRepoHandle = pamm_lib::handle::repo_handle::RepoHandle::open(repo_path)
+        .await?
+        .try_into()?;
     let pack = handle.get_pack(&pack_name).await?;
     let customization = pack.customization.unwrap_or_default();
 

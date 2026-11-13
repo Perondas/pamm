@@ -3,6 +3,8 @@ use pamm_cli_args::subcommands::externals::remove_external::RemoveExternalArgs;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use pamm_lib::handle::externals::load_externals::LoadExternals;
 use pamm_lib::handle::externals::save_externals::SaveExternals;
+use pamm_lib::handle::repo_handle::RepoHandle;
+use std::env::current_dir;
 
 pub async fn remove_external_command(args: RemoveExternalArgs) -> anyhow::Result<()> {
     let handle: ClientRepoHandle = RepoHandle::open(&current_dir()?).await?.try_into()?;

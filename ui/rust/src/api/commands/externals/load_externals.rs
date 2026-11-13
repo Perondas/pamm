@@ -7,7 +7,9 @@ pub async fn load_externals(
 ) -> anyhow::Result<Vec<FlutterExternalAddon>> {
     let repot_path = std::path::Path::new(&repot_path);
 
-    let handle = ClientRepoHandle::open(repot_path).await?;
+    let handle: ClientRepoHandle = pamm_lib::handle::repo_handle::RepoHandle::open(repot_path)
+        .await?
+        .try_into()?;
 
     let externals = handle.load_externals(&pack_name).await?;
 

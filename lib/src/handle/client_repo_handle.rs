@@ -202,7 +202,11 @@ mod tests {
         )
         .unwrap();
 
-        ClientRepoHandle::open(&repo_path).await.unwrap();
+        let _: ClientRepoHandle = RepoHandle::open(&repo_path)
+            .await
+            .unwrap()
+            .try_into()
+            .unwrap();
 
         assert!(repo_path.join("core/pack.config.json").is_file());
         assert!(repo_path.join("core/pack.settings.json").is_file());
@@ -270,7 +274,11 @@ mod local_pack_tests {
         core.init_client_on_fs(&repo_path).await.unwrap();
         fs::create_dir_all(repo_path.join("core/addons/@core_addon")).unwrap();
 
-        let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
+        let mut handle: ClientRepoHandle = RepoHandle::open(&repo_path)
+            .await
+            .unwrap()
+            .try_into()
+            .unwrap();
 
         let mut mission = PackConfig::new(
             "my_mission".to_string(),

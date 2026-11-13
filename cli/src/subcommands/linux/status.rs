@@ -6,7 +6,9 @@ use std::env::current_dir;
 /// Prints the one-time Steam setup for this repo, and the state of Arma's
 /// Proton prefix.
 pub async fn status_command() -> anyhow::Result<()> {
-    let handle = ClientRepoHandle::open(&current_dir()?).await?;
+    let handle: ClientRepoHandle = pamm_lib::handle::repo_handle::RepoHandle::open(&current_dir()?)
+        .await?
+        .try_into()?;
     let setup = handle.linux_launch_setup().await?;
 
     println!("Steam install:  {:?}", setup.flavour);

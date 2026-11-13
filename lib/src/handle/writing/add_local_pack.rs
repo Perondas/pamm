@@ -166,7 +166,11 @@ mod tests {
     #[tokio::test]
     async fn lays_out_the_client_layout_and_records_the_name_outside_the_repo_config() {
         let (_tmp, repo_path) = client_repo("pamm_add_local_pack_layout", &["core"]).await;
-        let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
+        let mut handle: ClientRepoHandle = crate::handle::repo_handle::RepoHandle::open(&repo_path)
+            .await
+            .unwrap()
+            .try_into()
+            .unwrap();
 
         handle
             .add_local_pack(&pack("my_mission", Some("core")))
@@ -195,7 +199,11 @@ mod tests {
     #[tokio::test]
     async fn resolves_like_any_other_pack_once_created() {
         let (_tmp, repo_path) = client_repo("pamm_add_local_pack_resolves", &["core"]).await;
-        let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
+        let mut handle: ClientRepoHandle = crate::handle::repo_handle::RepoHandle::open(&repo_path)
+            .await
+            .unwrap()
+            .try_into()
+            .unwrap();
 
         handle
             .add_local_pack(&pack("my_mission", Some("core")))
@@ -217,14 +225,22 @@ mod tests {
     #[tokio::test]
     async fn survives_a_reopen() {
         let (_tmp, repo_path) = client_repo("pamm_add_local_pack_reopen", &[]).await;
-        let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
+        let mut handle: ClientRepoHandle = crate::handle::repo_handle::RepoHandle::open(&repo_path)
+            .await
+            .unwrap()
+            .try_into()
+            .unwrap();
         handle
             .add_local_pack(&pack("my_mission", None))
             .await
             .unwrap();
         drop(handle);
 
-        let handle = ClientRepoHandle::open(&repo_path).await.unwrap();
+        let handle: ClientRepoHandle = crate::handle::repo_handle::RepoHandle::open(&repo_path)
+            .await
+            .unwrap()
+            .try_into()
+            .unwrap();
         assert!(handle.is_local_pack("my_mission"));
         assert_eq!(
             handle.get_pack("my_mission").await.unwrap().name,
@@ -235,7 +251,11 @@ mod tests {
     #[tokio::test]
     async fn a_local_pack_may_parent_another_local_pack() {
         let (_tmp, repo_path) = client_repo("pamm_add_local_pack_local_parent", &[]).await;
-        let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
+        let mut handle: ClientRepoHandle = crate::handle::repo_handle::RepoHandle::open(&repo_path)
+            .await
+            .unwrap()
+            .try_into()
+            .unwrap();
 
         handle.add_local_pack(&pack("base", None)).await.unwrap();
         handle
@@ -251,7 +271,11 @@ mod tests {
 
     async fn rejects(key: &str, remote_packs: &[&str], config: PackConfig, expected: &str) {
         let (_tmp, repo_path) = client_repo(key, remote_packs).await;
-        let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
+        let mut handle: ClientRepoHandle = crate::handle::repo_handle::RepoHandle::open(&repo_path)
+            .await
+            .unwrap()
+            .try_into()
+            .unwrap();
 
         let err = handle.add_local_pack(&config).await.unwrap_err();
         let err = format!("{:#}", err);
@@ -291,7 +315,11 @@ mod tests {
     #[tokio::test]
     async fn rejects_the_name_of_an_existing_local_pack() {
         let (_tmp, repo_path) = client_repo("pamm_add_local_pack_dup_local", &[]).await;
-        let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
+        let mut handle: ClientRepoHandle = crate::handle::repo_handle::RepoHandle::open(&repo_path)
+            .await
+            .unwrap()
+            .try_into()
+            .unwrap();
         handle
             .add_local_pack(&pack("my_mission", None))
             .await
@@ -379,7 +407,11 @@ mod tests {
         let (_tmp, repo_path) = client_repo("pamm_add_local_pack_folder_taken", &[]).await;
         fs::create_dir_all(repo_path.join("squatter")).unwrap();
 
-        let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
+        let mut handle: ClientRepoHandle = crate::handle::repo_handle::RepoHandle::open(&repo_path)
+            .await
+            .unwrap()
+            .try_into()
+            .unwrap();
         let err = format!(
             "{:#}",
             handle
