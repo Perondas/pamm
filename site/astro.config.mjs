@@ -2,7 +2,7 @@ import { defineConfig } from "astro/config";
 
 // TODO: set `site` to the URL the page will be deployed to.
 export default defineConfig({
-  site: "https://example.com/",
+  site: "https://pamm.perondas.dev",
   vite: {
     css: {
       preprocessorOptions: {
