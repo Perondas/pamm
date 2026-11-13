@@ -9,6 +9,8 @@ pub trait GetPack {
         &self,
         pack_name: &str,
     ) -> impl Future<Output = anyhow::Result<(PackConfig, PackUserSettings)>> + Send;
+
+    fn get_all_pack_names(&self) -> impl Future<Output=anyhow::Result<Vec<&str>>> + Send;
 }
 
 impl RepoHandle {
@@ -63,5 +65,9 @@ impl GetPack for RepoHandle {
         let pack_user_settings = self.read_pack_settings(pack_name).await?;
 
         Ok((pack_config, pack_user_settings))
+    }
+
+    async fn get_all_pack_names(&self) -> anyhow::Result<Vec<&str>> {
+        Ok(self.repo_config.packs.iter().map(|s| s.as_str()).collect())
     }
 }

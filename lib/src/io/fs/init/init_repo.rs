@@ -35,7 +35,7 @@ impl RepoConfig {
 mod tests {
     use super::*;
     use crate::io::files::file_names::fixed_file::FixedFile;
-    use crate::util::test_utils::TestTempDir;
+    use crate::util::test::test_utils::TestTempDir;
     use std::collections::HashSet;
 
     #[tokio::test]

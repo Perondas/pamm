@@ -56,7 +56,7 @@ impl PackConfig {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::util::test_utils::TestTempDir;
+    use crate::util::test::test_utils::TestTempDir;
 
     fn test_pack_config() -> PackConfig {
         PackConfig {

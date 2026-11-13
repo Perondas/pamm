@@ -58,7 +58,7 @@ mod tests {
 
     #[test]
     fn test_pack_index_get_addon_paths() {
-        use crate::util::test_utils::TestTempDir;
+        use crate::util::test::test_utils::TestTempDir;
         let temp_dir = TestTempDir::new("test_pack_index_get_addon_paths");
         let base_path = temp_dir.path();
 

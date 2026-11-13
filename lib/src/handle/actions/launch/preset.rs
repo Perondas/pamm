@@ -61,7 +61,7 @@ fn render_preset(params: &[String], arma_mod_paths: &[String]) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::util::test_utils::TestTempDir;
+    use crate::util::test::test_utils::TestTempDir;
 
     #[test]
     fn clean_pack_names_pass_through() {

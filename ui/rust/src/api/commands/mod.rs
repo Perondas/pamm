@@ -13,3 +13,4 @@ pub mod params;
 pub mod proton;
 pub mod sync_config;
 pub mod user_repo_settings;
+pub mod delete_pack_content;

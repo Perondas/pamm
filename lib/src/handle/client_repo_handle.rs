@@ -148,6 +148,10 @@ impl GetPack for ClientRepoHandle {
 
         self.base.get_pack_with_settings(pack_name).await
     }
+
+    async fn get_all_pack_names(&self) -> anyhow::Result<Vec<&str>> {
+        Ok(self.get_all_packs())
+    }
 }
 
 impl SavePackSettings for ClientRepoHandle {
@@ -164,7 +168,7 @@ impl SavePackSettings for ClientRepoHandle {
 mod tests {
     use super::*;
     use crate::models::repo::repo_version::RepoVersion;
-    use crate::util::test_utils::TestTempDir;
+    use crate::util::test::test_utils::TestTempDir;
     use std::collections::HashSet;
     use std::fs;
 
@@ -220,7 +224,7 @@ mod local_pack_tests {
     use crate::io::progress_reporting::progress_reporter::ProgressReporter;
     use crate::models::pack::addon::AddonSettings;
     use crate::models::repo::repo_version::RepoVersion;
-    use crate::util::test_utils::TestTempDir;
+    use crate::util::test::test_utils::TestTempDir;
     use std::collections::HashSet;
     use std::fs;
     use std::path::PathBuf;

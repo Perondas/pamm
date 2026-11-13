@@ -44,9 +44,9 @@ fn find_workshop_addons() -> anyhow::Result<HashSet<ExternalAddon>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::handle::mock_handle::MockHandle;
     use crate::models::pack::pack_config::PackConfig;
     use crate::models::pack::pack_user_settings::PackUserSettings;
+    use crate::util::test::mock_handle::MockHandle;
     use std::path::PathBuf;
 
     #[tokio::test]
