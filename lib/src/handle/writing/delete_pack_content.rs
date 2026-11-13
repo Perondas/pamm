@@ -31,13 +31,94 @@ impl<T: GetPack + GetRepoInfo + Send> DeletePackContent for T {
     }
 }
 
-#[cfg(test)]
-mod test {
+#[cfg(all(test, feature = "server"))]
+mod server_tests {
+    use super::*;
+    use crate::handle::repo_handle::RepoHandle;
+    use crate::handle::server_repo_handle::ServerRepoHandle;
+    use crate::io::files::name_consts::{ADDONS_DIR_NAME, INDEX_DIR_NAME};
+    use crate::models::pack::pack_config::PackConfig;
+    use crate::util::test::repo_builder::TestServerRepoBuilder;
     use crate::util::test::test_utils::TestTempDir;
 
-    #[test]
-    fn test_delete_pack_content() {
-        // TODO: implement
-        let dir = TestTempDir::new("test_delete_pack_content");
+    #[tokio::test]
+    async fn delete_server_pack_content_clears_addons_and_indexes() {
+        let temp_dir = TestTempDir::new("pamm_delete_server_pack_content");
+        let fixture = TestServerRepoBuilder::new(temp_dir.path())
+            .pack(PackConfig::new(
+                "core".to_string(),
+                "test pack".to_string(),
+                vec![],
+                None,
+                None,
+            ))
+            .pack_file("core", "addons/@addon/file.txt", b"addon data".as_slice())
+            .pack_file("core", "indexes/core.index", b"index data".as_slice())
+            .build()
+            .await
+            .unwrap();
+        let mut repo: ServerRepoHandle = RepoHandle::open(fixture.repo_path())
+            .await
+            .unwrap()
+            .try_into()
+            .unwrap();
+
+        repo.delete_pack_content("core").await.unwrap();
+
+        let pack_path = fixture.repo_path().join("core");
+        for dir in [ADDONS_DIR_NAME, INDEX_DIR_NAME] {
+            let path = pack_path.join(dir);
+            assert!(path.is_dir(), "{dir} directory should remain");
+            assert!(
+                std::fs::read_dir(path).unwrap().next().is_none(),
+                "{dir} directory should be empty"
+            );
+        }
+    }
+}
+
+#[cfg(all(test, feature = "client"))]
+mod client_tests {
+    use super::*;
+    use crate::handle::client_repo_handle::ClientRepoHandle;
+    use crate::handle::repo_handle::RepoHandle;
+    use crate::io::files::name_consts::{ADDONS_DIR_NAME, INDEX_DIR_NAME};
+    use crate::models::pack::pack_config::PackConfig;
+    use crate::util::test::repo_builder::TestClientRepoBuilder;
+    use crate::util::test::test_utils::TestTempDir;
+
+    #[tokio::test]
+    async fn delete_client_pack_content_clears_addons_and_indexes() {
+        let temp_dir = TestTempDir::new("pamm_delete_client_pack_content");
+        let fixture = TestClientRepoBuilder::new(temp_dir.path())
+            .pack(PackConfig::new(
+                "core".to_string(),
+                "test pack".to_string(),
+                vec![],
+                None,
+                None,
+            ))
+            .pack_file("core", "addons/@addon/file.txt", b"addon data".as_slice())
+            .pack_file("core", "indexes/core.index", b"index data".as_slice())
+            .build()
+            .await
+            .unwrap();
+        let mut repo: ClientRepoHandle = RepoHandle::open(fixture.repo_path())
+            .await
+            .unwrap()
+            .try_into()
+            .unwrap();
+
+        repo.delete_pack_content("core").await.unwrap();
+
+        let pack_path = fixture.repo_path().join("core");
+        for dir in [ADDONS_DIR_NAME, INDEX_DIR_NAME] {
+            let path = pack_path.join(dir);
+            assert!(path.is_dir(), "{dir} directory should remain");
+            assert!(
+                std::fs::read_dir(path).unwrap().next().is_none(),
+                "{dir} directory should be empty"
+            );
+        }
     }
 }
