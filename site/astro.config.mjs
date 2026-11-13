@@ -1,6 +1,5 @@
 import { defineConfig } from "astro/config";
 
-// TODO: set `site` to the URL the page will be deployed to.
 export default defineConfig({
   site: "https://pamm.perondas.dev",
   vite: {
