@@ -5,7 +5,7 @@ use pamm_lib::handle::externals::load_externals::LoadExternals;
 use pamm_lib::handle::externals::save_externals::SaveExternals;
 
 pub async fn remove_external_command(args: RemoveExternalArgs) -> anyhow::Result<()> {
-    let handle = ClientRepoHandle::open(&std::env::current_dir()?).await?;
+    let handle: ClientRepoHandle = RepoHandle::open(&current_dir()?).await?.try_into()?;
 
     let externals = handle.load_externals(&args.name).await?;
 

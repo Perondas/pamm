@@ -11,7 +11,7 @@ use crate::commands::init_repo::init_repo_command;
 use crate::commands::launch::launch_command;
 use crate::commands::status::status_command;
 use crate::commands::sync_pack::sync_pack_command;
-use crate::commands::sync_this_only_pack::sync_this_only_pack_command;
+use crate::commands::sync_this_only_pack::sync_this_pack_only_command;
 use crate::subcommands::externals::remove_external::remove_external_command;
 use crate::subcommands::local_packs::remove_local_pack::remove_local_pack_command;
 use crate::subcommands::pack::clear_pack::clear_pack_command;
@@ -53,7 +53,7 @@ async fn main() -> Result<()> {
         AppSubcommand::Build(args) => build_command(args, log_wrapper).await,
         AppSubcommand::InitRemote(args) => init_remote_command(args).await,
         AppSubcommand::Sync(args) => sync_pack_command(args, log_wrapper).await,
-        AppSubcommand::SyncThisOnly(args) => sync_this_only_pack_command(args, log_wrapper).await,
+        AppSubcommand::SyncThisOnly(args) => sync_this_pack_only_command(args, log_wrapper).await,
         AppSubcommand::Launch(args) => launch_command(args).await,
         #[cfg(target_os = "linux")]
         AppSubcommand::Linux(args) => {

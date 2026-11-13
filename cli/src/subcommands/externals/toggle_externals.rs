@@ -5,7 +5,7 @@ use pamm_lib::handle::externals::load_externals::LoadExternals;
 use pamm_lib::handle::externals::save_externals::SaveExternals;
 
 pub async fn toggle_externals_command(args: ToggleExternalsArgs) -> anyhow::Result<()> {
-    let handle = ClientRepoHandle::open(&std::env::current_dir()?).await?;
+    let handle: ClientRepoHandle = RepoHandle::open(&current_dir()?).await?.try_into()?;
 
     let mut externals = handle.load_externals(&args.name).await?;
 

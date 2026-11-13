@@ -3,6 +3,7 @@ use crate::io::fs::fs_writable::FixedFsWritable;
 use crate::io::fs::util::path_checks::is_dir;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_version::RepoVersion;
+use crate::models::server_config::ServerConfig;
 use std::path::{Path, PathBuf};
 use tokio::fs;
 
@@ -11,7 +12,7 @@ impl RepoConfig {
     /// The result is relative to whatever `dest_dir` is relative to — absolute if
     /// `dest_dir` is absolute, otherwise relative (usually to the process working
     /// directory).
-    pub async fn init_blank_on_fs(&self, dest_dir: &Path) -> anyhow::Result<PathBuf> {
+    pub async fn init_server_repo_blank_on_fs(&self, dest_dir: &Path) -> anyhow::Result<PathBuf> {
         if !is_dir(dest_dir).await {
             anyhow::bail!("{} is not a directory", dest_dir.display());
         }
@@ -26,6 +27,9 @@ impl RepoConfig {
         fs::create_dir(base_path.join(MEDIA_DIR_NAME)).await?;
         self.write_fixed(&base_path).await?;
         RepoVersion::current().write_fixed(&base_path).await?;
+
+        let server_config = ServerConfig::default();
+        server_config.write_fixed(&base_path).await?;
 
         Ok(base_path)
     }
@@ -49,7 +53,10 @@ mod tests {
         let config = RepoConfig::new("my_repo".to_string(), "A test repo".to_string(), packs);
 
         // This should succeed
-        let created_path = config.init_blank_on_fs(base_path).await.unwrap();
+        let created_path = config
+            .init_server_repo_blank_on_fs(base_path)
+            .await
+            .unwrap();
 
         assert!(created_path.exists());
         assert!(created_path.is_dir());
@@ -59,8 +66,12 @@ mod tests {
         let config_file = created_path.join(RepoConfig::file_name());
         assert!(config_file.exists());
 
+        // Check if server config was written
+        let server_config_file = created_path.join(ServerConfig::file_name());
+        assert!(server_config_file.exists());
+
         // Calling it again should fail since it already exists
-        let result = config.init_blank_on_fs(base_path).await;
+        let result = config.init_server_repo_blank_on_fs(base_path).await;
         assert!(result.is_err());
     }
 }

@@ -1,10 +1,8 @@
 use crate::handle::reading::get_pack::GetPack;
 use crate::handle::reading::get_repo_info::GetRepoInfo;
-use crate::handle::repo_handle::RepoHandle;
+use crate::handle::repo_handle::{RepoHandle, RepoType};
 use crate::handle::writing::save_pack_settings::SavePackSettings;
-use crate::io::files::file_names::fixed_file::FixedFile;
-use crate::io::fs::fs_readable::KnownFSReadable;
-use crate::io::fs::migration::run_migrations;
+use crate::io::fs::init::init_client_repo_from_remote::init_client_repo_from_remote;
 use crate::io::fs::util::path_checks::is_dir;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_user_settings::PackUserSettings;
@@ -23,34 +21,22 @@ pub struct ClientRepoHandle {
 }
 
 impl ClientRepoHandle {
-    pub async fn open(repo_path: &Path) -> anyhow::Result<Self> {
-        let base = RepoHandle::open(repo_path).await?;
-        ensure!(
-            tokio::fs::try_exists(repo_path.join(RepoUserSettings::file_name())).await?,
-            "Client repo at {:?} is missing user.repo.settings.json. \
-             Did you mean to initialize from a remote via `init-remote`?",
-            repo_path
-        );
-        let user_settings = RepoUserSettings::read_from_known(repo_path).await?;
-        run_migrations::run_migrations(repo_path, &base.repo_config).await?;
-        Ok(Self {
-            base,
-            user_settings,
-        })
+    pub async fn open(_repo_path: &Path) -> anyhow::Result<Self> {
+        todo!()
     }
 
     pub async fn init_from_remote(dest_path: &Path, remote: &Url) -> anyhow::Result<Self> {
         ensure!(is_dir(dest_path).await, "Destination path is not a folder");
 
-        let (repo_config, user_settings) = RepoConfig::init_from_remote(dest_path, remote).await?;
+        let repo_path = init_client_repo_from_remote(dest_path, remote).await?;
 
-        let repo_path = dest_path.join(&repo_config.name);
-        let base = RepoHandle::from_parts(repo_path, repo_config);
+        let handle = RepoHandle::open(&repo_path)
+            .await
+            .context("Failed to open repo after initializing from remote")?;
 
-        Ok(Self {
-            base,
-            user_settings,
-        })
+        handle
+            .try_into()
+            .context("Somehow a new client repo is not actually that?")
     }
 
     pub fn user_settings(&self) -> &RepoUserSettings {
@@ -161,6 +147,20 @@ impl SavePackSettings for ClientRepoHandle {
         settings: &PackUserSettings,
     ) -> anyhow::Result<()> {
         self.write_keyed(settings, pack_name).await
+    }
+}
+
+impl TryFrom<RepoHandle> for ClientRepoHandle {
+    type Error = anyhow::Error;
+
+    fn try_from(handle: RepoHandle) -> Result<Self, Self::Error> {
+        match &handle.repo_type {
+            RepoType::Client { repo_user_settings } => Ok(ClientRepoHandle {
+                user_settings: repo_user_settings.clone(),
+                base: handle,
+            }),
+            _ => Err(anyhow::anyhow!("This does not appear to be a client repo")),
+        }
     }
 }
 
