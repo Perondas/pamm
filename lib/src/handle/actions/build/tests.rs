@@ -40,8 +40,7 @@ impl Fixture {
     }
 
     async fn open(&self) -> ServerRepoHandle {
-        let handle = ServerRepoHandle::open(&self.repo_path).await.unwrap();
-        handle
+        ServerRepoHandle::open(&self.repo_path).await.unwrap()
     }
 
     // Absolute path to the fixture repo's `www` build-output dir (the fixture

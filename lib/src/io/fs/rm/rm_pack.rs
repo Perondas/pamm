@@ -3,6 +3,7 @@ use crate::models::pack::pack_config::PackConfig;
 use anyhow::{Context, anyhow, ensure};
 use std::path::Path;
 
+#[allow(dead_code)]
 /// Removes a pack from disk. Does nothing if pack does not exist. Errors if pack is malformed
 pub async fn remove_pack(parent_dir: impl AsRef<Path>, pack_name: &str) -> anyhow::Result<()> {
     let pack_path = parent_dir.as_ref().join(pack_name);

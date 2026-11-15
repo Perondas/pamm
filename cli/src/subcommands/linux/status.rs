@@ -1,5 +1,4 @@
 use crate::subcommands::linux::proton::detect_proton;
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use pamm_lib::util::proton::teamspeak::{TEAMSPEAK_DOWNLOAD_URL, find_teamspeak};
 use std::env::current_dir;
 

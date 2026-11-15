@@ -81,11 +81,9 @@ impl ClientRepoHandle {
     }
 
     pub fn get_all_packs(&self) -> Vec<&str> {
-        self.repo_config
-            .packs
-            .iter()
-            .chain(self.user_settings.local_packs.iter())
-            .map(|s| s.as_str())
+        self.get_registered_pack_names()
+            .into_iter()
+            .chain(self.user_settings.local_packs.iter().map(|s| s.as_str()))
             .collect()
     }
 }
