@@ -19,7 +19,7 @@ pub async fn get_diff(
 ) -> anyhow::Result<DiffResult> {
     let repo_dir = Path::new(&repo_path);
 
-    let handle: ClientRepoHandle = ClientRepoHandle::open(repo_dir).await?;
+    let handle = ClientRepoHandle::open(repo_dir).await?;
 
     let diff = handle
         .get_pack_diff(&pack_name, dart_progress_reporter.clone(), clear_cache)

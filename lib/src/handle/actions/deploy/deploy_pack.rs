@@ -310,7 +310,7 @@ mod tests {
                 .await
                 .unwrap();
             let repo_path = fixture.repo_path().to_path_buf();
-            let mut server: ServerRepoHandle = ServerRepoHandle::open(&repo_path).await.unwrap();
+            let mut server = ServerRepoHandle::open(&repo_path).await.unwrap();
 
             server.server_config.server_dir = Some(server_dir.clone());
 
@@ -433,7 +433,7 @@ mod tests {
             .build()
             .await
             .unwrap();
-        let server: ServerRepoHandle = ServerRepoHandle::open(fixture.repo_path()).await.unwrap();
+        let server = ServerRepoHandle::open(fixture.repo_path()).await.unwrap();
 
         let err = server.deploy_pack("core").await.unwrap_err().to_string();
         assert!(

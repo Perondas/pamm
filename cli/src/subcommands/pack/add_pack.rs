@@ -4,8 +4,7 @@ use pamm_lib::handle::server_repo_handle::ServerRepoHandle;
 use pamm_lib::models::pack::pack_config::PackConfig;
 
 pub async fn add_pack_command(_args: AddPackArgs) -> anyhow::Result<()> {
-    let mut repo_handle: ServerRepoHandle =
-        ServerRepoHandle::open(&std::env::current_dir()?).await?;
+    let mut repo_handle = ServerRepoHandle::open(&std::env::current_dir()?).await?;
 
     let pack_config = PackConfig::from_cli_input(&repo_handle.get_all_packs())?;
 

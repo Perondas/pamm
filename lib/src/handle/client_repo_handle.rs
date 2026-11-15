@@ -184,7 +184,7 @@ mod tests {
         )
         .unwrap();
 
-        let _: ClientRepoHandle = ClientRepoHandle::open(&repo_path).await.unwrap();
+        let _ = ClientRepoHandle::open(&repo_path).await.unwrap();
 
         assert!(repo_path.join("core/pack.config.json").is_file());
         assert!(repo_path.join("core/pack.settings.json").is_file());
@@ -240,7 +240,7 @@ mod local_pack_tests {
             .unwrap();
         let repo_path = fixture.repo_path().to_path_buf();
 
-        let mut handle: ClientRepoHandle = ClientRepoHandle::open(&repo_path).await.unwrap();
+        let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
 
         let mut mission = PackConfig::new(
             "my_mission".to_string(),

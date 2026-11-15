@@ -3,7 +3,7 @@ use pamm_lib::handle::server_repo_handle::ServerRepoHandle;
 use std::env::current_dir;
 
 pub async fn deploy_command(args: DeployArgs) -> anyhow::Result<()> {
-    let handle: ServerRepoHandle = ServerRepoHandle::open(&current_dir()?).await?;
+    let handle = ServerRepoHandle::open(&current_dir()?).await?;
 
     handle.deploy_pack(&args.name).await?;
 

@@ -11,7 +11,7 @@ pub async fn sync_this_pack_only_command(
     args: SyncThisOnlyPackArgs,
     log_wrapper: LogWrapper,
 ) -> anyhow::Result<()> {
-    let mut repo_handle: ClientRepoHandle = ClientRepoHandle::open(&current_dir()?).await?;
+    let mut repo_handle = ClientRepoHandle::open(&current_dir()?).await?;
 
     repo_handle.sync_repo_config(&DialogerInteractor).await?;
 

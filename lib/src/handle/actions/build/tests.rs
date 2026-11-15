@@ -40,7 +40,7 @@ impl Fixture {
     }
 
     async fn open(&self) -> ServerRepoHandle {
-        let handle: ServerRepoHandle = ServerRepoHandle::open(&self.repo_path).await.unwrap();
+        let handle = ServerRepoHandle::open(&self.repo_path).await.unwrap();
         handle
     }
 
@@ -460,7 +460,7 @@ async fn open_migrates_v1_source_then_build_publishes_v2_www() {
     fs::write(addon_dir.join("file.txt"), b"hello").unwrap();
     fs::write(addon_dir.join("sub").join("nested.txt"), b"world").unwrap();
 
-    let server: ServerRepoHandle = ServerRepoHandle::open(&repo_path).await.unwrap();
+    let server = ServerRepoHandle::open(&repo_path).await.unwrap();
 
     assert!(repo_path.join("core/pack.config.json").is_file());
     assert!(repo_path.join("core/addons/@addon1/file.txt").is_file());

@@ -307,7 +307,7 @@ mod client_tests {
             .build()
             .await
             .unwrap();
-        let repo: ClientRepoHandle = ClientRepoHandle::open(fixture.repo_path()).await.unwrap();
+        let repo = ClientRepoHandle::open(fixture.repo_path()).await.unwrap();
 
         assert!(repo.is_local_pack("mission"));
         assert!(!repo.get_config().packs.contains("mission"));

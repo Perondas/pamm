@@ -5,7 +5,7 @@ use pamm_lib::models::repo::repo_config::RepoConfig;
 pub async fn load_repo(repo_path: String) -> anyhow::Result<RepoConfig> {
     let repo_path = std::path::Path::new(&repo_path);
 
-    let handle: ClientRepoHandle = ClientRepoHandle::open(repo_path).await?;
+    let handle = ClientRepoHandle::open(repo_path).await?;
 
     Ok(handle.get_config().to_owned())
 }

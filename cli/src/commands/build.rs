@@ -6,7 +6,7 @@ use pamm_lib::handle::server_repo_handle::ServerRepoHandle;
 use std::env::current_dir;
 
 pub async fn build_command(args: BuildArgs, log_wrapper: LogWrapper) -> anyhow::Result<()> {
-    let handle: ServerRepoHandle = ServerRepoHandle::open(&current_dir()?).await?;
+    let handle = ServerRepoHandle::open(&current_dir()?).await?;
 
     let mode = if args.copy {
         BuildMode::Copy

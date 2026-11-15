@@ -48,7 +48,7 @@ mod server_tests {
             .build()
             .await
             .unwrap();
-        let mut repo: ServerRepoHandle = ServerRepoHandle::open(fixture.repo_path()).await.unwrap();
+        let mut repo = ServerRepoHandle::open(fixture.repo_path()).await.unwrap();
 
         repo.delete_pack_content("core").await.unwrap();
 
@@ -81,7 +81,7 @@ mod client_tests {
             .build()
             .await
             .unwrap();
-        let mut repo: ClientRepoHandle = ClientRepoHandle::open(fixture.repo_path()).await.unwrap();
+        let mut repo = ClientRepoHandle::open(fixture.repo_path()).await.unwrap();
 
         repo.delete_pack_content("core").await.unwrap();
 

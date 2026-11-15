@@ -9,7 +9,7 @@ pub async fn add_local_pack(
 ) -> anyhow::Result<()> {
     let repot_path = std::path::Path::new(&repo_path);
 
-    let mut handle: ClientRepoHandle = ClientRepoHandle::open(repot_path).await?;
+    let mut handle = ClientRepoHandle::open(repot_path).await?;
 
     handle.add_local_pack(&config.into()).await
 }

@@ -5,7 +5,7 @@ use pamm_lib::handle::optionals::load_optionals::LoadOptionals;
 use std::env::current_dir;
 
 pub async fn toggle_optionals_command(args: ToggleOptionalsArgs) -> anyhow::Result<()> {
-    let handle: ClientRepoHandle = ClientRepoHandle::open(&current_dir()?).await?;
+    let handle = ClientRepoHandle::open(&current_dir()?).await?;
 
     let mut optionals = handle.load_optionals(&args.name).await?;
 
