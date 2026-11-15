@@ -269,7 +269,6 @@ async fn get_path_to_keys(addon_path: &Path) -> anyhow::Result<Vec<PathBuf>> {
 
 #[cfg(test)]
 mod tests {
-    use crate::handle::repo_handle::RepoHandle;
     use crate::handle::server_repo_handle::ServerRepoHandle;
     use crate::models::pack::addon::AddonSettings;
     use crate::models::pack::pack_config::PackConfig;
@@ -311,11 +310,7 @@ mod tests {
                 .await
                 .unwrap();
             let repo_path = fixture.repo_path().to_path_buf();
-            let mut server: ServerRepoHandle = RepoHandle::open(&repo_path)
-                .await
-                .unwrap()
-                .try_into()
-                .unwrap();
+            let mut server: ServerRepoHandle = ServerRepoHandle::open(&repo_path).await.unwrap();
 
             server.server_config.server_dir = Some(server_dir.clone());
 
@@ -438,11 +433,7 @@ mod tests {
             .build()
             .await
             .unwrap();
-        let server: ServerRepoHandle = RepoHandle::open(fixture.repo_path())
-            .await
-            .unwrap()
-            .try_into()
-            .unwrap();
+        let server: ServerRepoHandle = ServerRepoHandle::open(fixture.repo_path()).await.unwrap();
 
         let err = server.deploy_pack("core").await.unwrap_err().to_string();
         assert!(

@@ -2,12 +2,11 @@ use crate::log_wrapper::LogWrapper;
 use crate::progress_reporting::IndicatifProgressReporter;
 use pamm_cli_args::commands::build::BuildArgs;
 use pamm_lib::handle::actions::build::{BuildMode, BuildOptions};
-use pamm_lib::handle::repo_handle::RepoHandle;
 use pamm_lib::handle::server_repo_handle::ServerRepoHandle;
 use std::env::current_dir;
 
 pub async fn build_command(args: BuildArgs, log_wrapper: LogWrapper) -> anyhow::Result<()> {
-    let handle: ServerRepoHandle = RepoHandle::open(&current_dir()?).await?.try_into()?;
+    let handle: ServerRepoHandle = ServerRepoHandle::open(&current_dir()?).await?;
 
     let mode = if args.copy {
         BuildMode::Copy

@@ -1,4 +1,4 @@
-use crate::handle::repo_handle::RepoHandle;
+use crate::handle::repo_handle::RepoBase;
 use crate::io::files::file_paths::rel_path::RelPath;
 use crate::io::files::name_consts::CACHE_DB_DIR_NAME;
 use crate::io::fs::cache::file_cache_entry::FileCacheEntry;
@@ -29,7 +29,7 @@ pub struct IndexGenerator<P: ProgressReporter> {
 
 impl<P: ProgressReporter> IndexGenerator<P> {
     pub async fn from_handle(
-        handle: &RepoHandle,
+        handle: &RepoBase,
         pack_name: &str,
         progress_reporter: P,
     ) -> Result<Self> {

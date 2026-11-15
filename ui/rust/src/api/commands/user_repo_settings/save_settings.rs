@@ -7,9 +7,7 @@ pub async fn save_settings(
 ) -> anyhow::Result<()> {
     let repo_path = std::path::Path::new(&repo_path);
 
-    let mut handle: ClientRepoHandle = pamm_lib::handle::repo_handle::RepoHandle::open(repo_path)
-        .await?
-        .try_into()?;
+    let mut handle: ClientRepoHandle = ClientRepoHandle::open(repo_path).await?;
 
     handle.update_settings(setting.try_into()?).await
 }

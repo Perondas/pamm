@@ -26,9 +26,7 @@ pub async fn sync_pack_with_parents(
 
     let repo_dir = Path::new(&repo_path);
 
-    let handle: ClientRepoHandle = pamm_lib::handle::repo_handle::RepoHandle::open(repo_dir)
-        .await?
-        .try_into()?;
+    let handle: ClientRepoHandle = ClientRepoHandle::open(repo_dir).await?;
 
     // Cancelling drops the download future, which stops every in-flight
     // request and closes its files at the next await point.

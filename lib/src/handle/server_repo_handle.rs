@@ -1,5 +1,6 @@
-use crate::handle::repo_handle::RepoHandle;
+use crate::handle::repo_handle::{ConcreteRepoHandle, RepoBase};
 use crate::io::files::name_consts::WWW_DIR_NAME;
+use crate::io::fs::fs_readable::KnownFSReadable;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::server_config::ServerConfig;
 use anyhow::Context;
@@ -8,21 +9,29 @@ use std::path::{Path, PathBuf};
 
 #[derive(Debug)]
 pub struct ServerRepoHandle {
-    base: RepoHandle,
+    base: RepoBase,
     #[allow(dead_code)]
     pub(crate) server_config: ServerConfig,
 }
 
 impl ServerRepoHandle {
+    pub async fn open(repo_path: &Path) -> anyhow::Result<Self> {
+        let base = RepoBase::load(repo_path).await?;
+        let server_config = ServerConfig::read_from_known(repo_path).await?;
+        Ok(Self {
+            base,
+            server_config,
+        })
+    }
+
     pub async fn create(parent_path: &Path, repo_config: RepoConfig) -> anyhow::Result<Self> {
         let repo_path = repo_config
             .init_server_repo_blank_on_fs(parent_path)
             .await?;
 
-        let base = RepoHandle::open(&repo_path).await?;
-
-        base.try_into()
-            .context("Failed to convert RepoHandle to ServerRepoHandle after creating repo")
+        Self::open(&repo_path)
+            .await
+            .context("Failed to open ServerRepoHandle after creating repo")
     }
 
     pub fn get_www_path(&self) -> PathBuf {
@@ -36,28 +45,16 @@ impl ServerRepoHandle {
 }
 
 impl Deref for ServerRepoHandle {
-    type Target = RepoHandle;
-    fn deref(&self) -> &RepoHandle {
+    type Target = RepoBase;
+    fn deref(&self) -> &RepoBase {
         &self.base
     }
 }
 
 impl DerefMut for ServerRepoHandle {
-    fn deref_mut(&mut self) -> &mut RepoHandle {
+    fn deref_mut(&mut self) -> &mut RepoBase {
         &mut self.base
     }
 }
 
-impl TryFrom<RepoHandle> for ServerRepoHandle {
-    type Error = anyhow::Error;
-
-    fn try_from(base: RepoHandle) -> Result<Self, Self::Error> {
-        match &base.repo_type {
-            crate::handle::repo_handle::RepoType::Server { server_config } => Ok(Self {
-                server_config: server_config.clone(),
-                base,
-            }),
-            _ => Err(anyhow::anyhow!("RepoHandle is not a server repo")),
-        }
-    }
-}
+impl ConcreteRepoHandle for ServerRepoHandle {}

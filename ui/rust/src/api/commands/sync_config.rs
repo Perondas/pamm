@@ -7,9 +7,7 @@ use std::path::Path;
 pub async fn sync_config(repo_path: String) -> anyhow::Result<RepoConfig> {
     let repo_path = Path::new(&repo_path);
 
-    let mut handle: ClientRepoHandle = pamm_lib::handle::repo_handle::RepoHandle::open(repo_path)
-        .await?
-        .try_into()?;
+    let mut handle: ClientRepoHandle = ClientRepoHandle::open(repo_path).await?;
 
     handle.sync_repo_config(&DummyConfigSyncInteractor).await?;
 

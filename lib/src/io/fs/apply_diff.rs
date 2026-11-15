@@ -1,4 +1,4 @@
-use crate::handle::repo_handle::RepoHandle;
+use crate::handle::repo_handle::RepoBase;
 use crate::io::files::file_paths::rel_path::RelPath;
 use crate::io::net::remote_patcher::RemotePatcher;
 use crate::io::progress_reporting::progress_reporter::ProgressReporter;
@@ -27,11 +27,11 @@ pub struct DiffApplier<P: ProgressReporter> {
 impl PackConfig {
     pub fn diff_applier<P: ProgressReporter>(
         &self,
-        repo_handle: &RepoHandle,
+        repo_base: &RepoBase,
         base_url: &Url,
         progress_reporter: P,
     ) -> DiffApplier<P> {
-        let addon_dir = repo_handle.pack_addons_path(&self.name);
+        let addon_dir = repo_base.pack_addons_path(&self.name);
         let remote_patcher = self.remote_patcher(base_url, progress_reporter.clone());
 
         DiffApplier::new(addon_dir, remote_patcher, progress_reporter)

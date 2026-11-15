@@ -1,12 +1,11 @@
 use crate::handle::reading::get_pack::GetPack;
-use crate::handle::reading::get_repo_info::GetRepoInfo;
-use crate::handle::repo_handle::{RepoHandle, RepoType};
+use crate::handle::repo_handle::{ConcreteRepoHandle, RepoBase};
 use crate::handle::writing::save_pack_settings::SavePackSettings;
+use crate::io::fs::fs_readable::KnownFSReadable;
 use crate::io::fs::init::init_client_repo_from_remote::init_client_repo_from_remote;
 use crate::io::fs::util::path_checks::is_dir;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_user_settings::PackUserSettings;
-use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_user_settings::RepoUserSettings;
 use crate::util::name_matches;
 use anyhow::{Context, ensure};
@@ -16,23 +15,31 @@ use url::Url;
 
 #[derive(Debug)]
 pub struct ClientRepoHandle {
-    base: RepoHandle,
+    base: RepoBase,
     user_settings: RepoUserSettings,
 }
 
 impl ClientRepoHandle {
+    pub async fn open(repo_path: &Path) -> anyhow::Result<Self> {
+        let base = RepoBase::load(repo_path).await?;
+
+        let user_settings = RepoUserSettings::read_from_known(repo_path).await?;
+        Ok(Self {
+            base,
+            user_settings,
+        })
+    }
+
     pub async fn init_from_remote(dest_path: &Path, remote: &Url) -> anyhow::Result<Self> {
         ensure!(is_dir(dest_path).await, "Destination path is not a folder");
 
         let repo_path = init_client_repo_from_remote(dest_path, remote).await?;
 
-        let handle = RepoHandle::open(&repo_path)
+        let handle = Self::open(&repo_path)
             .await
             .context("Failed to open repo after initializing from remote")?;
 
-        handle
-            .try_into()
-            .context("Somehow a new client repo is not actually that?")
+        Ok(handle)
     }
 
     pub fn user_settings(&self) -> &RepoUserSettings {
@@ -84,37 +91,29 @@ impl ClientRepoHandle {
 }
 
 impl Deref for ClientRepoHandle {
-    type Target = RepoHandle;
-    fn deref(&self) -> &RepoHandle {
+    type Target = RepoBase;
+    fn deref(&self) -> &RepoBase {
         &self.base
     }
 }
 
 impl DerefMut for ClientRepoHandle {
-    fn deref_mut(&mut self) -> &mut RepoHandle {
+    fn deref_mut(&mut self) -> &mut RepoBase {
         &mut self.base
     }
 }
 
-impl GetRepoInfo for ClientRepoHandle {
-    fn get_repo_path(&self) -> &Path {
-        self.base.get_repo_path()
-    }
-
-    fn get_config(&self) -> &RepoConfig {
-        self.base.get_config()
-    }
-}
+impl ConcreteRepoHandle for ClientRepoHandle {}
 
 impl GetPack for ClientRepoHandle {
     async fn get_pack(&self, pack_name: &str) -> anyhow::Result<PackConfig> {
         // Local packs are absent from the repo config, so they have to bypass
         // its registry check; on disk they are laid out identically.
         if self.is_local_pack(pack_name) {
-            return self.base.read_pack_config(pack_name).await;
+            return self.read_pack_config(pack_name).await;
         }
 
-        self.base.get_pack(pack_name).await
+        self.get_registered_pack(pack_name).await
     }
 
     async fn get_pack_with_settings(
@@ -123,12 +122,12 @@ impl GetPack for ClientRepoHandle {
     ) -> anyhow::Result<(PackConfig, PackUserSettings)> {
         if self.is_local_pack(pack_name) {
             return Ok((
-                self.base.read_pack_config(pack_name).await?,
-                self.base.read_pack_settings(pack_name).await?,
+                self.read_pack_config(pack_name).await?,
+                self.read_pack_settings(pack_name).await?,
             ));
         }
 
-        self.base.get_pack_with_settings(pack_name).await
+        self.get_registered_pack_with_settings(pack_name).await
     }
 
     async fn get_all_pack_names(&self) -> anyhow::Result<Vec<&str>> {
@@ -146,23 +145,10 @@ impl SavePackSettings for ClientRepoHandle {
     }
 }
 
-impl TryFrom<RepoHandle> for ClientRepoHandle {
-    type Error = anyhow::Error;
-
-    fn try_from(handle: RepoHandle) -> Result<Self, Self::Error> {
-        match &handle.repo_type {
-            RepoType::Client { repo_user_settings } => Ok(ClientRepoHandle {
-                user_settings: repo_user_settings.clone(),
-                base: handle,
-            }),
-            _ => Err(anyhow::anyhow!("This does not appear to be a client repo")),
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::models::repo::repo_config::RepoConfig;
     use crate::models::repo::repo_version::RepoVersion;
     use crate::util::test::test_utils::TestTempDir;
     use std::collections::HashSet;
@@ -198,11 +184,7 @@ mod tests {
         )
         .unwrap();
 
-        let _: ClientRepoHandle = RepoHandle::open(&repo_path)
-            .await
-            .unwrap()
-            .try_into()
-            .unwrap();
+        let _: ClientRepoHandle = ClientRepoHandle::open(&repo_path).await.unwrap();
 
         assert!(repo_path.join("core/pack.config.json").is_file());
         assert!(repo_path.join("core/pack.settings.json").is_file());
@@ -258,11 +240,7 @@ mod local_pack_tests {
             .unwrap();
         let repo_path = fixture.repo_path().to_path_buf();
 
-        let mut handle: ClientRepoHandle = RepoHandle::open(&repo_path)
-            .await
-            .unwrap()
-            .try_into()
-            .unwrap();
+        let mut handle: ClientRepoHandle = ClientRepoHandle::open(&repo_path).await.unwrap();
 
         let mut mission = PackConfig::new(
             "my_mission".to_string(),

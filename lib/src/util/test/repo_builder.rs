@@ -250,7 +250,6 @@ mod client_tests {
     use crate::handle::client_repo_handle::ClientRepoHandle;
     use crate::handle::reading::get_pack::GetPack;
     use crate::handle::reading::get_repo_info::GetRepoInfo;
-    use crate::handle::repo_handle::RepoHandle;
     use crate::util::test::test_utils::TestTempDir;
 
     #[tokio::test]
@@ -308,11 +307,7 @@ mod client_tests {
             .build()
             .await
             .unwrap();
-        let repo: ClientRepoHandle = RepoHandle::open(fixture.repo_path())
-            .await
-            .unwrap()
-            .try_into()
-            .unwrap();
+        let repo: ClientRepoHandle = ClientRepoHandle::open(fixture.repo_path()).await.unwrap();
 
         assert!(repo.is_local_pack("mission"));
         assert!(!repo.get_config().packs.contains("mission"));

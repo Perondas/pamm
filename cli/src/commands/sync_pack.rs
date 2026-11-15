@@ -8,10 +8,7 @@ use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use std::env::current_dir;
 
 pub async fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow::Result<()> {
-    let mut repo_handle: ClientRepoHandle =
-        pamm_lib::handle::repo_handle::RepoHandle::open(&current_dir()?)
-            .await?
-            .try_into()?;
+    let mut repo_handle = ClientRepoHandle::open(&current_dir()?).await?;
 
     let progress_reporter = if args.silent {
         IndicatifProgressReporter::disabled(log_wrapper)

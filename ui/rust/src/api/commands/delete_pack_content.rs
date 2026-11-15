@@ -5,9 +5,7 @@ use std::path::Path;
 pub async fn delete_pack_content(repo_path: String, pack_name: String) -> anyhow::Result<()> {
     let repo_path = Path::new(&repo_path);
 
-    let mut handle: ClientRepoHandle = pamm_lib::handle::repo_handle::RepoHandle::open(repo_path)
-        .await?
-        .try_into()?;
+    let mut handle: ClientRepoHandle = ClientRepoHandle::open(repo_path).await?;
 
     handle.delete_pack_content(&pack_name).await?;
 

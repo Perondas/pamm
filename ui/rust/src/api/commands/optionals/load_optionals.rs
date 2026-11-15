@@ -9,9 +9,7 @@ pub async fn load_optionals(
 ) -> anyhow::Result<Vec<OptionalAddon>> {
     let repot_path = std::path::Path::new(&repot_path);
 
-    let handle: ClientRepoHandle = pamm_lib::handle::repo_handle::RepoHandle::open(repot_path)
-        .await?
-        .try_into()?;
+    let handle: ClientRepoHandle = ClientRepoHandle::open(repot_path).await?;
 
     handle.load_optionals(&pack_name).await
 }

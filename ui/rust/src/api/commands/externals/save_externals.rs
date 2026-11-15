@@ -10,9 +10,7 @@ pub async fn save_externals(
 ) -> anyhow::Result<()> {
     let repo_path = std::path::Path::new(&repo_path);
 
-    let handle: ClientRepoHandle = pamm_lib::handle::repo_handle::RepoHandle::open(repo_path)
-        .await?
-        .try_into()?;
+    let handle: ClientRepoHandle = ClientRepoHandle::open(repo_path).await?;
 
     let externals = externals
         .into_iter()

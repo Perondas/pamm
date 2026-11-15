@@ -5,9 +5,7 @@ use pamm_lib::models::pack::pack_config::PackConfig;
 
 pub async fn add_local_pack_command(_args: AddLocalPackArgs) -> anyhow::Result<()> {
     let mut repo_handle: ClientRepoHandle =
-        pamm_lib::handle::repo_handle::RepoHandle::open(&std::env::current_dir()?)
-            .await?
-            .try_into()?;
+        ClientRepoHandle::open(&std::env::current_dir()?).await?;
 
     let pack_config = PackConfig::from_cli_input(&repo_handle.get_all_packs())?;
 

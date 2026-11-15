@@ -34,7 +34,6 @@ impl<T: GetPack + GetRepoInfo + Send> DeletePackContent for T {
 #[cfg(all(test, feature = "server"))]
 mod server_tests {
     use super::*;
-    use crate::handle::repo_handle::RepoHandle;
     use crate::handle::server_repo_handle::ServerRepoHandle;
     use crate::io::files::name_consts::{ADDONS_DIR_NAME, INDEX_DIR_NAME};
     use crate::util::test::repo_builder::default_server_repo;
@@ -49,11 +48,7 @@ mod server_tests {
             .build()
             .await
             .unwrap();
-        let mut repo: ServerRepoHandle = RepoHandle::open(fixture.repo_path())
-            .await
-            .unwrap()
-            .try_into()
-            .unwrap();
+        let mut repo: ServerRepoHandle = ServerRepoHandle::open(fixture.repo_path()).await.unwrap();
 
         repo.delete_pack_content("core").await.unwrap();
 
@@ -73,7 +68,6 @@ mod server_tests {
 mod client_tests {
     use super::*;
     use crate::handle::client_repo_handle::ClientRepoHandle;
-    use crate::handle::repo_handle::RepoHandle;
     use crate::io::files::name_consts::{ADDONS_DIR_NAME, INDEX_DIR_NAME};
     use crate::util::test::repo_builder::default_client_repo;
     use crate::util::test::test_utils::TestTempDir;
@@ -87,11 +81,7 @@ mod client_tests {
             .build()
             .await
             .unwrap();
-        let mut repo: ClientRepoHandle = RepoHandle::open(fixture.repo_path())
-            .await
-            .unwrap()
-            .try_into()
-            .unwrap();
+        let mut repo: ClientRepoHandle = ClientRepoHandle::open(fixture.repo_path()).await.unwrap();
 
         repo.delete_pack_content("core").await.unwrap();
 

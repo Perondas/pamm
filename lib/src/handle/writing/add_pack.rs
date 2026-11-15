@@ -1,6 +1,6 @@
 #[cfg(feature = "client")]
 use crate::handle::client_repo_handle::ClientRepoHandle;
-use crate::handle::repo_handle::RepoHandle;
+use crate::handle::repo_handle::{RepoBase, RepoHandle};
 #[cfg(feature = "server")]
 use crate::handle::server_repo_handle::ServerRepoHandle;
 use crate::handle::writing::reserved_root_names;
@@ -8,11 +8,8 @@ use crate::models::pack::pack_config::PackConfig;
 use crate::util::name_matches::names_match;
 use anyhow::ensure;
 
-impl RepoHandle {
-    /// Shared bookkeeping for adding a pack: ensure the name is new, register it in
-    /// `repo.config.json`, and write the pack config. Does NOT lay out the on-disk
-    /// addon directory — callers do that with the layout that suits their role
-    /// (server vs client), since the two differ (client also writes user settings).
+impl RepoBase {
+    /// Register a pack without choosing its role-specific on-disk layout.
     pub(in crate::handle) async fn register_pack(
         &mut self,
         pack_config: &PackConfig,
@@ -43,10 +40,20 @@ impl RepoHandle {
     }
 }
 
+impl RepoHandle {
+    pub async fn add_pack(&mut self, pack_config: &PackConfig) -> anyhow::Result<()> {
+        match self {
+            #[cfg(feature = "client")]
+            Self::Client(handle) => handle.add_pack(pack_config).await,
+            #[cfg(feature = "server")]
+            Self::Server(handle) => handle.add_pack(pack_config).await,
+        }
+    }
+}
+
 #[cfg(feature = "server")]
 impl ServerRepoHandle {
-    /// Add a pack to the server repo: register it and lay out the source addon
-    /// directory. No client-only settings file is created.
+    /// Add a pack to the server repo. No client-only settings file is created.
     pub async fn add_pack(&mut self, pack_config: &PackConfig) -> anyhow::Result<()> {
         self.register_pack(pack_config).await?;
         pack_config.init_source_on_fs(&self.repo_path).await
@@ -55,8 +62,7 @@ impl ServerRepoHandle {
 
 #[cfg(feature = "client")]
 impl ClientRepoHandle {
-    /// Add a pack to the client repo: register it and lay out the client addon
-    /// directory (including the default user settings).
+    /// Add a pack to the client repo, including its default user settings.
     pub async fn add_pack(&mut self, pack_config: &PackConfig) -> anyhow::Result<()> {
         self.register_pack(pack_config).await?;
         pack_config.init_client_on_fs(&self.repo_path).await
@@ -66,7 +72,6 @@ impl ClientRepoHandle {
 #[cfg(all(test, feature = "server"))]
 mod tests {
     use crate::handle::reading::get_repo_info::GetRepoInfo;
-    use crate::handle::repo_handle::RepoHandle;
     use crate::handle::server_repo_handle::ServerRepoHandle;
     use crate::models::pack::pack_config::PackConfig;
     use crate::util::test::repo_builder::TestServerRepoBuilder;
@@ -81,11 +86,7 @@ mod tests {
             .build()
             .await
             .unwrap();
-        let mut server: ServerRepoHandle = RepoHandle::open(fixture.repo_path())
-            .await
-            .unwrap()
-            .try_into()
-            .unwrap();
+        let mut server = ServerRepoHandle::open(fixture.repo_path()).await.unwrap();
 
         let pack = PackConfig::new("core".to_string(), "c".to_string(), vec![], None, None);
         server.add_pack(&pack).await.unwrap();
@@ -94,11 +95,6 @@ mod tests {
         assert!(server.get_config().packs.contains("core"));
         assert!(repo_path.join("core/pack.config.json").is_file());
         assert!(repo_path.join("core/addons").is_dir());
-
-        // The crux: no client-only settings file on the server.
-        assert!(
-            !repo_path.join("core/pack.settings.json").exists(),
-            "server add-pack must not create pack settings"
-        );
+        assert!(!repo_path.join("core/pack.settings.json").exists());
     }
 }

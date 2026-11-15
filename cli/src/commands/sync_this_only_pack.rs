@@ -5,14 +5,13 @@ use crate::utils::diff_to_string::ToPrettyString;
 use dialoguer::theme::ColorfulTheme;
 use pamm_cli_args::commands::sync_this_only_pack::SyncThisOnlyPackArgs;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-use pamm_lib::handle::repo_handle::RepoHandle;
 use std::env::current_dir;
 
 pub async fn sync_this_pack_only_command(
     args: SyncThisOnlyPackArgs,
     log_wrapper: LogWrapper,
 ) -> anyhow::Result<()> {
-    let mut repo_handle: ClientRepoHandle = RepoHandle::open(&current_dir()?).await?.try_into()?;
+    let mut repo_handle: ClientRepoHandle = ClientRepoHandle::open(&current_dir()?).await?;
 
     repo_handle.sync_repo_config(&DialogerInteractor).await?;
 

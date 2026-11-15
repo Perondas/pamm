@@ -1,7 +1,6 @@
 use pamm_cli_args::commands::launch::{LaunchArgs, LaunchMode};
 use pamm_lib::handle::actions::launch::launch_pack::LaunchParams;
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-use pamm_lib::handle::repo_handle::RepoHandle;
 use std::env::current_dir;
 
 fn to_lib_mode(mode: LaunchMode) -> pamm_lib::handle::actions::launch::launch_pack::LaunchMode {
@@ -15,7 +14,7 @@ fn to_lib_mode(mode: LaunchMode) -> pamm_lib::handle::actions::launch::launch_pa
 }
 
 pub async fn launch_command(args: LaunchArgs) -> anyhow::Result<()> {
-    let handle: ClientRepoHandle = RepoHandle::open(&current_dir()?).await?.try_into()?;
+    let handle: ClientRepoHandle = ClientRepoHandle::open(&current_dir()?).await?;
 
     let launch_params = LaunchParams::new(to_lib_mode(args.launch_type), args.no_optionals);
     let outcome = handle.launch_pack(&args.name, &launch_params).await?;
