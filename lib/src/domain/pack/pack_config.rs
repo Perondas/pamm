@@ -1,0 +1,126 @@
+use crate::domain::addon::AddonSettings;
+use crate::domain::cdlc::Cdlc;
+use crate::domain::pack::pack_customization::PackCustomization;
+use crate::domain::pack::pack_diff::PackDiff;
+use crate::domain::pack::pack_user_settings::PackUserSettings;
+use crate::keyed;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+
+keyed!(PackConfig);
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct PackConfig {
+    pub name: String,
+    pub description: String,
+    pub client_params: Vec<String>,
+    pub parent: Option<String>,
+    pub addons: HashMap<String, AddonSettings>,
+    pub customization: Option<PackCustomization>,
+    #[serde(default)]
+    pub enabled_cdlc: Option<Cdlc>,
+}
+
+impl PackConfig {
+    pub fn new(
+        name: String,
+        description: String,
+        client_params: Vec<String>,
+        parent: Option<String>,
+        enabled_cdlc: Option<Cdlc>,
+    ) -> Self {
+        Self {
+            name,
+            description,
+            client_params,
+            parent,
+            addons: HashMap::new(),
+            customization: None,
+            enabled_cdlc,
+        }
+    }
+
+    pub fn update_addons(mut self, diff: &PackDiff) -> Self {
+        let addons = diff.target_index.get_addon_names();
+        self.addons = addons
+            .into_iter()
+            .map(|name| {
+                let settings = self.addons.remove(name).unwrap_or_default();
+                (name.to_string(), settings)
+            })
+            .collect();
+
+        self
+    }
+
+    pub fn remove_disabled_optionals(&mut self, user_settings: &PackUserSettings) {
+        self.addons.retain(|name, settings| {
+            if settings.is_optional {
+                user_settings.enabled_optionals.contains(name)
+            } else {
+                true
+            }
+        });
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new_pack_config() {
+        let config = PackConfig::new(
+            "test_pack".to_string(),
+            "A test pack".to_string(),
+            vec!["-mod=1".to_string()],
+            Some("parent_pack".to_string()),
+            None,
+        );
+
+        assert_eq!(config.name, "test_pack");
+        assert_eq!(config.description, "A test pack");
+        assert_eq!(config.client_params, vec!["-mod=1".to_string()]);
+        assert_eq!(config.parent, Some("parent_pack".to_string()));
+        assert!(config.addons.is_empty());
+    }
+
+    #[test]
+    fn test_remove_disabled_optionals() {
+        let mut config = PackConfig::new(
+            "test_pack".to_string(),
+            "desc".to_string(),
+            vec![],
+            None,
+            None,
+        );
+
+        // Required addon
+        config.addons.insert(
+            "required_addon".to_string(),
+            AddonSettings { is_optional: false },
+        );
+
+        // Optional addon (enabled)
+        config.addons.insert(
+            "optional_enabled".to_string(),
+            AddonSettings { is_optional: true },
+        );
+
+        // Optional addon (disabled)
+        config.addons.insert(
+            "optional_disabled".to_string(),
+            AddonSettings { is_optional: true },
+        );
+
+        let mut user_settings = PackUserSettings::default();
+        user_settings
+            .enabled_optionals
+            .insert("optional_enabled".to_string());
+
+        config.remove_disabled_optionals(&user_settings);
+
+        assert!(config.addons.contains_key("required_addon"));
+        assert!(config.addons.contains_key("optional_enabled"));
+        assert!(!config.addons.contains_key("optional_disabled"));
+    }
+}

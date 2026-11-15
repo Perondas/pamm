@@ -1,4 +1,4 @@
-use pamm_lib::models::repo::repo_user_settings::RepoUserSettings;
+use pamm_lib::domain::repo::repo_user_settings::RepoUserSettings;
 
 pub mod load_settings;
 pub mod save_settings;

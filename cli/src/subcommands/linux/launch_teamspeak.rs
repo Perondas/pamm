@@ -1,7 +1,9 @@
 use crate::subcommands::linux::proton::detect_proton;
 use anyhow::Context;
 use pamm_cli_args::subcommands::linux::launch_teamspeak::LaunchTeamspeakArgs;
-use pamm_lib::util::proton::teamspeak::{TEAMSPEAK_DOWNLOAD_URL, find_teamspeak, launch_teamspeak};
+use pamm_lib::platform::proton::teamspeak::{
+    TEAMSPEAK_DOWNLOAD_URL, find_teamspeak, launch_teamspeak,
+};
 
 pub fn launch_teamspeak_command(_args: LaunchTeamspeakArgs) -> anyhow::Result<()> {
     let proton = detect_proton()?;

@@ -1,8 +1,8 @@
 use crate::log_wrapper::LogWrapper;
 use crate::progress_reporting::IndicatifProgressReporter;
 use pamm_cli_args::commands::build::BuildArgs;
-use pamm_lib::handle::actions::build::{BuildMode, BuildOptions};
-use pamm_lib::handle::server_repo_handle::ServerRepoHandle;
+use pamm_lib::application::pack::build::{BuildMode, BuildOptions};
+use pamm_lib::application::repo::server::ServerRepoHandle;
 use std::env::current_dir;
 
 pub async fn build_command(args: BuildArgs, log_wrapper: LogWrapper) -> anyhow::Result<()> {

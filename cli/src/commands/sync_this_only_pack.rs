@@ -4,7 +4,7 @@ use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::ToPrettyString;
 use dialoguer::theme::ColorfulTheme;
 use pamm_cli_args::commands::sync_this_only_pack::SyncThisOnlyPackArgs;
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
+use pamm_lib::application::repo::client::ClientRepoHandle;
 use std::env::current_dir;
 
 pub async fn sync_this_pack_only_command(

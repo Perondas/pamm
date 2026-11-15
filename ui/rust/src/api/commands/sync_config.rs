@@ -1,7 +1,7 @@
-use pamm_lib::handle::actions::sync::config_sync_interactor::DummyConfigSyncInteractor;
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-use pamm_lib::handle::reading::get_repo_info::GetRepoInfo;
-use pamm_lib::models::repo::repo_config::RepoConfig;
+use pamm_lib::application::pack::read::get_repo_info::GetRepoInfo;
+use pamm_lib::application::pack::sync::config_sync_interactor::DummyConfigSyncInteractor;
+use pamm_lib::application::repo::client::ClientRepoHandle;
+use pamm_lib::domain::repo::repo_config::RepoConfig;
 use std::path::Path;
 
 pub async fn sync_config(repo_path: String) -> anyhow::Result<RepoConfig> {

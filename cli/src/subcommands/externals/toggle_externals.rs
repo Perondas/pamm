@@ -1,8 +1,8 @@
 use crate::subcommands::externals::externals_to_names;
 use pamm_cli_args::subcommands::externals::toggle_externals::ToggleExternalsArgs;
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-use pamm_lib::handle::externals::load_externals::LoadExternals;
-use pamm_lib::handle::externals::save_externals::SaveExternals;
+use pamm_lib::application::addons::externals::load_externals::LoadExternals;
+use pamm_lib::application::addons::externals::save_externals::SaveExternals;
+use pamm_lib::application::repo::client::ClientRepoHandle;
 use std::env::current_dir;
 
 pub async fn toggle_externals_command(args: ToggleExternalsArgs) -> anyhow::Result<()> {

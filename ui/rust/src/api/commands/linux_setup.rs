@@ -1,6 +1,6 @@
 use flutter_rust_bridge::for_generated::anyhow;
 #[cfg(target_os = "linux")]
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
+use pamm_lib::application::repo::client::ClientRepoHandle;
 
 /// The one-time Steam setup a repo needs on Linux.
 ///
@@ -36,8 +36,10 @@ pub async fn linux_setup_info(repo_dir: String) -> anyhow::Result<Option<LinuxSe
 
     Ok(Some(LinuxSetupInfo {
         steam_flavour: match setup.flavour {
-            pamm_lib::util::dirs::steam_install::SteamFlavour::Native => SteamFlavour::Native,
-            pamm_lib::util::dirs::steam_install::SteamFlavour::Flatpak => SteamFlavour::Flatpak,
+            pamm_lib::platform::steam::steam_install::SteamFlavour::Native => SteamFlavour::Native,
+            pamm_lib::platform::steam::steam_install::SteamFlavour::Flatpak => {
+                SteamFlavour::Flatpak
+            }
         },
         arma_install_dir: setup.arma_install_dir,
         launch_options: setup.launch_options,

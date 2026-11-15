@@ -1,9 +1,9 @@
 use flutter_rust_bridge::for_generated::anyhow;
 use flutter_rust_bridge::frb;
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-use pamm_lib::handle::reading::get_repo_info::GetRepoInfo;
-pub use pamm_lib::models::repo::repo_config::RepoConfig;
-pub use pamm_lib::models::repo::repo_customization::RepoCustomization;
+use pamm_lib::application::pack::read::get_repo_info::GetRepoInfo;
+use pamm_lib::application::repo::client::ClientRepoHandle;
+pub use pamm_lib::domain::repo::repo_config::RepoConfig;
+pub use pamm_lib::domain::repo::repo_customization::RepoCustomization;
 use std::collections::HashSet;
 use std::path::Path;
 use url::Url;

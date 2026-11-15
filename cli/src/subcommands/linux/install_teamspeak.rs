@@ -1,7 +1,7 @@
 use crate::subcommands::linux::proton::detect_proton;
 use anyhow::{anyhow, bail};
 use pamm_cli_args::subcommands::linux::install_teamspeak::InstallTeamspeakArgs;
-use pamm_lib::util::proton::teamspeak::{find_teamspeak, install_teamspeak};
+use pamm_lib::platform::proton::teamspeak::{find_teamspeak, install_teamspeak};
 
 pub fn install_teamspeak_command(args: InstallTeamspeakArgs) -> anyhow::Result<()> {
     if args

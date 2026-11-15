@@ -1,6 +1,6 @@
 use crate::frb_generated::StreamSink;
 use flutter_rust_bridge::frb;
-use pamm_lib::io::progress_reporting::progress_reporter::ProgressReporter;
+use pamm_lib::infrastructure::progress::progress_reporter::ProgressReporter;
 use serde_json::json;
 use std::sync::Arc;
 

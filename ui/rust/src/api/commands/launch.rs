@@ -1,5 +1,5 @@
-use pamm_lib::handle::actions::launch::launch_pack::{LaunchMode, LaunchParams};
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
+use pamm_lib::application::pack::launch::launch_pack::{LaunchMode, LaunchParams};
+use pamm_lib::application::repo::client::ClientRepoHandle;
 use std::path::Path;
 
 pub async fn launch(

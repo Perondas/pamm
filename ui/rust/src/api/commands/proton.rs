@@ -14,12 +14,12 @@ pub struct ProtonInfo {
 }
 
 #[cfg(target_os = "linux")]
-fn detect() -> anyhow::Result<pamm_lib::util::proton::proton_env::Proton> {
+fn detect() -> anyhow::Result<pamm_lib::platform::proton::proton_env::Proton> {
     use anyhow::Context;
 
-    let arma = pamm_lib::util::dirs::arma_install::find_arma_install()
+    let arma = pamm_lib::platform::steam::arma_install::find_arma_install()
         .context("Failed to find the Arma 3 installation")?;
-    pamm_lib::util::proton::proton_env::Proton::detect(&arma)
+    pamm_lib::platform::proton::proton_env::Proton::detect(&arma)
 }
 
 /// The child is Proton's wrapper script. Reaping it on a thread keeps it from
@@ -36,7 +36,7 @@ pub fn proton_info() -> anyhow::Result<ProtonInfo> {
     Ok(ProtonInfo {
         version: proton.version().ok(),
         proton_dir: proton.proton_dir.display().to_string(),
-        teamspeak_exe: pamm_lib::util::proton::teamspeak::find_teamspeak(&proton.prefix())
+        teamspeak_exe: pamm_lib::platform::proton::teamspeak::find_teamspeak(&proton.prefix())
             .map(|exe| exe.display().to_string()),
     })
 }
@@ -44,7 +44,7 @@ pub fn proton_info() -> anyhow::Result<ProtonInfo> {
 /// Blocks until the installer exits.
 #[cfg(target_os = "linux")]
 pub fn proton_install_teamspeak(installer: String, silent: bool) -> anyhow::Result<()> {
-    pamm_lib::util::proton::teamspeak::install_teamspeak(
+    pamm_lib::platform::proton::teamspeak::install_teamspeak(
         &detect()?,
         std::path::Path::new(&installer),
         silent,
@@ -54,7 +54,7 @@ pub fn proton_install_teamspeak(installer: String, silent: bool) -> anyhow::Resu
 #[cfg(target_os = "linux")]
 pub fn proton_launch_teamspeak() -> anyhow::Result<()> {
     use anyhow::Context;
-    use pamm_lib::util::proton::teamspeak::{find_teamspeak, launch_teamspeak};
+    use pamm_lib::platform::proton::teamspeak::{find_teamspeak, launch_teamspeak};
 
     let proton = detect()?;
     let exe = find_teamspeak(&proton.prefix()).context("TeamSpeak is not installed")?;

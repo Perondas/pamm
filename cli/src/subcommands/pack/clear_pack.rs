@@ -1,7 +1,7 @@
 use log::info;
 use pamm_cli_args::subcommands::pack::clear_pack::ClearPackArgs;
-use pamm_lib::handle::repo_handle::RepoHandle;
-use pamm_lib::handle::writing::delete_pack_content::DeletePackContent;
+use pamm_lib::application::pack::write::delete_pack_content::DeletePackContent;
+use pamm_lib::application::repo::handle::RepoHandle;
 
 pub async fn clear_pack_command(args: ClearPackArgs) -> anyhow::Result<()> {
     let mut repo_handle = RepoHandle::open(&std::env::current_dir()?).await?;

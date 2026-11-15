@@ -1,6 +1,6 @@
 use crate::log_wrapper::LogWrapper;
 use indicatif::{ProgressBar, ProgressStyle};
-use pamm_lib::io::progress_reporting::progress_reporter::ProgressReporter;
+use pamm_lib::infrastructure::progress::progress_reporter::ProgressReporter;
 use std::sync::{Arc, RwLock};
 use std::time::Duration;
 

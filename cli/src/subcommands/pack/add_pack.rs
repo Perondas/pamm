@@ -1,7 +1,7 @@
 use crate::commands::input::from_cli_input::FromCliInputWithContext;
 use pamm_cli_args::subcommands::pack::add_pack::AddPackArgs;
-use pamm_lib::handle::server_repo_handle::ServerRepoHandle;
-use pamm_lib::models::pack::pack_config::PackConfig;
+use pamm_lib::application::repo::server::ServerRepoHandle;
+use pamm_lib::domain::pack::pack_config::PackConfig;
 
 pub async fn add_pack_command(_args: AddPackArgs) -> anyhow::Result<()> {
     let mut repo_handle = ServerRepoHandle::open(&std::env::current_dir()?).await?;

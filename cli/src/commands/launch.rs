@@ -1,10 +1,10 @@
 use pamm_cli_args::commands::launch::{LaunchArgs, LaunchMode};
-use pamm_lib::handle::actions::launch::launch_pack::LaunchParams;
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
+use pamm_lib::application::pack::launch::launch_pack::LaunchParams;
+use pamm_lib::application::repo::client::ClientRepoHandle;
 use std::env::current_dir;
 
-fn to_lib_mode(mode: LaunchMode) -> pamm_lib::handle::actions::launch::launch_pack::LaunchMode {
-    use pamm_lib::handle::actions::launch::launch_pack::LaunchMode as LibLaunchMode;
+fn to_lib_mode(mode: LaunchMode) -> pamm_lib::application::pack::launch::launch_pack::LaunchMode {
+    use pamm_lib::application::pack::launch::launch_pack::LaunchMode as LibLaunchMode;
 
     match mode {
         #[cfg(target_os = "windows")]

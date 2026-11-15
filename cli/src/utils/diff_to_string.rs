@@ -1,11 +1,11 @@
 use indicatif::DecimalBytes;
-use pamm_lib::models::index::get_dl_size::GetDlSize;
-use pamm_lib::models::index::get_size_change::GetSizeChange;
-use pamm_lib::models::index::index_node::{IndexNode, NodeKind};
-use pamm_lib::models::index::node_diff::{
+use pamm_lib::domain::index::get_dl_size::GetDlSize;
+use pamm_lib::domain::index::get_size_change::GetSizeChange;
+use pamm_lib::domain::index::index_node::{IndexNode, NodeKind};
+use pamm_lib::domain::index::node_diff::{
     FileModification, ModifiedNodeKind, NodeDiff, NodeModification,
 };
-use pamm_lib::models::pack::pack_diff::PackDiff;
+use pamm_lib::domain::pack::pack_diff::PackDiff;
 
 pub trait ToPrettyString {
     fn to_pretty_string(&self) -> String;

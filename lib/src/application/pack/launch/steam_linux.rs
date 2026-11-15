@@ -1,0 +1,90 @@
+use crate::application::pack::launch::launch_pack::LaunchOutcome;
+use crate::application::pack::launch::preset::Preset;
+use crate::application::pack::read::get_pack::GetPack;
+use crate::application::repo::client::ClientRepoHandle;
+use crate::domain::cdlc::Cdlc;
+use crate::platform::steam::ARMA_APP_ID;
+use crate::platform::steam::arma_install::find_arma_install;
+use crate::platform::steam::container_path::to_arma_path;
+use anyhow::Context;
+use log::{debug, info, warn};
+use std::path::Path;
+
+impl ClientRepoHandle {
+    /// Launches through Steam by writing a preset file and opening a
+    /// `steam://run` URL that points at it.
+    pub(super) async fn launch_via_steam(
+        &self,
+        pack_name: &str,
+        addon_paths: &[String],
+        cdlc: Option<Cdlc>,
+    ) -> anyhow::Result<LaunchOutcome> {
+        info!("Launching pack '{}' via Steam", pack_name);
+
+        let arma = find_arma_install().context("Failed to find the Arma 3 installation")?;
+
+        // Host paths might not be what the game sees. Under Flatpak the persisted
+        // home is mounted elsewhere, and a host path there would resolve
+        // successfully to the wrong directory rather than failing loudly.
+        let mut arma_mod_paths = addon_paths
+            .iter()
+            .map(|path| to_arma_path(&arma.steam.container_path(Path::new(path))))
+            .collect::<anyhow::Result<Vec<_>>>()?;
+
+        // CDLCs are addressed by their short form, which is not a path and
+        // must not be translated
+        if let Some(cdlc) = cdlc {
+            arma_mod_paths.push(cdlc.short_form().to_string());
+        }
+
+        // Earlier versions symlinked mods into <arma>/pamm/. Warn the user
+        let legacy_dir = arma.install_dir.join("pamm");
+        if legacy_dir.exists() {
+            warn!(
+                "{legacy_dir:?} is left over from an older pamm and is no longer used. \
+                 It is safe to delete."
+            );
+        }
+
+        let (pack_config, settings) = self.get_pack_with_settings(pack_name).await?;
+        let params = [pack_config.client_params, settings.launch_params].concat();
+
+        let preset = Preset::new(pack_name.to_string(), params, arma_mod_paths);
+
+        let preset_path = preset.write_to(&arma.install_dir).await?;
+
+        info!("Wrote preset to {preset_path:?}");
+
+        let launch_url = preset_launch_url(&preset_path);
+
+        debug!("Steam launch URL: {launch_url}");
+        open::that(launch_url).context("Failed to launch pack via Steam")?;
+
+        Ok(LaunchOutcome {
+            preset_path: Some(preset_path.display().to_string()),
+        })
+    }
+}
+
+/// The URL that launches Arma with a preset.
+fn preset_launch_url(path_to_par: impl AsRef<Path>) -> String {
+    let file_name = path_to_par
+        .as_ref()
+        .file_name()
+        .expect("Somehow we have a file with no name?")
+        .to_string_lossy();
+    format!("steam://run/{ARMA_APP_ID}//-noLauncher -par={file_name}/")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn builds_the_preset_launch_url() {
+        assert_eq!(
+            preset_launch_url("pamm_core.txt"),
+            "steam://run/107410//-noLauncher -par=pamm_core.txt/"
+        );
+    }
+}

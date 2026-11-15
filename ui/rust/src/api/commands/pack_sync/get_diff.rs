@@ -2,12 +2,12 @@ use crate::api::commands::pack_sync::file_change::{get_file_changes, FileChange}
 use crate::api::frb;
 use crate::api::progress_reporting::DartProgressReporter;
 use crate::frb_generated::RustAutoOpaque;
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-use pamm_lib::io::progress_reporting::progress_reporter::ProgressReporter;
-use pamm_lib::models::index::get_dl_size::GetDlSize;
-use pamm_lib::models::index::get_size_change::GetSizeChange;
-use pamm_lib::models::pack::pack_diff::PackDiff;
-use pamm_lib::models::self_keyed::SelfKeyed;
+use pamm_lib::application::repo::client::ClientRepoHandle;
+use pamm_lib::domain::index::get_dl_size::GetDlSize;
+use pamm_lib::domain::index::get_size_change::GetSizeChange;
+use pamm_lib::domain::pack::pack_diff::PackDiff;
+use pamm_lib::domain::self_keyed::SelfKeyed;
+use pamm_lib::infrastructure::progress::progress_reporter::ProgressReporter;
 use std::collections::HashMap;
 use std::path::Path;
 
