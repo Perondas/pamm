@@ -1,4 +1,4 @@
-use crate::handle::repo_handle::RepoHandle;
+use crate::handle::repo_handle::{ConcreteRepoHandle, RepoBase, RepoHandle};
 use crate::models::repo::repo_config::RepoConfig;
 
 pub trait UpdateRepoConfig {
@@ -8,10 +8,27 @@ pub trait UpdateRepoConfig {
     ) -> impl Future<Output = anyhow::Result<()>> + Send;
 }
 
-impl UpdateRepoConfig for RepoHandle {
+impl UpdateRepoConfig for RepoBase {
     async fn update_repo_config(&mut self, repo_config: RepoConfig) -> anyhow::Result<()> {
         self.write(&repo_config).await?;
         self.repo_config = repo_config;
         Ok(())
+    }
+}
+
+impl<T: ConcreteRepoHandle> UpdateRepoConfig for T {
+    async fn update_repo_config(&mut self, repo_config: RepoConfig) -> anyhow::Result<()> {
+        self.deref_mut().update_repo_config(repo_config).await
+    }
+}
+
+impl UpdateRepoConfig for RepoHandle {
+    async fn update_repo_config(&mut self, repo_config: RepoConfig) -> anyhow::Result<()> {
+        match self {
+            #[cfg(feature = "client")]
+            Self::Client(handle) => handle.update_repo_config(repo_config).await,
+            #[cfg(feature = "server")]
+            Self::Server(handle) => handle.update_repo_config(repo_config).await,
+        }
     }
 }

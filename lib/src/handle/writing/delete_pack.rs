@@ -1,4 +1,4 @@
-use crate::handle::repo_handle::RepoHandle;
+use crate::handle::repo_handle::{ConcreteRepoHandle, RepoBase, RepoHandle};
 use crate::io::files::file_paths::rel_path::RelPath;
 use crate::io::fs::util::path_checks::is_dir;
 use anyhow::{Context, anyhow, ensure};
@@ -11,7 +11,7 @@ pub trait DeletePack {
     ) -> impl Future<Output = anyhow::Result<()>> + Send;
 }
 
-impl DeletePack for RepoHandle {
+impl DeletePack for RepoBase {
     async fn delete_pack(&mut self, pack_name: &str, _delete_on_fs: bool) -> anyhow::Result<()> {
         ensure!(
             self.repo_config.packs.contains(pack_name),
@@ -20,7 +20,6 @@ impl DeletePack for RepoHandle {
         );
 
         let _pack_path = RelPath::from_name(pack_name);
-
         self.repo_config.packs.remove(pack_name);
         self.write(&self.repo_config).await?;
 
@@ -32,5 +31,22 @@ impl DeletePack for RepoHandle {
         }
 
         Ok(())
+    }
+}
+
+impl<T: ConcreteRepoHandle> DeletePack for T {
+    async fn delete_pack(&mut self, pack_name: &str, delete_on_fs: bool) -> anyhow::Result<()> {
+        self.deref_mut().delete_pack(pack_name, delete_on_fs).await
+    }
+}
+
+impl DeletePack for RepoHandle {
+    async fn delete_pack(&mut self, pack_name: &str, delete_on_fs: bool) -> anyhow::Result<()> {
+        match self {
+            #[cfg(feature = "client")]
+            Self::Client(handle) => handle.delete_pack(pack_name, delete_on_fs).await,
+            #[cfg(feature = "server")]
+            Self::Server(handle) => handle.delete_pack(pack_name, delete_on_fs).await,
+        }
     }
 }

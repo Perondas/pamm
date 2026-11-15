@@ -192,7 +192,7 @@ mod tests {
     use crate::io::fs::migration::run_migrations;
     use crate::models::repo::repo_config::RepoConfig;
     use crate::models::repo::repo_version::{CURRENT_REPO_VERSION, RepoVersion};
-    use crate::util::test_utils::TestTempDir;
+    use crate::util::test::test_utils::TestTempDir;
     use std::collections::HashSet;
     use std::fs;
     use std::path::PathBuf;

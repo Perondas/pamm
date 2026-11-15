@@ -3,9 +3,10 @@ use pamm_cli_args::subcommands::externals::toggle_externals::ToggleExternalsArgs
 use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 use pamm_lib::handle::externals::load_externals::LoadExternals;
 use pamm_lib::handle::externals::save_externals::SaveExternals;
+use std::env::current_dir;
 
 pub async fn toggle_externals_command(args: ToggleExternalsArgs) -> anyhow::Result<()> {
-    let handle = ClientRepoHandle::open(&std::env::current_dir()?).await?;
+    let handle = ClientRepoHandle::open(&current_dir()?).await?;
 
     let mut externals = handle.load_externals(&args.name).await?;
 

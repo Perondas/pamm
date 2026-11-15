@@ -1,14 +1,11 @@
 use crate::handle::reading::get_pack::GetPack;
-use crate::handle::reading::get_repo_info::GetRepoInfo;
-use crate::handle::repo_handle::RepoHandle;
+use crate::handle::repo_handle::{ConcreteRepoHandle, RepoBase};
 use crate::handle::writing::save_pack_settings::SavePackSettings;
-use crate::io::files::file_names::fixed_file::FixedFile;
 use crate::io::fs::fs_readable::KnownFSReadable;
-use crate::io::fs::migration::run_migrations;
+use crate::io::fs::init::init_client_repo_from_remote::init_client_repo_from_remote;
 use crate::io::fs::util::path_checks::is_dir;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_user_settings::PackUserSettings;
-use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_user_settings::RepoUserSettings;
 use crate::util::name_matches;
 use anyhow::{Context, ensure};
@@ -18,21 +15,17 @@ use url::Url;
 
 #[derive(Debug)]
 pub struct ClientRepoHandle {
-    base: RepoHandle,
+    base: RepoBase,
     user_settings: RepoUserSettings,
 }
 
 impl ClientRepoHandle {
     pub async fn open(repo_path: &Path) -> anyhow::Result<Self> {
-        let base = RepoHandle::open(repo_path).await?;
-        ensure!(
-            tokio::fs::try_exists(repo_path.join(RepoUserSettings::file_name())).await?,
-            "Client repo at {:?} is missing user.repo.settings.json. \
-             Did you mean to initialize from a remote via `init-remote`?",
-            repo_path
-        );
-        let user_settings = RepoUserSettings::read_from_known(repo_path).await?;
-        run_migrations::run_migrations(repo_path, &base.repo_config).await?;
+        let base = RepoBase::load(repo_path).await?;
+
+        let user_settings = RepoUserSettings::read_from_known(repo_path)
+            .await
+            .context("Failed to read user settings. Is this a client repository?")?;
         Ok(Self {
             base,
             user_settings,
@@ -42,15 +35,13 @@ impl ClientRepoHandle {
     pub async fn init_from_remote(dest_path: &Path, remote: &Url) -> anyhow::Result<Self> {
         ensure!(is_dir(dest_path).await, "Destination path is not a folder");
 
-        let (repo_config, user_settings) = RepoConfig::init_from_remote(dest_path, remote).await?;
+        let repo_path = init_client_repo_from_remote(dest_path, remote).await?;
 
-        let repo_path = dest_path.join(&repo_config.name);
-        let base = RepoHandle::from_parts(repo_path, repo_config);
+        let handle = Self::open(&repo_path)
+            .await
+            .context("Failed to open repo after initializing from remote")?;
 
-        Ok(Self {
-            base,
-            user_settings,
-        })
+        Ok(handle)
     }
 
     pub fn user_settings(&self) -> &RepoUserSettings {
@@ -92,47 +83,37 @@ impl ClientRepoHandle {
     }
 
     pub fn get_all_packs(&self) -> Vec<&str> {
-        self.repo_config
-            .packs
-            .iter()
-            .chain(self.user_settings.local_packs.iter())
-            .map(|s| s.as_str())
+        self.get_registered_pack_names()
+            .into_iter()
+            .chain(self.user_settings.local_packs.iter().map(|s| s.as_str()))
             .collect()
     }
 }
 
 impl Deref for ClientRepoHandle {
-    type Target = RepoHandle;
-    fn deref(&self) -> &RepoHandle {
+    type Target = RepoBase;
+    fn deref(&self) -> &RepoBase {
         &self.base
     }
 }
 
 impl DerefMut for ClientRepoHandle {
-    fn deref_mut(&mut self) -> &mut RepoHandle {
+    fn deref_mut(&mut self) -> &mut RepoBase {
         &mut self.base
     }
 }
 
-impl GetRepoInfo for ClientRepoHandle {
-    fn get_repo_path(&self) -> &Path {
-        self.base.get_repo_path()
-    }
-
-    fn get_config(&self) -> &RepoConfig {
-        self.base.get_config()
-    }
-}
+impl ConcreteRepoHandle for ClientRepoHandle {}
 
 impl GetPack for ClientRepoHandle {
     async fn get_pack(&self, pack_name: &str) -> anyhow::Result<PackConfig> {
         // Local packs are absent from the repo config, so they have to bypass
         // its registry check; on disk they are laid out identically.
         if self.is_local_pack(pack_name) {
-            return self.base.read_pack_config(pack_name).await;
+            return self.read_pack_config(pack_name).await;
         }
 
-        self.base.get_pack(pack_name).await
+        self.get_registered_pack(pack_name).await
     }
 
     async fn get_pack_with_settings(
@@ -141,12 +122,16 @@ impl GetPack for ClientRepoHandle {
     ) -> anyhow::Result<(PackConfig, PackUserSettings)> {
         if self.is_local_pack(pack_name) {
             return Ok((
-                self.base.read_pack_config(pack_name).await?,
-                self.base.read_pack_settings(pack_name).await?,
+                self.read_pack_config(pack_name).await?,
+                self.read_pack_settings(pack_name).await?,
             ));
         }
 
-        self.base.get_pack_with_settings(pack_name).await
+        self.get_registered_pack_with_settings(pack_name).await
+    }
+
+    async fn get_all_pack_names(&self) -> anyhow::Result<Vec<&str>> {
+        Ok(self.get_all_packs())
     }
 }
 
@@ -163,8 +148,9 @@ impl SavePackSettings for ClientRepoHandle {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::models::repo::repo_config::RepoConfig;
     use crate::models::repo::repo_version::RepoVersion;
-    use crate::util::test_utils::TestTempDir;
+    use crate::util::test::test_utils::TestTempDir;
     use std::collections::HashSet;
     use std::fs;
 
@@ -198,7 +184,7 @@ mod tests {
         )
         .unwrap();
 
-        ClientRepoHandle::open(&repo_path).await.unwrap();
+        let _ = ClientRepoHandle::open(&repo_path).await.unwrap();
 
         assert!(repo_path.join("core/pack.config.json").is_file());
         assert!(repo_path.join("core/pack.settings.json").is_file());
@@ -216,12 +202,10 @@ mod tests {
 mod local_pack_tests {
     use super::*;
     use crate::handle::reading::get_canonical_addon_paths::GetAddonPaths;
-    use crate::io::fs::fs_writable::FixedFsWritable;
     use crate::io::progress_reporting::progress_reporter::ProgressReporter;
     use crate::models::pack::addon::AddonSettings;
-    use crate::models::repo::repo_version::RepoVersion;
-    use crate::util::test_utils::TestTempDir;
-    use std::collections::HashSet;
+    use crate::util::test::repo_builder::TestClientRepoBuilder;
+    use crate::util::test::test_utils::TestTempDir;
     use std::fs;
     use std::path::PathBuf;
 
@@ -240,31 +224,21 @@ mod local_pack_tests {
     /// exist on disk, as they would after a sync.
     async fn repo_with_local_pack(key: &str) -> (TestTempDir, PathBuf, ClientRepoHandle) {
         let tmp = TestTempDir::new(key);
-        let repo_path = tmp.path().join("repo");
-        fs::create_dir_all(&repo_path).unwrap();
-
-        let repo_config = RepoConfig::new(
-            "repo".to_string(),
-            "desc".to_string(),
-            HashSet::from(["core".to_string()]),
-        );
-        repo_config.write_fixed(&repo_path).await.unwrap();
-        RepoUserSettings::new(Url::parse("http://localhost/").unwrap())
-            .write_fixed(&repo_path)
-            .await
-            .unwrap();
-        RepoVersion::current()
-            .write_fixed(&repo_path)
-            .await
-            .unwrap();
 
         let mut core = PackConfig::new("core".to_string(), "d".to_string(), vec![], None, None);
         core.addons.insert(
             "@core_addon".to_string(),
             AddonSettings { is_optional: false },
         );
-        core.init_client_on_fs(&repo_path).await.unwrap();
-        fs::create_dir_all(repo_path.join("core/addons/@core_addon")).unwrap();
+        let fixture = TestClientRepoBuilder::new(tmp.path())
+            .repo_name("repo")
+            .description("desc")
+            .pack(core)
+            .pack_file("core", "addons/@core_addon/.keep", b"".as_slice())
+            .build()
+            .await
+            .unwrap();
+        let repo_path = fixture.repo_path().to_path_buf();
 
         let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
 

@@ -33,10 +33,10 @@ pub(in crate::handle) trait GetExternalAddonsPaths {
 mod tests {
     use super::*;
     use crate::handle::externals::external_addon::ExternalAddon;
-    use crate::handle::mock_handle::MockHandle;
     use crate::io::fs::util::clean_path::canonicalize_and_clean_path;
     use crate::models::pack::pack_config::PackConfig;
     use crate::models::pack::pack_user_settings::PackUserSettings;
+    use crate::util::test::mock_handle::MockHandle;
     use std::path::PathBuf;
 
     #[tokio::test]

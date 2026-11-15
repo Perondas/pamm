@@ -4,7 +4,6 @@ pub mod progress_reporting;
 pub mod subcommands;
 pub mod utils;
 
-use crate::commands::add_pack::add_pack_command;
 use crate::commands::build::build_command;
 use crate::commands::deploy::deploy_command;
 use crate::commands::init_remote::init_remote_command;
@@ -12,9 +11,10 @@ use crate::commands::init_repo::init_repo_command;
 use crate::commands::launch::launch_command;
 use crate::commands::status::status_command;
 use crate::commands::sync_pack::sync_pack_command;
-use crate::commands::sync_this_only_pack::sync_this_only_pack_command;
+use crate::commands::sync_this_only_pack::sync_this_pack_only_command;
 use crate::subcommands::externals::remove_external::remove_external_command;
 use crate::subcommands::local_packs::remove_local_pack::remove_local_pack_command;
+use crate::subcommands::pack::clear_pack::clear_pack_command;
 use anyhow::Result;
 use clap::Parser;
 use log::{debug, trace};
@@ -22,10 +22,12 @@ use pamm_cli_args::args::{AppSubcommand, Args};
 use pamm_cli_args::subcommands::externals::ExternalsSubcommand;
 use pamm_cli_args::subcommands::local_packs::LocalPacksSubcommand;
 use pamm_cli_args::subcommands::optionals::OptionalsSubcommand;
+use pamm_cli_args::subcommands::pack::PackSubcommand;
 use subcommands::externals::add_external::add_external_command;
 use subcommands::externals::toggle_externals::toggle_externals_command;
 use subcommands::local_packs::add_local_pack::add_local_pack_command;
 use subcommands::optionals::toggle_optionals::toggle_optionals_command;
+use subcommands::pack::add_pack::add_pack_command;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -48,11 +50,10 @@ async fn main() -> Result<()> {
 
     match args.command {
         AppSubcommand::Init => init_repo_command().await,
-        AppSubcommand::AddPack(args) => add_pack_command(args).await,
         AppSubcommand::Build(args) => build_command(args, log_wrapper).await,
         AppSubcommand::InitRemote(args) => init_remote_command(args).await,
         AppSubcommand::Sync(args) => sync_pack_command(args, log_wrapper).await,
-        AppSubcommand::SyncThisOnly(args) => sync_this_only_pack_command(args, log_wrapper).await,
+        AppSubcommand::SyncThisOnly(args) => sync_this_pack_only_command(args, log_wrapper).await,
         AppSubcommand::Launch(args) => launch_command(args).await,
         #[cfg(target_os = "linux")]
         AppSubcommand::Linux(args) => {
@@ -84,5 +85,9 @@ async fn main() -> Result<()> {
         },
         AppSubcommand::Deploy(args) => deploy_command(args).await,
         AppSubcommand::Status(args) => status_command(args).await,
+        AppSubcommand::Pack(args) => match args.command {
+            PackSubcommand::Add(args) => add_pack_command(args).await,
+            PackSubcommand::Clear(args) => clear_pack_command(args).await,
+        },
     }
 }

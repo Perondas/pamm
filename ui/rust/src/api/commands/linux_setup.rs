@@ -1,4 +1,6 @@
 use flutter_rust_bridge::for_generated::anyhow;
+#[cfg(target_os = "linux")]
+use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
 
 /// The one-time Steam setup a repo needs on Linux.
 ///
@@ -29,10 +31,7 @@ pub enum SteamFlavour {
 /// nothing without special-casing an error.
 #[cfg(target_os = "linux")]
 pub async fn linux_setup_info(repo_dir: String) -> anyhow::Result<Option<LinuxSetupInfo>> {
-    let handle = pamm_lib::handle::client_repo_handle::ClientRepoHandle::open(
-        std::path::Path::new(&repo_dir),
-    )
-    .await?;
+    let handle = ClientRepoHandle::open(std::path::Path::new(&repo_dir)).await?;
     let setup = handle.linux_launch_setup().await?;
 
     Ok(Some(LinuxSetupInfo {

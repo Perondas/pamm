@@ -1,30 +1,25 @@
-use crate::handle::repo_handle::RepoHandle;
+use crate::handle::repo_handle::{ConcreteRepoHandle, RepoBase};
 use crate::io::files::name_consts::WWW_DIR_NAME;
 use crate::io::fs::fs_readable::KnownFSReadable;
-use crate::io::fs::fs_writable::FixedFsWritable;
-use crate::io::fs::migration::run_migrations;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::server_config::ServerConfig;
+use anyhow::Context;
 use std::ops::{Deref, DerefMut};
 use std::path::{Path, PathBuf};
 
 #[derive(Debug)]
 pub struct ServerRepoHandle {
-    base: RepoHandle,
-    // Only read by the deploy actions, but always populated so the server
-    // config file is created/validated on create/open.
-    #[cfg_attr(not(feature = "deploy"), allow(dead_code))]
+    base: RepoBase,
+    #[allow(dead_code)]
     pub(crate) server_config: ServerConfig,
 }
 
 impl ServerRepoHandle {
     pub async fn open(repo_path: &Path) -> anyhow::Result<Self> {
-        let base = RepoHandle::open(repo_path).await?;
-        let server_config = ServerConfig::read_from_known(repo_path).await?;
-        // Only migrate once we know this really is a server repo (the server
-        // config read above fails otherwise).
-        run_migrations::run_migrations(repo_path, &base.repo_config).await?;
-
+        let base = RepoBase::load(repo_path).await?;
+        let server_config = ServerConfig::read_from_known(repo_path)
+            .await
+            .context("Failed to read server config. Is this a server repository?")?;
         Ok(Self {
             base,
             server_config,
@@ -32,21 +27,15 @@ impl ServerRepoHandle {
     }
 
     pub async fn create(parent_path: &Path, repo_config: RepoConfig) -> anyhow::Result<Self> {
-        let base = RepoHandle::create_repo_folder(parent_path, repo_config).await?;
-        let server_config = ServerConfig::default();
-        server_config.write_fixed(&base.repo_path).await?;
+        let repo_path = repo_config
+            .init_server_repo_blank_on_fs(parent_path)
+            .await?;
 
-        Ok(Self {
-            base,
-            server_config,
-        })
+        Self::open(&repo_path)
+            .await
+            .context("Failed to open ServerRepoHandle after creating repo")
     }
 
-    /// Returns the path to the `www` build-output directory, i.e. `<repo_path>/www`.
-    /// The path is only absolute if the handle was opened/created from an absolute
-    /// path — `repo_path` is stored as given, without canonicalizing. Otherwise it
-    /// is relative to whatever `repo_path` itself is relative to (usually the
-    /// process working directory).
     pub fn get_www_path(&self) -> PathBuf {
         self.base.repo_path.join(WWW_DIR_NAME)
     }
@@ -58,14 +47,16 @@ impl ServerRepoHandle {
 }
 
 impl Deref for ServerRepoHandle {
-    type Target = RepoHandle;
-    fn deref(&self) -> &RepoHandle {
+    type Target = RepoBase;
+    fn deref(&self) -> &RepoBase {
         &self.base
     }
 }
 
 impl DerefMut for ServerRepoHandle {
-    fn deref_mut(&mut self) -> &mut RepoHandle {
+    fn deref_mut(&mut self) -> &mut RepoBase {
         &mut self.base
     }
 }
+
+impl ConcreteRepoHandle for ServerRepoHandle {}

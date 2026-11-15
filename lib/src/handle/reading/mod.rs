@@ -2,12 +2,12 @@ pub mod get_canonical_addon_paths;
 pub mod get_pack;
 pub mod get_repo_info;
 
-use crate::handle::repo_handle::RepoHandle;
+use crate::handle::repo_handle::RepoBase;
 use crate::io::files::file_paths::keyed_path::KeyedFilePath;
 use crate::io::fs::fs_readable::KnownFSReadable;
 use anyhow::{Context, anyhow};
 
-impl RepoHandle {
+impl RepoBase {
     pub(in crate::handle) async fn read_keyed<T: KnownFSReadable + KeyedFilePath>(
         &self,
         key: &str,

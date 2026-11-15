@@ -1,4 +1,6 @@
-use crate::handle::repo_handle::RepoHandle;
+use crate::handle::repo_handle::{RepoBase, RepoHandle};
+#[cfg(feature = "server")]
+use crate::handle::server_repo_handle::ServerRepoHandle;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::pack::pack_user_settings::PackUserSettings;
 use anyhow::{Context, anyhow, ensure};
@@ -9,13 +11,12 @@ pub trait GetPack {
         &self,
         pack_name: &str,
     ) -> impl Future<Output = anyhow::Result<(PackConfig, PackUserSettings)>> + Send;
+
+    fn get_all_pack_names(&self) -> impl Future<Output = anyhow::Result<Vec<&str>>> + Send;
 }
 
-impl RepoHandle {
-    /// Read a pack's config off disk **without** checking that the pack is
-    /// registered in `repo.config.json`. Only for callers that have already
-    /// established the pack exists by other means — a client's local packs are
-    /// deliberately absent from the repo config, which mirrors the remote.
+impl RepoBase {
+    /// Read a pack's config off disk without checking that the pack is registered.
     pub(in crate::handle) async fn read_pack_config(
         &self,
         pack_name: &str,
@@ -29,8 +30,7 @@ impl RepoHandle {
             ))
     }
 
-    /// Read a pack's user settings off disk, without the registry check. See
-    /// [`RepoHandle::read_pack_config`].
+    /// Read pack user settings without checking the pack registry.
     pub(in crate::handle) async fn read_pack_settings(
         &self,
         pack_name: &str,
@@ -41,10 +41,11 @@ impl RepoHandle {
             self.repo_path
         ))
     }
-}
 
-impl GetPack for RepoHandle {
-    async fn get_pack(&self, pack_name: &str) -> anyhow::Result<PackConfig> {
+    pub(in crate::handle) async fn get_registered_pack(
+        &self,
+        pack_name: &str,
+    ) -> anyhow::Result<PackConfig> {
         ensure!(
             self.repo_config.packs.contains(pack_name),
             "Pack '{}' not found in repo",
@@ -54,14 +55,66 @@ impl GetPack for RepoHandle {
         self.read_pack_config(pack_name).await
     }
 
+    pub(in crate::handle) async fn get_registered_pack_with_settings(
+        &self,
+        pack_name: &str,
+    ) -> anyhow::Result<(PackConfig, PackUserSettings)> {
+        let pack_config = self.get_registered_pack(pack_name).await?;
+        let pack_user_settings = self.read_pack_settings(pack_name).await?;
+        Ok((pack_config, pack_user_settings))
+    }
+
+    pub(in crate::handle) fn get_registered_pack_names(&self) -> Vec<&str> {
+        self.repo_config.packs.iter().map(|s| s.as_str()).collect()
+    }
+}
+
+#[cfg(feature = "server")]
+impl GetPack for ServerRepoHandle {
+    async fn get_pack(&self, pack_name: &str) -> anyhow::Result<PackConfig> {
+        self.get_registered_pack(pack_name).await
+    }
+
     async fn get_pack_with_settings(
         &self,
         pack_name: &str,
     ) -> anyhow::Result<(PackConfig, PackUserSettings)> {
-        let pack_config = self.get_pack(pack_name).await?;
+        self.get_registered_pack_with_settings(pack_name).await
+    }
 
-        let pack_user_settings = self.read_pack_settings(pack_name).await?;
+    async fn get_all_pack_names(&self) -> anyhow::Result<Vec<&str>> {
+        Ok(self.get_registered_pack_names())
+    }
+}
 
-        Ok((pack_config, pack_user_settings))
+impl GetPack for RepoHandle {
+    async fn get_pack(&self, pack_name: &str) -> anyhow::Result<PackConfig> {
+        match self {
+            #[cfg(feature = "client")]
+            Self::Client(handle) => handle.get_pack(pack_name).await,
+            #[cfg(feature = "server")]
+            Self::Server(handle) => handle.get_pack(pack_name).await,
+        }
+    }
+
+    async fn get_pack_with_settings(
+        &self,
+        pack_name: &str,
+    ) -> anyhow::Result<(PackConfig, PackUserSettings)> {
+        match self {
+            #[cfg(feature = "client")]
+            Self::Client(handle) => handle.get_pack_with_settings(pack_name).await,
+            #[cfg(feature = "server")]
+            Self::Server(handle) => handle.get_pack_with_settings(pack_name).await,
+        }
+    }
+
+    async fn get_all_pack_names(&self) -> anyhow::Result<Vec<&str>> {
+        match self {
+            #[cfg(feature = "client")]
+            Self::Client(handle) => handle.get_all_pack_names().await,
+            #[cfg(feature = "server")]
+            Self::Server(handle) => handle.get_all_pack_names().await,
+        }
     }
 }

@@ -1,5 +1,5 @@
 use crate::commands::input::from_cli_input::FromCliInputWithContext;
-use pamm_cli_args::commands::add_pack::AddPackArgs;
+use pamm_cli_args::subcommands::pack::add_pack::AddPackArgs;
 use pamm_lib::handle::server_repo_handle::ServerRepoHandle;
 use pamm_lib::models::pack::pack_config::PackConfig;
 

@@ -5,6 +5,7 @@ use pamm_lib::handle::reading::get_pack::GetPack;
 use pamm_lib::handle::reading::get_repo_info::GetRepoInfo;
 use pamm_lib::models::cdlc::Cdlc;
 use std::collections::HashMap;
+use std::env::current_dir;
 use std::fmt::{Display, Formatter};
 use termtree::Tree;
 
@@ -39,7 +40,8 @@ impl Display for Node {
 }
 
 pub async fn status_command(args: StatusArgs) -> anyhow::Result<()> {
-    let handle = ClientRepoHandle::open(&std::env::current_dir()?).await?;
+    // TODO: Re work to also work with server repo
+    let handle = ClientRepoHandle::open(&current_dir()?).await?;
 
     if let Some(name) = args.name {
         return pack_status(&handle, &name).await;

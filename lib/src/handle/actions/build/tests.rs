@@ -9,7 +9,8 @@ use crate::models::index::checksum_index::ChecksumIndex;
 use crate::models::pack::pack_config::PackConfig;
 use crate::models::repo::repo_config::RepoConfig;
 use crate::models::repo::repo_version::RepoVersion;
-use crate::util::test_utils::TestTempDir;
+use crate::util::test::repo_builder::default_server_repo;
+use crate::util::test::test_utils::TestTempDir;
 use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
@@ -22,32 +23,15 @@ struct Fixture {
 impl Fixture {
     async fn new(key: &str) -> Self {
         let tmp = TestTempDir::new(key);
-        let repo_path = tmp.path().join("repo");
 
-        // Minimal repo config with one pack.
-        let mut packs = HashSet::new();
-        packs.insert("core".to_string());
-        let repo_config = RepoConfig::new("repo".to_string(), "test".to_string(), packs);
-        ServerRepoHandle::create(tmp.path(), repo_config)
+        // The default fixture lays out a current server repo with a core pack.
+        let fixture = default_server_repo(tmp.path())
+            .pack_file("core", "addons/@addon1/file.txt", b"hello".as_slice())
+            .pack_file("core", "addons/@addon1/sub/nested.txt", b"world".as_slice())
+            .build()
             .await
             .unwrap();
-
-        // Minimal pack config, no required/optional addons declared. Lays out
-        // the per-pack source folder: core/pack.config.json + core/addons/.
-        let pack_config = PackConfig::new(
-            "core".to_string(),
-            "test pack".to_string(),
-            vec![],
-            None,
-            None,
-        );
-        pack_config.init_source_on_fs(&repo_path).await.unwrap();
-
-        // Source pack addon dir with one addon containing a tiny file.
-        let addon_dir = repo_path.join("core/addons/@addon1");
-        fs::create_dir_all(addon_dir.join("sub")).unwrap();
-        fs::write(addon_dir.join("file.txt"), b"hello").unwrap();
-        fs::write(addon_dir.join("sub").join("nested.txt"), b"world").unwrap();
+        let repo_path = fixture.repo_path().to_path_buf();
 
         Self {
             _tmp: tmp,

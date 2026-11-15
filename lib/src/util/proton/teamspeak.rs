@@ -103,7 +103,7 @@ fn unescape_reg_string(value: &str) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::util::test_utils::TestTempDir;
+    use crate::util::test::test_utils::TestTempDir;
 
     const SYSTEM_REG: &str = r#"WINE REGISTRY Version 2
 

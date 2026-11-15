@@ -269,13 +269,11 @@ async fn get_path_to_keys(addon_path: &Path) -> anyhow::Result<Vec<PathBuf>> {
 
 #[cfg(test)]
 mod tests {
-    use crate::handle::reading::get_repo_info::GetRepoInfo;
     use crate::handle::server_repo_handle::ServerRepoHandle;
     use crate::models::pack::addon::AddonSettings;
     use crate::models::pack::pack_config::PackConfig;
-    use crate::models::repo::repo_config::RepoConfig;
-    use crate::util::test_utils::TestTempDir;
-    use std::collections::HashSet;
+    use crate::util::test::repo_builder::TestServerRepoBuilder;
+    use crate::util::test::test_utils::TestTempDir;
     use std::fs;
     use std::path::PathBuf;
 
@@ -294,15 +292,6 @@ mod tests {
             fs::create_dir_all(server_dir.join("keys")).unwrap();
             fs::create_dir_all(server_dir.join("mpmissions")).unwrap();
 
-            let mut packs = HashSet::new();
-            packs.insert("core".to_string());
-
-            let repo_config = RepoConfig::new("repo".to_string(), "desc".to_string(), packs);
-            let mut server = ServerRepoHandle::create(tmp.path(), repo_config)
-                .await
-                .unwrap();
-            let repo_path = server.get_repo_path().to_path_buf();
-
             let mut pack = PackConfig::new(
                 "core".to_string(),
                 "core pack".to_string(),
@@ -312,9 +301,16 @@ mod tests {
             );
             pack.addons
                 .insert("@addon1".to_string(), AddonSettings { is_optional: false });
-            pack.init_source_on_fs(&repo_path).await.unwrap();
-
-            fs::create_dir_all(repo_path.join("core/addons/@addon1")).unwrap();
+            let fixture = TestServerRepoBuilder::new(tmp.path())
+                .repo_name("repo")
+                .description("desc")
+                .pack(pack)
+                .pack_file("core", "addons/@addon1/.keep", b"".as_slice())
+                .build()
+                .await
+                .unwrap();
+            let repo_path = fixture.repo_path().to_path_buf();
+            let mut server = ServerRepoHandle::open(&repo_path).await.unwrap();
 
             server.server_config.server_dir = Some(server_dir.clone());
 
@@ -420,14 +416,6 @@ mod tests {
     #[tokio::test]
     async fn deploy_pack_requires_server_directory() {
         let tmp = TestTempDir::new("pamm_deploy_pack_requires_server_directory");
-        let mut packs = HashSet::new();
-        packs.insert("core".to_string());
-
-        let repo_config = RepoConfig::new("repo".to_string(), "desc".to_string(), packs);
-        let server = ServerRepoHandle::create(tmp.path(), repo_config)
-            .await
-            .unwrap();
-
         let mut pack = PackConfig::new(
             "core".to_string(),
             "core pack".to_string(),
@@ -437,10 +425,15 @@ mod tests {
         );
         pack.addons
             .insert("@addon1".to_string(), AddonSettings { is_optional: false });
-        pack.init_source_on_fs(server.get_repo_path())
+        let fixture = TestServerRepoBuilder::new(tmp.path())
+            .repo_name("repo")
+            .description("desc")
+            .pack(pack)
+            .pack_file("core", "addons/@addon1/.keep", b"".as_slice())
+            .build()
             .await
             .unwrap();
-        fs::create_dir_all(server.get_repo_path().join("core/addons/@addon1")).unwrap();
+        let server = ServerRepoHandle::open(fixture.repo_path()).await.unwrap();
 
         let err = server.deploy_pack("core").await.unwrap_err().to_string();
         assert!(
