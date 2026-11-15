@@ -17,7 +17,9 @@ pub struct ServerRepoHandle {
 impl ServerRepoHandle {
     pub async fn open(repo_path: &Path) -> anyhow::Result<Self> {
         let base = RepoBase::load(repo_path).await?;
-        let server_config = ServerConfig::read_from_known(repo_path).await?;
+        let server_config = ServerConfig::read_from_known(repo_path)
+            .await
+            .context("Failed to read server config. Is this a server repository?")?;
         Ok(Self {
             base,
             server_config,

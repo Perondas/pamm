@@ -23,7 +23,9 @@ impl ClientRepoHandle {
     pub async fn open(repo_path: &Path) -> anyhow::Result<Self> {
         let base = RepoBase::load(repo_path).await?;
 
-        let user_settings = RepoUserSettings::read_from_known(repo_path).await?;
+        let user_settings = RepoUserSettings::read_from_known(repo_path)
+            .await
+            .context("Failed to read user settings. Is this a client repository?")?;
         Ok(Self {
             base,
             user_settings,
