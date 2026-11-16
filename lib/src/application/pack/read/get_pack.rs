@@ -1,4 +1,5 @@
-use crate::application::repo::handle::{RepoBase, RepoHandle};
+use crate::application::repo::handle::RepoHandle;
+use crate::application::repo::repo_base::RepoBase;
 #[cfg(feature = "server")]
 use crate::application::repo::server::ServerRepoHandle;
 use crate::domain::pack::pack_config::PackConfig;

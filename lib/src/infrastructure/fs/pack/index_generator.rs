@@ -1,4 +1,4 @@
-use crate::application::repo::handle::RepoBase;
+use crate::application::repo::repo_base::RepoBase;
 use crate::domain::index::index_node::FileKind;
 use crate::domain::index::index_node::IndexNode;
 use crate::domain::index::index_node::NodeKind;

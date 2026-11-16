@@ -1,4 +1,5 @@
-use crate::application::repo::handle::{ConcreteRepoHandle, RepoBase};
+use crate::application::repo::handle::ConcreteRepoHandle;
+use crate::application::repo::repo_base::RepoBase;
 use crate::domain::repo::repo_config::RepoConfig;
 use crate::domain::repo::server_config::ServerConfig;
 use crate::infrastructure::fs::files::fs_readable::KnownFSReadable;

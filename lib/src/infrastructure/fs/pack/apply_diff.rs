@@ -1,4 +1,4 @@
-use crate::application::repo::handle::RepoBase;
+use crate::application::repo::repo_base::RepoBase;
 use crate::domain::index::get_dl_size::GetDlSize;
 use crate::domain::index::index_node::{IndexNode, NodeKind};
 use crate::domain::index::node_diff::{ModifiedNodeKind, NodeDiff, NodeModification};

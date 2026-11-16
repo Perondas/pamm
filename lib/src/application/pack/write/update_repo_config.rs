@@ -1,4 +1,5 @@
-use crate::application::repo::handle::{ConcreteRepoHandle, RepoBase, RepoHandle};
+use crate::application::repo::handle::{ConcreteRepoHandle, RepoHandle};
+use crate::application::repo::repo_base::RepoBase;
 use crate::domain::repo::repo_config::RepoConfig;
 
 pub trait UpdateRepoConfig {

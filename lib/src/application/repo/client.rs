@@ -2,7 +2,8 @@ mod downloading;
 
 use crate::application::pack::read::get_pack::GetPack;
 use crate::application::pack::write::save_pack_settings::SavePackSettings;
-use crate::application::repo::handle::{ConcreteRepoHandle, RepoBase};
+use crate::application::repo::handle::ConcreteRepoHandle;
+use crate::application::repo::repo_base::RepoBase;
 use crate::domain::pack::pack_config::PackConfig;
 use crate::domain::pack::pack_user_settings::PackUserSettings;
 use crate::domain::repo::repo_user_settings::RepoUserSettings;

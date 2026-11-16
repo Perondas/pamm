@@ -1,8 +1,8 @@
 use crate::application::pack::read::get_pack::GetPack;
 use crate::application::pack::read::get_repo_info::GetRepoInfo;
-use crate::application::pack::write::reserved_root_names;
 use crate::application::repo::client::ClientRepoHandle;
 use crate::domain::pack::pack_config::PackConfig;
+use crate::infrastructure::reserved_root_names::reserved_root_names;
 use crate::support::name_matches::names_match;
 use anyhow::{Context, ensure};
 use std::path::{Component, Path};
