@@ -13,7 +13,7 @@ pub trait FixedFile {
 #[macro_export]
 macro_rules! known_file_name {
     ($ty:ty, $expr:expr) => {
-        impl $crate::infrastructure::filesystem::files::file_names::fixed_file::FixedFile for $ty {
+        impl $crate::infrastructure::fs::files::file_names::fixed_file::FixedFile for $ty {
             fn file_name() -> &'static str {
                 $expr
             }

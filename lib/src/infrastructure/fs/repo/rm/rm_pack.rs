@@ -1,5 +1,5 @@
 use crate::domain::pack::pack_config::PackConfig;
-use crate::infrastructure::filesystem::files::fs_readable::KnownFSReadable;
+use crate::infrastructure::fs::files::fs_readable::KnownFSReadable;
 use anyhow::{Context, anyhow, ensure};
 use std::path::Path;
 

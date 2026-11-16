@@ -1,5 +1,5 @@
 use crate::application::pack::read::get_pack::GetPack;
-use crate::infrastructure::filesystem::files::util::clean_path::canonicalize_and_clean_path;
+use crate::infrastructure::fs::files::util::clean_path::canonicalize_and_clean_path;
 
 impl<T> GetExternalAddonsPaths for T
 where
@@ -35,7 +35,7 @@ mod tests {
     use crate::application::addons::externals::external_addon::ExternalAddon;
     use crate::domain::pack::pack_config::PackConfig;
     use crate::domain::pack::pack_user_settings::PackUserSettings;
-    use crate::infrastructure::filesystem::files::util::clean_path::canonicalize_and_clean_path;
+    use crate::infrastructure::fs::files::util::clean_path::canonicalize_and_clean_path;
     use crate::support::test::mock_handle::MockHandle;
     use std::path::PathBuf;
 

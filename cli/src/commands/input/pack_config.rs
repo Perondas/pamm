@@ -3,7 +3,7 @@ use anyhow::Result;
 use dialoguer::theme::ColorfulTheme;
 use pamm_lib::domain::cdlc::Cdlc;
 use pamm_lib::domain::pack::pack_config::PackConfig;
-use pamm_lib::infrastructure::filesystem::files::file_names::fixed_file::FixedFile;
+use pamm_lib::infrastructure::fs::files::file_names::fixed_file::FixedFile;
 use std::path::PathBuf;
 use strum::IntoEnumIterator;
 

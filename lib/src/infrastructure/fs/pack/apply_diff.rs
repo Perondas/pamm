@@ -4,7 +4,7 @@ use crate::domain::index::index_node::{IndexNode, NodeKind};
 use crate::domain::index::node_diff::{ModifiedNodeKind, NodeDiff, NodeModification};
 use crate::domain::pack::pack_config::PackConfig;
 use crate::domain::pack::pack_diff::PackDiff;
-use crate::infrastructure::filesystem::files::file_paths::rel_path::RelPath;
+use crate::infrastructure::fs::files::file_paths::rel_path::RelPath;
 use crate::infrastructure::http::remote_patcher::RemotePatcher;
 use crate::infrastructure::progress::progress_reporter::ProgressReporter;
 use anyhow::Context;

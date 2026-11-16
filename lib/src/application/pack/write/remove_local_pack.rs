@@ -1,6 +1,6 @@
 use crate::application::pack::read::get_pack::GetPack;
 use crate::application::repo::client::ClientRepoHandle;
-use crate::infrastructure::filesystem::repo::rm::rm_pack::remove_pack;
+use crate::infrastructure::fs::repo::rm::rm_pack::remove_pack;
 use anyhow::{Context, anyhow, bail, ensure};
 
 impl ClientRepoHandle {

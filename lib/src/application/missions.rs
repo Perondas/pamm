@@ -1,6 +1,6 @@
 use crate::application::pack::read::get_pack::GetPack;
 use crate::application::pack::read::get_repo_info::GetRepoInfo;
-use crate::infrastructure::filesystem::files::name_consts::MP_MISSIONS_DIR_NAME;
+use crate::infrastructure::fs::files::name_consts::MP_MISSIONS_DIR_NAME;
 use anyhow::{Context, anyhow};
 use log::trace;
 use std::path::PathBuf;

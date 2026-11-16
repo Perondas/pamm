@@ -1,8 +1,8 @@
 use crate::application::repo::handle::{ConcreteRepoHandle, RepoBase};
 use crate::domain::repo::repo_config::RepoConfig;
 use crate::domain::repo::server_config::ServerConfig;
-use crate::infrastructure::filesystem::files::fs_readable::KnownFSReadable;
-use crate::infrastructure::filesystem::files::name_consts::WWW_DIR_NAME;
+use crate::infrastructure::fs::files::fs_readable::KnownFSReadable;
+use crate::infrastructure::fs::files::name_consts::WWW_DIR_NAME;
 use anyhow::Context;
 use std::ops::{Deref, DerefMut};
 use std::path::{Path, PathBuf};

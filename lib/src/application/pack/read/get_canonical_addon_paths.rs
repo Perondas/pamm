@@ -3,7 +3,7 @@ use crate::application::addons::optionals::get_optionals_paths::GetOptionalsPath
 use crate::application::addons::resolve::ResolveAddons;
 use crate::application::pack::read::get_pack::GetPack;
 use crate::application::pack::read::get_repo_info::GetRepoInfo;
-use crate::infrastructure::filesystem::files::util::clean_path::canonicalize_and_clean_path;
+use crate::infrastructure::fs::files::util::clean_path::canonicalize_and_clean_path;
 use anyhow::{Context, anyhow};
 
 pub trait GetAddonPaths {

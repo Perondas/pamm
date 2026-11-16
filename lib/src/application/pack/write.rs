@@ -14,12 +14,12 @@ use crate::domain::repo::repo_config::RepoConfig;
 use crate::domain::repo::repo_user_settings::RepoUserSettings;
 use crate::domain::repo::repo_version::RepoVersion;
 use crate::domain::repo::server_config::ServerConfig;
-use crate::infrastructure::filesystem::files::file_names::fixed_file::FixedFile;
+use crate::infrastructure::fs::files::file_names::fixed_file::FixedFile;
 #[cfg(feature = "client")]
-use crate::infrastructure::filesystem::files::file_paths::keyed_path::KeyedFilePath;
-use crate::infrastructure::filesystem::files::file_paths::self_identified_path::SelfIdentifiedFilePath;
-use crate::infrastructure::filesystem::files::fs_writable::FixedFsWritable;
-use crate::infrastructure::filesystem::files::name_consts::{
+use crate::infrastructure::fs::files::file_paths::keyed_path::KeyedFilePath;
+use crate::infrastructure::fs::files::file_paths::self_identified_path::SelfIdentifiedFilePath;
+use crate::infrastructure::fs::files::fs_writable::FixedFsWritable;
+use crate::infrastructure::fs::files::name_consts::{
     CACHE_DB_DIR_NAME, INDEX_DIR_NAME, MEDIA_DIR_NAME, WWW_DIR_NAME,
 };
 

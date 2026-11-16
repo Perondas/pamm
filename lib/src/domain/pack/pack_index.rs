@@ -1,5 +1,5 @@
 use crate::domain::index::index_node::IndexNode;
-use crate::infrastructure::filesystem::files::util::clean_path::canonicalize_and_clean_path;
+use crate::infrastructure::fs::files::util::clean_path::canonicalize_and_clean_path;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::path::Path;

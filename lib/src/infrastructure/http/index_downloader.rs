@@ -1,7 +1,7 @@
 use crate::domain::index::index_node::IndexNode;
 use crate::domain::pack::pack_config::PackConfig;
 use crate::domain::pack::pack_index::PackIndex;
-use crate::infrastructure::filesystem::files::name_consts::INDEX_DIR_NAME;
+use crate::infrastructure::fs::files::name_consts::INDEX_DIR_NAME;
 use crate::infrastructure::http::downloadable::NamedDownloadable;
 use anyhow::Result;
 use futures::{StreamExt, TryStreamExt, stream};

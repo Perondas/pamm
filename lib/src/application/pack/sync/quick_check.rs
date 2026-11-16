@@ -1,9 +1,9 @@
 use crate::application::pack::read::get_pack::GetPack;
 use crate::application::repo::client::ClientRepoHandle;
 use crate::domain::index::checksum_index::ChecksumIndex;
-use crate::infrastructure::filesystem::files::file_paths::rel_path::RelPath;
-use crate::infrastructure::filesystem::files::fs_readable::KnownFSReadable;
-use crate::infrastructure::filesystem::files::name_consts::INDEX_DIR_NAME;
+use crate::infrastructure::fs::files::file_paths::rel_path::RelPath;
+use crate::infrastructure::fs::files::fs_readable::KnownFSReadable;
+use crate::infrastructure::fs::files::name_consts::INDEX_DIR_NAME;
 use crate::infrastructure::http::downloadable::KnownDownloadable;
 use crate::infrastructure::http::remote_version::verify_remote_version;
 use anyhow::{Context, anyhow};

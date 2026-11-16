@@ -6,11 +6,11 @@ use crate::application::repo::server::ServerRepoHandle;
 use crate::domain::pack::pack_config::PackConfig;
 use crate::domain::repo::repo_config::RepoConfig;
 use crate::domain::repo::repo_version::RepoVersion;
-use crate::infrastructure::filesystem::files::file_names::fixed_file::FixedFile;
-use crate::infrastructure::filesystem::files::file_paths::rel_path::RelPath;
-use crate::infrastructure::filesystem::files::fs_writable::FixedFsWritable;
-use crate::infrastructure::filesystem::files::name_consts::{ADDONS_DIR_NAME, CACHE_DB_DIR_NAME};
-use crate::infrastructure::filesystem::pack::index_generator::IndexGenerator;
+use crate::infrastructure::fs::files::file_names::fixed_file::FixedFile;
+use crate::infrastructure::fs::files::file_paths::rel_path::RelPath;
+use crate::infrastructure::fs::files::fs_writable::FixedFsWritable;
+use crate::infrastructure::fs::files::name_consts::{ADDONS_DIR_NAME, CACHE_DB_DIR_NAME};
+use crate::infrastructure::fs::pack::index_generator::IndexGenerator;
 use crate::infrastructure::progress::progress_reporter::ProgressReporter;
 use anyhow::{Context, ensure};
 

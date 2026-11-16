@@ -1,6 +1,6 @@
 use crate::application::pack::read::get_pack::GetPack;
 use crate::application::pack::read::get_repo_info::GetRepoInfo;
-use crate::infrastructure::filesystem::repo::rm::rm_pack_content::remove_pack_content;
+use crate::infrastructure::fs::repo::rm::rm_pack_content::remove_pack_content;
 use anyhow::{Context, anyhow, ensure};
 use log::debug;
 
@@ -35,7 +35,7 @@ impl<T: GetPack + GetRepoInfo + Send> DeletePackContent for T {
 mod server_tests {
     use super::*;
     use crate::application::repo::server::ServerRepoHandle;
-    use crate::infrastructure::filesystem::files::name_consts::{ADDONS_DIR_NAME, INDEX_DIR_NAME};
+    use crate::infrastructure::fs::files::name_consts::{ADDONS_DIR_NAME, INDEX_DIR_NAME};
     use crate::support::test::repo_builder::default_server_repo;
     use crate::support::test::test_utils::TestTempDir;
 
@@ -68,7 +68,7 @@ mod server_tests {
 mod client_tests {
     use super::*;
     use crate::application::repo::client::ClientRepoHandle;
-    use crate::infrastructure::filesystem::files::name_consts::{ADDONS_DIR_NAME, INDEX_DIR_NAME};
+    use crate::infrastructure::fs::files::name_consts::{ADDONS_DIR_NAME, INDEX_DIR_NAME};
     use crate::support::test::repo_builder::default_client_repo;
     use crate::support::test::test_utils::TestTempDir;
 

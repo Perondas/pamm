@@ -113,7 +113,7 @@ mod tests {
     use super::*;
     use crate::domain::repo::repo_config::RepoConfig;
     use crate::domain::repo::repo_user_settings::RepoUserSettings;
-    use crate::infrastructure::filesystem::files::fs_readable::KnownFSReadable;
+    use crate::infrastructure::fs::files::fs_readable::KnownFSReadable;
     use crate::support::test::repo_builder::TestClientRepoBuilder;
     use crate::support::test::test_utils::TestTempDir;
     use std::collections::HashSet;

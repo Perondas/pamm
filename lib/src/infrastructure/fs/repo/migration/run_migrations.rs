@@ -1,7 +1,7 @@
 use crate::domain::repo::repo_config::RepoConfig;
 use crate::domain::repo::repo_version::{CURRENT_REPO_VERSION, RepoVersion};
-use crate::infrastructure::filesystem::files::fs_writable::FixedFsWritable;
-use crate::infrastructure::filesystem::repo::migration::migrations::{v1_to_v2, v2_to_v3};
+use crate::infrastructure::fs::files::fs_writable::FixedFsWritable;
+use crate::infrastructure::fs::repo::migration::migrations::{v1_to_v2, v2_to_v3};
 use anyhow::{Context, bail};
 use log::info;
 use std::path::Path;

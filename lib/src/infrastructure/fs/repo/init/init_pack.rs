@@ -1,10 +1,10 @@
 use crate::domain::pack::pack_config::PackConfig;
 use crate::domain::pack::pack_user_settings::PackUserSettings;
-use crate::infrastructure::filesystem::files::fs_writable::FixedFsWritable;
-use crate::infrastructure::filesystem::files::name_consts::{
+use crate::infrastructure::fs::files::fs_writable::FixedFsWritable;
+use crate::infrastructure::fs::files::name_consts::{
     ADDONS_DIR_NAME, INDEX_DIR_NAME, MP_MISSIONS_DIR_NAME, WWW_DIR_NAME,
 };
-use crate::infrastructure::filesystem::files::util::path_checks::is_dir;
+use crate::infrastructure::fs::files::util::path_checks::is_dir;
 use std::path::Path;
 use tokio::fs;
 

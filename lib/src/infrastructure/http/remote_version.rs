@@ -1,6 +1,6 @@
 use crate::domain::repo::repo_config::RepoConfig;
 use crate::domain::repo::repo_version::{CURRENT_REPO_VERSION, RepoVersion};
-use crate::infrastructure::filesystem::files::file_names::fixed_file::FixedFile;
+use crate::infrastructure::fs::files::file_names::fixed_file::FixedFile;
 use crate::infrastructure::http::downloadable::KnownDownloadable;
 use anyhow::bail;
 use url::Url;

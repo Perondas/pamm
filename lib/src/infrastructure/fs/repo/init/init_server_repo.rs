@@ -1,9 +1,9 @@
 use crate::domain::repo::repo_config::RepoConfig;
 use crate::domain::repo::repo_version::RepoVersion;
 use crate::domain::repo::server_config::ServerConfig;
-use crate::infrastructure::filesystem::files::fs_writable::FixedFsWritable;
-use crate::infrastructure::filesystem::files::name_consts::MEDIA_DIR_NAME;
-use crate::infrastructure::filesystem::files::util::path_checks::is_dir;
+use crate::infrastructure::fs::files::fs_writable::FixedFsWritable;
+use crate::infrastructure::fs::files::name_consts::MEDIA_DIR_NAME;
+use crate::infrastructure::fs::files::util::path_checks::is_dir;
 use std::path::{Path, PathBuf};
 use tokio::fs;
 
@@ -38,7 +38,7 @@ impl RepoConfig {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::infrastructure::filesystem::files::file_names::fixed_file::FixedFile;
+    use crate::infrastructure::fs::files::file_names::fixed_file::FixedFile;
     use crate::support::test::test_utils::TestTempDir;
     use std::collections::HashSet;
 

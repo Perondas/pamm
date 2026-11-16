@@ -1,6 +1,6 @@
 use crate::application::repo::client::ClientRepoHandle;
 use crate::domain::pack::pack_config::PackConfig;
-use crate::infrastructure::filesystem::pack::index_generator::IndexGenerator;
+use crate::infrastructure::fs::pack::index_generator::IndexGenerator;
 use crate::infrastructure::progress::progress_reporter::ProgressReporter;
 use anyhow::{Context, ensure};
 

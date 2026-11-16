@@ -1,5 +1,5 @@
-use crate::infrastructure::filesystem::files::file_names::fixed_file::FixedFile;
-use crate::infrastructure::filesystem::files::file_names::keyed_file::KeyedFile;
+use crate::infrastructure::fs::files::file_names::fixed_file::FixedFile;
+use crate::infrastructure::fs::files::file_names::keyed_file::KeyedFile;
 use crate::infrastructure::http::http_client;
 use crate::infrastructure::serialization::readable::Readable;
 use anyhow::Context;

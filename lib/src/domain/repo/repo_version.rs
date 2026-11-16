@@ -1,5 +1,5 @@
-use crate::infrastructure::filesystem::files::file_names::fixed_file::FixedFile;
-use crate::infrastructure::filesystem::files::fs_readable::KnownFSReadable;
+use crate::infrastructure::fs::files::file_names::fixed_file::FixedFile;
+use crate::infrastructure::fs::files::fs_readable::KnownFSReadable;
 use crate::infrastructure::serialization::readable::Readable;
 use crate::infrastructure::serialization::writable::Writable;
 use anyhow::Context;
@@ -53,7 +53,7 @@ impl Writable for RepoVersion {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::infrastructure::filesystem::files::fs_writable::FixedFsWritable;
+    use crate::infrastructure::fs::files::fs_writable::FixedFsWritable;
     use crate::support::test::test_utils::TestTempDir;
 
     #[tokio::test]

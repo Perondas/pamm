@@ -1,5 +1,5 @@
 use crate::application::repo::client::ClientRepoHandle;
-use crate::infrastructure::filesystem::files::file_paths::keyed_path::KeyedFilePath;
+use crate::infrastructure::fs::files::file_paths::keyed_path::KeyedFilePath;
 use crate::infrastructure::http::downloadable::KnownDownloadable;
 use anyhow::Context;
 use url::Url;

@@ -1,6 +1,6 @@
 use crate::domain::pack::pack_config::PackConfig;
-use crate::infrastructure::filesystem::files::fs_readable::KnownFSReadable;
-use crate::infrastructure::filesystem::files::name_consts::{ADDONS_DIR_NAME, INDEX_DIR_NAME};
+use crate::infrastructure::fs::files::fs_readable::KnownFSReadable;
+use crate::infrastructure::fs::files::name_consts::{ADDONS_DIR_NAME, INDEX_DIR_NAME};
 use anyhow::{Context, anyhow, ensure};
 use std::path::Path;
 

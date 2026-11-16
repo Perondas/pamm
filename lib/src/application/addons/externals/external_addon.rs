@@ -1,4 +1,4 @@
-use crate::infrastructure::filesystem::files::util::try_find_addon_name::try_find_addon_name;
+use crate::infrastructure::fs::files::util::try_find_addon_name::try_find_addon_name;
 use anyhow::ensure;
 use log::warn;
 use serde::{Deserialize, Serialize};

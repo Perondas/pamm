@@ -2,7 +2,7 @@ use crate::application::pack::read::get_pack::GetPack;
 use crate::application::repo::client::ClientRepoHandle;
 use crate::domain::pack::pack_config::PackConfig;
 use crate::domain::pack::pack_diff::{PackDiff, diff_packs};
-use crate::infrastructure::filesystem::pack::index_generator::IndexGenerator;
+use crate::infrastructure::fs::pack::index_generator::IndexGenerator;
 use crate::infrastructure::http::remote_version::verify_remote_version;
 use crate::infrastructure::progress::progress_reporter::ProgressReporter;
 

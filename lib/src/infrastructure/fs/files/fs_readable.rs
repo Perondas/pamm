@@ -1,4 +1,4 @@
-use crate::infrastructure::filesystem::files::file_names::fixed_file::FixedFile;
+use crate::infrastructure::fs::files::file_names::fixed_file::FixedFile;
 use crate::infrastructure::serialization::readable::Readable;
 use anyhow::{Context, anyhow};
 use std::path::Path;

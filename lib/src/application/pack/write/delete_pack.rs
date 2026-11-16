@@ -1,6 +1,6 @@
 use crate::application::repo::handle::{ConcreteRepoHandle, RepoBase, RepoHandle};
-use crate::infrastructure::filesystem::files::file_paths::rel_path::RelPath;
-use crate::infrastructure::filesystem::files::util::path_checks::is_dir;
+use crate::infrastructure::fs::files::file_paths::rel_path::RelPath;
+use crate::infrastructure::fs::files::util::path_checks::is_dir;
 use anyhow::{Context, anyhow, ensure};
 
 pub trait DeletePack {

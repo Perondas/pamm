@@ -1,4 +1,4 @@
-pub mod filesystem;
+pub mod fs;
 pub mod http;
 pub mod progress;
 pub mod serialization;

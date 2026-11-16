@@ -6,9 +6,9 @@ use crate::application::repo::handle::{ConcreteRepoHandle, RepoBase};
 use crate::domain::pack::pack_config::PackConfig;
 use crate::domain::pack::pack_user_settings::PackUserSettings;
 use crate::domain::repo::repo_user_settings::RepoUserSettings;
-use crate::infrastructure::filesystem::files::fs_readable::KnownFSReadable;
-use crate::infrastructure::filesystem::files::util::path_checks::is_dir;
-use crate::infrastructure::filesystem::repo::init::init_client_repo_from_remote::init_client_repo_from_remote;
+use crate::infrastructure::fs::files::fs_readable::KnownFSReadable;
+use crate::infrastructure::fs::files::util::path_checks::is_dir;
+use crate::infrastructure::fs::repo::init::init_client_repo_from_remote::init_client_repo_from_remote;
 use crate::support::name_matches;
 use anyhow::{Context, ensure};
 use std::ops::{Deref, DerefMut};
@@ -167,14 +167,14 @@ mod tests {
         let mut packs = HashSet::new();
         packs.insert("core".to_string());
         let repo_config = RepoConfig::new("repo".to_string(), "desc".to_string(), packs);
-        crate::infrastructure::filesystem::files::fs_writable::FixedFsWritable::write_fixed(
+        crate::infrastructure::fs::files::fs_writable::FixedFsWritable::write_fixed(
             &repo_config,
             &repo_path,
         )
         .await
         .unwrap();
         let settings = RepoUserSettings::new(Url::parse("http://localhost/").unwrap());
-        crate::infrastructure::filesystem::files::fs_writable::FixedFsWritable::write_fixed(
+        crate::infrastructure::fs::files::fs_writable::FixedFsWritable::write_fixed(
             &settings, &repo_path,
         )
         .await

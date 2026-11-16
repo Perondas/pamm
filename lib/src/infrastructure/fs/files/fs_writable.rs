@@ -1,6 +1,6 @@
 use crate::domain::self_keyed::SelfKeyed;
-use crate::infrastructure::filesystem::files::file_names::fixed_file::FixedFile;
-use crate::infrastructure::filesystem::files::file_names::keyed_file::KeyedFile;
+use crate::infrastructure::fs::files::file_names::fixed_file::FixedFile;
+use crate::infrastructure::fs::files::file_names::keyed_file::KeyedFile;
 use crate::infrastructure::serialization::writable::Writable;
 use anyhow::{Context, anyhow};
 use std::path::Path;

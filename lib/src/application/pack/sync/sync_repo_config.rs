@@ -7,7 +7,7 @@ use crate::application::pack::write::update_repo_config::UpdateRepoConfig;
 use crate::application::repo::client::ClientRepoHandle;
 use crate::domain::pack::pack_config::PackConfig;
 use crate::domain::repo::repo_config::RepoConfig;
-use crate::infrastructure::filesystem::files::file_paths::keyed_path::KeyedFilePath;
+use crate::infrastructure::fs::files::file_paths::keyed_path::KeyedFilePath;
 use crate::infrastructure::http::downloadable::KnownDownloadable;
 use crate::infrastructure::http::remote_version::verify_remote_version;
 use anyhow::{Context, anyhow, ensure};

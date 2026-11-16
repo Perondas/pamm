@@ -1,8 +1,8 @@
 use crate::domain::index::index_node::{PBO_CHECKSUM_LEN, PBOPart};
 use crate::domain::index::node_diff::FileModification;
 use crate::domain::pack::pack_config::PackConfig;
-use crate::infrastructure::filesystem::files::file_paths::rel_path::RelPath;
-use crate::infrastructure::filesystem::files::name_consts::ADDONS_DIR_NAME;
+use crate::infrastructure::fs::files::file_paths::rel_path::RelPath;
+use crate::infrastructure::fs::files::name_consts::ADDONS_DIR_NAME;
 use crate::infrastructure::http::byte_range_response::ByteRangeResponse;
 use crate::infrastructure::http::download_file::download_file;
 use crate::infrastructure::http::http_client;

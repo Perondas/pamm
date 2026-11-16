@@ -1,5 +1,5 @@
 use crate::application::pack::read::get_pack::GetPack;
-use crate::infrastructure::filesystem::files::name_consts::ADDONS_DIR_NAME;
+use crate::infrastructure::fs::files::name_consts::ADDONS_DIR_NAME;
 use std::path::PathBuf;
 
 impl<T> ResolveAddons for T

@@ -1,8 +1,8 @@
 use crate::domain::pack::pack_config::PackConfig;
 use crate::domain::pack::pack_user_settings::PackUserSettings;
 use crate::domain::repo::repo_config::RepoConfig;
-use crate::infrastructure::filesystem::files::file_names::fixed_file::FixedFile;
-use crate::infrastructure::filesystem::files::name_consts::{
+use crate::infrastructure::fs::files::file_names::fixed_file::FixedFile;
+use crate::infrastructure::fs::files::name_consts::{
     ADDONS_DIR_NAME, INDEX_DIR_NAME, WWW_DIR_NAME, get_pack_addon_directory_name,
 };
 use anyhow::{Context, bail, ensure};
@@ -190,8 +190,8 @@ pub fn migrate_v1_to_v2(repo_path: &Path, repo_config: &RepoConfig) -> anyhow::R
 mod tests {
     use crate::domain::repo::repo_config::RepoConfig;
     use crate::domain::repo::repo_version::{CURRENT_REPO_VERSION, RepoVersion};
-    use crate::infrastructure::filesystem::files::fs_writable::FixedFsWritable;
-    use crate::infrastructure::filesystem::repo::migration::run_migrations;
+    use crate::infrastructure::fs::files::fs_writable::FixedFsWritable;
+    use crate::infrastructure::fs::repo::migration::run_migrations;
     use crate::support::test::test_utils::TestTempDir;
     use std::collections::HashSet;
     use std::fs;

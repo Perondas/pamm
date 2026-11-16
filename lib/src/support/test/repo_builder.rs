@@ -10,7 +10,7 @@ use crate::domain::repo::repo_user_settings::RepoUserSettings;
 #[cfg(feature = "client")]
 use crate::domain::repo::repo_version::RepoVersion;
 #[cfg(feature = "client")]
-use crate::infrastructure::filesystem::files::fs_writable::FixedFsWritable;
+use crate::infrastructure::fs::files::fs_writable::FixedFsWritable;
 
 #[cfg(feature = "server")]
 pub struct ServerRepo;

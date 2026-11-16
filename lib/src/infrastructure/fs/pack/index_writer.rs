@@ -1,8 +1,8 @@
 use crate::domain::index::checksum_index::ChecksumIndex;
 use crate::domain::pack::pack_diff::PackDiff;
 use crate::domain::pack::pack_index::PackIndex;
-use crate::infrastructure::filesystem::files::fs_writable::{FixedFsWritable, SelfKeyedFSWritable};
-use crate::infrastructure::filesystem::files::name_consts::INDEX_DIR_NAME;
+use crate::infrastructure::fs::files::fs_writable::{FixedFsWritable, SelfKeyedFSWritable};
+use crate::infrastructure::fs::files::name_consts::INDEX_DIR_NAME;
 use std::path::Path;
 
 impl PackDiff {
