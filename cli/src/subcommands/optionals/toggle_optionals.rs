@@ -1,13 +1,13 @@
 use pamm_cli_args::subcommands::optionals::toggle_optionals::ToggleOptionalsArgs;
+use pamm_lib::application::addons::optionals::GetOptionals;
 use pamm_lib::application::addons::optionals::SaveOptionals;
-use pamm_lib::application::addons::optionals::load_optionals::LoadOptionals;
 use pamm_lib::application::repo::client::ClientRepoHandle;
 use std::env::current_dir;
 
 pub async fn toggle_optionals_command(args: ToggleOptionalsArgs) -> anyhow::Result<()> {
     let handle = ClientRepoHandle::open(&current_dir()?).await?;
 
-    let mut optionals = handle.load_optionals(&args.name).await?;
+    let mut optionals = handle.get_optionals(&args.name).await?;
 
     let selection = dialoguer::MultiSelect::new()
         .with_prompt("What optionals to enable?")

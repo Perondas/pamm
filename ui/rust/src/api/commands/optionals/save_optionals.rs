@@ -1,4 +1,4 @@
-use pamm_lib::application::addons::optionals::optional_addon::OptionalAddon;
+use pamm_lib::application::addons::optionals::OptionalAddon;
 use pamm_lib::application::addons::optionals::SaveOptionals;
 use pamm_lib::application::repo::client::ClientRepoHandle;
 

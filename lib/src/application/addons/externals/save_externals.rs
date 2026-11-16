@@ -1,8 +1,9 @@
-use crate::application::addons::externals::external_addon::ExternalAddon;
+use crate::application::addons::externals::ExternalAddon;
 use crate::application::pack::read::get_pack::GetPack;
 use crate::application::pack::write::save_pack_settings::SavePackSettings;
 
 pub trait SaveExternals {
+    /// Saves the supplied externals to the pack settings
     fn save_externals(
         &self,
         pack_name: &str,

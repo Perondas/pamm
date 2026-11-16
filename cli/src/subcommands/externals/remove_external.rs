@@ -1,14 +1,14 @@
 use crate::subcommands::externals::externals_to_names;
 use pamm_cli_args::subcommands::externals::remove_external::RemoveExternalArgs;
-use pamm_lib::application::addons::externals::load_externals::LoadExternals;
-use pamm_lib::application::addons::externals::save_externals::SaveExternals;
+use pamm_lib::application::addons::externals::GetAllStoredExternals;
+use pamm_lib::application::addons::externals::SaveExternals;
 use pamm_lib::application::repo::client::ClientRepoHandle;
 use std::env::current_dir;
 
 pub async fn remove_external_command(args: RemoveExternalArgs) -> anyhow::Result<()> {
     let handle = ClientRepoHandle::open(&current_dir()?).await?;
 
-    let externals = handle.load_externals(&args.name).await?;
+    let externals = handle.get_all_stored_externals(&args.name).await?;
 
     let mut externals = externals
         .into_iter()

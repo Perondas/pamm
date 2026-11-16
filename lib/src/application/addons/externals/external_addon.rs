@@ -3,7 +3,6 @@ use anyhow::ensure;
 use log::warn;
 use serde::{Deserialize, Serialize};
 use std::hash::{Hash, Hasher};
-
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -14,7 +13,6 @@ pub struct ExternalAddon {
     pub enabled: bool,
     #[serde(default)]
     pub found_in_workshop: bool,
-    // For convenience we want this to stay constructable in tests, but nowhere else
 }
 
 impl ExternalAddon {

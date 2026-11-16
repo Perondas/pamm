@@ -1,11 +1,19 @@
-use crate::application::addons::optionals::optional_addon::OptionalAddon;
+use crate::application::addons::optionals::OptionalAddon;
 use crate::application::pack::read::get_pack::GetPack;
 
-impl<T> LoadOptionals for T
+pub trait GetOptionals {
+    /// Gets all available optionals for a pack, including inherited ones, together with their status
+    fn get_optionals(
+        &self,
+        pack_name: &str,
+    ) -> impl Future<Output = anyhow::Result<Vec<OptionalAddon>>> + Send;
+}
+
+impl<T> GetOptionals for T
 where
     T: GetPack + Sync,
 {
-    async fn load_optionals(&self, pack_name: &str) -> anyhow::Result<Vec<OptionalAddon>> {
+    async fn get_optionals(&self, pack_name: &str) -> anyhow::Result<Vec<OptionalAddon>> {
         let mut optionals = Vec::new();
         let mut current = Some(pack_name.to_string());
 
@@ -30,13 +38,6 @@ where
     }
 }
 
-pub trait LoadOptionals {
-    fn load_optionals(
-        &self,
-        pack_name: &str,
-    ) -> impl Future<Output = anyhow::Result<Vec<OptionalAddon>>> + Send;
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -54,7 +55,7 @@ mod tests {
             &["@opt_addon"],
         );
 
-        let optionals = mock_get_pack.load_optionals("test_pack").await.unwrap();
+        let optionals = mock_get_pack.get_optionals("test_pack").await.unwrap();
 
         assert_eq!(optionals.len(), 1);
         assert_eq!(optionals[0].name, "@opt_addon");
@@ -75,7 +76,7 @@ mod tests {
 
         mock_get_pack.mock_pack("parent_pack", None, &["@parent_opt"], &[], &[]);
 
-        let mut optionals = mock_get_pack.load_optionals("child_pack").await.unwrap();
+        let mut optionals = mock_get_pack.get_optionals("child_pack").await.unwrap();
 
         // Sort to ensure consistent order for assertions
         optionals.sort_by(|a, b| a.name.cmp(&b.name));

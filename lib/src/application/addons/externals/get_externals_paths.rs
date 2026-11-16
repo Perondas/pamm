@@ -1,11 +1,21 @@
 use crate::application::pack::read::get_pack::GetPack;
 use crate::infrastructure::fs::files::util::clean_path::canonicalize_and_clean_path;
 
-impl<T> GetExternalAddonsPaths for T
+pub(in crate::application) trait GetExternalsPaths {
+    /// Gets the paths to the pack's enabled external addons as absolute,
+    /// canonicalized path strings (relative paths in the user settings are
+    /// resolved against the process working directory).
+    fn get_externals_paths(
+        &self,
+        pack_name: &str,
+    ) -> impl Future<Output = anyhow::Result<Vec<String>>> + Send;
+}
+
+impl<T> GetExternalsPaths for T
 where
     T: GetPack + Sync,
 {
-    async fn get_external_addon_paths(&self, pack_name: &str) -> anyhow::Result<Vec<String>> {
+    async fn get_externals_paths(&self, pack_name: &str) -> anyhow::Result<Vec<String>> {
         let (_, settings) = self.get_pack_with_settings(pack_name).await?;
 
         settings
@@ -19,20 +29,10 @@ where
     }
 }
 
-pub(in crate::application) trait GetExternalAddonsPaths {
-    /// Gets the paths to the pack's enabled external addons as absolute,
-    /// canonicalized path strings (relative paths in the user settings are
-    /// resolved against the process working directory).
-    fn get_external_addon_paths(
-        &self,
-        pack_name: &str,
-    ) -> impl Future<Output = anyhow::Result<Vec<String>>> + Send;
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::application::addons::externals::external_addon::ExternalAddon;
+    use crate::application::addons::externals::ExternalAddon;
     use crate::domain::pack::pack_config::PackConfig;
     use crate::domain::pack::pack_user_settings::PackUserSettings;
     use crate::infrastructure::fs::files::util::clean_path::canonicalize_and_clean_path;
@@ -75,7 +75,7 @@ mod tests {
             .with(mockall::predicate::eq("test_pack"))
             .returning(move |_| Ok((config.clone(), settings.clone())));
 
-        let paths = mock.get_external_addon_paths("test_pack").await.unwrap();
+        let paths = mock.get_externals_paths("test_pack").await.unwrap();
 
         assert_eq!(paths.len(), 1);
         let valid_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))

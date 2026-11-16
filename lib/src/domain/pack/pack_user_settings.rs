@@ -1,4 +1,4 @@
-use crate::application::addons::externals::external_addon::ExternalAddon;
+use crate::application::addons::externals::ExternalAddon;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 

@@ -1,21 +1,26 @@
-use crate::application::addons::externals::external_addon::ExternalAddon;
+use crate::application::addons::externals::ExternalAddon;
 use crate::application::pack::read::get_pack::GetPack;
 use crate::platform::steam::find_workshop_folder::find_workshop_folder;
 use std::collections::HashSet;
 use std::fs::read_dir;
 
-pub trait LoadExternals {
-    fn load_externals(
+pub trait GetAllStoredExternals {
+    /// Gets all externals of a pack. This includes all that have been added by the user to the config
+    /// plus any addons we find in the workshop folder, deduplicated over the path
+    fn get_all_stored_externals(
         &self,
         pack_name: &str,
     ) -> impl Future<Output = anyhow::Result<Vec<ExternalAddon>>> + Send;
 }
 
-impl<T> LoadExternals for T
+impl<T> GetAllStoredExternals for T
 where
     T: GetPack + Sync,
 {
-    async fn load_externals(&self, pack_name: &str) -> anyhow::Result<Vec<ExternalAddon>> {
+    async fn get_all_stored_externals(
+        &self,
+        pack_name: &str,
+    ) -> anyhow::Result<Vec<ExternalAddon>> {
         let (_, settings) = self.get_pack_with_settings(pack_name).await?;
 
         let mut externals = settings.external_addons.clone();
@@ -31,14 +36,14 @@ where
 }
 
 fn find_workshop_addons() -> anyhow::Result<HashSet<ExternalAddon>> {
-    let mut externals = HashSet::new();
+    let mut addons = HashSet::new();
     if let Ok(path) = find_workshop_folder() {
         for entry in read_dir(path)? {
             let addon = ExternalAddon::new(entry?.path())?.found_in_workshop();
-            externals.insert(addon);
+            addons.insert(addon);
         }
     }
-    Ok(externals)
+    Ok(addons)
 }
 
 #[cfg(test)]

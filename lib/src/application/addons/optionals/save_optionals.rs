@@ -1,8 +1,9 @@
-use crate::application::addons::optionals::optional_addon::OptionalAddon;
+use crate::application::addons::optionals::OptionalAddon;
 use crate::application::pack::read::get_pack::GetPack;
 use crate::application::pack::write::save_pack_settings::SavePackSettings;
 
 pub trait SaveOptionals {
+    /// Saves optionals and their status to the pack settings.
     fn save_optionals(
         &self,
         pack_name: &str,

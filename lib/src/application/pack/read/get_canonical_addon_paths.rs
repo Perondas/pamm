@@ -1,5 +1,5 @@
-use crate::application::addons::externals::get_external_addons_paths::GetExternalAddonsPaths;
-use crate::application::addons::optionals::get_optionals_paths::GetOptionalsPaths;
+use crate::application::addons::externals::GetExternalsPaths;
+use crate::application::addons::optionals::GetOptionalsPaths;
 use crate::application::addons::resolve::ResolveAddons;
 use crate::application::pack::read::get_pack::GetPack;
 use crate::application::pack::read::get_repo_info::GetRepoInfo;
@@ -31,7 +31,7 @@ where
 
         let required_addons = self.resolve_addons(pack_name).await?;
         let optional_addons = if !disable_optionals {
-            self.get_optional_paths(pack_name).await?
+            self.get_optionals_paths(pack_name).await?
         } else {
             vec![]
         };
@@ -44,7 +44,7 @@ where
             .collect::<anyhow::Result<Vec<_>>>()?;
 
         let externals = self
-            .get_external_addon_paths(pack_name)
+            .get_externals_paths(pack_name)
             .await
             .context(anyhow!("Failed to read external addons"))?;
 

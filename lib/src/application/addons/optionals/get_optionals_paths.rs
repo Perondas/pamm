@@ -3,13 +3,21 @@ use crate::infrastructure::fs::files::name_consts::ADDONS_DIR_NAME;
 use log::{debug, trace};
 use std::path::PathBuf;
 
+pub trait GetOptionalsPaths {
+    /// Gets the paths to the enabled optional addons (including inherited ones).
+    /// The returned paths are relative to the repo root, e.g.
+    /// `<pack>/addons/<addon>`.
+    fn get_optionals_paths(
+        &self,
+        pack_name: &str,
+    ) -> impl Future<Output = anyhow::Result<Vec<PathBuf>>> + Send;
+}
+
 impl<T> GetOptionalsPaths for T
 where
     T: GetPack + Sync,
 {
-    /// Returns relative paths of the form `<pack>/addons/<addon>`, relative to
-    /// the repo root (join with the repo path to get usable filesystem paths).
-    async fn get_optional_paths(&self, pack_name: &str) -> anyhow::Result<Vec<PathBuf>> {
+    async fn get_optionals_paths(&self, pack_name: &str) -> anyhow::Result<Vec<PathBuf>> {
         let mut res = Vec::new();
         let mut current = Some(pack_name.to_string());
 
@@ -48,16 +56,6 @@ where
     }
 }
 
-pub trait GetOptionalsPaths {
-    /// Gets the paths to the enabled optional addons (including inherited ones).
-    /// The returned paths are relative to the repo root, e.g.
-    /// `<pack>/addons/<addon>`.
-    fn get_optional_paths(
-        &self,
-        pack_name: &str,
-    ) -> impl Future<Output = anyhow::Result<Vec<PathBuf>>> + Send;
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -76,7 +74,7 @@ mod tests {
             &["@opt_addon", "@req_addon"],
         );
 
-        let paths = mock.get_optional_paths("test_pack").await.unwrap();
+        let paths = mock.get_optionals_paths("test_pack").await.unwrap();
 
         assert_eq!(paths.len(), 1);
         assert_eq!(
@@ -99,7 +97,7 @@ mod tests {
 
         mock.mock_pack("parent_pack", None, &["@parent_opt"], &[], &["@parent_opt"]);
 
-        let mut paths = mock.get_optional_paths("child_pack").await.unwrap();
+        let mut paths = mock.get_optionals_paths("child_pack").await.unwrap();
 
         // Sort to ensure consistent order for assertions
         paths.sort();

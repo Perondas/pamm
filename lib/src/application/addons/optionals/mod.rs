@@ -1,8 +1,9 @@
+pub mod get_optionals;
 pub mod get_optionals_paths;
-pub mod load_optionals;
 pub mod optional_addon;
 pub mod save_optionals;
 
+pub use get_optionals::GetOptionals;
 pub use get_optionals_paths::GetOptionalsPaths;
-pub use load_optionals::LoadOptionals;
+pub use optional_addon::OptionalAddon;
 pub use save_optionals::SaveOptionals;

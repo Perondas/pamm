@@ -1,4 +1,4 @@
-use crate::application::addons::externals::load_externals::LoadExternals;
+use crate::application::addons::externals::GetAllStoredExternals;
 use crate::application::pack::read::get_repo_info::GetRepoInfo;
 use crate::application::repo::client::ClientRepoHandle;
 use crate::platform::steam::arma_install::find_arma_install;
@@ -33,9 +33,12 @@ impl ClientRepoHandle {
         let mut roots = vec![repo_path];
 
         for pack_name in self.all_pack_names() {
-            let externals = self.load_externals(&pack_name).await.context(anyhow!(
-                "Failed to load external addons for pack {pack_name:?}"
-            ))?;
+            let externals = self
+                .get_all_stored_externals(&pack_name)
+                .await
+                .context(anyhow!(
+                    "Failed to load external addons for pack {pack_name:?}"
+                ))?;
 
             for external in externals.iter().filter(|e| e.enabled) {
                 let path = tokio::fs::canonicalize(&external.path)
