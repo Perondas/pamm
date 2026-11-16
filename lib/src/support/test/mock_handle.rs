@@ -14,7 +14,7 @@ mockall::mock! {
             &self,
             pack_name: &str,
         ) -> anyhow::Result<(PackConfig, PackUserSettings)>;
-        async fn get_all_pack_names<'a>(&'a self) -> anyhow::Result<Vec<&'a str>>;
+        fn get_all_pack_names<'a>(&'a self) -> anyhow::Result<Vec<&'a str>>;
     }
     impl SavePackSettings for Handle {
         async fn save_pack_settings(&self, pack_name: &str, settings: &PackUserSettings) -> anyhow::Result<()>;

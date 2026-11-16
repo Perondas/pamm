@@ -6,17 +6,21 @@ use crate::infrastructure::fs::files::fs_readable::KnownFSReadable;
 use crate::infrastructure::fs::files::name_consts::INDEX_DIR_NAME;
 use crate::infrastructure::http::downloadable::KnownDownloadable;
 use crate::infrastructure::http::remote_version::verify_remote_version;
-use anyhow::{Context, anyhow};
+use anyhow::{Context, anyhow, ensure};
 use log::{debug, trace};
 use std::collections::HashSet;
 
 impl ClientRepoHandle {
     pub async fn quick_check_pack_up_to_date(&self, pack_name: &str) -> anyhow::Result<bool> {
-        self.ensure_not_local(pack_name)?;
+        ensure!(
+            !self.is_local_pack(pack_name),
+            "Pack '{}' is a local pack and cannot be quick checked",
+            pack_name
+        );
 
         let index_rel = RelPath::new().push(pack_name).push(INDEX_DIR_NAME);
 
-        let remote_url = self.remote().clone();
+        let remote_url = self.get_remote_url().clone();
 
         verify_remote_version(&remote_url).await?;
 

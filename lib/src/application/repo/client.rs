@@ -51,15 +51,12 @@ impl ClientRepoHandle {
         &self.user_settings
     }
 
-    pub fn remote(&self) -> &Url {
-        self.user_settings.get_remote()
-    }
-
     pub async fn update_settings(&mut self, settings: RepoUserSettings) -> anyhow::Result<()> {
-        self.user_settings = settings;
-        self.write(&self.user_settings)
+        self.write(&settings)
             .await
             .context("Failed to write user settings")?;
+        self.user_settings = settings;
+
         Ok(())
     }
 
@@ -72,24 +69,6 @@ impl ClientRepoHandle {
             .local_packs
             .iter()
             .any(|p| name_matches::names_match(p, pack_name))
-    }
-
-    /// Guard for every operation that talks to the remote. Local packs exist
-    /// only on this machine, so there is nothing to compare them against.
-    pub(in crate::application) fn ensure_not_local(&self, pack_name: &str) -> anyhow::Result<()> {
-        ensure!(
-            !self.is_local_pack(pack_name),
-            "Pack '{}' is a local pack and has no remote; local packs can never be synced",
-            pack_name
-        );
-        Ok(())
-    }
-
-    pub fn get_all_packs(&self) -> Vec<&str> {
-        self.get_registered_pack_names()
-            .into_iter()
-            .chain(self.user_settings.local_packs.iter().map(|s| s.as_str()))
-            .collect()
     }
 }
 
@@ -133,8 +112,12 @@ impl GetPack for ClientRepoHandle {
         self.get_registered_pack_with_settings(pack_name).await
     }
 
-    async fn get_all_pack_names(&self) -> anyhow::Result<Vec<&str>> {
-        Ok(self.get_all_packs())
+    fn get_all_pack_names(&self) -> anyhow::Result<Vec<&str>> {
+        Ok(self
+            .get_registered_pack_names()
+            .into_iter()
+            .chain(self.user_settings.local_packs.iter().map(|s| s.as_str()))
+            .collect())
     }
 }
 
@@ -329,7 +312,7 @@ mod local_pack_tests {
 
         for err in errors {
             assert!(
-                err.contains("is a local pack and has no remote"),
+                err.contains("is a local pack and cannot be"),
                 "unexpected error: {}",
                 err
             );

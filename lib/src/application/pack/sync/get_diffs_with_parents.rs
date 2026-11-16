@@ -2,6 +2,7 @@ use crate::application::pack::read::get_pack::GetPack;
 use crate::application::repo::client::ClientRepoHandle;
 use crate::domain::pack::pack_diff::PackDiff;
 use crate::infrastructure::progress::progress_reporter::ProgressReporter;
+use anyhow::ensure;
 
 impl ClientRepoHandle {
     pub async fn get_pack_and_parents_diffs(
@@ -12,7 +13,11 @@ impl ClientRepoHandle {
     ) -> anyhow::Result<Vec<PackDiff>> {
         // Only the requested pack needs checking: a normal pack can never name a
         // local pack as its parent, since local packs exist on one machine only.
-        self.ensure_not_local(pack_name)?;
+        ensure!(
+            !self.is_local_pack(pack_name),
+            "Pack '{}' is a local pack and cannot be diffed against the remote",
+            pack_name
+        );
 
         let chain = collect_pack_chain(self, pack_name).await?;
 

@@ -14,7 +14,7 @@ pub trait DeletePackContent {
 impl<T: GetPack + GetRepoInfo + Send> DeletePackContent for T {
     async fn delete_pack_content(&mut self, pack_name: &str) -> anyhow::Result<()> {
         ensure!(
-            self.get_all_pack_names().await?.contains(&pack_name),
+            self.get_all_pack_names()?.contains(&pack_name),
             "Pack '{}' not found in repo",
             pack_name
         );

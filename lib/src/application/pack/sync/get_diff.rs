@@ -5,6 +5,7 @@ use crate::domain::pack::pack_diff::{PackDiff, diff_packs};
 use crate::infrastructure::fs::pack::index_generator::IndexGenerator;
 use crate::infrastructure::http::remote_version::verify_remote_version;
 use crate::infrastructure::progress::progress_reporter::ProgressReporter;
+use anyhow::ensure;
 
 impl ClientRepoHandle {
     pub async fn get_pack_diff(
@@ -13,7 +14,11 @@ impl ClientRepoHandle {
         progress_reporter: impl ProgressReporter,
         force_refresh: bool,
     ) -> anyhow::Result<PackDiff> {
-        self.ensure_not_local(pack_name)?;
+        ensure!(
+            !self.is_local_pack(pack_name),
+            "Pack '{}' is a local pack and cannot be diffed against the remote",
+            pack_name
+        );
 
         verify_remote_version(self.get_remote_url()).await?;
 

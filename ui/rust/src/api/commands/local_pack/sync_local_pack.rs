@@ -8,10 +8,6 @@ pub async fn sync_local_pack(pack_name: String, repo_path: String) -> anyhow::Re
     let handle = ClientRepoHandle::open(repo_dir).await?;
 
     handle
-        .is_local_pack(&pack_name)
-        .ok_or(anyhow::anyhow!("Pack '{}' is not a local pack.", pack_name))?;
-
-    handle
         .sync_local_pack(&pack_name, &NoopProgressReporter)
         .await?;
 

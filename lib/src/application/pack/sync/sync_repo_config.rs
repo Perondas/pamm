@@ -18,7 +18,7 @@ impl ClientRepoHandle {
         &mut self,
         interactor: &impl ConfigSyncInteractor,
     ) -> anyhow::Result<()> {
-        let remote_url = self.remote().clone();
+        let remote_url = self.get_remote_url().clone();
 
         verify_remote_version(&remote_url).await?;
 

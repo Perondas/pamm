@@ -13,7 +13,7 @@ pub trait GetPack {
         pack_name: &str,
     ) -> impl Future<Output = anyhow::Result<(PackConfig, PackUserSettings)>> + Send;
 
-    fn get_all_pack_names(&self) -> impl Future<Output = anyhow::Result<Vec<&str>>> + Send;
+    fn get_all_pack_names(&self) -> anyhow::Result<Vec<&str>>;
 }
 
 impl RepoBase {
@@ -83,7 +83,7 @@ impl GetPack for ServerRepoHandle {
         self.get_registered_pack_with_settings(pack_name).await
     }
 
-    async fn get_all_pack_names(&self) -> anyhow::Result<Vec<&str>> {
+    fn get_all_pack_names(&self) -> anyhow::Result<Vec<&str>> {
         Ok(self.get_registered_pack_names())
     }
 }
@@ -110,12 +110,12 @@ impl GetPack for RepoHandle {
         }
     }
 
-    async fn get_all_pack_names(&self) -> anyhow::Result<Vec<&str>> {
+    fn get_all_pack_names(&self) -> anyhow::Result<Vec<&str>> {
         match self {
             #[cfg(feature = "client")]
-            Self::Client(handle) => handle.get_all_pack_names().await,
+            Self::Client(handle) => handle.get_all_pack_names(),
             #[cfg(feature = "server")]
-            Self::Server(handle) => handle.get_all_pack_names().await,
+            Self::Server(handle) => handle.get_all_pack_names(),
         }
     }
 }
