@@ -8,6 +8,8 @@ pub mod container_path;
 pub mod find_steam_dir;
 pub mod find_workshop_folder;
 #[cfg(target_os = "linux")]
+pub mod linux_launch_setup;
+#[cfg(target_os = "linux")]
 pub mod linux_setup;
 #[cfg(target_os = "linux")]
 pub mod steam_install;
