@@ -20,6 +20,12 @@ pub enum RepoHandle {
     Server(ServerRepoHandle),
 }
 
+#[derive(Clone, Copy)]
+enum RepoKind {
+    Client,
+    Server,
+}
+
 pub(crate) trait ConcreteRepoHandle:
     Deref<Target = RepoBase> + DerefMut + Send + Sync
 {
@@ -139,12 +145,6 @@ impl GetRepoInfo for RepoHandle {
             Self::Server(handle) => handle.get_config(),
         }
     }
-}
-
-#[derive(Clone, Copy)]
-enum RepoKind {
-    Client,
-    Server,
 }
 
 #[cfg(all(test, feature = "client", feature = "server"))]
