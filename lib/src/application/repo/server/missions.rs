@@ -1,15 +1,21 @@
 use crate::application::pack::read::get_pack::GetPack;
 use crate::application::pack::read::get_repo_info::GetRepoInfo;
+use crate::application::repo::server::ServerRepoHandle;
 use crate::infrastructure::fs::files::name_consts::MP_MISSIONS_DIR_NAME;
 use anyhow::{Context, anyhow};
 use log::trace;
 use std::path::PathBuf;
 use tokio::fs;
 
-impl<T> ResolveMissions for T
-where
-    T: GetPack + GetRepoInfo + Sync,
-{
+pub(in crate::application) trait ResolveMissions {
+    /// Gets the paths to the pack's missions (including inherited ones).
+    fn resolve_missions(
+        &self,
+        pack_name: &str,
+    ) -> impl Future<Output = anyhow::Result<Vec<PathBuf>>> + Send;
+}
+
+impl ResolveMissions for ServerRepoHandle {
     async fn resolve_missions(&self, pack_name: &str) -> anyhow::Result<Vec<PathBuf>> {
         let mut missions = Vec::new();
         let mut current = Some(pack_name.to_string());
@@ -44,12 +50,4 @@ where
 
         Ok(missions)
     }
-}
-
-pub(in crate::application) trait ResolveMissions {
-    /// Gets the paths to the pack's missions (including inherited ones).
-    fn resolve_missions(
-        &self,
-        pack_name: &str,
-    ) -> impl Future<Output = anyhow::Result<Vec<PathBuf>>> + Send;
 }

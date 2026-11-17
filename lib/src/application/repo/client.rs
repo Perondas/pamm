@@ -1,4 +1,5 @@
 mod downloading;
+pub mod params;
 
 use crate::application::pack::read::get_pack::GetPack;
 use crate::application::pack::write::save_pack_settings::SavePackSettings;
