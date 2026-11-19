@@ -56,25 +56,16 @@ impl RepoHandle {
 
     #[cfg(all(feature = "client", not(feature = "server")))]
     pub async fn open(repo_path: &Path) -> anyhow::Result<Self> {
-        match check_repo(repo_path).await? {
-            RepoKind::Client => Ok(ClientRepoHandle::open(repo_path).await?.into()),
-            RepoKind::Server => {
-                anyhow::bail!("Repository is a server repo, but the `server` feature is disabled")
-            }
-        }
+        ClientRepoHandle::open(repo_path).await.map(Into::into)
     }
 
     #[cfg(all(feature = "server", not(feature = "client")))]
     pub async fn open(repo_path: &Path) -> anyhow::Result<Self> {
-        match check_repo(repo_path).await? {
-            RepoKind::Server => Ok(ServerRepoHandle::open(repo_path).await?.into()),
-            RepoKind::Client => {
-                anyhow::bail!("Repository is a client repo, but the `client` feature is disabled")
-            }
-        }
+        ServerRepoHandle::open(repo_path).await.map(Into::into)
     }
 }
 
+#[cfg(all(feature = "client", feature = "server"))]
 async fn determine_repo_type(repo_path: &Path) -> anyhow::Result<RepoKind> {
     let server_config_path = repo_path.join(ServerConfig::file_name());
     let client_settings_path = repo_path.join(RepoUserSettings::file_name());
