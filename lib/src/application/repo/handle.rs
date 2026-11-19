@@ -5,10 +5,14 @@ use crate::application::repo::repo_base::RepoBase;
 #[cfg(feature = "server")]
 use crate::application::repo::server::ServerRepoHandle;
 use crate::domain::repo::repo_config::RepoConfig;
-use crate::domain::repo::repo_user_settings::RepoUserSettings;
-use crate::domain::repo::server_config::ServerConfig;
-use crate::infrastructure::fs::files::file_names::fixed_file::FixedFile;
-use crate::infrastructure::fs::files::util::path_checks::is_file;
+#[cfg(all(feature = "client", feature = "server"))]
+use {
+    crate::domain::repo::repo_user_settings::RepoUserSettings,
+    crate::domain::repo::server_config::ServerConfig,
+    crate::infrastructure::fs::files::file_names::fixed_file::FixedFile,
+    crate::infrastructure::fs::files::util::path_checks::is_file,
+};
+
 use std::ops::{Deref, DerefMut};
 use std::path::Path;
 
@@ -20,6 +24,7 @@ pub enum RepoHandle {
     Server(ServerRepoHandle),
 }
 
+#[cfg(all(feature = "client", feature = "server"))]
 #[derive(Clone, Copy)]
 enum RepoKind {
     Client,

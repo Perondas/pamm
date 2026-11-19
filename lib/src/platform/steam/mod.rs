@@ -7,9 +7,9 @@ pub mod container_path;
 #[cfg(target_os = "windows")]
 pub mod find_steam_dir;
 pub mod find_workshop_folder;
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", feature = "client"))]
 pub mod linux_launch_setup;
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", feature = "client"))]
 pub mod linux_setup;
 #[cfg(target_os = "linux")]
 pub mod steam_install;

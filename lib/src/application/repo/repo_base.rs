@@ -3,7 +3,6 @@ use crate::domain::repo::repo_config::RepoConfig;
 use crate::domain::repo::repo_user_settings::RepoUserSettings;
 use crate::domain::repo::server_config::ServerConfig;
 use crate::infrastructure::fs::files::file_names::fixed_file::FixedFile;
-#[cfg(feature = "client")]
 use crate::infrastructure::fs::files::file_paths::keyed_path::KeyedFilePath;
 use crate::infrastructure::fs::files::file_paths::self_identified_path::SelfIdentifiedFilePath;
 use crate::infrastructure::fs::files::fs_readable::KnownFSReadable;
