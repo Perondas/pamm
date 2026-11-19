@@ -1,5 +1,5 @@
 use crate::api::commands::user_repo_settings::FlutterRepoUserSettings;
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
+use pamm_lib::application::repo::client::ClientRepoHandle;
 
 pub async fn save_settings(
     repo_path: String,

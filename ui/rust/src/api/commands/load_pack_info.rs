@@ -1,7 +1,7 @@
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-use pamm_lib::handle::reading::get_pack::GetPack;
-use pamm_lib::models::cdlc::Cdlc;
-use pamm_lib::models::pack::pack_config::PackConfig;
+use pamm_lib::application::pack::read::get_pack::GetPack;
+use pamm_lib::application::repo::client::ClientRepoHandle;
+use pamm_lib::domain::cdlc::Cdlc;
+use pamm_lib::domain::pack::pack_config::PackConfig;
 
 pub struct PackInfo {
     pub description: String,

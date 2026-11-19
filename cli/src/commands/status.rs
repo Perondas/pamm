@@ -1,9 +1,9 @@
 use anyhow::bail;
 use pamm_cli_args::commands::status::StatusArgs;
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-use pamm_lib::handle::reading::get_pack::GetPack;
-use pamm_lib::handle::reading::get_repo_info::GetRepoInfo;
-use pamm_lib::models::cdlc::Cdlc;
+use pamm_lib::application::pack::read::get_pack::GetPack;
+use pamm_lib::application::pack::read::get_repo_info::GetRepoInfo;
+use pamm_lib::application::repo::client::ClientRepoHandle;
+use pamm_lib::domain::cdlc::Cdlc;
 use std::collections::HashMap;
 use std::env::current_dir;
 use std::fmt::{Display, Formatter};
@@ -64,7 +64,7 @@ pub async fn status_command(args: StatusArgs) -> anyhow::Result<()> {
 
     let mut packs = HashMap::new();
 
-    for pack in handle.get_all_packs() {
+    for pack in handle.get_all_pack_names()? {
         let pack = handle.get_pack(pack).await?;
         let needs_update = !handle
             .quick_check_pack_up_to_date(&pack.name)

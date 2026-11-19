@@ -1,0 +1,70 @@
+use crate::application::addons::externals::GetAllStoredExternals;
+use crate::application::pack::read::get_repo_info::GetRepoInfo;
+use crate::application::repo::client::ClientRepoHandle;
+use crate::platform::steam::arma_install::find_arma_install;
+use crate::platform::steam::linux_setup::LinuxLaunchSetup;
+use crate::platform::steam::linux_setup::compute_linux_launch_setup;
+use anyhow::{Context, anyhow};
+use std::path::Path;
+use std::path::PathBuf;
+
+impl ClientRepoHandle {
+    /// Describes the one-time Steam setup this repo needs on Linux: the string
+    /// to paste into Arma's launch options, and the `flatpak override` command
+    /// when mods sit outside the sandbox.
+    pub async fn linux_launch_setup(&self) -> anyhow::Result<LinuxLaunchSetup> {
+        let arma = find_arma_install().context("Failed to find the Arma 3 installation")?;
+
+        Ok(compute_linux_launch_setup(
+            &arma.steam,
+            &arma.install_dir,
+            &arma.libraries,
+            &self.mod_roots().await?,
+        ))
+    }
+
+    /// The directories this repo's mods live in: the repo itself, which holds
+    /// every pack's addons, plus the directory each external addon sits in.
+    async fn mod_roots(&self) -> anyhow::Result<Vec<PathBuf>> {
+        let repo_path = tokio::fs::canonicalize(self.get_repo_path())
+            .await
+            .context("Failed to resolve the repo path")?;
+
+        let mut roots = vec![repo_path];
+
+        for pack_name in self.all_pack_names() {
+            let externals = self
+                .get_all_stored_externals(&pack_name)
+                .await
+                .context(anyhow!(
+                    "Failed to load external addons for pack {pack_name:?}"
+                ))?;
+
+            for external in externals.iter().filter(|e| e.enabled) {
+                let path = tokio::fs::canonicalize(&external.path)
+                    .await
+                    .context(format!(
+                        "Failed to resolve the path of external addon {external:?}"
+                    ))?;
+
+                // The directory the addon sits in, not the addon itself, so
+                // that a sibling added later is already covered.
+                roots.push(path.parent().map(Path::to_path_buf).unwrap_or(path))
+            }
+        }
+
+        Ok(roots)
+    }
+
+    /// Every pack in the repo, remote and local alike.
+    fn all_pack_names(&self) -> Vec<String> {
+        use crate::application::pack::read::get_repo_info::GetRepoInfo;
+
+        self.get_config()
+            .packs
+            .iter()
+            .chain(self.user_settings().local_packs.iter())
+            .cloned()
+            .collect()
+    }
+}

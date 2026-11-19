@@ -1,4 +1,4 @@
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
+use pamm_lib::application::repo::client::ClientRepoHandle;
 use std::path::Path;
 
 pub async fn quick_check(pack_name: String, repo_path: String) -> anyhow::Result<bool> {

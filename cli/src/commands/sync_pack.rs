@@ -3,8 +3,8 @@ use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::{ToPrettyString, multi_pack_details_string};
 use dialoguer::theme::ColorfulTheme;
 use pamm_cli_args::commands::sync_pack::SyncPackArgs;
-use pamm_lib::handle::actions::sync::config_sync_interactor::ConfigSyncInteractor;
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
+use pamm_lib::application::pack::sync::config_sync_interactor::ConfigSyncInteractor;
+use pamm_lib::application::repo::client::ClientRepoHandle;
 use std::env::current_dir;
 
 pub async fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> anyhow::Result<()> {

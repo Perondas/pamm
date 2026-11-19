@@ -1,5 +1,5 @@
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-use pamm_lib::handle::writing::delete_pack_content::DeletePackContent;
+use pamm_lib::application::pack::write::delete_pack_content::DeletePackContent;
+use pamm_lib::application::repo::client::ClientRepoHandle;
 use std::path::Path;
 
 pub async fn delete_pack_content(repo_path: String, pack_name: String) -> anyhow::Result<()> {

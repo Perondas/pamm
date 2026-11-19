@@ -1,6 +1,6 @@
 use flutter_rust_bridge::frb;
-use pamm_lib::io::files::file_names::fixed_file::FixedFile;
-use pamm_lib::models::index::checksum_index::ChecksumIndex;
+use pamm_lib::domain::index::checksum_index::ChecksumIndex;
+use pamm_lib::infrastructure::fs::files::file_names::fixed_file::FixedFile;
 use std::path::Path;
 use tokio_util::sync::CancellationToken;
 

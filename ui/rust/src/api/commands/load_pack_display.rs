@@ -1,5 +1,5 @@
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-use pamm_lib::handle::reading::get_pack::GetPack;
+use pamm_lib::application::pack::read::get_pack::GetPack;
+use pamm_lib::application::repo::client::ClientRepoHandle;
 
 /// The subset of a pack's config the UI needs to display it.
 pub struct PackDisplayInfo {

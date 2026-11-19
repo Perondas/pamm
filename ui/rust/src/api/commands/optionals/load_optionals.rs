@@ -1,7 +1,7 @@
 use flutter_rust_bridge::frb;
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-use pamm_lib::handle::optionals::load_optionals::LoadOptionals;
-pub use pamm_lib::handle::optionals::optional_addon::OptionalAddon;
+use pamm_lib::application::addons::optionals::GetOptionals;
+pub use pamm_lib::application::addons::optionals::OptionalAddon;
+use pamm_lib::application::repo::client::ClientRepoHandle;
 
 pub async fn load_optionals(
     repot_path: String,
@@ -11,7 +11,7 @@ pub async fn load_optionals(
 
     let handle = ClientRepoHandle::open(repot_path).await?;
 
-    handle.load_optionals(&pack_name).await
+    handle.get_optionals(&pack_name).await
 }
 
 #[frb(mirror(OptionalAddon))]

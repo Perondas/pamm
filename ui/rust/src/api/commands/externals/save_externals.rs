@@ -1,7 +1,7 @@
 use crate::api::commands::externals::load_externals::FlutterExternalAddon;
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-use pamm_lib::handle::externals::external_addon::ExternalAddon;
-use pamm_lib::handle::externals::save_externals::SaveExternals;
+use pamm_lib::application::addons::externals::ExternalAddon;
+use pamm_lib::application::addons::externals::SaveExternals;
+use pamm_lib::application::repo::client::ClientRepoHandle;
 
 pub async fn save_externals(
     repo_path: String,

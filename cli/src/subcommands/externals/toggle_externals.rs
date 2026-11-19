@@ -1,14 +1,14 @@
 use crate::subcommands::externals::externals_to_names;
 use pamm_cli_args::subcommands::externals::toggle_externals::ToggleExternalsArgs;
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-use pamm_lib::handle::externals::load_externals::LoadExternals;
-use pamm_lib::handle::externals::save_externals::SaveExternals;
+use pamm_lib::application::addons::externals::GetAllStoredExternals;
+use pamm_lib::application::addons::externals::SaveExternals;
+use pamm_lib::application::repo::client::ClientRepoHandle;
 use std::env::current_dir;
 
 pub async fn toggle_externals_command(args: ToggleExternalsArgs) -> anyhow::Result<()> {
     let handle = ClientRepoHandle::open(&current_dir()?).await?;
 
-    let mut externals = handle.load_externals(&args.name).await?;
+    let mut externals = handle.get_all_stored_externals(&args.name).await?;
 
     if externals.is_empty() {
         println!("No externals to toggle.");

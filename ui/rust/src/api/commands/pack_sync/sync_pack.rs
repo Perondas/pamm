@@ -3,8 +3,8 @@ use crate::api::commands::pack_sync::cancellation::{
 };
 use crate::api::commands::pack_sync::get_diff::OpaqueDiff;
 use crate::api::progress_reporting::DartProgressReporter;
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-use pamm_lib::io::progress_reporting::progress_reporter::ProgressReporter;
+use pamm_lib::application::repo::client::ClientRepoHandle;
+use pamm_lib::infrastructure::progress::progress_reporter::ProgressReporter;
 use std::path::Path;
 
 pub async fn sync_pack(

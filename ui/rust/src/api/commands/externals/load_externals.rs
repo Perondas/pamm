@@ -1,5 +1,5 @@
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-use pamm_lib::handle::externals::load_externals::LoadExternals;
+use pamm_lib::application::addons::externals::GetAllStoredExternals;
+use pamm_lib::application::repo::client::ClientRepoHandle;
 
 pub async fn load_externals(
     repot_path: String,
@@ -9,7 +9,7 @@ pub async fn load_externals(
 
     let handle = ClientRepoHandle::open(repot_path).await?;
 
-    let externals = handle.load_externals(&pack_name).await?;
+    let externals = handle.get_all_stored_externals(&pack_name).await?;
 
     Ok(externals.into_iter().map(Into::into).collect())
 }
@@ -21,8 +21,12 @@ pub struct FlutterExternalAddon {
     pub found_in_workshop: bool,
 }
 
-impl From<pamm_lib::handle::externals::external_addon::ExternalAddon> for FlutterExternalAddon {
-    fn from(external: pamm_lib::handle::externals::external_addon::ExternalAddon) -> Self {
+impl From<pamm_lib::application::addons::externals::external_addon::ExternalAddon>
+    for FlutterExternalAddon
+{
+    fn from(
+        external: pamm_lib::application::addons::externals::external_addon::ExternalAddon,
+    ) -> Self {
         Self {
             enabled: external.enabled,
             name: external.name,

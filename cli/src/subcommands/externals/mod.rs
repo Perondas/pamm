@@ -1,4 +1,4 @@
-use pamm_lib::handle::externals::external_addon::ExternalAddon;
+use pamm_lib::application::addons::externals::ExternalAddon;
 use std::path::Path;
 
 pub mod add_external;

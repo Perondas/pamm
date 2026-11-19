@@ -1,0 +1,61 @@
+use crate::domain::index::index_node::{IndexNode, PBOPart};
+use crate::domain::self_keyed::SelfKeyed;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug)]
+pub enum NodeDiff {
+    Created(IndexNode),
+    Deleted { name: String, size: u64 },
+    Modified(NodeModification),
+    None(String),
+}
+
+#[derive(Debug)]
+pub struct NodeModification {
+    pub name: String,
+    pub kind: ModifiedNodeKind,
+}
+
+#[derive(Debug)]
+pub enum ModifiedNodeKind {
+    Folder(Vec<NodeDiff>),
+    File {
+        old_length: u64,
+        target_checksum: Vec<u8>,
+        modification: FileModification,
+    },
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub enum FileModification {
+    PBO {
+        new_length: u64,
+        new_order: Vec<PBOPart>,
+        required_checksums: Vec<Vec<u8>>,
+        dl_size: u64,
+        new_blob_start: u64,
+    },
+    Generic {
+        new_length: u64,
+    },
+}
+
+impl FileModification {
+    pub(crate) fn get_length(&self) -> u64 {
+        match self {
+            FileModification::PBO { new_length, .. } => *new_length,
+            FileModification::Generic { new_length } => *new_length,
+        }
+    }
+}
+
+impl SelfKeyed for NodeDiff {
+    fn get_key(&self) -> &str {
+        match self {
+            NodeDiff::Created(node) => &node.name,
+            NodeDiff::Deleted { name, .. } => name,
+            NodeDiff::Modified(modification) => &modification.name,
+            NodeDiff::None(name) => name,
+        }
+    }
+}

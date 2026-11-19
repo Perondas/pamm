@@ -1,7 +1,7 @@
 use flutter_rust_bridge::frb;
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-pub use pamm_lib::models::cdlc::Cdlc;
-use pamm_lib::models::pack::pack_config::PackConfig;
+use pamm_lib::application::repo::client::ClientRepoHandle;
+pub use pamm_lib::domain::cdlc::Cdlc;
+use pamm_lib::domain::pack::pack_config::PackConfig;
 
 pub async fn add_local_pack(
     repo_path: String,

@@ -1,0 +1,115 @@
+use crate::application::pack::read::get_pack::GetPack;
+use crate::infrastructure::fs::files::name_consts::ADDONS_DIR_NAME;
+use log::{debug, trace};
+use std::path::PathBuf;
+
+pub trait GetOptionalsPaths {
+    /// Gets the paths to the enabled optional addons (including inherited ones).
+    /// The returned paths are relative to the repo root, e.g.
+    /// `<pack>/addons/<addon>`.
+    fn get_optionals_paths(
+        &self,
+        pack_name: &str,
+    ) -> impl Future<Output = anyhow::Result<Vec<PathBuf>>> + Send;
+}
+
+impl<T> GetOptionalsPaths for T
+where
+    T: GetPack + Sync,
+{
+    async fn get_optionals_paths(&self, pack_name: &str) -> anyhow::Result<Vec<PathBuf>> {
+        let mut res = Vec::new();
+        let mut current = Some(pack_name.to_string());
+
+        // Own optionals first, then each ancestor's in turn.
+        while let Some(pack_name) = current {
+            let (config, settings) = self.get_pack_with_settings(&pack_name).await?;
+
+            let addon_dir = PathBuf::from(&pack_name).join(ADDONS_DIR_NAME);
+            let start = res.len();
+
+            for optional in &settings.enabled_optionals {
+                if config
+                    .addons
+                    .get(optional)
+                    .is_some_and(|addon| addon.is_optional)
+                {
+                    trace!(
+                        "Optional addon '{}' is enabled for pack '{}'",
+                        optional, config.name
+                    );
+                    let optional_path = addon_dir.join(optional);
+                    res.push(optional_path);
+                }
+            }
+
+            debug!(
+                "Optional addon paths for pack '{}': {:#?}",
+                config.name,
+                &res[start..]
+            );
+
+            current = config.parent;
+        }
+
+        Ok(res)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::support::test::mock_handle::{MockHandle, MockHandleExt};
+    use std::path::PathBuf;
+
+    #[tokio::test]
+    async fn test_get_optional_paths() {
+        let mut mock = MockHandle::new();
+
+        mock.mock_pack(
+            "test_pack",
+            None,
+            &["@opt_addon"],
+            &["@req_addon"],
+            &["@opt_addon", "@req_addon"],
+        );
+
+        let paths = mock.get_optionals_paths("test_pack").await.unwrap();
+
+        assert_eq!(paths.len(), 1);
+        assert_eq!(
+            paths[0],
+            PathBuf::from("test_pack/addons").join("@opt_addon")
+        );
+    }
+
+    #[tokio::test]
+    async fn test_get_optional_paths_with_parent() {
+        let mut mock = MockHandle::new();
+
+        mock.mock_pack(
+            "child_pack",
+            Some("parent_pack"),
+            &["@child_opt"],
+            &[],
+            &["@child_opt"],
+        );
+
+        mock.mock_pack("parent_pack", None, &["@parent_opt"], &[], &["@parent_opt"]);
+
+        let mut paths = mock.get_optionals_paths("child_pack").await.unwrap();
+
+        // Sort to ensure consistent order for assertions
+        paths.sort();
+
+        assert_eq!(paths.len(), 2);
+        assert_eq!(
+            paths[0],
+            PathBuf::from("child_pack/addons").join("@child_opt")
+        );
+        assert_eq!(
+            paths[1],
+            PathBuf::from("parent_pack/addons").join("@parent_opt")
+        );
+    }
+}

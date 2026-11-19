@@ -1,6 +1,6 @@
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
-use pamm_lib::handle::optionals::optional_addon::OptionalAddon;
-use pamm_lib::handle::optionals::SaveOptionals;
+use pamm_lib::application::addons::optionals::OptionalAddon;
+use pamm_lib::application::addons::optionals::SaveOptionals;
+use pamm_lib::application::repo::client::ClientRepoHandle;
 
 pub async fn save_optionals(
     repo_path: String,

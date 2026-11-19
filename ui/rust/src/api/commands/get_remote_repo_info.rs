@@ -1,5 +1,5 @@
-use pamm_lib::io::net::downloadable::KnownDownloadable;
-use pamm_lib::models::repo::repo_config::RepoConfig;
+use pamm_lib::domain::repo::repo_config::RepoConfig;
+use pamm_lib::infrastructure::http::downloadable::KnownDownloadable;
 use url::Url;
 
 pub async fn get_remote_repo_info(remote: &str) -> anyhow::Result<RepoConfig> {

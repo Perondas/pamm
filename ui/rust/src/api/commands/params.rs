@@ -1,4 +1,4 @@
-use pamm_lib::handle::client_repo_handle::ClientRepoHandle;
+use pamm_lib::application::repo::client::ClientRepoHandle;
 pub async fn get_launch_params(
     repot_path: String,
     pack_name: String,
