@@ -2,7 +2,7 @@ use crate::domain::cdlc::Cdlc;
 use crate::platform::steam::arma_install::find_arma_install;
 use log::{debug, info};
 
-pub async fn has_cdlc_installed(cldc: &Cdlc) -> anyhow::Result<bool> {
+pub fn has_cdlc_installed(cldc: &Cdlc) -> anyhow::Result<bool> {
     let arma_install = find_arma_install()?;
 
     let cdlc_code = cldc.short_form();
@@ -24,6 +24,6 @@ pub async fn has_cdlc_installed(cldc: &Cdlc) -> anyhow::Result<bool> {
         return Ok(false);
     }
 
-    info!("CDLC {:?} seems to be installed", cdlc_folder);
+    info!("CDLC {:?} seems to be installed at {:?}", cldc, cdlc_folder);
     Ok(true)
 }

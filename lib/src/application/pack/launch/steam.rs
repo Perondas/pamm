@@ -9,7 +9,7 @@ impl ClientRepoHandle {
     pub(super) async fn launch_via_steam(
         &self,
         pack_name: &str,
-        addon_paths: &[String],
+        addon_paths: impl Iterator<Item= String>,
         cdlc: Option<Cdlc>,
     ) -> anyhow::Result<LaunchOutcome> {
         info!("Launching pack '{}' via Steam", pack_name);
@@ -30,9 +30,7 @@ impl ClientRepoHandle {
 
         // CDLCs are addressed by their short form, not by a path
         let mods = addon_paths
-            .iter()
-            .map(String::as_str)
-            .chain(cdlc.as_ref().map(Cdlc::short_form))
+            .chain(cdlc.map(|c| c.short_form().to_string()))
             .collect::<Vec<_>>();
 
         let addons_combined = format!("\"-mod={}\"", mods.join(";"));

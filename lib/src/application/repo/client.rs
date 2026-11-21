@@ -193,7 +193,7 @@ mod tests {
 #[cfg(test)]
 mod local_pack_tests {
     use super::*;
-    use crate::application::pack::read::get_canonical_addon_paths::GetAddonPaths;
+    use crate::application::pack::read::get_combined_canonical_addon_paths::GetAddonPaths;
     use crate::domain::addon::AddonSettings;
     use crate::infrastructure::progress::progress_reporter::ProgressReporter;
     use crate::support::test::repo_builder::TestClientRepoBuilder;

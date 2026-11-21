@@ -10,7 +10,6 @@ pub mod find_workshop_folder;
 pub mod linux_launch_setup;
 #[cfg(all(target_os = "linux", feature = "client"))]
 pub mod linux_setup;
-#[cfg(target_os = "linux")]
 pub mod steam_install;
 pub mod get_workshop_item_path;
 pub mod has_cdlc_installed;

@@ -47,13 +47,13 @@ where
             .map(canonicalize_and_clean_path)
             .collect::<anyhow::Result<HashSet<_>>>()?;
 
-        let mut externals = self
+        let externals = self
             .get_externals_paths(pack_name)
             .await
             .context(anyhow!("Failed to read external addons"))?;
 
         if let Some(cldc) = cdlc {
-
+            todo!("CDLC support is not yet implemented. CDLC short form: {}", cldc.short_form());
         }
 
         addons.extend(externals);

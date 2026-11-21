@@ -1,4 +1,4 @@
-use crate::application::pack::read::get_canonical_addon_paths::GetAddonPaths;
+use crate::application::pack::read::get_combined_canonical_addon_paths::GetAddonPaths;
 use crate::application::pack::read::get_pack::GetPack;
 use crate::application::repo::client::ClientRepoHandle;
 use log::{debug, info};
@@ -52,10 +52,13 @@ impl ClientRepoHandle {
         );
 
         match params.mode {
-            LaunchMode::Steam => self.launch_via_steam(pack_name, addon_paths.iter(), cdlc).await,
+            LaunchMode::Steam => {
+                self.launch_via_steam(pack_name, addon_paths.into_iter(), cdlc)
+                    .await
+            }
             #[cfg(target_os = "windows")]
             LaunchMode::Executable => {
-                self.launch_via_executable(pack_name, &addon_paths, cdlc)
+                self.launch_via_executable(pack_name, addon_paths.into_iter(), cdlc)
                     .await
             }
         }

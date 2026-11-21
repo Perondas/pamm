@@ -16,7 +16,7 @@ impl ClientRepoHandle {
     pub(super) async fn launch_via_steam(
         &self,
         pack_name: &str,
-        addon_paths: impl Iterator<Item = impl AsRef<str>>,
+        addon_paths: impl Iterator<Item= String>,
         cdlc: Option<Cdlc>,
     ) -> anyhow::Result<LaunchOutcome> {
         info!("Launching pack '{}' via Steam", pack_name);
@@ -27,7 +27,7 @@ impl ClientRepoHandle {
         // home is mounted elsewhere, and a host path there would resolve
         // successfully to the wrong directory rather than failing loudly.
         let mut arma_mod_paths = addon_paths
-            .map(|path| to_arma_path(&arma.steam.container_path(Path::new(path.as_ref()))))
+            .map(|path| to_arma_path(&arma.steam.container_path(Path::new(&path))))
             .collect::<anyhow::Result<Vec<_>>>()?;
 
         // CDLCs are addressed by their short form, which is not a path and
