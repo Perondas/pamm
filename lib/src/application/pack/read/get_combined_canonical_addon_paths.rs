@@ -5,12 +5,16 @@ use crate::application::pack::read::get_pack::GetPack;
 use crate::application::pack::read::get_repo_info::GetRepoInfo;
 use crate::domain::cdlc::Cdlc;
 use crate::infrastructure::fs::files::util::clean_path::canonicalize_and_clean_path;
+use crate::platform::steam::get_workshop_item_path::get_workshop_item_path;
+use crate::platform::steam::has_cdlc_installed::has_cdlc_installed;
 use anyhow::{Context, anyhow};
+use log::info;
 use std::collections::HashSet;
 
 pub trait GetAddonPaths {
     /// Gets the paths to all enabled addons of the pack (required, optional and
-    /// external) as absolute, canonicalized path strings.
+    /// external) as absolute, canonicalized path strings. When supplying a CDLC will try and add a
+    /// compat if the CDLC is not installed but a compat can be found in the workshop folder.
     fn get_combined_canonical_addon_paths(
         &self,
         pack_name: &str,
@@ -47,16 +51,24 @@ where
             .map(canonicalize_and_clean_path)
             .collect::<anyhow::Result<HashSet<_>>>()?;
 
-        let externals = self
-            .get_externals_paths(pack_name)
-            .await
-            .context(anyhow!("Failed to read external addons"))?;
+        addons.extend(
+            self.get_externals_paths(pack_name)
+                .await
+                .context(anyhow!("Failed to read external addons"))?,
+        );
 
-        if let Some(cldc) = cdlc {
-            todo!("CDLC support is not yet implemented. CDLC short form: {}", cldc.short_form());
+        // If we are loading a CDLC enabled pack, and we don't have it installed, we should try and load the compat if available
+        if let Some(cdlc) = cdlc
+            && !has_cdlc_installed(&cdlc).context("Failed to check if CDLC is installed")?
+            && let Some(path) = get_workshop_item_path(cdlc.compat_mod_id())
+                .context("Failed to get workshop item path")?
+        {
+            info!(
+                "CDLC '{:?}' is not installed, but found compat mod at '{:?}'",
+                cdlc, path
+            );
+            addons.insert(canonicalize_and_clean_path(path)?);
         }
-
-        addons.extend(externals);
 
         Ok(addons)
     }

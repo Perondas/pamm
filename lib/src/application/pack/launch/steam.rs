@@ -9,7 +9,7 @@ impl ClientRepoHandle {
     pub(super) async fn launch_via_steam(
         &self,
         pack_name: &str,
-        addon_paths: impl Iterator<Item= String>,
+        addon_paths: impl Iterator<Item = String>,
         cdlc: Option<Cdlc>,
     ) -> anyhow::Result<LaunchOutcome> {
         info!("Launching pack '{}' via Steam", pack_name);

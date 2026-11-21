@@ -1,6 +1,6 @@
-use std::collections::HashSet;
 use crate::application::pack::read::get_pack::GetPack;
 use crate::infrastructure::fs::files::util::clean_path::canonicalize_and_clean_path;
+use std::collections::HashSet;
 
 pub(in crate::application) trait GetExternalsPaths {
     /// Gets the paths to the pack's enabled external addons as absolute,
@@ -82,6 +82,9 @@ mod tests {
         let valid_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .canonicalize()
             .unwrap();
-        assert_eq!(paths.iter().next().unwrap(), &canonicalize_and_clean_path(valid_path).unwrap());
+        assert_eq!(
+            paths.iter().next().unwrap(),
+            &canonicalize_and_clean_path(valid_path).unwrap()
+        );
     }
 }

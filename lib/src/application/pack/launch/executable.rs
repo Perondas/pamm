@@ -12,7 +12,7 @@ impl ClientRepoHandle {
     pub(super) async fn launch_via_executable(
         &self,
         pack_name: &str,
-        addon_paths: impl Iterator<Item= String>,
+        addon_paths: impl Iterator<Item = String>,
         cdlc: Option<Cdlc>,
     ) -> anyhow::Result<LaunchOutcome> {
         info!("Launching pack '{}' via executable", pack_name);
@@ -45,7 +45,7 @@ impl ClientRepoHandle {
         let mods = addon_paths
             .chain(cdlc.map(|c| c.short_form().to_string()))
             .collect::<Vec<_>>();
-        
+
         let addons_combined = format!("-mod={}", mods.join(";"));
 
         command.arg(addons_combined);
