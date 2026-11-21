@@ -1,6 +1,7 @@
 use crate::log_wrapper::LogWrapper;
 use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::{ToPrettyString, multi_pack_details_string};
+use crate::utils::workshop::report_workshop_addons_not_found;
 use dialoguer::theme::ColorfulTheme;
 use pamm_cli_args::commands::sync_pack::SyncPackArgs;
 use pamm_lib::application::pack::sync::config_sync_interactor::ConfigSyncInteractor;
@@ -21,7 +22,7 @@ pub async fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> a
         repo_handle
             .sync_local_pack(&args.name, &progress_reporter)
             .await?;
-        return Ok(());
+        return report_workshop_addons_not_found(&repo_handle, &args.name).await;
     }
 
     if args.yes {
@@ -36,7 +37,7 @@ pub async fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> a
 
     if diffs.iter().all(|d| !d.has_changes()) {
         println!("No changes found.");
-        return Ok(());
+        return report_workshop_addons_not_found(&repo_handle, &args.name).await;
     }
 
     println!("{}", diffs.to_pretty_string());
@@ -68,7 +69,7 @@ pub async fn sync_pack_command(args: SyncPackArgs, log_wrapper: LogWrapper) -> a
 
     println!("Pack synchronized successfully.");
 
-    Ok(())
+    report_workshop_addons_not_found(&repo_handle, &args.name).await
 }
 
 pub(super) struct DialogerInteractor;

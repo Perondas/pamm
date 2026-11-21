@@ -2,6 +2,7 @@ use crate::commands::sync_pack::DialogerInteractor;
 use crate::log_wrapper::LogWrapper;
 use crate::progress_reporting::IndicatifProgressReporter;
 use crate::utils::diff_to_string::ToPrettyString;
+use crate::utils::workshop::report_workshop_addons_not_found;
 use dialoguer::theme::ColorfulTheme;
 use pamm_cli_args::commands::sync_this_only_pack::SyncThisOnlyPackArgs;
 use pamm_lib::application::repo::client::ClientRepoHandle;
@@ -27,7 +28,7 @@ pub async fn sync_this_pack_only_command(
 
     if !diff.has_changes() {
         println!("No changes found.");
-        return Ok(());
+        return report_workshop_addons_not_found(&repo_handle, &args.name).await;
     }
 
     println!("{}", diff.to_pretty_string());
@@ -49,5 +50,5 @@ pub async fn sync_this_pack_only_command(
 
     println!("Pack synchronized successfully.");
 
-    Ok(())
+    report_workshop_addons_not_found(&repo_handle, &args.name).await
 }

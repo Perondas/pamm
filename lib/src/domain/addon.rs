@@ -48,6 +48,17 @@ impl PackAddon {
         self.settings.source()
     }
 
+    /// The Steam workshop page of the addon, where users can subscribe to it.
+    /// `None` for addons served by the repo.
+    pub fn workshop_url(&self) -> Option<String> {
+        match self.source() {
+            AddonSource::Repo => None,
+            AddonSource::Workshop { id } => Some(format!(
+                "https://steamcommunity.com/sharedfiles/filedetails/?id={id}"
+            )),
+        }
+    }
+
     /// The addon's folder in the repo, relative to the repo root:
     /// `<pack>/addons/<name>`. The server always has every addon there, workshop
     /// addons included.
@@ -67,5 +78,39 @@ impl Display for PackAddon {
         }
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn addon(workshop_id: Option<&str>) -> PackAddon {
+        PackAddon {
+            pack_name: "core".to_string(),
+            name: "@cba".to_string(),
+            settings: AddonSettings {
+                workshop_id: workshop_id.map(str::to_string),
+                ..Default::default()
+            },
+        }
+    }
+
+    #[test]
+    fn workshop_url_points_at_the_workshop_page() {
+        assert_eq!(
+            addon(Some("450814997")).workshop_url().as_deref(),
+            Some("https://steamcommunity.com/sharedfiles/filedetails/?id=450814997")
+        );
+        assert_eq!(addon(None).workshop_url(), None);
+    }
+
+    #[test]
+    fn display_names_the_pack_and_workshop_item() {
+        assert_eq!(addon(None).to_string(), "'@cba' of pack 'core'");
+        assert_eq!(
+            addon(Some("450814997")).to_string(),
+            "'@cba' of pack 'core' (workshop item 450814997)"
+        );
     }
 }
