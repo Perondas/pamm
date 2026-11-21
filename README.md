@@ -13,7 +13,7 @@ It is NOT compatible with other mod managers.
 
 ## Admin guide
 
-Check the [wiki](https://github.com/Perondas/pamm/wiki) for an admin guode
+Check the [wiki](https://github.com/Perondas/pamm/wiki) for an admin guide
 
 ## Features
 
@@ -51,7 +51,7 @@ supported, and Arma can live in any of your Steam libraries.
 
 ### One-time Steam setup
 
-Depending on where your mods are stored, Steam may need a little setup before Arma can see them. Run `pamm linux`
+Depending on where your mods are stored, Steam may need a little setup before Arma can see them. Run `pamm_cli linux`
 inside a repo, or click **Steam setup** on the repo page in the GUI, to see exactly what is needed:
 
 - **Mods in your home directory or a Steam library:** nothing to do.
@@ -67,11 +67,11 @@ Arma has to be started through Steam once so Proton creates its prefix. After th
 programs in the same prefix as the game, using the same Proton version:
 
 ```
-pamm linux                                # Steam setup, Proton version, and whether TeamSpeak is installed
-pamm linux install-teamspeak <installer>  # install TeamSpeak into Arma's prefix (silent, add --interactive for the wizard)
-pamm linux teamspeak                      # launch TeamSpeak
-pamm linux explorer [path]                # open a file browser in the prefix, e.g. at C:\ or Z:\home
-pamm linux kill                           # stop everything in the prefix, including the game
+pamm_cli linux                                # Steam setup, Proton version, and whether TeamSpeak is installed
+pamm_cli linux install-teamspeak <installer>  # install TeamSpeak into Arma's prefix (silent, add --interactive for the wizard)
+pamm_cli linux teamspeak                      # launch TeamSpeak
+pamm_cli linux explorer [path]                # open a file browser in the prefix, e.g. at C:\ or Z:\home
+pamm_cli linux kill                           # stop everything in the prefix, including the game
 ```
 
 Download the **Windows** version of TeamSpeak 3 from the [TeamSpeak downloads page](https://www.teamspeak.com/en/downloads).
@@ -88,13 +88,13 @@ over HTTP). The build output lives in a dedicated `www/` subdirectory of the rep
 server should expose.
 
 ```
-pamm init                       # create a new empty repo
-pamm add-pack                   # register a new pack interactively
+pamm_cli init                   # create a new empty repo
+pamm_cli pack add               # register a new pack interactively
 # drop addon files into <pack>/addons/@addon_name/ ...
-pamm build                      # populate www/ with symlinks + indexes
-pamm build <pack>               # rebuild a single pack's subtree
-pamm build --copy               # use copies instead of symlinks (Windows / cross-fs)
-pamm build --force-refresh      # ignore the on-disk index cache and re-scan everything
+pamm_cli build                  # populate www/ with symlinks + indexes
+pamm_cli build <pack>           # rebuild a single pack's subtree
+pamm_cli build --copy           # use copies instead of symlinks (Windows / cross-fs)
+pamm_cli build --force-refresh  # ignore the on-disk index cache and re-scan everything
 ```
 
 Each pack lives in its own folder, on the server source, in the build output, and in client repos:
@@ -131,13 +131,13 @@ shows up in `pack.config.json`, then add its workshop ID:
 }
 ```
 
-The next `pamm build` leaves it out of `www/`. Players are shown a link to every workshop addon they are
+The next `pamm_cli build` leaves it out of `www/`. Players are shown a link to every workshop addon they are
 missing when they sync, a pack with a missing workshop addon is reported as not up to date, and launching
 fails until they have subscribed. Workshop addons can be optional as well.
 
 `version.pamm` stores the layout version (a repo without one is treated as version 1, the old flat layout).
 Repos with an outdated version are migrated automatically the next time they are opened — both server sources
-and client repos. After a server repo migrates, run `pamm build` to regenerate `www/` in the new layout;
+and client repos. After a server repo migrates, run `pamm_cli build` to regenerate `www/` in the new layout;
 clients refuse to sync against a `www/` that has not been rebuilt yet and say so explicitly.
 
 Point your HTTP server's document root at `<repo>/www/`. Stop the HTTP server during a build — the build
