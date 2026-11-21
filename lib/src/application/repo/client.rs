@@ -220,7 +220,10 @@ mod local_pack_tests {
         let mut core = PackConfig::new("core".to_string(), "d".to_string(), vec![], None, None);
         core.addons.insert(
             "@core_addon".to_string(),
-            AddonSettings { is_optional: false },
+            AddonSettings {
+                is_optional: false,
+                ..Default::default()
+            },
         );
         let fixture = TestClientRepoBuilder::new(tmp.path())
             .repo_name("repo")
@@ -243,7 +246,10 @@ mod local_pack_tests {
         );
         mission.addons.insert(
             "@mission_addon".to_string(),
-            AddonSettings { is_optional: false },
+            AddonSettings {
+                is_optional: false,
+                ..Default::default()
+            },
         );
         handle.add_local_pack(&mission).await.unwrap();
         fs::create_dir_all(repo_path.join("my_mission/addons/@mission_addon")).unwrap();

@@ -56,13 +56,19 @@ impl MockHandleExt for MockHandle {
         for opt in optionals {
             config.addons.insert(
                 opt.to_string(),
-                crate::domain::addon::AddonSettings { is_optional: true },
+                crate::domain::addon::AddonSettings {
+                    is_optional: true,
+                    ..Default::default()
+                },
             );
         }
         for req in required {
             config.addons.insert(
                 req.to_string(),
-                crate::domain::addon::AddonSettings { is_optional: false },
+                crate::domain::addon::AddonSettings {
+                    is_optional: false,
+                    ..Default::default()
+                },
             );
         }
 

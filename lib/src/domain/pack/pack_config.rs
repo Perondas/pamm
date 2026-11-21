@@ -97,19 +97,28 @@ mod tests {
         // Required addon
         config.addons.insert(
             "required_addon".to_string(),
-            AddonSettings { is_optional: false },
+            AddonSettings {
+                is_optional: false,
+                ..Default::default()
+            },
         );
 
         // Optional addon (enabled)
         config.addons.insert(
             "optional_enabled".to_string(),
-            AddonSettings { is_optional: true },
+            AddonSettings {
+                is_optional: true,
+                ..Default::default()
+            },
         );
 
         // Optional addon (disabled)
         config.addons.insert(
             "optional_disabled".to_string(),
-            AddonSettings { is_optional: true },
+            AddonSettings {
+                is_optional: true,
+                ..Default::default()
+            },
         );
 
         let mut user_settings = PackUserSettings::default();

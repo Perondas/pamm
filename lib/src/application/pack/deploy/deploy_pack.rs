@@ -299,8 +299,13 @@ mod tests {
                 None,
                 None,
             );
-            pack.addons
-                .insert("@addon1".to_string(), AddonSettings { is_optional: false });
+            pack.addons.insert(
+                "@addon1".to_string(),
+                AddonSettings {
+                    is_optional: false,
+                    ..Default::default()
+                },
+            );
             let fixture = TestServerRepoBuilder::new(tmp.path())
                 .repo_name("repo")
                 .description("desc")
@@ -423,8 +428,13 @@ mod tests {
             None,
             None,
         );
-        pack.addons
-            .insert("@addon1".to_string(), AddonSettings { is_optional: false });
+        pack.addons.insert(
+            "@addon1".to_string(),
+            AddonSettings {
+                is_optional: false,
+                ..Default::default()
+            },
+        );
         let fixture = TestServerRepoBuilder::new(tmp.path())
             .repo_name("repo")
             .description("desc")
