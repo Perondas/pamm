@@ -72,11 +72,23 @@ pub(super) async fn build_pack_inner(
 
     let www_path = handle.get_www_path();
 
+    // Workshop addons stay in the source and the config, but clients get them
+    // from the Steam workshop, so they are never published.
+    let workshop_addons = config
+        .addons
+        .iter()
+        .filter(|(_, settings)| settings.is_workshop())
+        .map(|(name, _)| name.clone())
+        .collect::<Vec<_>>();
+
     // Source `<pack>/addons/` maps onto the same path in `www/`. The sled
     // cache inside the source addons dir stays out of the published tree.
     let addons_rel = RelPath::from_name(pack_name).push(ADDONS_DIR_NAME);
+    let excludes = std::iter::once(CACHE_DB_DIR_NAME)
+        .chain(workshop_addons.iter().map(String::as_str))
+        .collect::<Vec<_>>();
     let report = materializer
-        .materialize_from(&addons_rel, &addons_rel, &[CACHE_DB_DIR_NAME])
+        .materialize_from(&addons_rel, &addons_rel, &excludes)
         .await?;
 
     materialize_pack_config(materializer, pack_name).await?;
@@ -92,13 +104,7 @@ pub(super) async fn build_pack_inner(
         .await
         .context("Failed to index pack addons during build")?;
 
-    // Write indexes into www (not next to source).
-    pack_index
-        .write_full_index_to_fs(&www_path)
-        .await
-        .context("Failed to write pack index into www")?;
-
-    // Update the pack config
+    // Update the pack config against everything on disk, workshop addons included
     for index in &pack_index.addons {
         config.addons.entry(index.name.clone()).or_default();
     }
@@ -108,6 +114,17 @@ pub(super) async fn build_pack_inner(
         .retain(|name, _| pack_index.addons.iter().any(|i| i.name == *name));
 
     handle.write(&config).await?;
+
+    // Write indexes into www (not next to source), leaving out workshop addons.
+    let mut published_index = pack_index;
+    published_index
+        .addons
+        .retain(|index| !workshop_addons.contains(&index.name));
+
+    published_index
+        .write_full_index_to_fs(&www_path)
+        .await
+        .context("Failed to write pack index into www")?;
 
     Ok(report)
 }

@@ -25,6 +25,14 @@ const features = [
         body: "Packs can ship optional addons that players toggle on or off.",
     },
     {
+        title: "Steam workshop addons",
+        body: "Packs can include addons straight from the Steam workshop instead of hosting them. Players are pointed at anything they still need to subscribe to when syncing.",
+    },
+    {
+        title: "CDLC compat",
+        body: "Players who don't own a pack's CDLC automatically get its compat mod loaded instead.",
+    },
+    {
         title: "External addons",
         body: "Players can load local addons, with their workshop subscriptions being auto detected.",
     },
@@ -42,7 +50,7 @@ const features = [
     },
     {
         title: "Full Linux support",
-        body: "Runs natively on Linux, with native, Flatpak and snap Steam fully supported.",
+        body: "Runs natively on Linux, with both native and Flatpak Steam supported.",
     },
     {
         title: "GUI and CLI",
@@ -50,7 +58,7 @@ const features = [
     },
     {
         title: "Customizable GUI",
-        body: "Chang the color of the GUI to fit the style of your unit, add your own icons and banner images",
+        body: "Change the color of the GUI to fit the style of your unit, add your own icons and banner images",
     },
 ];
 ---
@@ -132,6 +140,11 @@ const features = [
                 on <code>core</code>.
             </li>
             <li>
+                <strong>Workshop addons</strong> are part of a pack like any other addon, but
+                are not served by the repository. Players subscribe to them on the Steam
+                workshop, and pamm links every one they are missing when they sync.
+            </li>
+            <li>
                 <strong>Deploy</strong> resolves the same chain on the server, so a dedicated
                 server loads the same required addons as players. Optional addons are left
                 out.
@@ -171,7 +184,7 @@ pamm_cli launch &lt;pack&gt;        # start Arma</code></pre>
                     repo to populate the <code>www/</code> folder.
                 </p>
                 <pre><code>pamm_cli init       # create an empty repo
-pamm_cli add-pack   # register a pack
+pamm_cli pack add   # register a pack
 # drop addons into &lt;pack&gt;/addons/
 pamm_cli build      # populate www/</code></pre>
                 <p>

@@ -1,4 +1,4 @@
-use crate::application::addons::resolve::ResolveAddons;
+use crate::application::addons::active::GetActiveAddons;
 use crate::application::pack::read::get_pack::GetPack;
 use crate::application::pack::read::get_repo_info::GetRepoInfo;
 use crate::application::repo::server::ServerRepoHandle;
@@ -37,7 +37,13 @@ impl ServerRepoHandle {
             symlink_path
         );
 
-        let resolved_addons = self.resolve_addons(pack_name).await?;
+        // The server has every addon in the repo, workshop addons included.
+        let resolved_addons = self
+            .get_active_addons(pack_name, false)
+            .await?
+            .iter()
+            .map(|addon| addon.repo_rel_path())
+            .collect::<Vec<_>>();
 
         debug!(
             "Resolved addons for pack '{}': {:?}",
@@ -225,7 +231,7 @@ async fn run_post_deploy_script(script: String) -> anyhow::Result<std::process::
 //
 // The returned paths are always absolute: each found `.bikey` file is
 // canonicalized. Note that `addon_path` itself is repo-root-relative (as
-// produced by `resolve_addons`), so the lookup of `<addon_path>/keys` resolves
+// produced by `PackAddon::repo_rel_path`), so the lookup of `<addon_path>/keys` resolves
 // against the process working directory.
 async fn get_path_to_keys(addon_path: &Path) -> anyhow::Result<Vec<PathBuf>> {
     let keys_dir = addon_path.join("keys");
@@ -299,8 +305,13 @@ mod tests {
                 None,
                 None,
             );
-            pack.addons
-                .insert("@addon1".to_string(), AddonSettings { is_optional: false });
+            pack.addons.insert(
+                "@addon1".to_string(),
+                AddonSettings {
+                    is_optional: false,
+                    ..Default::default()
+                },
+            );
             let fixture = TestServerRepoBuilder::new(tmp.path())
                 .repo_name("repo")
                 .description("desc")
@@ -423,8 +434,13 @@ mod tests {
             None,
             None,
         );
-        pack.addons
-            .insert("@addon1".to_string(), AddonSettings { is_optional: false });
+        pack.addons.insert(
+            "@addon1".to_string(),
+            AddonSettings {
+                is_optional: false,
+                ..Default::default()
+            },
+        );
         let fixture = TestServerRepoBuilder::new(tmp.path())
             .repo_name("repo")
             .description("desc")

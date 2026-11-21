@@ -29,6 +29,7 @@ import 'api/commands/pack_sync/get_diffs_with_parents.dart';
 import 'api/commands/pack_sync/quick_check.dart';
 import 'api/commands/pack_sync/sync_pack.dart';
 import 'api/commands/pack_sync/sync_pack_with_parents.dart';
+import 'api/commands/pack_sync/workshop_addons.dart';
 import 'api/commands/params.dart';
 import 'api/commands/proton.dart';
 import 'api/commands/sync_config.dart';
@@ -230,6 +231,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   dco_decode_list_record_string_list_file_change(dynamic raw);
 
   @protected
+  List<WorkshopAddonNotFound> dco_decode_list_workshop_addon_not_found(
+    dynamic raw,
+  );
+
+  @protected
   MultiDiffResult dco_decode_multi_diff_result(dynamic raw);
 
   @protected
@@ -292,6 +298,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   BigInt dco_decode_usize(dynamic raw);
+
+  @protected
+  WorkshopAddonNotFound dco_decode_workshop_addon_not_found(dynamic raw);
 
   @protected
   AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer);
@@ -477,6 +486,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   sse_decode_list_record_string_list_file_change(SseDeserializer deserializer);
 
   @protected
+  List<WorkshopAddonNotFound> sse_decode_list_workshop_addon_not_found(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   MultiDiffResult sse_decode_multi_diff_result(SseDeserializer deserializer);
 
   @protected
@@ -545,6 +559,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   BigInt sse_decode_usize(SseDeserializer deserializer);
+
+  @protected
+  WorkshopAddonNotFound sse_decode_workshop_addon_not_found(
+    SseDeserializer deserializer,
+  );
 
   @protected
   void sse_encode_AnyhowException(
@@ -773,6 +792,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_list_workshop_addon_not_found(
+    List<WorkshopAddonNotFound> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_multi_diff_result(
     MultiDiffResult self,
     SseSerializer serializer,
@@ -855,6 +880,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_usize(BigInt self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_workshop_addon_not_found(
+    WorkshopAddonNotFound self,
+    SseSerializer serializer,
+  );
 }
 
 // Section: wire_class

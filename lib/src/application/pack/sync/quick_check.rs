@@ -1,3 +1,4 @@
+use crate::application::addons::active::needed_cdlc_compat;
 use crate::application::pack::read::get_pack::GetPack;
 use crate::application::repo::client::ClientRepoHandle;
 use crate::domain::index::checksum_index::ChecksumIndex;
@@ -48,11 +49,31 @@ impl ClientRepoHandle {
             }
         };
 
-        let (mut local_config, settings) = self.get_pack_with_settings(pack_name).await?;
+        let (local_config, settings) = self.get_pack_with_settings(pack_name).await?;
+        let active_addons = local_config
+            .active_addons(&settings)
+            .chain(needed_cdlc_compat(&local_config)?)
+            .collect::<Vec<_>>();
 
-        local_config.remove_disabled_optionals(&settings);
+        // An addon that cannot be found at all means the pack is definitely out
+        // of sync. This is the only check workshop addons get.
+        for addon in &active_addons {
+            if addon.locate(&self.repo_path)?.is_none() {
+                debug!(
+                    "Addon {} not found. Pack '{}' is not up to date.",
+                    addon, pack_name
+                );
+                return Ok(false);
+            }
+        }
 
-        let expected_addons: HashSet<_> = local_config.addons.keys().collect();
+        // Served addons are additionally checked against the checksum index,
+        // which workshop addons never appear in.
+        let expected_addons: HashSet<_> = active_addons
+            .iter()
+            .filter(|addon| !addon.settings.is_workshop())
+            .map(|addon| &addon.name)
+            .collect();
         let actual_addons: HashSet<_> = local_checksum_index.checksums.keys().collect();
 
         if expected_addons != actual_addons {

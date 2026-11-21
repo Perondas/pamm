@@ -193,7 +193,7 @@ mod tests {
 #[cfg(test)]
 mod local_pack_tests {
     use super::*;
-    use crate::application::pack::read::get_canonical_addon_paths::GetAddonPaths;
+    use crate::application::pack::read::get_combined_canonical_addon_paths::GetAddonPaths;
     use crate::domain::addon::AddonSettings;
     use crate::infrastructure::progress::progress_reporter::ProgressReporter;
     use crate::support::test::repo_builder::TestClientRepoBuilder;
@@ -220,7 +220,10 @@ mod local_pack_tests {
         let mut core = PackConfig::new("core".to_string(), "d".to_string(), vec![], None, None);
         core.addons.insert(
             "@core_addon".to_string(),
-            AddonSettings { is_optional: false },
+            AddonSettings {
+                is_optional: false,
+                ..Default::default()
+            },
         );
         let fixture = TestClientRepoBuilder::new(tmp.path())
             .repo_name("repo")
@@ -243,7 +246,10 @@ mod local_pack_tests {
         );
         mission.addons.insert(
             "@mission_addon".to_string(),
-            AddonSettings { is_optional: false },
+            AddonSettings {
+                is_optional: false,
+                ..Default::default()
+            },
         );
         handle.add_local_pack(&mission).await.unwrap();
         fs::create_dir_all(repo_path.join("my_mission/addons/@mission_addon")).unwrap();
@@ -259,7 +265,7 @@ mod local_pack_tests {
             repo_with_local_pack("pamm_local_pack_canonical_addon_paths").await;
 
         let paths = handle
-            .get_canonical_addon_paths("my_mission", false)
+            .get_combined_canonical_addon_paths("my_mission", false)
             .await
             .unwrap();
 
@@ -277,6 +283,25 @@ mod local_pack_tests {
         ];
         want.sort();
         assert_eq!(paths, want);
+    }
+
+    // An addon the pack expects but that is not on disk means the pack is out
+    // of sync, which launching must not silently paper over.
+    #[tokio::test]
+    async fn resolving_addon_paths_fails_when_an_addon_is_missing() {
+        let (_tmp, repo_path, handle) = repo_with_local_pack("pamm_local_pack_missing_addon").await;
+
+        fs::remove_dir_all(repo_path.join("core/addons/@core_addon")).unwrap();
+
+        let err = handle
+            .get_combined_canonical_addon_paths("my_mission", false)
+            .await
+            .unwrap_err();
+
+        assert!(
+            format!("{err:#}").contains("'@core_addon' of pack 'core'"),
+            "unexpected error: {err:#}"
+        );
     }
 
     // Local packs exist on this machine only, so every remote-facing operation

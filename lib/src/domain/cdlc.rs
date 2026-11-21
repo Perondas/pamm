@@ -12,6 +12,16 @@ pub enum Cdlc {
     ExpeditionaryForces,
 }
 
+const CDLC_COMPAT_MOD_IDS: [&str; 7] = [
+    "1776428269", // Global Mobilization
+    "2477276806", // SOG Prairie Fire
+    "2503886780", // CSLA Iron Curtain
+    "2636962953", // Western Sahara
+    "2991828484", // Spearhead 1944
+    "3150497912", // Reaction Forces
+    "3348605126", // Expeditionary Forces
+];
+
 impl Cdlc {
     pub const fn name(&self) -> &'static str {
         match self {
@@ -37,6 +47,18 @@ impl Cdlc {
         }
     }
 
+    pub const fn compat_mod_id(&self) -> &'static str {
+        match self {
+            Cdlc::GlobalMobilization => "1776428269",
+            Cdlc::SogPrairieFire => "2477276806",
+            Cdlc::CslaIronCurtain => "2503886780",
+            Cdlc::WesternSahara => "2636962953",
+            Cdlc::Spearhead1944 => "2991828484",
+            Cdlc::ReactionForces => "3150497912",
+            Cdlc::ExpeditionaryForces => "3348605126",
+        }
+    }
+
     pub fn from_short_form(short_form: &str) -> Self {
         match short_form {
             "gm" => Self::GlobalMobilization,
@@ -49,6 +71,10 @@ impl Cdlc {
             _ => panic!("Invalid short form: {}", short_form),
         }
     }
+}
+
+pub fn is_compat_mod(id: &str) -> bool {
+    CDLC_COMPAT_MOD_IDS.contains(&id)
 }
 
 #[cfg(test)]

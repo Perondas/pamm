@@ -56,13 +56,19 @@ impl MockHandleExt for MockHandle {
         for opt in optionals {
             config.addons.insert(
                 opt.to_string(),
-                crate::domain::addon::AddonSettings { is_optional: true },
+                crate::domain::addon::AddonSettings {
+                    is_optional: true,
+                    ..Default::default()
+                },
             );
         }
         for req in required {
             config.addons.insert(
                 req.to_string(),
-                crate::domain::addon::AddonSettings { is_optional: false },
+                crate::domain::addon::AddonSettings {
+                    is_optional: false,
+                    ..Default::default()
+                },
             );
         }
 
@@ -70,6 +76,12 @@ impl MockHandleExt for MockHandle {
         for opt in enabled_optionals {
             settings.enabled_optionals.insert(opt.to_string());
         }
+
+        let pack_name_owned = pack_name.to_string();
+        let config_only = config.clone();
+        self.expect_get_pack()
+            .withf(move |p| p == pack_name_owned.clone())
+            .returning(move |_| Ok(config_only.clone()));
 
         let pack_name_owned = pack_name.to_string();
         self.expect_get_pack_with_settings()

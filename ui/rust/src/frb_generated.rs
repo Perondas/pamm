@@ -42,7 +42,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1619912072;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -158172247;
 
 // Section: executor
 
@@ -625,13 +625,13 @@ fn wire__crate__api__commands__linux_setup__linux_setup_info_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api__repo_dir = <String>::sse_decode(&mut deserializer);
+            let api_repo_dir = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || async move {
                         let output_ok =
-                            crate::api::commands::linux_setup::linux_setup_info(api__repo_dir)
+                            crate::api::commands::linux_setup::linux_setup_info(api_repo_dir)
                                 .await?;
                         std::result::Result::Ok(output_ok)
                     })()
@@ -940,15 +940,15 @@ fn wire__crate__api__commands__proton__proton_install_teamspeak_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api__installer = <String>::sse_decode(&mut deserializer);
-            let api__silent = <bool>::sse_decode(&mut deserializer);
+            let api_installer = <String>::sse_decode(&mut deserializer);
+            let api_silent = <bool>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || {
                         let output_ok = crate::api::commands::proton::proton_install_teamspeak(
-                            api__installer,
-                            api__silent,
+                            api_installer,
+                            api_silent,
                         )?;
                         std::result::Result::Ok(output_ok)
                     })(),
@@ -1047,13 +1047,13 @@ fn wire__crate__api__commands__proton__proton_open_explorer_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api__path = <Option<String>>::sse_decode(&mut deserializer);
+            let api_path = <Option<String>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || {
                         let output_ok =
-                            crate::api::commands::proton::proton_open_explorer(api__path)?;
+                            crate::api::commands::proton::proton_open_explorer(api_path)?;
                         std::result::Result::Ok(output_ok)
                     })(),
                 )
@@ -1528,6 +1528,22 @@ let decode_indices_ = flutter_rust_bridge::for_generated::lockable_compute_decod
         }
         let api_cancel_token_guard = api_cancel_token_guard.unwrap();
  let output_ok = crate::api::commands::pack_sync::sync_pack_with_parents::sync_pack_with_parents(api_repo_path, api_dart_progress_reporter, api_diffs, &*api_cancel_token_guard).await?;   std::result::Result::Ok(output_ok)
+                    })().await)
+                } })
+}
+fn wire__crate__api__commands__pack_sync__workshop_addons__workshop_addons_not_found_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec,_,_,_>(flutter_rust_bridge::for_generated::TaskInfo{ debug_name: "workshop_addons_not_found", port: Some(port_), mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal }, move || {
+            let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
+            let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_repo_path = <String>::sse_decode(&mut deserializer);
+let api_pack_name = <String>::sse_decode(&mut deserializer);deserializer.end(); move |context| async move {
+                    transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move || async move {
+                         let output_ok = crate::api::commands::pack_sync::workshop_addons::workshop_addons_not_found(api_repo_path, api_pack_name).await?;   std::result::Result::Ok(output_ok)
                     })().await)
                 } })
 }
@@ -2012,6 +2028,18 @@ impl SseDecode
     }
 }
 
+impl SseDecode for Vec<crate::api::commands::pack_sync::workshop_addons::WorkshopAddonNotFound> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = Vec::with_capacity(len_ as usize);
+        for idx_ in 0..len_ {
+            ans_.push(<crate::api::commands::pack_sync::workshop_addons::WorkshopAddonNotFound>::sse_decode(deserializer));
+        }
+        return ans_;
+    }
+}
+
 impl SseDecode for crate::api::commands::pack_sync::get_diffs_with_parents::MultiDiffResult {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -2258,6 +2286,22 @@ impl SseDecode for usize {
     }
 }
 
+impl SseDecode for crate::api::commands::pack_sync::workshop_addons::WorkshopAddonNotFound {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_name = <String>::sse_decode(deserializer);
+        let mut var_packName = <String>::sse_decode(deserializer);
+        let mut var_url = <String>::sse_decode(deserializer);
+        let mut var_steamUrl = <String>::sse_decode(deserializer);
+        return crate::api::commands::pack_sync::workshop_addons::WorkshopAddonNotFound {
+            name: var_name,
+            pack_name: var_packName,
+            url: var_url,
+            steam_url: var_steamUrl,
+        };
+    }
+}
+
 fn pde_ffi_dispatcher_primary_impl(
     func_id: i32,
     port: flutter_rust_bridge::for_generated::MessagePort,
@@ -2298,6 +2342,7 @@ fn pde_ffi_dispatcher_primary_impl(
 35 => wire__crate__api__commands__local_pack__sync_local_pack__sync_local_pack_impl(port, ptr, rust_vec_len, data_len),
 36 => wire__crate__api__commands__pack_sync__sync_pack__sync_pack_impl(port, ptr, rust_vec_len, data_len),
 37 => wire__crate__api__commands__pack_sync__sync_pack_with_parents__sync_pack_with_parents_impl(port, ptr, rust_vec_len, data_len),
+38 => wire__crate__api__commands__pack_sync__workshop_addons__workshop_addons_not_found_impl(port, ptr, rust_vec_len, data_len),
                         _ => unreachable!(),
                     }
 }
@@ -2859,6 +2904,35 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::commands::linux_setup::SteamF
         self
     }
 }
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart
+    for crate::api::commands::pack_sync::workshop_addons::WorkshopAddonNotFound
+{
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.name.into_into_dart().into_dart(),
+            self.pack_name.into_into_dart().into_dart(),
+            self.url.into_into_dart().into_dart(),
+            self.steam_url.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::commands::pack_sync::workshop_addons::WorkshopAddonNotFound
+{
+}
+impl
+    flutter_rust_bridge::IntoIntoDart<
+        crate::api::commands::pack_sync::workshop_addons::WorkshopAddonNotFound,
+    > for crate::api::commands::pack_sync::workshop_addons::WorkshopAddonNotFound
+{
+    fn into_into_dart(
+        self,
+    ) -> crate::api::commands::pack_sync::workshop_addons::WorkshopAddonNotFound {
+        self
+    }
+}
 
 impl SseEncode for flutter_rust_bridge::for_generated::anyhow::Error {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -3242,6 +3316,18 @@ impl SseEncode
     }
 }
 
+impl SseEncode for Vec<crate::api::commands::pack_sync::workshop_addons::WorkshopAddonNotFound> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <crate::api::commands::pack_sync::workshop_addons::WorkshopAddonNotFound>::sse_encode(
+                item, serializer,
+            );
+        }
+    }
+}
+
 impl SseEncode for crate::api::commands::pack_sync::get_diffs_with_parents::MultiDiffResult {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -3443,6 +3529,16 @@ impl SseEncode for usize {
             .cursor
             .write_u64::<NativeEndian>(self as _)
             .unwrap();
+    }
+}
+
+impl SseEncode for crate::api::commands::pack_sync::workshop_addons::WorkshopAddonNotFound {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.name, serializer);
+        <String>::sse_encode(self.pack_name, serializer);
+        <String>::sse_encode(self.url, serializer);
+        <String>::sse_encode(self.steam_url, serializer);
     }
 }
 

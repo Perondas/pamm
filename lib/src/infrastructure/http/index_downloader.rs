@@ -26,7 +26,14 @@ impl PackConfig {
         // Owned names: a closure over `&String` here trips rustc's `Send`
         // inference for the enclosing future (rust-lang/rust#110338).
         let index_dir = &index_dir;
-        let indexes = stream::iter(self.addons.keys().cloned())
+        // Workshop addons are not served, clients get them from Steam instead.
+        let served_addons = self
+            .addons
+            .iter()
+            .filter(|(_, settings)| !settings.is_workshop())
+            .map(|(name, _)| name.clone())
+            .collect::<Vec<_>>();
+        let indexes = stream::iter(served_addons)
             .map(|addon| async move { IndexNode::download_named(index_dir, &addon).await })
             .buffered(CONCURRENT_INDEX_DOWNLOADS)
             .try_collect::<Vec<_>>()

@@ -7,6 +7,7 @@ import 'package:pamm_ui/src/services/debug_settings_service.dart';
 import 'package:pamm_ui/src/services/progress_reporter_service.dart';
 import 'package:pamm_ui/src/widgets/diff_addon_tile.dart';
 import 'package:pamm_ui/src/widgets/progress_reporter.dart';
+import 'package:pamm_ui/src/widgets/workshop_addons_notice.dart';
 
 class SyncScreen extends StatefulWidget {
   SyncScreen(this.packName, this.repoPath, {super.key});
@@ -98,6 +99,11 @@ class _SyncScreenState extends State<SyncScreen> {
               ),
             ],
             if (isDoneSyncing) ...[
+              if (error == null)
+                WorkshopAddonsNotice(
+                  repoPath: widget.repoPath,
+                  packName: widget.packName,
+                ),
               if (multiDiffResult?.hasChanges ?? false)
                 ..._buildDiffResult()
               else
