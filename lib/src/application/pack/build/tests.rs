@@ -482,3 +482,71 @@ async fn open_migrates_v1_source_then_build_publishes_v2_www() {
         b"hello"
     );
 }
+
+// Workshop addons live in the source and keep their config entry, but clients
+// subscribe to them on Steam, so nothing of them may reach www.
+#[tokio::test]
+async fn build_pack_does_not_publish_workshop_addons() {
+    use crate::domain::addon::AddonSettings;
+    use crate::support::test::repo_builder::TestServerRepoBuilder;
+
+    let tmp = TestTempDir::new("pamm_build_skips_workshop_addons");
+
+    let mut pack = PackConfig::new("core".to_string(), "desc".to_string(), vec![], None, None);
+    pack.addons.insert(
+        "@ws".to_string(),
+        AddonSettings {
+            workshop_id: Some("450814997".to_string()),
+            ..Default::default()
+        },
+    );
+
+    let repo = TestServerRepoBuilder::new(tmp.path())
+        .repo_name("repo")
+        .description("test repo")
+        .pack(pack)
+        .pack_file("core", "addons/@addon1/file.txt", b"hello".as_slice())
+        .pack_file("core", "addons/@ws/file.txt", b"workshop".as_slice())
+        .build()
+        .await
+        .unwrap();
+    let repo_path = repo.repo_path().to_path_buf();
+    let www = repo_path.join(WWW_DIR_NAME);
+
+    // A copy left over from before the addon moved to the workshop.
+    let stale = www.join("core/addons/@ws/file.txt");
+    fs::create_dir_all(stale.parent().unwrap()).unwrap();
+    fs::write(&stale, b"old").unwrap();
+
+    let server = ServerRepoHandle::open(&repo_path).await.unwrap();
+    server
+        .build_pack("core", opts(BuildMode::Symlink), &NoopProgressReporter)
+        .await
+        .unwrap();
+
+    assert!(www.join("core/addons/@addon1/file.txt").exists());
+    assert!(
+        !www.join("core/addons/@ws").exists(),
+        "workshop addon must not be published"
+    );
+    assert!(!www.join("core/indexes/@ws.index.pamm").exists());
+
+    let checksums = ChecksumIndex::read_from_known(&www.join("core/indexes"))
+        .await
+        .unwrap();
+    assert!(checksums.checksums.contains_key("@addon1"));
+    assert!(!checksums.checksums.contains_key("@ws"));
+
+    // The config keeps the workshop entry, so clients know to load it.
+    let config: PackConfig =
+        serde_json::from_slice(&fs::read(www.join("core").join(PackConfig::file_name())).unwrap())
+            .unwrap();
+    assert_eq!(
+        config
+            .addons
+            .get("@ws")
+            .and_then(|a| a.workshop_id.as_deref()),
+        Some("450814997")
+    );
+    assert!(config.addons.contains_key("@addon1"));
+}
