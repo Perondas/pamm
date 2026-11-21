@@ -26,6 +26,7 @@ import 'api/commands/pack_sync/get_diffs_with_parents.dart';
 import 'api/commands/pack_sync/quick_check.dart';
 import 'api/commands/pack_sync/sync_pack.dart';
 import 'api/commands/pack_sync/sync_pack_with_parents.dart';
+import 'api/commands/pack_sync/workshop_addons.dart';
 import 'api/commands/params.dart';
 import 'api/commands/proton.dart';
 import 'api/commands/sync_config.dart';
@@ -94,7 +95,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.13.0';
 
   @override
-  int get rustContentHash => 1619912072;
+  int get rustContentHash => -158172247;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -279,6 +280,12 @@ abstract class RustLibApi extends BaseApi {
     required DartProgressReporter dartProgressReporter,
     required List<OpaqueDiff> diffs,
     required DownloadCancelToken cancelToken,
+  });
+
+  Future<List<WorkshopAddonNotFound>>
+  crateApiCommandsPackSyncWorkshopAddonsWorkshopAddonsNotFound({
+    required String repoPath,
+    required String packName,
   });
 
   RustArcIncrementStrongCountFnType
@@ -1625,6 +1632,44 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         argNames: ["repoPath", "dartProgressReporter", "diffs", "cancelToken"],
       );
 
+  @override
+  Future<List<WorkshopAddonNotFound>>
+  crateApiCommandsPackSyncWorkshopAddonsWorkshopAddonsNotFound({
+    required String repoPath,
+    required String packName,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(repoPath, serializer);
+          sse_encode_String(packName, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 38,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_workshop_addon_not_found,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta:
+            kCrateApiCommandsPackSyncWorkshopAddonsWorkshopAddonsNotFoundConstMeta,
+        argValues: [repoPath, packName],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiCommandsPackSyncWorkshopAddonsWorkshopAddonsNotFoundConstMeta =>
+      const TaskConstMeta(
+        debugName: "workshop_addons_not_found",
+        argNames: ["repoPath", "packName"],
+      );
+
   RustArcIncrementStrongCountFnType
   get rust_arc_increment_strong_count_DartProgressReporter => wire
       .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartProgressReporter;
@@ -2020,6 +2065,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<WorkshopAddonNotFound> dco_decode_list_workshop_addon_not_found(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>)
+        .map(dco_decode_workshop_addon_not_found)
+        .toList();
+  }
+
+  @protected
   MultiDiffResult dco_decode_multi_diff_result(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
@@ -2210,6 +2265,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   BigInt dco_decode_usize(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dcoDecodeU64(raw);
+  }
+
+  @protected
+  WorkshopAddonNotFound dco_decode_workshop_addon_not_found(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    return WorkshopAddonNotFound(
+      name: dco_decode_String(arr[0]),
+      packName: dco_decode_String(arr[1]),
+      url: dco_decode_String(arr[2]),
+      steamUrl: dco_decode_String(arr[3]),
+    );
   }
 
   @protected
@@ -2677,6 +2746,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<WorkshopAddonNotFound> sse_decode_list_workshop_addon_not_found(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <WorkshopAddonNotFound>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_workshop_addon_not_found(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
   MultiDiffResult sse_decode_multi_diff_result(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_results = sse_decode_list_diff_result(deserializer);
@@ -2893,6 +2976,23 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   BigInt sse_decode_usize(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getBigUint64();
+  }
+
+  @protected
+  WorkshopAddonNotFound sse_decode_workshop_addon_not_found(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_name = sse_decode_String(deserializer);
+    var var_packName = sse_decode_String(deserializer);
+    var var_url = sse_decode_String(deserializer);
+    var var_steamUrl = sse_decode_String(deserializer);
+    return WorkshopAddonNotFound(
+      name: var_name,
+      packName: var_packName,
+      url: var_url,
+      steamUrl: var_steamUrl,
+    );
   }
 
   @protected
@@ -3353,6 +3453,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_list_workshop_addon_not_found(
+    List<WorkshopAddonNotFound> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_workshop_addon_not_found(item, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_multi_diff_result(
     MultiDiffResult self,
     SseSerializer serializer,
@@ -3540,6 +3652,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_usize(BigInt self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putBigUint64(self);
+  }
+
+  @protected
+  void sse_encode_workshop_addon_not_found(
+    WorkshopAddonNotFound self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.name, serializer);
+    sse_encode_String(self.packName, serializer);
+    sse_encode_String(self.url, serializer);
+    sse_encode_String(self.steamUrl, serializer);
   }
 }
 

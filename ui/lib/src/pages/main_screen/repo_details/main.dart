@@ -22,6 +22,7 @@ import 'package:pamm_ui/src/widgets/confirm_dialog.dart';
 import 'package:pamm_ui/src/widgets/launch_teamspeak_button.dart';
 import 'package:pamm_ui/src/widgets/linux_setup_dialog.dart';
 import 'package:pamm_ui/src/widgets/media_icon.dart';
+import 'package:pamm_ui/src/widgets/workshop_addons_notice.dart';
 
 class RepoDetails extends StatefulWidget {
   const RepoDetails(this.selectedRepo, {super.key});
@@ -432,10 +433,26 @@ class _PackListTileState extends State<PackListTile> {
           IconButton(
             onPressed: () async {
               if (widget.isLocal) {
-                await syncLocalPack(
-                  packName: widget.packName,
-                  repoPath: widget.repoPath,
-                );
+                try {
+                  await syncLocalPack(
+                    packName: widget.packName,
+                    repoPath: widget.repoPath,
+                  );
+                  if (!context.mounted) return;
+                  await showWorkshopAddonsDialogIfNeeded(
+                    context,
+                    repoPath: widget.repoPath,
+                    packName: widget.packName,
+                  );
+                } catch (e) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Error syncing pack: $e"),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               } else {
                 await Navigator.of(context).push(
                   MaterialPageRoute(

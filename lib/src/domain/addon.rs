@@ -59,6 +59,15 @@ impl PackAddon {
         }
     }
 
+    /// Like [`PackAddon::workshop_url`], but opens the page in the Steam client
+    /// rather than the browser.
+    pub fn workshop_steam_url(&self) -> Option<String> {
+        match self.source() {
+            AddonSource::Repo => None,
+            AddonSource::Workshop { id } => Some(format!("steam://url/CommunityFilePage/{id}")),
+        }
+    }
+
     /// The addon's folder in the repo, relative to the repo root:
     /// `<pack>/addons/<name>`. The server always has every addon there, workshop
     /// addons included.
@@ -103,6 +112,15 @@ mod tests {
             Some("https://steamcommunity.com/sharedfiles/filedetails/?id=450814997")
         );
         assert_eq!(addon(None).workshop_url(), None);
+    }
+
+    #[test]
+    fn workshop_steam_url_opens_the_steam_client() {
+        assert_eq!(
+            addon(Some("450814997")).workshop_steam_url().as_deref(),
+            Some("steam://url/CommunityFilePage/450814997")
+        );
+        assert_eq!(addon(None).workshop_steam_url(), None);
     }
 
     #[test]
