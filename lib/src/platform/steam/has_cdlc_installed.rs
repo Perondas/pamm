@@ -13,7 +13,7 @@ pub fn has_cdlc_installed(cldc: &Cdlc) -> anyhow::Result<bool> {
     ];
 
     for candidate in candidates {
-        let cdlc_folder = arma_install.install_dir.join(cdlc_code.to_uppercase());
+        let cdlc_folder = arma_install.install_dir.join(candidate);
 
         debug!("Checking for CDLC folder at {:?}", cdlc_folder);
 
