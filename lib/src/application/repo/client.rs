@@ -259,7 +259,7 @@ mod local_pack_tests {
             repo_with_local_pack("pamm_local_pack_canonical_addon_paths").await;
 
         let paths = handle
-            .get_canonical_addon_paths("my_mission", false)
+            .get_combined_canonical_addon_paths("my_mission", false, None)
             .await
             .unwrap();
 

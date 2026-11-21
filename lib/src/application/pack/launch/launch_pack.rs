@@ -39,11 +39,11 @@ impl ClientRepoHandle {
     ) -> anyhow::Result<LaunchOutcome> {
         info!("Launching pack with params: '{:#?}'", params);
 
-        let addon_paths = self
-            .get_canonical_addon_paths(pack_name, params.disable_optionals)
-            .await?;
-
         let cdlc = self.get_pack(pack_name).await?.enabled_cdlc;
+
+        let addon_paths = self
+            .get_combined_canonical_addon_paths(pack_name, params.disable_optionals, cdlc)
+            .await?;
 
         debug!(
             "Resolved {} addon path(s) for pack '{}'",
@@ -52,7 +52,7 @@ impl ClientRepoHandle {
         );
 
         match params.mode {
-            LaunchMode::Steam => self.launch_via_steam(pack_name, &addon_paths, cdlc).await,
+            LaunchMode::Steam => self.launch_via_steam(pack_name, addon_paths.iter(), cdlc).await,
             #[cfg(target_os = "windows")]
             LaunchMode::Executable => {
                 self.launch_via_executable(pack_name, &addon_paths, cdlc)

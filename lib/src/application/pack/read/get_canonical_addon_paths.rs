@@ -3,28 +3,32 @@ use crate::application::addons::optionals::GetOptionalsPaths;
 use crate::application::addons::resolve::ResolveAddons;
 use crate::application::pack::read::get_pack::GetPack;
 use crate::application::pack::read::get_repo_info::GetRepoInfo;
+use crate::domain::cdlc::Cdlc;
 use crate::infrastructure::fs::files::util::clean_path::canonicalize_and_clean_path;
 use anyhow::{Context, anyhow};
+use std::collections::HashSet;
 
 pub trait GetAddonPaths {
     /// Gets the paths to all enabled addons of the pack (required, optional and
     /// external) as absolute, canonicalized path strings.
-    fn get_canonical_addon_paths(
+    fn get_combined_canonical_addon_paths(
         &self,
         pack_name: &str,
         disable_optionals: bool,
-    ) -> impl Future<Output = anyhow::Result<Vec<String>>> + Send;
+        cdlc: Option<Cdlc>,
+    ) -> impl Future<Output = anyhow::Result<HashSet<String>>> + Send;
 }
 
 impl<T> GetAddonPaths for T
 where
     T: GetPack + GetRepoInfo + Sync,
 {
-    async fn get_canonical_addon_paths(
+    async fn get_combined_canonical_addon_paths(
         &self,
         pack_name: &str,
         disable_optionals: bool,
-    ) -> anyhow::Result<Vec<String>> {
+        cdlc: Option<Cdlc>,
+    ) -> anyhow::Result<HashSet<String>> {
         log::debug!("Resolving canonical addon paths for pack '{}'", pack_name);
 
         let repo_path = self.get_repo_path();
@@ -36,18 +40,24 @@ where
             vec![]
         };
 
-        let addons = required_addons
+        let mut addons = required_addons
             .iter()
             .chain(&optional_addons)
             .map(|p| repo_path.join(p))
             .map(canonicalize_and_clean_path)
-            .collect::<anyhow::Result<Vec<_>>>()?;
+            .collect::<anyhow::Result<HashSet<_>>>()?;
 
-        let externals = self
+        let mut externals = self
             .get_externals_paths(pack_name)
             .await
             .context(anyhow!("Failed to read external addons"))?;
 
-        Ok([addons, externals].concat())
+        if let Some(cldc) = cdlc {
+
+        }
+
+        addons.extend(externals);
+
+        Ok(addons)
     }
 }
