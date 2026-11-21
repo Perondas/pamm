@@ -48,16 +48,27 @@ impl ClientRepoHandle {
             }
         };
 
-        let (mut local_config, settings) = self.get_pack_with_settings(pack_name).await?;
+        let (local_config, settings) = self.get_pack_with_settings(pack_name).await?;
+        let active_addons = local_config.active_addons(&settings).collect::<Vec<_>>();
 
-        local_config.remove_disabled_optionals(&settings);
+        // An addon that cannot be found at all means the pack is definitely out
+        // of sync. This is the only check workshop addons get.
+        for addon in &active_addons {
+            if addon.locate(&self.repo_path)?.is_none() {
+                debug!(
+                    "Addon {} not found. Pack '{}' is not up to date.",
+                    addon, pack_name
+                );
+                return Ok(false);
+            }
+        }
 
-        // Workshop addons are not served, so they never show up in the checksum index.
-        let expected_addons: HashSet<_> = local_config
-            .addons
+        // Served addons are additionally checked against the checksum index,
+        // which workshop addons never appear in.
+        let expected_addons: HashSet<_> = active_addons
             .iter()
-            .filter(|(_, settings)| !settings.is_workshop())
-            .map(|(name, _)| name)
+            .filter(|addon| !addon.settings.is_workshop())
+            .map(|addon| &addon.name)
             .collect();
         let actual_addons: HashSet<_> = local_checksum_index.checksums.keys().collect();
 
