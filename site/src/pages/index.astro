@@ -25,6 +25,14 @@ const features = [
         body: "Packs can ship optional addons that players toggle on or off.",
     },
     {
+        title: "Steam workshop addons",
+        body: "Packs can include addons straight from the Steam workshop instead of hosting them. Players are pointed at anything they still need to subscribe to when syncing.",
+    },
+    {
+        title: "CDLC compat",
+        body: "Players who don't own a pack's CDLC automatically get its compat mod loaded instead.",
+    },
+    {
         title: "External addons",
         body: "Players can load local addons, with their workshop subscriptions being auto detected.",
     },
@@ -130,6 +138,11 @@ const features = [
                 you launch a child pack. Your choice is saved on the pack that owns the addon,
                 so enabling an optional in <code>core</code> enables it for every pack built
                 on <code>core</code>.
+            </li>
+            <li>
+                <strong>Workshop addons</strong> are part of a pack like any other addon, but
+                are not served by the repository. Players subscribe to them on the Steam
+                workshop, and pamm links every one they are missing when they sync.
             </li>
             <li>
                 <strong>Deploy</strong> resolves the same chain on the server, so a dedicated

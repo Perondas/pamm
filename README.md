@@ -21,6 +21,10 @@ Check the [wiki](https://github.com/Perondas/pamm/wiki) for an admin guode
     - All of your community's mod packs can be hosted in one place
     - You can have packs depend on one another (e.g. a base pack with core mods, and event specific packs that depend on the base pack)
 - Optional mods
+- Steam workshop addons
+    - Packs can include addons from the Steam workshop without serving them
+    - Players subscribe to them on Steam, pamm points them at anything missing when syncing
+    - CDLC compat mods are loaded automatically for players who don't own the CDLC
 - Delta patching of pbo files
     - Only download what has changed between versions
     - Saves bandwidth for both server and client
@@ -112,6 +116,24 @@ Each pack lives in its own folder, on the server source, in the build output, an
       addons/@addon_name/...
       indexes/
 ```
+
+### Workshop addons
+
+An addon can be marked as a Steam workshop addon. Clients then don't download it from your server; they
+subscribe to it on the Steam workshop instead, and pamm loads it from Steam's workshop folder.
+
+Keep the addon in `<pack>/addons/` as usual (the server loads it from there when deploying), build once so it
+shows up in `pack.config.json`, then add its workshop ID:
+
+```json
+"addons": {
+  "@CBA_A3": { "is_optional": false, "workshop_id": "450814997" }
+}
+```
+
+The next `pamm build` leaves it out of `www/`. Players are shown a link to every workshop addon they are
+missing when they sync, a pack with a missing workshop addon is reported as not up to date, and launching
+fails until they have subscribed. Workshop addons can be optional as well.
 
 `version.pamm` stores the layout version (a repo without one is treated as version 1, the old flat layout).
 Repos with an outdated version are migrated automatically the next time they are opened — both server sources
