@@ -52,7 +52,13 @@ impl ClientRepoHandle {
 
         local_config.remove_disabled_optionals(&settings);
 
-        let expected_addons: HashSet<_> = local_config.addons.keys().collect();
+        // Workshop addons are not served, so they never show up in the checksum index.
+        let expected_addons: HashSet<_> = local_config
+            .addons
+            .iter()
+            .filter(|(_, settings)| !settings.is_workshop())
+            .map(|(name, _)| name)
+            .collect();
         let actual_addons: HashSet<_> = local_checksum_index.checksums.keys().collect();
 
         if expected_addons != actual_addons {

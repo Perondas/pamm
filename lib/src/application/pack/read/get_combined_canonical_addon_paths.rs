@@ -1,6 +1,5 @@
+use crate::application::addons::active::GetActiveAddons;
 use crate::application::addons::externals::GetExternalsPaths;
-use crate::application::addons::optionals::GetOptionalsPaths;
-use crate::application::addons::resolve::ResolveAddons;
 use crate::application::pack::read::get_pack::GetPack;
 use crate::application::pack::read::get_repo_info::GetRepoInfo;
 use crate::domain::cdlc::Cdlc;
@@ -12,8 +11,9 @@ use log::info;
 use std::collections::HashSet;
 
 pub trait GetAddonPaths {
-    /// Gets the paths to all enabled addons of the pack (required, optional and
-    /// external) as absolute, canonicalized path strings. When supplying a CDLC will try and add a
+    /// Gets the paths to all enabled addons of the pack (required, optional,
+    /// workshop and external) as absolute, canonicalized path strings. Fails if
+    /// any of the pack's addons cannot be found. When supplying a CDLC will try and add a
     /// compat if the CDLC is not installed but a compat can be found in the workshop folder.
     fn get_combined_canonical_addon_paths(
         &self,
@@ -37,18 +37,19 @@ where
 
         let repo_path = self.get_repo_path();
 
-        let required_addons = self.resolve_addons(pack_name).await?;
-        let optional_addons = if !disable_optionals {
-            self.get_optionals_paths(pack_name).await?
-        } else {
-            vec![]
-        };
-
-        let mut addons = required_addons
+        let mut addons = self
+            .get_active_addons(pack_name, !disable_optionals)
+            .await?
             .iter()
-            .chain(&optional_addons)
-            .map(|p| repo_path.join(p))
-            .map(canonicalize_and_clean_path)
+            .map(|addon| {
+                let path = addon.locate(repo_path)?.with_context(|| {
+                    format!(
+                        "Could not find addon {addon}. Make sure the pack is synced and \
+                         its workshop addons are subscribed to"
+                    )
+                })?;
+                canonicalize_and_clean_path(path)
+            })
             .collect::<anyhow::Result<HashSet<_>>>()?;
 
         addons.extend(

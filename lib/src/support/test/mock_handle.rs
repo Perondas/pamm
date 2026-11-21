@@ -78,6 +78,12 @@ impl MockHandleExt for MockHandle {
         }
 
         let pack_name_owned = pack_name.to_string();
+        let config_only = config.clone();
+        self.expect_get_pack()
+            .withf(move |p| p == pack_name_owned.clone())
+            .returning(move |_| Ok(config_only.clone()));
+
+        let pack_name_owned = pack_name.to_string();
         self.expect_get_pack_with_settings()
             .withf(move |p| p == pack_name_owned.clone())
             .returning(move |_| Ok((config.clone(), settings.clone())));

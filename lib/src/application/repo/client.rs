@@ -285,6 +285,25 @@ mod local_pack_tests {
         assert_eq!(paths, want);
     }
 
+    // An addon the pack expects but that is not on disk means the pack is out
+    // of sync, which launching must not silently paper over.
+    #[tokio::test]
+    async fn resolving_addon_paths_fails_when_an_addon_is_missing() {
+        let (_tmp, repo_path, handle) = repo_with_local_pack("pamm_local_pack_missing_addon").await;
+
+        fs::remove_dir_all(repo_path.join("core/addons/@core_addon")).unwrap();
+
+        let err = handle
+            .get_combined_canonical_addon_paths("my_mission", false, None)
+            .await
+            .unwrap_err();
+
+        assert!(
+            format!("{err:#}").contains("'@core_addon' of pack 'core'"),
+            "unexpected error: {err:#}"
+        );
+    }
+
     // Local packs exist on this machine only, so every remote-facing operation
     // has to refuse them rather than 404 against a URL that cannot exist. The
     // guards run before any network access, so these need no server.
