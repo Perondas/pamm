@@ -7,23 +7,32 @@ pub fn has_cdlc_installed(cldc: &Cdlc) -> anyhow::Result<bool> {
 
     let cdlc_code = cldc.short_form();
 
-    let cdlc_folder = arma_install.install_dir.join(cdlc_code.to_uppercase());
+    let candidates = [
+        arma_install.install_dir.join(cdlc_code.to_uppercase()),
+        arma_install.install_dir.join(cdlc_code.to_lowercase()),
+    ];
 
-    debug!("Checking for CDLC folder at {:?}", cdlc_folder);
+    for candidate in candidates {
+        let cdlc_folder = arma_install.install_dir.join(cdlc_code.to_uppercase());
 
-    if !cdlc_folder.exists() {
-        debug!("CDLC folder does not exist: {:?}", cdlc_folder);
-        return Ok(false);
+        debug!("Checking for CDLC folder at {:?}", cdlc_folder);
+
+        if !cdlc_folder.exists() {
+            debug!("CDLC folder does not exist: {:?}", cdlc_folder);
+            continue;
+        }
+
+        if !cdlc_folder.join("mod.cpp").exists() {
+            debug!(
+                "CDLC folder exists but mod.cpp is missing: {:?}",
+                cdlc_folder
+            );
+            continue;
+        }
+
+        info!("CDLC {:?} seems to be installed at {:?}", cldc, cdlc_folder);
+        return Ok(true);
     }
 
-    if !cdlc_folder.join("mod.cpp").exists() {
-        debug!(
-            "CDLC folder exists but mod.cpp is missing: {:?}",
-            cdlc_folder
-        );
-        return Ok(false);
-    }
-
-    info!("CDLC {:?} seems to be installed at {:?}", cldc, cdlc_folder);
-    Ok(true)
+    Ok(false)
 }
