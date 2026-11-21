@@ -42,7 +42,7 @@ impl ClientRepoHandle {
         let cdlc = self.get_pack(pack_name).await?.enabled_cdlc;
 
         let addon_paths = self
-            .get_combined_canonical_addon_paths(pack_name, params.disable_optionals, cdlc)
+            .get_combined_canonical_addon_paths(pack_name, params.disable_optionals)
             .await?;
 
         debug!(

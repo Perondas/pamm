@@ -57,6 +57,19 @@ impl PackConfig {
             })
     }
 
+    /// The compat addon for the pack's CDLC, which stands in for the CDLC on
+    /// machines that do not have it installed.
+    pub fn cdlc_compat_addon(&self) -> Option<PackAddon> {
+        self.enabled_cdlc.map(|cdlc| PackAddon {
+            pack_name: self.name.clone(),
+            name: format!("{} compat", cdlc.name()),
+            settings: AddonSettings {
+                workshop_id: Some(cdlc.compat_mod_id().to_string()),
+                ..Default::default()
+            },
+        })
+    }
+
     pub fn remove_disabled_optionals(&mut self, user_settings: &PackUserSettings) {
         self.addons.retain(|name, settings| {
             if settings.is_optional {
@@ -182,5 +195,26 @@ mod tests {
         active.sort();
 
         assert_eq!(active, vec!["@optional_enabled", "@required", "@workshop"]);
+    }
+
+    #[test]
+    fn test_cdlc_compat_addon() {
+        let mut config = PackConfig::new(
+            "test_pack".to_string(),
+            "desc".to_string(),
+            vec![],
+            None,
+            None,
+        );
+        assert_eq!(config.cdlc_compat_addon(), None);
+
+        config.enabled_cdlc = Some(Cdlc::GlobalMobilization);
+        let compat = config.cdlc_compat_addon().unwrap();
+
+        assert_eq!(compat.pack_name, "test_pack");
+        assert_eq!(
+            compat.source(),
+            crate::domain::addon::AddonSource::Workshop { id: "1776428269" }
+        );
     }
 }

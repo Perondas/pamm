@@ -1,6 +1,9 @@
 use crate::application::pack::read::get_pack::GetPack;
 use crate::domain::addon::PackAddon;
+use crate::domain::pack::pack_config::PackConfig;
 use crate::domain::pack::pack_user_settings::PackUserSettings;
+use crate::platform::steam::has_cdlc_installed::has_cdlc_installed;
+use anyhow::Context;
 
 pub trait GetActiveAddons {
     /// Gets the addons that take part in launching the pack: the required
@@ -8,6 +11,15 @@ pub trait GetActiveAddons {
     /// when `include_optionals` is set. Own addons first, then each ancestor's
     /// in turn.
     fn get_active_addons(
+        &self,
+        pack_name: &str,
+        include_optionals: bool,
+    ) -> impl Future<Output = anyhow::Result<Vec<PackAddon>>> + Send;
+
+    /// Like [`GetActiveAddons::get_active_addons`], plus the compat for the
+    /// pack's CDLC when this machine does not have the CDLC installed. These are
+    /// the addons launching the pack on this machine needs.
+    fn get_launch_addons(
         &self,
         pack_name: &str,
         include_optionals: bool,
@@ -47,6 +59,38 @@ where
 
         Ok(addons)
     }
+
+    async fn get_launch_addons(
+        &self,
+        pack_name: &str,
+        include_optionals: bool,
+    ) -> anyhow::Result<Vec<PackAddon>> {
+        let mut addons = self.get_active_addons(pack_name, include_optionals).await?;
+
+        let config = self.get_pack(pack_name).await?;
+        addons.extend(needed_cdlc_compat(&config)?);
+
+        Ok(addons)
+    }
+}
+
+/// The compat addon this machine needs for the pack's CDLC: only when the pack
+/// enables a CDLC that is not installed here.
+pub(crate) fn needed_cdlc_compat(config: &PackConfig) -> anyhow::Result<Option<PackAddon>> {
+    let Some(cdlc) = config.enabled_cdlc else {
+        return Ok(None);
+    };
+
+    if has_cdlc_installed(&cdlc).context("Failed to check if CDLC is installed")? {
+        return Ok(None);
+    }
+
+    log::info!(
+        "CDLC '{:?}' is not installed, its compat is needed instead",
+        cdlc
+    );
+
+    Ok(config.cdlc_compat_addon())
 }
 
 #[cfg(test)]

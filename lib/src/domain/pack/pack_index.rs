@@ -1,7 +1,6 @@
 use crate::domain::index::index_node::IndexNode;
 use crate::infrastructure::fs::files::util::clean_path::canonicalize_and_clean_path;
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
 use std::path::Path;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -11,10 +10,6 @@ pub struct PackIndex {
 }
 
 impl PackIndex {
-    pub fn get_addon_names(&self) -> HashSet<&str> {
-        self.addons.iter().map(|node| node.name.as_ref()).collect()
-    }
-
     pub fn get_addon_paths(&self, base_path: &Path) -> Vec<String> {
         self.addons
             .iter()
@@ -31,30 +26,6 @@ mod tests {
     use super::*;
     use crate::domain::index::index_node::{IndexNode, NodeKind};
     use std::fs;
-
-    #[test]
-    fn test_pack_index_get_addon_names() {
-        let node1 = IndexNode {
-            name: "addon1".to_string(),
-            checksum: vec![],
-            kind: NodeKind::Folder(vec![]),
-        };
-        let node2 = IndexNode {
-            name: "addon2".to_string(),
-            checksum: vec![],
-            kind: NodeKind::Folder(vec![]),
-        };
-
-        let index = PackIndex {
-            addons: vec![node1, node2],
-            pack_name: "test_pack".to_string(),
-        };
-
-        let names = index.get_addon_names();
-        assert_eq!(names.len(), 2);
-        assert!(names.contains("addon1"));
-        assert!(names.contains("addon2"));
-    }
 
     #[test]
     fn test_pack_index_get_addon_paths() {

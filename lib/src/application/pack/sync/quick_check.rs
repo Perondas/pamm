@@ -1,3 +1,4 @@
+use crate::application::addons::active::needed_cdlc_compat;
 use crate::application::pack::read::get_pack::GetPack;
 use crate::application::repo::client::ClientRepoHandle;
 use crate::domain::index::checksum_index::ChecksumIndex;
@@ -49,7 +50,10 @@ impl ClientRepoHandle {
         };
 
         let (local_config, settings) = self.get_pack_with_settings(pack_name).await?;
-        let active_addons = local_config.active_addons(&settings).collect::<Vec<_>>();
+        let active_addons = local_config
+            .active_addons(&settings)
+            .chain(needed_cdlc_compat(&local_config)?)
+            .collect::<Vec<_>>();
 
         // An addon that cannot be found at all means the pack is definitely out
         // of sync. This is the only check workshop addons get.

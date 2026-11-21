@@ -2,24 +2,19 @@ use crate::application::addons::active::GetActiveAddons;
 use crate::application::addons::externals::GetExternalsPaths;
 use crate::application::pack::read::get_pack::GetPack;
 use crate::application::pack::read::get_repo_info::GetRepoInfo;
-use crate::domain::cdlc::Cdlc;
 use crate::infrastructure::fs::files::util::clean_path::canonicalize_and_clean_path;
-use crate::platform::steam::get_workshop_item_path::get_workshop_item_path;
-use crate::platform::steam::has_cdlc_installed::has_cdlc_installed;
 use anyhow::{Context, anyhow};
-use log::info;
 use std::collections::HashSet;
 
 pub trait GetAddonPaths {
     /// Gets the paths to all enabled addons of the pack (required, optional,
-    /// workshop and external) as absolute, canonicalized path strings. Fails if
-    /// any of the pack's addons cannot be found. When supplying a CDLC will try and add a
-    /// compat if the CDLC is not installed but a compat can be found in the workshop folder.
+    /// workshop and external) as absolute, canonicalized path strings, including
+    /// the CDLC compat when the pack's CDLC is not installed. Fails if any of
+    /// these addons cannot be found.
     fn get_combined_canonical_addon_paths(
         &self,
         pack_name: &str,
         disable_optionals: bool,
-        cdlc: Option<Cdlc>,
     ) -> impl Future<Output = anyhow::Result<HashSet<String>>> + Send;
 }
 
@@ -31,14 +26,13 @@ where
         &self,
         pack_name: &str,
         disable_optionals: bool,
-        cdlc: Option<Cdlc>,
     ) -> anyhow::Result<HashSet<String>> {
         log::debug!("Resolving canonical addon paths for pack '{}'", pack_name);
 
         let repo_path = self.get_repo_path();
 
         let mut addons = self
-            .get_active_addons(pack_name, !disable_optionals)
+            .get_launch_addons(pack_name, !disable_optionals)
             .await?
             .iter()
             .map(|addon| {
@@ -57,19 +51,6 @@ where
                 .await
                 .context(anyhow!("Failed to read external addons"))?,
         );
-
-        // If we are loading a CDLC enabled pack, and we don't have it installed, we should try and load the compat if available
-        if let Some(cdlc) = cdlc
-            && !has_cdlc_installed(&cdlc).context("Failed to check if CDLC is installed")?
-            && let Some(path) = get_workshop_item_path(cdlc.compat_mod_id())
-                .context("Failed to get workshop item path")?
-        {
-            info!(
-                "CDLC '{:?}' is not installed, but found compat mod at '{:?}'",
-                cdlc, path
-            );
-            addons.insert(canonicalize_and_clean_path(path)?);
-        }
 
         Ok(addons)
     }

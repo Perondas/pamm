@@ -265,7 +265,7 @@ mod local_pack_tests {
             repo_with_local_pack("pamm_local_pack_canonical_addon_paths").await;
 
         let paths = handle
-            .get_combined_canonical_addon_paths("my_mission", false, None)
+            .get_combined_canonical_addon_paths("my_mission", false)
             .await
             .unwrap();
 
@@ -294,7 +294,7 @@ mod local_pack_tests {
         fs::remove_dir_all(repo_path.join("core/addons/@core_addon")).unwrap();
 
         let err = handle
-            .get_combined_canonical_addon_paths("my_mission", false, None)
+            .get_combined_canonical_addon_paths("my_mission", false)
             .await
             .unwrap_err();
 
