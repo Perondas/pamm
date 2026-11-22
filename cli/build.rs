@@ -12,10 +12,13 @@ fn main() -> std::io::Result<()> {
 
     let out_dir = PathBuf::from(std::env::var_os("OUT_DIR").ok_or(std::io::ErrorKind::NotFound)?);
 
-    // OUT_DIR is target/<profile>/build/pamm_cli-<hash>/out.
+    // OUT_DIR is target/<profile>/build/pamm_cli-<hash>/out, or
+    // target/<profile>/build/pamm_cli/<hash>/out with cargo's newer build-dir
+    // layout. Climb to the `build` directory instead of counting levels.
     let man_dir = out_dir
         .ancestors()
-        .nth(3)
+        .find(|p| p.file_name().is_some_and(|n| n == "build"))
+        .and_then(|build| build.parent())
         .ok_or(std::io::ErrorKind::NotFound)?
         .join("man");
 
