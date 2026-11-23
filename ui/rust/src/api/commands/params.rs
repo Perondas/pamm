@@ -1,4 +1,5 @@
 use pamm_lib::application::repo::client::ClientRepoHandle;
+#[err_wrap]
 pub async fn get_launch_params(
     repot_path: String,
     pack_name: String,
@@ -10,6 +11,7 @@ pub async fn get_launch_params(
     handle.get_pack_launch_params(&pack_name).await
 }
 
+#[err_wrap]
 pub async fn get_server_launch_params(
     repot_path: String,
     pack_name: String,
@@ -21,6 +23,7 @@ pub async fn get_server_launch_params(
     handle.get_pack_server_launch_params(&pack_name).await
 }
 
+#[err_wrap]
 pub async fn set_launch_params(
     repot_path: String,
     pack_name: String,

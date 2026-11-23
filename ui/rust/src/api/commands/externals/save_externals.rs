@@ -3,6 +3,7 @@ use pamm_lib::application::addons::externals::ExternalAddon;
 use pamm_lib::application::addons::externals::SaveExternals;
 use pamm_lib::application::repo::client::ClientRepoHandle;
 
+#[err_wrap]
 pub async fn save_externals(
     repo_path: String,
     pack_name: String,

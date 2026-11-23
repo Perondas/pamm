@@ -30,6 +30,7 @@ fn reap(mut child: std::process::Child) {
 }
 
 #[cfg(target_os = "linux")]
+#[err_wrap]
 pub fn proton_info() -> anyhow::Result<ProtonInfo> {
     let proton = detect()?;
 
@@ -43,6 +44,7 @@ pub fn proton_info() -> anyhow::Result<ProtonInfo> {
 
 /// Blocks until the installer exits.
 #[cfg(target_os = "linux")]
+#[err_wrap]
 pub fn proton_install_teamspeak(installer: String, silent: bool) -> anyhow::Result<()> {
     pamm_lib::platform::proton::teamspeak::install_teamspeak(
         &detect()?,
@@ -52,6 +54,7 @@ pub fn proton_install_teamspeak(installer: String, silent: bool) -> anyhow::Resu
 }
 
 #[cfg(target_os = "linux")]
+#[err_wrap]
 pub fn proton_launch_teamspeak() -> anyhow::Result<()> {
     use anyhow::Context;
     use pamm_lib::platform::proton::teamspeak::{find_teamspeak, launch_teamspeak};
@@ -64,6 +67,7 @@ pub fn proton_launch_teamspeak() -> anyhow::Result<()> {
 }
 
 #[cfg(target_os = "linux")]
+#[err_wrap]
 pub fn proton_open_explorer(path: Option<String>) -> anyhow::Result<()> {
     reap(detect()?.open_explorer(path.as_deref())?);
     Ok(())
@@ -71,19 +75,24 @@ pub fn proton_open_explorer(path: Option<String>) -> anyhow::Result<()> {
 
 /// Stops everything in the prefix, including the game.
 #[cfg(target_os = "linux")]
+#[err_wrap]
 pub fn proton_kill_all() -> anyhow::Result<()> {
     detect()?.kill_all()
 }
 
 #[cfg(not(target_os = "linux"))]
+#[err_wrap]
 pub fn proton_info() -> anyhow::Result<ProtonInfo> {
-    anyhow::bail!("proton_info is only available on Linux");
+    Err(anyhow::anyhow!("proton_info is only available on Linux"))
 }
 
 /// Blocks until the installer exits.
 #[cfg(not(target_os = "linux"))]
+#[err_wrap]
 pub fn proton_install_teamspeak(_installer: String, _silent: bool) -> anyhow::Result<()> {
-    anyhow::bail!("proton_install_teamspeak is only available on Linux");
+    Err(anyhow::anyhow!(
+        "proton_install_teamspeak is only available on Linux"
+    ))
 }
 
 #[cfg(not(target_os = "linux"))]

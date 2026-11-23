@@ -3,6 +3,7 @@ use pamm_lib::application::repo::client::ClientRepoHandle;
 pub use pamm_lib::domain::cdlc::Cdlc;
 use pamm_lib::domain::pack::pack_config::PackConfig;
 
+#[err_wrap]
 pub async fn add_local_pack(
     repo_path: String,
     config: FlutterLocalPackConfig,

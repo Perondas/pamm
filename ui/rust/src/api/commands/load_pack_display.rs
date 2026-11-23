@@ -9,6 +9,7 @@ pub struct PackDisplayInfo {
     pub icon: Option<String>,
 }
 
+#[err_wrap]
 pub async fn load_pack_display(
     repo_path: String,
     pack_name: String,

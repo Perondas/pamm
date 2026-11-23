@@ -2,6 +2,7 @@ use pamm_lib::application::pack::launch::launch_pack::{LaunchMode, LaunchParams}
 use pamm_lib::application::repo::client::ClientRepoHandle;
 use std::path::Path;
 
+#[err_wrap]
 pub async fn launch(
     repo_dir: String,
     pack_name: String,

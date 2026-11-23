@@ -1,6 +1,7 @@
 use pamm_lib::application::addons::externals::GetAllStoredExternals;
 use pamm_lib::application::repo::client::ClientRepoHandle;
 
+#[err_wrap]
 pub async fn load_externals(
     repot_path: String,
     pack_name: String,

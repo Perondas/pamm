@@ -9,6 +9,7 @@ pub struct PackInfo {
     pub enabled_cdlc: Option<Cdlc>,
 }
 
+#[err_wrap]
 pub async fn load_pack_info(repo_path: String, pack_name: String) -> anyhow::Result<PackInfo> {
     let repo_path = std::path::Path::new(&repo_path);
 

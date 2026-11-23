@@ -4,6 +4,7 @@ use pamm_lib::application::repo::client::ClientRepoHandle;
 use pamm_lib::domain::repo::repo_config::RepoConfig;
 use std::path::Path;
 
+#[err_wrap]
 pub async fn sync_config(repo_path: String) -> anyhow::Result<RepoConfig> {
     let repo_path = Path::new(&repo_path);
 

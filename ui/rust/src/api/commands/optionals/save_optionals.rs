@@ -2,6 +2,7 @@ use pamm_lib::application::addons::optionals::OptionalAddon;
 use pamm_lib::application::addons::optionals::SaveOptionals;
 use pamm_lib::application::repo::client::ClientRepoHandle;
 
+#[err_wrap]
 pub async fn save_optionals(
     repo_path: String,
     pack_name: String,

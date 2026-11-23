@@ -3,6 +3,7 @@ use pamm_lib::application::addons::optionals::GetOptionals;
 pub use pamm_lib::application::addons::optionals::OptionalAddon;
 use pamm_lib::application::repo::client::ClientRepoHandle;
 
+#[err_wrap]
 pub async fn load_optionals(
     repot_path: String,
     pack_name: String,

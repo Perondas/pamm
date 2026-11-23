@@ -4,6 +4,7 @@ use pamm_lib::application::repo::client::ClientRepoHandle;
 use pamm_lib::infrastructure::progress::progress_reporter::ProgressReporter;
 use std::path::Path;
 
+#[err_wrap]
 pub async fn get_diff_with_parents(
     pack_name: String,
     repo_path: String,

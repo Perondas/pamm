@@ -14,6 +14,7 @@ pub struct WorkshopAddonNotFound {
 
 /// Gets the workshop addons launching the pack needs that cannot be found, so
 /// the user can be pointed at them to subscribe.
+#[err_wrap]
 pub async fn workshop_addons_not_found(
     repo_path: String,
     pack_name: String,

@@ -7,6 +7,7 @@ use pamm_lib::application::repo::client::ClientRepoHandle;
 use pamm_lib::infrastructure::progress::progress_reporter::ProgressReporter;
 use std::path::Path;
 
+#[err_wrap]
 pub async fn sync_pack(
     pack_name: String,
     repo_path: String,

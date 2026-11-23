@@ -1,6 +1,7 @@
 use crate::api::commands::user_repo_settings::FlutterRepoUserSettings;
 use pamm_lib::application::repo::client::ClientRepoHandle;
 
+#[err_wrap]
 pub async fn save_settings(
     repo_path: String,
     setting: FlutterRepoUserSettings,

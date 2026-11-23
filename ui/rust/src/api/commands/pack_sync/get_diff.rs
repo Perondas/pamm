@@ -11,6 +11,7 @@ use pamm_lib::infrastructure::progress::progress_reporter::ProgressReporter;
 use std::collections::HashMap;
 use std::path::Path;
 
+#[err_wrap]
 pub async fn get_diff(
     pack_name: String,
     repo_path: String,
