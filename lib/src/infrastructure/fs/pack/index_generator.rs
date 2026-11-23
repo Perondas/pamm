@@ -9,7 +9,7 @@ use crate::infrastructure::fs::files::util::path_checks::is_dir;
 use crate::infrastructure::fs::pack::cache::file_cache_entry::FileCacheEntry;
 use crate::infrastructure::fs::pack::cache::kv_cache::KVCache;
 use crate::infrastructure::progress::progress_reporter::ProgressReporter;
-use anyhow::Result;
+use anyhow::{Context, Result, anyhow};
 use bi_fs_rs::pbo::handle::PBOHandle;
 use rayon::iter::ParallelIterator;
 use rayon::prelude::IntoParallelIterator;
@@ -57,7 +57,9 @@ impl<P: ProgressReporter> IndexGenerator<P> {
 
     pub async fn index_addons(&self) -> Result<PackIndex> {
         let this = self.clone();
-        tokio::task::spawn_blocking(move || this.index_addons_blocking()).await?
+        tokio::task::spawn_blocking(move || this.index_addons_blocking())
+            .await
+            .context("Failed to index addons. Maybe your cache is broken?")?
     }
 
     fn index_addons_blocking(&self) -> Result<PackIndex> {
@@ -108,13 +110,16 @@ impl<P: ProgressReporter> IndexGenerator<P> {
 
                 if entry.path().is_file() {
                     self.index_file(rel_entry_path)
+                        .context(anyhow!("Failed to index file: {:?}", entry_name))
                 } else if entry.path().is_dir() {
                     self.index_dir(rel_entry_path)
+                        .context(anyhow!("Failed to index directory: {:?}", entry_name))
                 } else {
                     unreachable!("Path is neither file nor directory: {:?}", entry_name);
                 }
             })
-            .collect::<Result<Vec<IndexNode>>>()?;
+            .collect::<Result<Vec<IndexNode>>>()
+            .context(anyhow!("Failed to index folder: {:?}", name))?;
 
         let mut hasher = blake3::Hasher::new();
         hasher.update(name.as_bytes());
