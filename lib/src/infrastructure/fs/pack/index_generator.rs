@@ -147,7 +147,10 @@ impl<P: ProgressReporter> IndexGenerator<P> {
         let metadata = std::fs::metadata(&fs_path)?;
         let last_modified = metadata
             .modified()?
-            .duration_since(std::time::UNIX_EPOCH)?
+            .duration_since(std::time::UNIX_EPOCH)
+            .context(
+                "Failed to get file modification time. Is there an issue with your system time?",
+            )?
             .as_secs();
         let length = metadata.len();
 
