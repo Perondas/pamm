@@ -28,10 +28,10 @@ class RustLogService {
       _logBuffer.add(message);
     });
 
-    // Every 5 seconds cull the log buffer to the most recent 1000 entries to prevent unbounded memory growth
+    // Every 5 seconds cull the log buffer to the most recent 100_000 entries to prevent unbounded memory growth
     Stream.periodic(const Duration(seconds: 5)).listen((_) {
-      if (_logBuffer.length > 1000) {
-        _logBuffer.removeRange(0, _logBuffer.length - 1000);
+      if (_logBuffer.length > 100_000) {
+        _logBuffer.removeRange(0, _logBuffer.length - 100_000);
       }
     });
   }

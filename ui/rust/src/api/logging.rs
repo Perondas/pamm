@@ -70,7 +70,21 @@ impl Log for FlutterLogger {
 
     fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
-            let log_message = format!("{} - {}", record.level(), record.args());
+            // Filter out sled as it is WAY to verbose
+            if record
+                .module_path()
+                .is_some_and(|path| path.starts_with("sled"))
+                && record.level() == Level::Trace
+            {
+                return;
+            }
+
+            let log_message = format!(
+                "{} - {} - {}",
+                record.level(),
+                record.module_path().unwrap_or("<unknown>"),
+                record.args()
+            );
             self.log_sink
                 .add(log_message)
                 .expect("Failed to send log message to Flutter");
