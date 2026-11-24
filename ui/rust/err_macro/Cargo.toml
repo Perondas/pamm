@@ -9,8 +9,6 @@ path = "src/lib.rs"
 proc-macro = true
 
 [dependencies]
-darling = "0.24.1"
-function-wrapper = "0.1.8"
 proc-macro2 = "1.0.107"
 quote = "1.0.47"
 syn = "3.0.10"
