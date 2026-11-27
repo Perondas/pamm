@@ -1,5 +1,6 @@
 use crate::application::addons::optionals::OptionalAddon;
 use crate::application::pack::read::get_pack::GetPack;
+use crate::support::collect_packs::walk_packs;
 
 pub trait GetOptionals {
     /// Gets all available optionals for a pack, including inherited ones, together with their status
@@ -14,27 +15,20 @@ where
     T: GetPack + Sync,
 {
     async fn get_optionals(&self, pack_name: &str) -> anyhow::Result<Vec<OptionalAddon>> {
-        let mut optionals = Vec::new();
-        let mut current = Some(pack_name.to_string());
-
-        // Own optionals first, then each ancestor's in turn.
-        while let Some(pack_name) = current {
-            let (pack_config, settings) = self.get_pack_with_settings(&pack_name).await?;
-
-            optionals.extend(
-                pack_config
-                    .addons
-                    .iter()
-                    .filter(|(_, addon)| addon.is_optional)
-                    .map(|(name, _)| {
-                        OptionalAddon::new(name.clone(), settings.enabled_optionals.contains(name))
-                    }),
-            );
-
-            current = pack_config.parent;
-        }
-
-        Ok(optionals)
+        Ok(walk_packs(self, pack_name, |(pack_config, settings)| {
+            pack_config
+                .addons
+                .iter()
+                .filter(|(_, addon)| addon.is_optional)
+                .map(|(name, _)| {
+                    OptionalAddon::new(name.clone(), settings.enabled_optionals.contains(name))
+                })
+                .collect::<Vec<_>>()
+        })
+        .await?
+        .into_iter()
+        .flatten()
+        .collect())
     }
 }
 

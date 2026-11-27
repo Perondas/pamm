@@ -95,9 +95,7 @@ impl ClientRepoHandle {
             name
         );
 
-        if let Some(parent) = &pack_config.parent {
-            // Resolves both normal and local packs, so a local pack may parent
-            // another. No cycle is possible: the new name is not yet in any chain.
+        for parent in &pack_config.parents {
             self.get_pack(parent).await.context(format!(
                 "Parent pack '{}' of new local pack '{}' does not exist",
                 parent, name
@@ -133,7 +131,7 @@ mod tests {
                 pack.to_string(),
                 "d".to_string(),
                 vec![],
-                None,
+                vec![],
                 None,
             ));
         }
@@ -142,12 +140,12 @@ mod tests {
         (tmp, fixture.repo_path().to_path_buf())
     }
 
-    fn pack(name: &str, parent: Option<&str>) -> PackConfig {
+    fn pack(name: &str, parents: Vec<&str>) -> PackConfig {
         PackConfig::new(
             name.to_string(),
             "a local pack".to_string(),
             vec![],
-            parent.map(|p| p.to_string()),
+            parents.into_iter().map(|s| s.to_string()).collect(),
             None,
         )
     }
@@ -158,7 +156,7 @@ mod tests {
         let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
 
         handle
-            .add_local_pack(&pack("my_mission", Some("core")))
+            .add_local_pack(&pack("my_mission", vec!["core"]))
             .await
             .unwrap();
 
@@ -187,7 +185,7 @@ mod tests {
         let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
 
         handle
-            .add_local_pack(&pack("my_mission", Some("core")))
+            .add_local_pack(&pack("my_mission", vec!["core"]))
             .await
             .unwrap();
 
@@ -196,7 +194,7 @@ mod tests {
 
         let config = handle.get_pack("my_mission").await.unwrap();
         assert_eq!(config.name, "my_mission");
-        assert_eq!(config.parent, Some("core".to_string()));
+        assert_eq!(config.parents, vec!["core".to_string()]);
 
         let (config, settings) = handle.get_pack_with_settings("my_mission").await.unwrap();
         assert_eq!(config.name, "my_mission");
@@ -208,7 +206,7 @@ mod tests {
         let (_tmp, repo_path) = client_repo("pamm_add_local_pack_reopen", &[]).await;
         let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
         handle
-            .add_local_pack(&pack("my_mission", None))
+            .add_local_pack(&pack("my_mission", vec![]))
             .await
             .unwrap();
         drop(handle);
@@ -226,15 +224,15 @@ mod tests {
         let (_tmp, repo_path) = client_repo("pamm_add_local_pack_local_parent", &[]).await;
         let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
 
-        handle.add_local_pack(&pack("base", None)).await.unwrap();
+        handle.add_local_pack(&pack("base", vec![])).await.unwrap();
         handle
-            .add_local_pack(&pack("derived", Some("base")))
+            .add_local_pack(&pack("derived", vec!["base"]))
             .await
             .unwrap();
 
         assert_eq!(
-            handle.get_pack("derived").await.unwrap().parent,
-            Some("base".to_string())
+            handle.get_pack("derived").await.unwrap().parents,
+            vec!["base".to_string()]
         );
     }
 
@@ -260,7 +258,7 @@ mod tests {
         rejects(
             "pamm_add_local_pack_dup_remote",
             &["core"],
-            pack("core", None),
+            pack("core", vec![]),
             "already exists in repo",
         )
         .await;
@@ -271,7 +269,7 @@ mod tests {
         rejects(
             "pamm_add_local_pack_dup_remote_case",
             &["core"],
-            pack("Core", None),
+            pack("Core", vec![]),
             "as remote pack 'core'",
         )
         .await;
@@ -282,7 +280,7 @@ mod tests {
         let (_tmp, repo_path) = client_repo("pamm_add_local_pack_dup_local", &[]).await;
         let mut handle = ClientRepoHandle::open(&repo_path).await.unwrap();
         handle
-            .add_local_pack(&pack("my_mission", None))
+            .add_local_pack(&pack("my_mission", vec![]))
             .await
             .unwrap();
 
@@ -290,7 +288,7 @@ mod tests {
         let err = format!(
             "{:#}",
             handle
-                .add_local_pack(&pack("My_Mission", None))
+                .add_local_pack(&pack("My_Mission", vec![]))
                 .await
                 .unwrap_err()
         );
@@ -308,7 +306,7 @@ mod tests {
             rejects(
                 &format!("pamm_add_local_pack_reserved_{}", i),
                 &[],
-                pack(name, None),
+                pack(name, vec![]),
                 "would collide with",
             )
             .await;
@@ -325,7 +323,7 @@ mod tests {
             rejects(
                 &format!("pamm_add_local_pack_reserved_file_{}", i),
                 &[],
-                pack(name, None),
+                pack(name, vec![]),
                 "would collide with",
             )
             .await;
@@ -338,7 +336,7 @@ mod tests {
             rejects(
                 &format!("pamm_add_local_pack_pathlike_{}", i),
                 &[],
-                pack(name, None),
+                pack(name, vec![]),
                 "is not a valid folder name",
             )
             .await;
@@ -350,14 +348,14 @@ mod tests {
         rejects(
             "pamm_add_local_pack_empty",
             &[],
-            pack("", None),
+            pack("", vec![]),
             "must not be empty",
         )
         .await;
         rejects(
             "pamm_add_local_pack_padded",
             &[],
-            pack(" spaced ", None),
+            pack(" spaced ", vec![]),
             "must not start or end with whitespace",
         )
         .await;
@@ -372,7 +370,7 @@ mod tests {
         let err = format!(
             "{:#}",
             handle
-                .add_local_pack(&pack("squatter", None))
+                .add_local_pack(&pack("squatter", vec![]))
                 .await
                 .unwrap_err()
         );
@@ -388,7 +386,7 @@ mod tests {
         rejects(
             "pamm_add_local_pack_missing_parent",
             &["core"],
-            pack("my_mission", Some("nope")),
+            pack("my_mission", vec!["nope"]),
             "Parent pack 'nope' of new local pack 'my_mission' does not exist",
         )
         .await;

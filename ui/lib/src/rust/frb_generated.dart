@@ -1951,7 +1951,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
     return FlutterLocalPackConfig(
       name: dco_decode_String(arr[0]),
-      parent: dco_decode_opt_String(arr[1]),
+      parents: dco_decode_list_String(arr[1]),
       enabledCdlc: dco_decode_opt_box_autoadd_cdlc(arr[2]),
     );
   }
@@ -2159,7 +2159,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
     return PackInfo(
       description: dco_decode_String(arr[0]),
-      parent: dco_decode_opt_String(arr[1]),
+      parents: dco_decode_list_String(arr[1]),
       enabledCdlc: dco_decode_opt_box_autoadd_cdlc(arr[2]),
     );
   }
@@ -2582,11 +2582,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_name = sse_decode_String(deserializer);
-    var var_parent = sse_decode_opt_String(deserializer);
+    var var_parents = sse_decode_list_String(deserializer);
     var var_enabledCdlc = sse_decode_opt_box_autoadd_cdlc(deserializer);
     return FlutterLocalPackConfig(
       name: var_name,
-      parent: var_parent,
+      parents: var_parents,
       enabledCdlc: var_enabledCdlc,
     );
   }
@@ -2864,11 +2864,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   PackInfo sse_decode_pack_info(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_description = sse_decode_String(deserializer);
-    var var_parent = sse_decode_opt_String(deserializer);
+    var var_parents = sse_decode_list_String(deserializer);
     var var_enabledCdlc = sse_decode_opt_box_autoadd_cdlc(deserializer);
     return PackInfo(
       description: var_description,
-      parent: var_parent,
+      parents: var_parents,
       enabledCdlc: var_enabledCdlc,
     );
   }
@@ -3311,7 +3311,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.name, serializer);
-    sse_encode_opt_String(self.parent, serializer);
+    sse_encode_list_String(self.parents, serializer);
     sse_encode_opt_box_autoadd_cdlc(self.enabledCdlc, serializer);
   }
 
@@ -3559,7 +3559,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_pack_info(PackInfo self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.description, serializer);
-    sse_encode_opt_String(self.parent, serializer);
+    sse_encode_list_String(self.parents, serializer);
     sse_encode_opt_box_autoadd_cdlc(self.enabledCdlc, serializer);
   }
 

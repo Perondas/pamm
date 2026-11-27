@@ -12,7 +12,7 @@ pub struct PackConfig {
     pub name: String,
     pub description: String,
     pub client_params: Vec<String>,
-    pub parent: Option<String>,
+    pub parents: Vec<String>,
     pub addons: HashMap<String, AddonSettings>,
     pub customization: Option<PackCustomization>,
     #[serde(default)]
@@ -24,14 +24,14 @@ impl PackConfig {
         name: String,
         description: String,
         client_params: Vec<String>,
-        parent: Option<String>,
+        parents: Vec<String>,
         enabled_cdlc: Option<Cdlc>,
     ) -> Self {
         Self {
             name,
             description,
             client_params,
-            parent,
+            parents,
             addons: HashMap::new(),
             customization: None,
             enabled_cdlc,
@@ -91,14 +91,14 @@ mod tests {
             "test_pack".to_string(),
             "A test pack".to_string(),
             vec!["-mod=1".to_string()],
-            Some("parent_pack".to_string()),
+            vec!["parent_pack".to_string()],
             None,
         );
 
         assert_eq!(config.name, "test_pack");
         assert_eq!(config.description, "A test pack");
         assert_eq!(config.client_params, vec!["-mod=1".to_string()]);
-        assert_eq!(config.parent, Some("parent_pack".to_string()));
+        assert_eq!(config.parents, vec!["parent_pack".to_string()]);
         assert!(config.addons.is_empty());
     }
 
@@ -108,7 +108,7 @@ mod tests {
             "test_pack".to_string(),
             "desc".to_string(),
             vec![],
-            None,
+            vec![],
             None,
         );
 
@@ -157,7 +157,7 @@ mod tests {
             "test_pack".to_string(),
             "desc".to_string(),
             vec![],
-            None,
+            vec![],
             None,
         );
         config
@@ -203,7 +203,7 @@ mod tests {
             "test_pack".to_string(),
             "desc".to_string(),
             vec![],
-            None,
+            vec![],
             None,
         );
         assert_eq!(config.cdlc_compat_addon(), None);

@@ -9,6 +9,7 @@ use crate::domain::pack::pack_config::PackConfig;
 use crate::domain::pack::pack_user_settings::PackUserSettings;
 use crate::domain::repo::repo_user_settings::RepoUserSettings;
 use crate::infrastructure::fs::files::fs_readable::KnownFSReadable;
+use crate::infrastructure::fs::files::fs_writable::FixedFsWritable;
 use crate::infrastructure::fs::files::util::path_checks::is_dir;
 use crate::infrastructure::fs::repo::init::init_client_repo_from_remote::init_client_repo_from_remote;
 use crate::support::name_matches;
@@ -123,12 +124,15 @@ impl GetPack for ClientRepoHandle {
 }
 
 impl SavePackSettings for ClientRepoHandle {
-    async fn save_pack_settings(
-        &self,
-        pack_name: &str,
-        settings: &PackUserSettings,
-    ) -> anyhow::Result<()> {
-        self.write_keyed(settings, pack_name).await
+    fn save_pack_settings<'a, 'b>(
+        &'a self,
+        pack_name: &'a str,
+        settings: &'a PackUserSettings,
+    ) -> impl Future<Output = anyhow::Result<()>> + Send + 'b + use<'b> {
+        let path = self.repo_path.join(pack_name);
+        let settings = settings.clone();
+
+        async move { settings.write_fixed(path).await }
     }
 }
 

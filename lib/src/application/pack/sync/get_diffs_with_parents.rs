@@ -1,8 +1,8 @@
-use crate::application::pack::read::get_pack::GetPack;
 use crate::application::repo::client::ClientRepoHandle;
 use crate::domain::pack::pack_diff::PackDiff;
 use crate::infrastructure::progress::progress_reporter::ProgressReporter;
 use anyhow::ensure;
+use crate::support::collect_packs::collect_pack_names;
 
 impl ClientRepoHandle {
     pub async fn get_pack_and_parents_diffs(
@@ -19,7 +19,7 @@ impl ClientRepoHandle {
             pack_name
         );
 
-        let chain = collect_pack_chain(self, pack_name).await?;
+        let chain = collect_pack_names(self, pack_name).await?;
 
         let mut diffs = Vec::with_capacity(chain.len());
         for name in chain {
@@ -32,24 +32,3 @@ impl ClientRepoHandle {
     }
 }
 
-async fn collect_pack_chain(
-    handle: &ClientRepoHandle,
-    pack_name: &str,
-) -> anyhow::Result<Vec<String>> {
-    let mut chain = Vec::new();
-    let mut current = pack_name.to_string();
-
-    loop {
-        let pack = handle.get_pack(&current).await?;
-        let parent = pack.parent.clone();
-        chain.push(current);
-
-        match parent {
-            Some(p) => current = p,
-            None => break,
-        }
-    }
-
-    chain.reverse();
-    Ok(chain)
-}

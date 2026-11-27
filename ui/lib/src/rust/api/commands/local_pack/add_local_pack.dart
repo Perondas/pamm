@@ -28,17 +28,17 @@ enum Cdlc {
 
 class FlutterLocalPackConfig {
   final String name;
-  final String? parent;
+  final List<String> parents;
   final Cdlc? enabledCdlc;
 
   const FlutterLocalPackConfig({
     required this.name,
-    this.parent,
+    required this.parents,
     this.enabledCdlc,
   });
 
   @override
-  int get hashCode => name.hashCode ^ parent.hashCode ^ enabledCdlc.hashCode;
+  int get hashCode => name.hashCode ^ parents.hashCode ^ enabledCdlc.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -46,6 +46,6 @@ class FlutterLocalPackConfig {
       other is FlutterLocalPackConfig &&
           runtimeType == other.runtimeType &&
           name == other.name &&
-          parent == other.parent &&
+          parents == other.parents &&
           enabledCdlc == other.enabledCdlc;
 }

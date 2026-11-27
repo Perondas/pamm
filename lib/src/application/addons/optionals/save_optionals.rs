@@ -1,6 +1,10 @@
 use crate::application::addons::optionals::OptionalAddon;
 use crate::application::pack::read::get_pack::GetPack;
 use crate::application::pack::write::save_pack_settings::SavePackSettings;
+use crate::domain::pack::pack_config::PackConfig;
+use crate::domain::pack::pack_user_settings::PackUserSettings;
+use crate::support::collect_packs::walk_packs;
+use futures::future::join_all;
 
 pub trait SaveOptionals {
     /// Saves optionals and their status to the pack settings.
@@ -20,11 +24,8 @@ where
         pack_name: &str,
         optionals: &[OptionalAddon],
     ) -> anyhow::Result<()> {
-        let mut current = Some(pack_name.to_string());
-
-        // The pack first, then each ancestor in turn.
-        while let Some(pack_name) = current {
-            let (config, mut settings) = self.get_pack_with_settings(&pack_name).await?;
+        let save_optionals = |values: (&PackConfig, &PackUserSettings)| {
+            let (config, settings) = values;
 
             let enabled = optionals
                 .iter()
@@ -38,14 +39,26 @@ where
                 .map(|optional| optional.name.to_owned())
                 .collect();
 
+            let mut settings = settings.clone();
+
             settings.enabled_optionals = enabled;
 
-            self.save_pack_settings(&pack_name, &settings).await?;
+            self.save_pack_settings(&pack_name, &settings)
+        };
 
-            current = config.parent;
+        let results = walk_packs(self, pack_name, save_optionals).await?;
+        let results = join_all(results.into_iter()).await;
+
+        let errors: Vec<anyhow::Error> = results.into_iter().filter_map(|res| res.err()).collect();
+
+        if !errors.is_empty() {
+            Err(anyhow::anyhow!(
+                "Failed to save optionals for some packs: {:#?}",
+                errors
+            ))
+        } else {
+            Ok(())
         }
-
-        Ok(())
     }
 }
 

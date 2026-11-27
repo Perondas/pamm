@@ -18,7 +18,7 @@ pub async fn add_local_pack(
 #[derive(Debug)]
 pub struct FlutterLocalPackConfig {
     pub name: String,
-    pub parent: Option<String>,
+    pub parents: Vec<String>,
     pub enabled_cdlc: Option<Cdlc>,
 }
 
@@ -28,7 +28,7 @@ impl From<FlutterLocalPackConfig> for PackConfig {
             value.name,
             String::default(),
             Vec::default(),
-            value.parent,
+            value.parents,
             value.enabled_cdlc,
         )
     }

@@ -39,9 +39,9 @@ impl Display for Node {
     }
 }
 
-pub async fn status_command(args: StatusArgs) -> anyhow::Result<()> {
-    // TODO: Re work to also work with server repo
-    let handle = ClientRepoHandle::open(&current_dir()?).await?;
+pub async fn status_command(_args: StatusArgs) -> anyhow::Result<()> {
+    // TODO: Re work to work with multiple parents
+/*    let handle = ClientRepoHandle::open(&current_dir()?).await?;
 
     if let Some(name) = args.name {
         return pack_status(&handle, &name).await;
@@ -74,7 +74,7 @@ pub async fn status_command(args: StatusArgs) -> anyhow::Result<()> {
         let node = Node::new(pack.name.clone(), needs_update);
 
         packs
-            .entry(pack.parent.clone())
+            .entry(pack.parents.clone())
             .or_insert_with(Vec::new)
             .push(Tree::new(node));
     }
@@ -116,7 +116,7 @@ pub async fn status_command(args: StatusArgs) -> anyhow::Result<()> {
         current_level = next_level;
     }
 
-    println!("{}", repo_root);
+    println!("{}", repo_root);*/
 
     Ok(())
 }
@@ -130,7 +130,7 @@ async fn pack_status(handle: &ClientRepoHandle, pack_name: &str) -> anyhow::Resu
         println!("Description: {}", pack.description);
     }
 
-    println!("Parent: {}", pack.parent.as_deref().unwrap_or("None"));
+    //println!("Parent: {}", pack.parents.as_deref().unwrap_or("None"));
     println!(
         "CDLC: {}",
         pack.enabled_cdlc.as_ref().map_or("None", Cdlc::name)
