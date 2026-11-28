@@ -8,6 +8,7 @@ import 'package:pamm_ui/src/services/settings_service.dart';
 import 'package:pamm_ui/src/util/media.dart';
 import 'package:pamm_ui/src/widgets/launch_teamspeak_button.dart';
 import 'package:pamm_ui/src/widgets/linux_setup_dialog.dart';
+import 'package:pamm_ui/src/widgets/update_badge.dart';
 
 /// Right-hand pane: the repo banner, the play button and the details and
 /// actions of the selected pack.
@@ -128,8 +129,9 @@ class PackDetails extends StatelessWidget {
               message: updateAvailable ? 'Updates available' : 'Sync pack',
               child: FilledButton.icon(
                 onPressed: () => syncPack(context, pack),
-                icon: Badge(
-                  isLabelVisible: updateAvailable,
+                icon: UpdateBadge(
+                  visible: updateAvailable,
+                  size: 18,
                   child: Icon(
                     pack.isLocal ? Icons.sync : Icons.download,
                     size: 32,

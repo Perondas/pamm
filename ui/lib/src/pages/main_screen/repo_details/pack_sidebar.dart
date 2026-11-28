@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pamm_ui/src/pages/main_screen/repo_details/pack_actions.dart';
 import 'package:pamm_ui/src/pages/main_screen/repo_details/pack_state.dart';
 import 'package:pamm_ui/src/util/media.dart';
 import 'package:pamm_ui/src/widgets/media_icon.dart';
+import 'package:pamm_ui/src/widgets/update_badge.dart';
 
 /// Left-hand list of the repo's packs (and local packs in MM mode).
 class PackSidebar extends StatelessWidget {
@@ -172,11 +172,15 @@ class _PackRow extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  MediaIcon(
-                    iconFile:
-                        mediaFile(pack.repoPath, pack.display?.icon) ??
-                        mediaFile(pack.repoPath, repoIconName),
-                    fallback: pack.packName,
+                  UpdateBadge(
+                    visible: pack.upToDate == false,
+                    size: 22,
+                    child: MediaIcon(
+                      iconFile:
+                          mediaFile(pack.repoPath, pack.display?.icon) ??
+                          mediaFile(pack.repoPath, repoIconName),
+                      fallback: pack.packName,
+                    ),
                   ),
                   const SizedBox(width: 20),
                   Flexible(
@@ -196,20 +200,6 @@ class _PackRow extends StatelessWidget {
                       child: const Icon(Icons.warning_amber, size: 16),
                     ),
                   ],
-                  const Spacer(),
-                  if (pack.upToDate == false)
-                    Tooltip(
-                      message: 'Updates available',
-                      child: FilledButton(
-                        onPressed: () => syncPack(context, pack),
-                        style: FilledButton.styleFrom(
-                          visualDensity: VisualDensity.compact,
-                          padding: const EdgeInsets.symmetric(horizontal: 14),
-                          textStyle: theme.textTheme.labelMedium,
-                        ),
-                        child: const Text('Update'),
-                      ),
-                    ),
                 ],
               ),
             ),
