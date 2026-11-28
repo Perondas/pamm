@@ -136,7 +136,7 @@ class TopBar extends StatelessWidget {
                   repo.repoPath.replaceAll("\\\\", "\\"),
                 );
               },
-              child: const Text("Explore Folder"),
+              child: const Text("Open Folder"),
             ),
           ],
           if (repo.repoState != null) ...[
@@ -149,7 +149,7 @@ class TopBar extends StatelessWidget {
                 );
                 await onReposChanged();
               },
-              child: const Text("Modpack Settings"),
+              child: const Text("Repo Settings"),
             ),
           ],
         ],
