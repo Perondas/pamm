@@ -37,7 +37,7 @@ where
         res.push(action(handle, current).await?);
 
         for parent in pack.parents {
-            if !visited.contains(&parent) {
+            if !visited.contains(&parent) && !to_visit.contains(&parent) {
                 to_visit.push(parent);
             }
         }
