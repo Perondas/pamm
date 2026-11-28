@@ -1,6 +1,7 @@
 use crate::application::pack::read::get_pack::GetPack;
 
 /// Collects all packs in the chain of the given pack, including the pack itself and all its parents.
+#[cfg(any(feature = "client", feature = "deploy"))]
 pub async fn collect_pack_names(
     handle: &impl GetPack,
     pack_name: &str,
