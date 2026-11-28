@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:open_folder/open_folder.dart';
 import 'package:pamm_ui/src/rust/api/commands/externals/load_externals.dart';
 import 'package:pamm_ui/src/rust/api/commands/externals/save_externals.dart';
 
@@ -67,6 +68,17 @@ class _ExternalsListState extends State<ExternalsList> {
     _loadExternals();
   }
 
+  Future<void> _openFolder(String path) async {
+    try {
+      await OpenFolder.openFolder(path);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to open folder: $e')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -118,9 +130,30 @@ class _ExternalsListState extends State<ExternalsList> {
                       externals[i].name ??
                           externals[i].path.split(Platform.pathSeparator).last,
                     ),
-                    subtitle: Text(
-                      externals[i].path,
-                      style: Theme.of(context).textTheme.labelSmall,
+                    subtitle: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Tooltip(
+                        message: 'Open folder',
+                        child: MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          child: GestureDetector(
+                            onTap: () => _openFolder(externals[i].path),
+                            child: Text(
+                              externals[i].path,
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                     value: externals[i].enabled,
                     onChanged: (value) {

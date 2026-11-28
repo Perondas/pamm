@@ -80,6 +80,8 @@ class _DownloadScreenState extends State<DownloadScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return PopScope(
       canPop: _isStopped,
       // Leaving mid-download is the same as cancelling it.
@@ -91,22 +93,71 @@ class _DownloadScreenState extends State<DownloadScreen> {
           title: Text('Downloading ${widget.packName}'),
           automaticallyImplyLeading: false,
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              DownloadActions(
-                state: state,
-                error: error,
-                onCancel: _requestCancel,
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 960),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      if (_statusIcon(theme) case final icon?) ...[
+                        icon,
+                        const SizedBox(width: 16),
+                      ],
+                      Expanded(
+                        child: Text(
+                          _statusText,
+                          style: theme.textTheme.headlineSmall,
+                        ),
+                      ),
+                      DownloadActions(
+                        state: state,
+                        error: error,
+                        onCancel: _requestCancel,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Expanded(
+                    child: ProgressReporter(widget.progressReporterService),
+                  ),
+                ],
               ),
-              Expanded(child: ProgressReporter(widget.progressReporterService)),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
+
+  String get _statusText => switch (state) {
+    DownloadState.running => 'Downloading ${widget.packName}…',
+    DownloadState.cancelling => 'Cancelling…',
+    DownloadState.completed => 'Download complete',
+    DownloadState.cancelled => 'Download cancelled',
+    DownloadState.failed => 'Download failed',
+  };
+
+  /// Icon for a finished download; none while it is still running.
+  Widget? _statusIcon(ThemeData theme) => switch (state) {
+    DownloadState.running || DownloadState.cancelling => null,
+    DownloadState.completed => const Icon(
+      Icons.check_circle,
+      size: 32,
+      color: Colors.green,
+    ),
+    DownloadState.cancelled => Icon(
+      Icons.cancel_outlined,
+      size: 32,
+      color: theme.colorScheme.onSurfaceVariant,
+    ),
+    DownloadState.failed => Icon(
+      Icons.error_outline,
+      size: 32,
+      color: theme.colorScheme.error,
+    ),
+  };
 }

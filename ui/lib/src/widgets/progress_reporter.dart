@@ -151,75 +151,92 @@ class _ProgressReporterState extends State<ProgressReporter> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final t = total;
+    final indeterminate = t == BigInt.zero;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Progress section
-        if (!isFinished && total != null) ...[
-          if (total == BigInt.zero) ...[
-            Column(
-              mainAxisSize: MainAxisSize.min,
+        if (!isFinished && t != null) ...[
+          if (indeterminate)
+            Text('Progress: $progress', style: theme.textTheme.titleMedium)
+          else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
               children: [
-                Text('Progress: ${progress.toString()}'),
-                const SizedBox(height: 8),
-                const LinearProgressIndicator(value: null, minHeight: 10),
-              ],
-            ),
-          ] else ...[
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      '${format(progress.toInt())} / ${format(total!.toInt())}',
-                    ),
-                    if (_speedAndEtaLabel() case final label?) ...[
-                      const Spacer(),
-                      Text(
-                        label,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 8),
-                // Animate between the once-per-second value updates so the bar
-                // glides smoothly instead of stepping.
-                TweenAnimationBuilder<double>(
-                  tween: Tween<double>(
-                    end: progress.toDouble() / total!.toDouble(),
+                Text(
+                  '${(progress.toDouble() / t.toDouble() * 100).clamp(0, 100).toStringAsFixed(0)}%',
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
-                  duration: _refreshInterval,
-                  curve: Curves.linear,
-                  builder: (context, value, _) =>
-                      LinearProgressIndicator(value: value, minHeight: 10),
                 ),
+                const SizedBox(width: 16),
+                Text(
+                  '${format(progress.toInt())} / ${format(t.toInt())}',
+                  style: theme.textTheme.bodyLarge,
+                ),
+                const Spacer(),
+                if (_speedAndEtaLabel() case final label?)
+                  Text(
+                    label,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
               ],
             ),
-          ],
+          const SizedBox(height: 12),
+          if (indeterminate)
+            const LinearProgressIndicator(
+              value: null,
+              minHeight: 12,
+              borderRadius: BorderRadius.all(Radius.circular(6)),
+            )
+          else
+            // Animate between the once-per-second value updates so the bar
+            // glides smoothly instead of stepping.
+            TweenAnimationBuilder<double>(
+              tween: Tween<double>(end: progress.toDouble() / t.toDouble()),
+              duration: _refreshInterval,
+              curve: Curves.linear,
+              builder: (context, value, _) => LinearProgressIndicator(
+                value: value,
+                minHeight: 12,
+                borderRadius: const BorderRadius.all(Radius.circular(6)),
+              ),
+            ),
+          const SizedBox(height: 24),
         ],
-        const SizedBox(height: 16),
 
         // Scrolling messages view
         if (messages.isNotEmpty) ...[
-          Padding(
-            padding: EdgeInsetsGeometry.directional(start: 8, bottom: 8),
-            child: Text("Logs", style: Theme.of(context).textTheme.titleMedium),
-          ),
+          Text("Logs", style: theme.textTheme.titleMedium),
+          const SizedBox(height: 8),
           Expanded(
-            child: ListView.builder(
-              shrinkWrap: true,
-              controller: _scrollController,
-              padding: const EdgeInsets.all(8),
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                return Text(
-                  messages[index],
-                  style: Theme.of(context).textTheme.bodySmall,
-                );
-              },
+            child: Container(
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerLowest,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: colors.outlineVariant),
+              ),
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(12),
+                itemCount: messages.length,
+                itemBuilder: (context, index) {
+                  return SelectableText(
+                    messages[index],
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontFamily: 'monospace',
+                      color: colors.onSurfaceVariant,
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ],

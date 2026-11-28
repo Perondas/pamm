@@ -44,8 +44,7 @@ class _SyncScreenState extends State<SyncScreen> {
       var diff = await getDiffWithParents(
         packName: widget.packName,
         repoPath: widget.repoPath,
-        dartProgressReporter:
-            widget.progressReporterService.underlyingReporter,
+        dartProgressReporter: widget.progressReporterService.underlyingReporter,
         clearCache: debugSettingsService.alwaysForceRefresh,
       );
       if (!mounted) return;
@@ -62,9 +61,9 @@ class _SyncScreenState extends State<SyncScreen> {
         isDoneSyncing = true;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error checking for updates: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error checking for updates: $e")));
     }
   }
 
@@ -72,89 +71,176 @@ class _SyncScreenState extends State<SyncScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Updating ${widget.packName}')),
-      body: Padding(
-        padding: EdgeInsetsGeometry.all(8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: EdgeInsetsGeometry.directional(bottom: 8),
-              child: Center(
-                child: isDoneSyncing && (multiDiffResult?.hasChanges ?? false)
-                    ? _buildDownloadButton(context)
-                    : const SizedBox.shrink(),
-              ),
-            ),
-            if (error != null) ...[
-              IconButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Error checking for updates: $error"),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 960),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (!isDoneSyncing) ...[
+                  _StatusHeader(
+                    icon: const SizedBox.square(
+                      dimension: 28,
+                      child: CircularProgressIndicator(strokeWidth: 3),
                     ),
-                  );
-                },
-                icon: Icon(Icons.bug_report),
-                color: Colors.red,
-              ),
-            ],
-            if (isDoneSyncing) ...[
-              if (error == null)
-                WorkshopAddonsNotice(
-                  repoPath: widget.repoPath,
-                  packName: widget.packName,
-                ),
-              if (multiDiffResult?.hasChanges ?? false)
-                ..._buildDiffResult()
-              else
-                const Center(
-                  child: Text(
-                    'No changes found',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    title: 'Checking for updates…',
                   ),
-                ),
-            ] else ...[
-              Expanded(
-                flex: 1,
-                child: Padding(
-                  padding: EdgeInsetsGeometry.all(8),
-                  child: ProgressReporter(widget.progressReporterService),
-                ),
-              ),
-            ],
-          ],
+                  const SizedBox(height: 24),
+                  Expanded(
+                    child: ProgressReporter(widget.progressReporterService),
+                  ),
+                ] else ...[
+                  if (error != null) _buildError(context),
+                  if (error == null)
+                    WorkshopAddonsNotice(
+                      repoPath: widget.repoPath,
+                      packName: widget.packName,
+                    ),
+                  if (multiDiffResult?.hasChanges ?? false)
+                    ..._buildDiffResult(context)
+                  else if (error == null)
+                    Expanded(child: _buildUpToDate(context)),
+                ],
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildDownloadButton(BuildContext context) => ElevatedButton(
-    onPressed: () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => DownloadScreen(
-            widget.packName,
-            widget.repoPath,
-            multiDiffResult!,
-          ),
+  Widget _buildError(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Card(
+      color: colors.errorContainer,
+      child: ListTile(
+        leading: Icon(Icons.error_outline, color: colors.onErrorContainer),
+        title: Text(
+          'Error checking for updates',
+          style: TextStyle(color: colors.onErrorContainer),
         ),
-      );
-    },
-    child: Text("Download"),
-  );
+        subtitle: Text(
+          error!,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(color: colors.onErrorContainer),
+        ),
+        trailing: IconButton(
+          tooltip: 'Show error',
+          onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Error checking for updates: $error")),
+            );
+          },
+          icon: const Icon(Icons.bug_report),
+          color: Colors.red,
+        ),
+      ),
+    );
+  }
 
-  List<Widget> _buildDiffResult() {
+  Widget _buildUpToDate(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.check_circle_outline,
+            size: 72,
+            color: theme.colorScheme.primary,
+          ),
+          const SizedBox(height: 16),
+          Text('No changes found', style: theme.textTheme.headlineSmall),
+          const SizedBox(height: 4),
+          Text(
+            '${widget.packName} is up to date',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDownloadButton(BuildContext context) {
+    final theme = Theme.of(context);
+    return FilledButton.icon(
+      onPressed: () {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => DownloadScreen(
+              widget.packName,
+              widget.repoPath,
+              multiDiffResult!,
+            ),
+          ),
+        );
+      },
+      icon: const Icon(Icons.download, size: 28),
+      label: const Text("Download"),
+      style: FilledButton.styleFrom(
+        minimumSize: const Size(220, 60),
+        elevation: 4,
+        shadowColor: theme.colorScheme.shadow,
+        shape: const StadiumBorder(),
+        textStyle: theme.textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildDiffResult(BuildContext context) {
+    final theme = Theme.of(context);
     final multi = multiDiffResult!;
     return [
-      Text('Total Download Size: ${format(multi.totalDlSize.toInt())}'),
-      Text('Total Size change: ${format(multi.totalSizeChange.toInt())}'),
-      Text('Changed packs: ${multi.changedPacks} / ${multi.results.length}'),
+      Card(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 32,
+            runSpacing: 16,
+            children: [
+              Wrap(
+                spacing: 40,
+                runSpacing: 16,
+                children: [
+                  _Stat(
+                    label: 'Download size',
+                    value: format(multi.totalDlSize.toInt()),
+                  ),
+                  _Stat(
+                    label: 'Size change',
+                    value: format(multi.totalSizeChange.toInt()),
+                  ),
+                  _Stat(
+                    label: 'Changed packs',
+                    value: '${multi.changedPacks} / ${multi.results.length}',
+                  ),
+                ],
+              ),
+              _buildDownloadButton(context),
+            ],
+          ),
+        ),
+      ),
+      const SizedBox(height: 24),
+      Text('Changes', style: theme.textTheme.titleMedium),
+      const SizedBox(height: 8),
       Expanded(
-        flex: 2,
-        child: ListView(
-          children: multi.results
-              .map((result) => _buildPackTile(result))
-              .toList(),
+        child: Card.outlined(
+          clipBehavior: Clip.antiAlias,
+          child: ListView(
+            children: multi.results
+                .map((result) => _buildPackTile(result))
+                .toList(),
+          ),
         ),
       ),
     ];
@@ -184,8 +270,62 @@ class _SyncScreenState extends State<SyncScreen> {
         ],
       ),
       children: addonEntries
-          .map((entry) => DiffAddonTile(addonName: entry.key, changes: entry.value))
+          .map(
+            (entry) =>
+                DiffAddonTile(addonName: entry.key, changes: entry.value),
+          )
           .toList(),
+    );
+  }
+}
+
+/// A large icon + title line shown at the top of the update screens.
+class _StatusHeader extends StatelessWidget {
+  const _StatusHeader({required this.icon, required this.title});
+
+  final Widget icon;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        icon,
+        const SizedBox(width: 16),
+        Text(title, style: Theme.of(context).textTheme.headlineSmall),
+      ],
+    );
+  }
+}
+
+/// A labelled figure in the update summary.
+class _Stat extends StatelessWidget {
+  const _Stat({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 }
