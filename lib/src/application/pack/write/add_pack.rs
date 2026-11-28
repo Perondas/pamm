@@ -89,7 +89,7 @@ mod tests {
             .unwrap();
         let mut server = ServerRepoHandle::open(fixture.repo_path()).await.unwrap();
 
-        let pack = PackConfig::new("core".to_string(), "c".to_string(), vec![], None, None);
+        let pack = PackConfig::new("core".to_string(), "c".to_string(), vec![], vec![], None);
         server.add_pack(&pack).await.unwrap();
 
         let repo_path = server.get_repo_path().to_path_buf();

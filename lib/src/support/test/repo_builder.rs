@@ -27,7 +27,7 @@ fn default_pack() -> PackConfig {
         "core".to_string(),
         "test pack".to_string(),
         vec![],
-        None,
+        vec![],
         None,
     )
 }
@@ -223,7 +223,7 @@ mod server_tests {
                 "core".to_string(),
                 "core pack".to_string(),
                 vec![],
-                None,
+                vec![],
                 None,
             ))
             .pack_file("core", "addons/@addon/file.txt", b"addon data".as_slice())
@@ -262,7 +262,7 @@ mod client_tests {
                 "core".to_string(),
                 "core pack".to_string(),
                 vec![],
-                None,
+                vec![],
                 None,
             ))
             .pack_file("core", "addons/@addon/file.txt", b"addon data".as_slice())
@@ -296,7 +296,7 @@ mod client_tests {
                 "mission".to_string(),
                 "local mission".to_string(),
                 vec![],
-                None,
+                vec![],
                 None,
             ))
             .pack_file(

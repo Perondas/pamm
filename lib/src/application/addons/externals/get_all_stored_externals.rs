@@ -62,7 +62,7 @@ mod tests {
             "test_pack".to_string(),
             "desc".to_string(),
             vec![],
-            None,
+            vec![],
             None,
         );
 

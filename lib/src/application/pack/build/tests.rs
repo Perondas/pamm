@@ -450,7 +450,7 @@ async fn open_migrates_v1_source_then_build_publishes_v2_www() {
         "core".to_string(),
         "test pack".to_string(),
         vec![],
-        None,
+        vec![],
         None,
     );
     pack_config.write_fixed(&repo_path).await.unwrap();
@@ -492,7 +492,7 @@ async fn build_pack_does_not_publish_workshop_addons() {
 
     let tmp = TestTempDir::new("pamm_build_skips_workshop_addons");
 
-    let mut pack = PackConfig::new("core".to_string(), "desc".to_string(), vec![], None, None);
+    let mut pack = PackConfig::new("core".to_string(), "desc".to_string(), vec![], vec![], None);
     pack.addons.insert(
         "@ws".to_string(),
         AddonSettings {

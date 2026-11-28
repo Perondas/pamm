@@ -17,7 +17,7 @@ mockall::mock! {
         fn get_all_pack_names<'a>(&'a self) -> anyhow::Result<Vec<&'a str>>;
     }
     impl SavePackSettings for Handle {
-        fn save_pack_settings<'a,'b>(&self, pack_name: &'a str, settings: &'a PackUserSettings) -> impl Future<Output = anyhow::Result<()>> + Send + 'b;
+        fn save_pack_settings(&self, pack_name: &str, settings: &PackUserSettings) -> impl Future<Output = anyhow::Result<()>> + Send + 'static;
     }
     impl GetRepoInfo for Handle {
         fn get_repo_path(&self) -> &Path;
@@ -49,7 +49,7 @@ impl MockHandleExt for MockHandle {
             pack_name.to_string(),
             "desc".to_string(),
             vec![],
-            parent.map(|s| s.to_string()),
+            parent.into_iter().map(|s| s.to_string()).collect(),
             None,
         );
 

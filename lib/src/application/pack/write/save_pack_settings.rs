@@ -1,9 +1,11 @@
 use crate::domain::pack::pack_user_settings::PackUserSettings;
 
 pub trait SavePackSettings {
-    fn save_pack_settings<'a, 'b>(
-        &'a self,
-        pack_name: &'a str,
-        settings: &'a PackUserSettings,
-    ) -> impl Future<Output = anyhow::Result<()>> + Send + 'b + use<'b, Self>;
+    /// The returned future does not borrow the arguments (`use<Self>`), so
+    /// callers can collect several of them and await them together.
+    fn save_pack_settings(
+        &self,
+        pack_name: &str,
+        settings: &PackUserSettings,
+    ) -> impl Future<Output = anyhow::Result<()>> + Send + use<Self>;
 }

@@ -124,11 +124,11 @@ impl GetPack for ClientRepoHandle {
 }
 
 impl SavePackSettings for ClientRepoHandle {
-    fn save_pack_settings<'a, 'b>(
-        &'a self,
-        pack_name: &'a str,
-        settings: &'a PackUserSettings,
-    ) -> impl Future<Output = anyhow::Result<()>> + Send + 'b + use<'b> {
+    fn save_pack_settings(
+        &self,
+        pack_name: &str,
+        settings: &PackUserSettings,
+    ) -> impl Future<Output = anyhow::Result<()>> + Send + use<> {
         let path = self.repo_path.join(pack_name);
         let settings = settings.clone();
 
@@ -221,7 +221,7 @@ mod local_pack_tests {
     async fn repo_with_local_pack(key: &str) -> (TestTempDir, PathBuf, ClientRepoHandle) {
         let tmp = TestTempDir::new(key);
 
-        let mut core = PackConfig::new("core".to_string(), "d".to_string(), vec![], None, None);
+        let mut core = PackConfig::new("core".to_string(), "d".to_string(), vec![], vec![], None);
         core.addons.insert(
             "@core_addon".to_string(),
             AddonSettings {
@@ -245,7 +245,7 @@ mod local_pack_tests {
             "my_mission".to_string(),
             "d".to_string(),
             vec![],
-            Some("core".to_string()),
+            vec!["core".to_string()],
             None,
         );
         mission.addons.insert(

@@ -36,23 +36,21 @@ where
         pack_name: &str,
         include_optionals: bool,
     ) -> anyhow::Result<Vec<PackAddon>> {
-        let get_addons = |values: (&PackConfig, &PackUserSettings)| -> Vec<PackAddon> {
-            let (config, settings) = values;
-
+        let addons = walk_packs(self, pack_name, |handle, name| async move {
+            // Without optionals the user settings are irrelevant, so don't
+            // require them (the server has none).
             let (config, settings) = if include_optionals {
-                (config, settings)
+                handle.get_pack_with_settings(&name).await?
             } else {
-                (config, &PackUserSettings::default())
+                (handle.get_pack(&name).await?, PackUserSettings::default())
             };
 
-            config.active_addons(&settings).collect()
-        };
-
-        let addons = walk_packs(self, pack_name, get_addons)
-            .await?
-            .into_iter()
-            .flatten()
-            .collect();
+            Ok(config.active_addons(&settings).collect::<Vec<_>>())
+        })
+        .await?
+        .into_iter()
+        .flatten()
+        .collect();
 
         log::debug!("Active addons for pack '{}': {:#?}", pack_name, addons);
 

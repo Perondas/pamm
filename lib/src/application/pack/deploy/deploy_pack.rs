@@ -302,7 +302,7 @@ mod tests {
                 "core".to_string(),
                 "core pack".to_string(),
                 vec![],
-                None,
+                vec![],
                 None,
             );
             pack.addons.insert(
@@ -431,7 +431,7 @@ mod tests {
             "core".to_string(),
             "core pack".to_string(),
             vec![],
-            None,
+            vec![],
             None,
         );
         pack.addons.insert(

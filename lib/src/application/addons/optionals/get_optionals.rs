@@ -15,15 +15,17 @@ where
     T: GetPack + Sync,
 {
     async fn get_optionals(&self, pack_name: &str) -> anyhow::Result<Vec<OptionalAddon>> {
-        Ok(walk_packs(self, pack_name, |(pack_config, settings)| {
-            pack_config
+        Ok(walk_packs(self, pack_name, |handle, name| async move {
+            let (pack_config, settings) = handle.get_pack_with_settings(&name).await?;
+
+            Ok(pack_config
                 .addons
                 .iter()
                 .filter(|(_, addon)| addon.is_optional)
                 .map(|(name, _)| {
                     OptionalAddon::new(name.clone(), settings.enabled_optionals.contains(name))
                 })
-                .collect::<Vec<_>>()
+                .collect::<Vec<_>>())
         })
         .await?
         .into_iter()
