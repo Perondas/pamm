@@ -45,7 +45,7 @@ mod tests {
                 pack_name == "test_pack" && settings.external_addons.len() == 1
             })
             .times(1)
-            .returning(|_, _| Ok(()));
+            .returning(|_, _| Box::pin(async { Ok(()) }));
 
         let external = ExternalAddon {
             path: PathBuf::from("/some/path/to/addon"),

@@ -6,8 +6,6 @@
 import '../../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-/// `Ok(None)` on platforms that need no setup, so the Dart side can render
-/// nothing without special-casing an error.
 Future<LinuxSetupInfo?> linuxSetupInfo({required String repoDir}) => RustLib
     .instance
     .api

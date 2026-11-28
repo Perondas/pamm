@@ -50,7 +50,7 @@ impl ClientRepoHandle {
                 other
             ))?;
 
-            if matches!(config.parent.as_deref(), Some(parent) if parent == name) {
+            if config.parents.iter().any(|parent| parent == name) {
                 return Ok(Some(other.clone()));
             }
         }

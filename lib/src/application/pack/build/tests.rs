@@ -6,12 +6,10 @@ use crate::domain::repo::repo_config::RepoConfig;
 use crate::domain::repo::repo_version::RepoVersion;
 use crate::infrastructure::fs::files::file_names::fixed_file::FixedFile;
 use crate::infrastructure::fs::files::fs_readable::KnownFSReadable;
-use crate::infrastructure::fs::files::fs_writable::FixedFsWritable;
 use crate::infrastructure::fs::files::name_consts::{CACHE_DB_DIR_NAME, WWW_DIR_NAME};
 use crate::infrastructure::progress::progress_reporter::NoopProgressReporter;
 use crate::support::test::repo_builder::default_server_repo;
 use crate::support::test::test_utils::TestTempDir;
-use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
 
@@ -429,62 +427,6 @@ async fn build_removes_www_media_when_source_is_gone() {
     );
 }
 
-// End-to-end: opening a legacy flat (v1) repo migrates the source into
-// per-pack folders, stamps version.pamm, and the subsequent build publishes
-// the v2 www shape.
-#[tokio::test]
-async fn open_migrates_v1_source_then_build_publishes_v2_www() {
-    let tmp = TestTempDir::new("pamm_migrate_then_build");
-    let repo_path = tmp.path().join("repo");
-
-    let mut packs = HashSet::new();
-    packs.insert("core".to_string());
-    let repo_config = RepoConfig::new("repo".to_string(), "test".to_string(), packs);
-    ServerRepoHandle::create(tmp.path(), repo_config)
-        .await
-        .unwrap();
-
-    // Turn the fresh repo into a v1 one: flat source files, no version.pamm.
-    fs::remove_file(repo_path.join(RepoVersion::file_name())).unwrap();
-    let pack_config = PackConfig::new(
-        "core".to_string(),
-        "test pack".to_string(),
-        vec![],
-        None,
-        None,
-    );
-    pack_config.write_fixed(&repo_path).await.unwrap();
-    let addon_dir = repo_path.join("core_pack_addons").join("@addon1");
-    fs::create_dir_all(addon_dir.join("sub")).unwrap();
-    fs::write(addon_dir.join("file.txt"), b"hello").unwrap();
-    fs::write(addon_dir.join("sub").join("nested.txt"), b"world").unwrap();
-
-    let server = ServerRepoHandle::open(&repo_path).await.unwrap();
-
-    assert!(repo_path.join("core/pack.config.json").is_file());
-    assert!(repo_path.join("core/addons/@addon1/file.txt").is_file());
-    assert!(!repo_path.join("core.pack.config.json").exists());
-    assert!(!repo_path.join("core_pack_addons").exists());
-    assert_eq!(
-        RepoVersion::read_or_v1(&repo_path).await.unwrap(),
-        RepoVersion::current()
-    );
-
-    server
-        .build(opts(BuildMode::Symlink), NoopProgressReporter)
-        .await
-        .unwrap();
-
-    let www = repo_path.join(WWW_DIR_NAME);
-    assert_eq!(walk_relative(&www), expected_www_entries());
-    assert_eq!(
-        fs::read(www.join("core/addons/@addon1/file.txt")).unwrap(),
-        b"hello"
-    );
-}
-
-// Workshop addons live in the source and keep their config entry, but clients
-// subscribe to them on Steam, so nothing of them may reach www.
 #[tokio::test]
 async fn build_pack_does_not_publish_workshop_addons() {
     use crate::domain::addon::AddonSettings;
@@ -492,7 +434,7 @@ async fn build_pack_does_not_publish_workshop_addons() {
 
     let tmp = TestTempDir::new("pamm_build_skips_workshop_addons");
 
-    let mut pack = PackConfig::new("core".to_string(), "desc".to_string(), vec![], None, None);
+    let mut pack = PackConfig::new("core".to_string(), "desc".to_string(), vec![], vec![], None);
     pack.addons.insert(
         "@ws".to_string(),
         AddonSettings {

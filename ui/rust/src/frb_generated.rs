@@ -625,13 +625,13 @@ fn wire__crate__api__commands__linux_setup__linux_setup_info_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_repo_dir = <String>::sse_decode(&mut deserializer);
+            let api__repo_dir = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || async move {
                         let output_ok =
-                            crate::api::commands::linux_setup::linux_setup_info(api_repo_dir)
+                            crate::api::commands::linux_setup::linux_setup_info(api__repo_dir)
                                 .await?;
                         std::result::Result::Ok(output_ok)
                     })()
@@ -940,15 +940,15 @@ fn wire__crate__api__commands__proton__proton_install_teamspeak_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_installer = <String>::sse_decode(&mut deserializer);
-            let api_silent = <bool>::sse_decode(&mut deserializer);
+            let api__installer = <String>::sse_decode(&mut deserializer);
+            let api__silent = <bool>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || {
                         let output_ok = crate::api::commands::proton::proton_install_teamspeak(
-                            api_installer,
-                            api_silent,
+                            api__installer,
+                            api__silent,
                         )?;
                         std::result::Result::Ok(output_ok)
                     })(),
@@ -1047,13 +1047,13 @@ fn wire__crate__api__commands__proton__proton_open_explorer_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_path = <Option<String>>::sse_decode(&mut deserializer);
+            let api__path = <Option<String>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || {
                         let output_ok =
-                            crate::api::commands::proton::proton_open_explorer(api_path)?;
+                            crate::api::commands::proton::proton_open_explorer(api__path)?;
                         std::result::Result::Ok(output_ok)
                     })(),
                 )
@@ -1838,14 +1838,14 @@ impl SseDecode for crate::api::commands::local_pack::add_local_pack::FlutterLoca
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_name = <String>::sse_decode(deserializer);
-        let mut var_parent = <Option<String>>::sse_decode(deserializer);
+        let mut var_parents = <Vec<String>>::sse_decode(deserializer);
         let mut var_enabledCdlc =
             <Option<crate::api::commands::local_pack::add_local_pack::Cdlc>>::sse_decode(
                 deserializer,
             );
         return crate::api::commands::local_pack::add_local_pack::FlutterLocalPackConfig {
             name: var_name,
-            parent: var_parent,
+            parents: var_parents,
             enabled_cdlc: var_enabledCdlc,
         };
     }
@@ -2154,14 +2154,14 @@ impl SseDecode for crate::api::commands::load_pack_info::PackInfo {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_description = <String>::sse_decode(deserializer);
-        let mut var_parent = <Option<String>>::sse_decode(deserializer);
+        let mut var_parents = <Vec<String>>::sse_decode(deserializer);
         let mut var_enabledCdlc =
             <Option<crate::api::commands::local_pack::add_local_pack::Cdlc>>::sse_decode(
                 deserializer,
             );
         return crate::api::commands::load_pack_info::PackInfo {
             description: var_description,
-            parent: var_parent,
+            parents: var_parents,
             enabled_cdlc: var_enabledCdlc,
         };
     }
@@ -2612,7 +2612,7 @@ impl flutter_rust_bridge::IntoDart
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
             self.name.into_into_dart().into_dart(),
-            self.parent.into_into_dart().into_dart(),
+            self.parents.into_into_dart().into_dart(),
             self.enabled_cdlc.into_into_dart().into_dart(),
         ]
         .into_dart()
@@ -2789,7 +2789,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::commands::load_pack_info::Pac
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
             self.description.into_into_dart().into_dart(),
-            self.parent.into_into_dart().into_dart(),
+            self.parents.into_into_dart().into_dart(),
             self.enabled_cdlc.into_into_dart().into_dart(),
         ]
         .into_dart()
@@ -3161,7 +3161,7 @@ impl SseEncode for crate::api::commands::local_pack::add_local_pack::FlutterLoca
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.name, serializer);
-        <Option<String>>::sse_encode(self.parent, serializer);
+        <Vec<String>>::sse_encode(self.parents, serializer);
         <Option<crate::api::commands::local_pack::add_local_pack::Cdlc>>::sse_encode(
             self.enabled_cdlc,
             serializer,
@@ -3416,7 +3416,7 @@ impl SseEncode for crate::api::commands::load_pack_info::PackInfo {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.description, serializer);
-        <Option<String>>::sse_encode(self.parent, serializer);
+        <Vec<String>>::sse_encode(self.parents, serializer);
         <Option<crate::api::commands::local_pack::add_local_pack::Cdlc>>::sse_encode(
             self.enabled_cdlc,
             serializer,

@@ -3,6 +3,7 @@ use crate::domain::addon::PackAddon;
 use crate::domain::pack::pack_config::PackConfig;
 use crate::domain::pack::pack_user_settings::PackUserSettings;
 use crate::platform::steam::has_cdlc_installed::has_cdlc_installed;
+use crate::support::collect_packs::walk_packs;
 use anyhow::Context;
 
 pub trait GetActiveAddons {
@@ -35,25 +36,21 @@ where
         pack_name: &str,
         include_optionals: bool,
     ) -> anyhow::Result<Vec<PackAddon>> {
-        let mut addons = Vec::new();
-        let mut current = Some(pack_name.to_string());
-
-        while let Some(pack_name) = current {
+        let addons = walk_packs(self, pack_name, |handle, name| async move {
             // Without optionals the user settings are irrelevant, so don't
             // require them (the server has none).
             let (config, settings) = if include_optionals {
-                self.get_pack_with_settings(&pack_name).await?
+                handle.get_pack_with_settings(&name).await?
             } else {
-                (
-                    self.get_pack(&pack_name).await?,
-                    PackUserSettings::default(),
-                )
+                (handle.get_pack(&name).await?, PackUserSettings::default())
             };
 
-            addons.extend(config.active_addons(&settings));
-
-            current = config.parent;
-        }
+            Ok(config.active_addons(&settings).collect::<Vec<_>>())
+        })
+        .await?
+        .into_iter()
+        .flatten()
+        .collect();
 
         log::debug!("Active addons for pack '{}': {:#?}", pack_name, addons);
 

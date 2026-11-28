@@ -1,6 +1,7 @@
 use crate::application::addons::optionals::OptionalAddon;
 use crate::application::pack::read::get_pack::GetPack;
 use crate::application::pack::write::save_pack_settings::SavePackSettings;
+use crate::support::collect_packs::walk_packs;
 
 pub trait SaveOptionals {
     /// Saves optionals and their status to the pack settings.
@@ -20,13 +21,10 @@ where
         pack_name: &str,
         optionals: &[OptionalAddon],
     ) -> anyhow::Result<()> {
-        let mut current = Some(pack_name.to_string());
+        let results = walk_packs(self, pack_name, |handle, name| async move {
+            let (config, mut settings) = handle.get_pack_with_settings(&name).await?;
 
-        // The pack first, then each ancestor in turn.
-        while let Some(pack_name) = current {
-            let (config, mut settings) = self.get_pack_with_settings(&pack_name).await?;
-
-            let enabled = optionals
+            settings.enabled_optionals = optionals
                 .iter()
                 .filter(|optional| optional.enabled)
                 .filter(|optional| {
@@ -38,14 +36,20 @@ where
                 .map(|optional| optional.name.to_owned())
                 .collect();
 
-            settings.enabled_optionals = enabled;
+            Ok(handle.save_pack_settings(&name, &settings).await)
+        })
+        .await?;
 
-            self.save_pack_settings(&pack_name, &settings).await?;
+        let errors: Vec<anyhow::Error> = results.into_iter().filter_map(|res| res.err()).collect();
 
-            current = config.parent;
+        if !errors.is_empty() {
+            Err(anyhow::anyhow!(
+                "Failed to save optionals for some packs: {:#?}",
+                errors
+            ))
+        } else {
+            Ok(())
         }
-
-        Ok(())
     }
 }
 
@@ -65,7 +69,7 @@ mod tests {
                 pack_name == "test_pack" && settings.enabled_optionals.contains("@opt_addon")
             })
             .times(1)
-            .returning(|_, _| Ok(()));
+            .returning(|_, _| Box::pin(async { Ok(()) }));
 
         let optionals = vec![
             OptionalAddon {
@@ -96,7 +100,7 @@ mod tests {
                     && !settings.enabled_optionals.contains("@parent_opt")
             })
             .times(1)
-            .returning(|_, _| Ok(()));
+            .returning(|_, _| Box::pin(async { Ok(()) }));
 
         mock.expect_save_pack_settings()
             .withf(|name, settings| {
@@ -105,7 +109,7 @@ mod tests {
                     && !settings.enabled_optionals.contains("@child_opt")
             })
             .times(1)
-            .returning(|_, _| Ok(()));
+            .returning(|_, _| Box::pin(async { Ok(()) }));
 
         let optionals = vec![
             OptionalAddon {

@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default, PartialEq, Eq, Hash)]
 pub struct PackCustomization {
     /// File name of the pack's icon inside the repo's `media/` directory.
     pub icon: Option<String>,

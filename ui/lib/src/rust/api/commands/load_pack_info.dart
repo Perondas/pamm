@@ -19,14 +19,18 @@ Future<PackInfo> loadPackInfo({
 
 class PackInfo {
   final String description;
-  final String? parent;
+  final List<String> parents;
   final Cdlc? enabledCdlc;
 
-  const PackInfo({required this.description, this.parent, this.enabledCdlc});
+  const PackInfo({
+    required this.description,
+    required this.parents,
+    this.enabledCdlc,
+  });
 
   @override
   int get hashCode =>
-      description.hashCode ^ parent.hashCode ^ enabledCdlc.hashCode;
+      description.hashCode ^ parents.hashCode ^ enabledCdlc.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -34,6 +38,6 @@ class PackInfo {
       other is PackInfo &&
           runtimeType == other.runtimeType &&
           description == other.description &&
-          parent == other.parent &&
+          parents == other.parents &&
           enabledCdlc == other.enabledCdlc;
 }

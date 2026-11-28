@@ -5,7 +5,7 @@ use pamm_lib::domain::pack::pack_config::PackConfig;
 
 pub struct PackInfo {
     pub description: String,
-    pub parent: Option<String>,
+    pub parents: Vec<String>,
     pub enabled_cdlc: Option<Cdlc>,
 }
 
@@ -21,7 +21,7 @@ impl From<PackConfig> for PackInfo {
     fn from(value: PackConfig) -> Self {
         Self {
             description: value.description,
-            parent: value.parent,
+            parents: value.parents,
             enabled_cdlc: value.enabled_cdlc,
         }
     }

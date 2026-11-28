@@ -1,7 +1,7 @@
-use crate::application::pack::read::get_pack::GetPack;
 use crate::application::pack::read::get_repo_info::GetRepoInfo;
 use crate::application::repo::server::ServerRepoHandle;
 use crate::infrastructure::fs::files::name_consts::MP_MISSIONS_DIR_NAME;
+use crate::support::collect_packs::collect_pack_names;
 use anyhow::{Context, anyhow};
 use log::trace;
 use std::path::PathBuf;
@@ -18,12 +18,9 @@ pub(in crate::application) trait ResolveMissions {
 impl ResolveMissions for ServerRepoHandle {
     async fn resolve_missions(&self, pack_name: &str) -> anyhow::Result<Vec<PathBuf>> {
         let mut missions = Vec::new();
-        let mut current = Some(pack_name.to_string());
+        let pack_names = collect_pack_names(self, pack_name).await?;
 
-        // Own addons first, then each ancestor's in turn.
-        while let Some(pack_name) = current {
-            let pack_config = self.get_pack(&pack_name).await?;
-
+        for pack_name in pack_names {
             let missions_dir = self
                 .get_repo_path()
                 .join(&pack_name)
@@ -44,8 +41,6 @@ impl ResolveMissions for ServerRepoHandle {
                     missions.push(path);
                 }
             }
-
-            current = pack_config.parent;
         }
 
         Ok(missions)

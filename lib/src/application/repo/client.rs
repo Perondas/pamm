@@ -9,6 +9,7 @@ use crate::domain::pack::pack_config::PackConfig;
 use crate::domain::pack::pack_user_settings::PackUserSettings;
 use crate::domain::repo::repo_user_settings::RepoUserSettings;
 use crate::infrastructure::fs::files::fs_readable::KnownFSReadable;
+use crate::infrastructure::fs::files::fs_writable::FixedFsWritable;
 use crate::infrastructure::fs::files::util::path_checks::is_dir;
 use crate::infrastructure::fs::repo::init::init_client_repo_from_remote::init_client_repo_from_remote;
 use crate::support::name_matches;
@@ -123,70 +124,15 @@ impl GetPack for ClientRepoHandle {
 }
 
 impl SavePackSettings for ClientRepoHandle {
-    async fn save_pack_settings(
+    fn save_pack_settings(
         &self,
         pack_name: &str,
         settings: &PackUserSettings,
-    ) -> anyhow::Result<()> {
-        self.write_keyed(settings, pack_name).await
-    }
-}
+    ) -> impl Future<Output = anyhow::Result<()>> + Send + use<> {
+        let path = self.repo_path.join(pack_name);
+        let settings = settings.clone();
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::domain::repo::repo_config::RepoConfig;
-    use crate::domain::repo::repo_version::RepoVersion;
-    use crate::support::test::test_utils::TestTempDir;
-    use std::collections::HashSet;
-    use std::fs;
-
-    // Opening a legacy flat (v1) client repo migrates it to the per-pack
-    // layout, including hoisting indexes/ out of the addon dir.
-    #[tokio::test]
-    async fn open_migrates_v1_client_repo() {
-        let tmp = TestTempDir::new("pamm_client_open_migrates_v1");
-        let repo_path = tmp.path().join("repo");
-        fs::create_dir_all(&repo_path).unwrap();
-
-        let mut packs = HashSet::new();
-        packs.insert("core".to_string());
-        let repo_config = RepoConfig::new("repo".to_string(), "desc".to_string(), packs);
-        crate::infrastructure::fs::files::fs_writable::FixedFsWritable::write_fixed(
-            &repo_config,
-            &repo_path,
-        )
-        .await
-        .unwrap();
-        let settings = RepoUserSettings::new(Url::parse("http://localhost/").unwrap());
-        crate::infrastructure::fs::files::fs_writable::FixedFsWritable::write_fixed(
-            &settings, &repo_path,
-        )
-        .await
-        .unwrap();
-
-        // Flat v1 client layout.
-        fs::write(repo_path.join("core.pack.config.json"), b"{}").unwrap();
-        fs::write(repo_path.join("core.pack.settings.json"), b"{}").unwrap();
-        fs::create_dir_all(repo_path.join("core_pack_addons/@addon1")).unwrap();
-        fs::create_dir_all(repo_path.join("core_pack_addons/indexes")).unwrap();
-        fs::write(
-            repo_path.join("core_pack_addons/indexes/checksum_index.pamm"),
-            b"idx",
-        )
-        .unwrap();
-
-        let _ = ClientRepoHandle::open(&repo_path).await.unwrap();
-
-        assert!(repo_path.join("core/pack.config.json").is_file());
-        assert!(repo_path.join("core/pack.settings.json").is_file());
-        assert!(repo_path.join("core/addons/@addon1").is_dir());
-        assert!(repo_path.join("core/indexes/checksum_index.pamm").is_file());
-        assert!(!repo_path.join("core_pack_addons").exists());
-        assert_eq!(
-            RepoVersion::read_or_v1(&repo_path).await.unwrap(),
-            RepoVersion::current()
-        );
+        async move { settings.write_fixed(path).await }
     }
 }
 
@@ -217,7 +163,7 @@ mod local_pack_tests {
     async fn repo_with_local_pack(key: &str) -> (TestTempDir, PathBuf, ClientRepoHandle) {
         let tmp = TestTempDir::new(key);
 
-        let mut core = PackConfig::new("core".to_string(), "d".to_string(), vec![], None, None);
+        let mut core = PackConfig::new("core".to_string(), "d".to_string(), vec![], vec![], None);
         core.addons.insert(
             "@core_addon".to_string(),
             AddonSettings {
@@ -241,7 +187,7 @@ mod local_pack_tests {
             "my_mission".to_string(),
             "d".to_string(),
             vec![],
-            Some("core".to_string()),
+            vec!["core".to_string()],
             None,
         );
         mission.addons.insert(

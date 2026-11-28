@@ -36,15 +36,18 @@ impl FromCliInputWithContext for PackConfig {
             .map(|s| s.to_string())
             .collect();
 
-        let mut parent = None;
+        let mut parents = Vec::new();
 
         if !existing_packs.is_empty() {
             // We don't check for loops because we assume that users will never edit the pack config manually
-            parent = dialoguer::Select::new()
+            parents = dialoguer::MultiSelect::new()
                 .with_prompt("Select Parent Pack (if any) ESC to skip")
                 .items(existing_packs)
                 .interact_opt()?
-                .map(|i| existing_packs[i].to_string());
+                .unwrap_or_default()
+                .into_iter()
+                .map(|i| existing_packs[i].to_string())
+                .collect();
         }
 
         let cdlcs = Cdlc::iter().collect::<Vec<_>>();
@@ -59,7 +62,7 @@ impl FromCliInputWithContext for PackConfig {
             name,
             description,
             client_params,
-            parent,
+            parents,
             cdlc,
         ))
     }

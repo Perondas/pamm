@@ -63,7 +63,7 @@ mod tests {
             name: "test_pack".to_string(),
             description: "test pack".to_string(),
             client_params: vec![],
-            parent: None,
+            parents: vec![],
             addons: Default::default(),
             customization: None,
             enabled_cdlc: None,
