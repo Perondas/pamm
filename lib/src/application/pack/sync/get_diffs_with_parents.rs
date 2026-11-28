@@ -1,8 +1,8 @@
 use crate::application::repo::client::ClientRepoHandle;
 use crate::domain::pack::pack_diff::PackDiff;
 use crate::infrastructure::progress::progress_reporter::ProgressReporter;
-use anyhow::ensure;
 use crate::support::collect_packs::collect_pack_names;
+use anyhow::ensure;
 
 impl ClientRepoHandle {
     pub async fn get_pack_and_parents_diffs(
@@ -31,4 +31,3 @@ impl ClientRepoHandle {
         Ok(diffs)
     }
 }
-

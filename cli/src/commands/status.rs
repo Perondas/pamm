@@ -41,7 +41,7 @@ impl Display for Node {
 
 pub async fn status_command(_args: StatusArgs) -> anyhow::Result<()> {
     // TODO: Re work to work with multiple parents
-/*    let handle = ClientRepoHandle::open(&current_dir()?).await?;
+    /*    let handle = ClientRepoHandle::open(&current_dir()?).await?;
 
     if let Some(name) = args.name {
         return pack_status(&handle, &name).await;
