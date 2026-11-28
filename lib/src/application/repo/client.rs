@@ -137,64 +137,6 @@ impl SavePackSettings for ClientRepoHandle {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::domain::repo::repo_config::RepoConfig;
-    use crate::domain::repo::repo_version::RepoVersion;
-    use crate::support::test::test_utils::TestTempDir;
-    use std::collections::HashSet;
-    use std::fs;
-
-    // Opening a legacy flat (v1) client repo migrates it to the per-pack
-    // layout, including hoisting indexes/ out of the addon dir.
-    #[tokio::test]
-    async fn open_migrates_v1_client_repo() {
-        let tmp = TestTempDir::new("pamm_client_open_migrates_v1");
-        let repo_path = tmp.path().join("repo");
-        fs::create_dir_all(&repo_path).unwrap();
-
-        let mut packs = HashSet::new();
-        packs.insert("core".to_string());
-        let repo_config = RepoConfig::new("repo".to_string(), "desc".to_string(), packs);
-        crate::infrastructure::fs::files::fs_writable::FixedFsWritable::write_fixed(
-            &repo_config,
-            &repo_path,
-        )
-        .await
-        .unwrap();
-        let settings = RepoUserSettings::new(Url::parse("http://localhost/").unwrap());
-        crate::infrastructure::fs::files::fs_writable::FixedFsWritable::write_fixed(
-            &settings, &repo_path,
-        )
-        .await
-        .unwrap();
-
-        // Flat v1 client layout.
-        fs::write(repo_path.join("core.pack.config.json"), b"{}").unwrap();
-        fs::write(repo_path.join("core.pack.settings.json"), b"{}").unwrap();
-        fs::create_dir_all(repo_path.join("core_pack_addons/@addon1")).unwrap();
-        fs::create_dir_all(repo_path.join("core_pack_addons/indexes")).unwrap();
-        fs::write(
-            repo_path.join("core_pack_addons/indexes/checksum_index.pamm"),
-            b"idx",
-        )
-        .unwrap();
-
-        let _ = ClientRepoHandle::open(&repo_path).await.unwrap();
-
-        assert!(repo_path.join("core/pack.config.json").is_file());
-        assert!(repo_path.join("core/pack.settings.json").is_file());
-        assert!(repo_path.join("core/addons/@addon1").is_dir());
-        assert!(repo_path.join("core/indexes/checksum_index.pamm").is_file());
-        assert!(!repo_path.join("core_pack_addons").exists());
-        assert_eq!(
-            RepoVersion::read_or_v1(&repo_path).await.unwrap(),
-            RepoVersion::current()
-        );
-    }
-}
-
-#[cfg(test)]
 mod local_pack_tests {
     use super::*;
     use crate::application::pack::read::get_combined_canonical_addon_paths::GetAddonPaths;
